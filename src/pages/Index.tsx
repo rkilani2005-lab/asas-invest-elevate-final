@@ -4,6 +4,7 @@ import WhyAsas from "@/components/WhyAsas";
 import Services from "@/components/Services";
 import Properties from "@/components/Properties";
 import InvestorValue from "@/components/InvestorValue";
+import Team from "@/components/Team";
 import Insights from "@/components/Insights";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
@@ -18,6 +19,7 @@ const Index = () => {
         <Services />
         <Properties />
         <InvestorValue />
+        <Team />
         <Insights />
         <Contact />
       </main>
