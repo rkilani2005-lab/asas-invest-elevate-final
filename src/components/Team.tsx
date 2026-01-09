@@ -1,4 +1,7 @@
 import { Linkedin, Mail } from "lucide-react";
+import teamAhmed from "@/assets/team-ahmed.jpg";
+import teamSarah from "@/assets/team-sarah.jpg";
+import teamOmar from "@/assets/team-omar.jpg";
 
 const Team = () => {
   const team = [
@@ -6,6 +9,7 @@ const Team = () => {
       name: "Ahmed Al Rashid",
       role: "Founder & CEO",
       bio: "With extensive experience in UAE real estate and investment banking, Ahmed founded Asas Invest to bring institutional-grade investment strategies to individual investors.",
+      image: teamAhmed,
       linkedin: "#",
       email: "ahmed@asasinvest.ae"
     },
@@ -13,6 +17,7 @@ const Team = () => {
       name: "Sarah Mitchell",
       role: "Head of Investments",
       bio: "Sarah leads our investment strategy and portfolio management, bringing over a decade of experience in commercial real estate across the GCC region.",
+      image: teamSarah,
       linkedin: "#",
       email: "sarah@asasinvest.ae"
     },
@@ -20,6 +25,7 @@ const Team = () => {
       name: "Omar Hassan",
       role: "Director of Property Services",
       bio: "Omar oversees all property management and leasing operations, ensuring our clients' assets are maintained to the highest standards.",
+      image: teamOmar,
       linkedin: "#",
       email: "omar@asasinvest.ae"
     }
@@ -48,15 +54,14 @@ const Team = () => {
               key={index}
               className="group text-center"
             >
-              {/* Portrait Placeholder */}
+              {/* Portrait */}
               <div className="relative w-48 h-48 mx-auto mb-6">
                 <div className="w-full h-full rounded-full bg-secondary overflow-hidden">
-                  {/* Placeholder avatar with initials */}
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                    <span className="font-serif text-4xl font-medium text-primary/40">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
+                  <img 
+                    src={member.image} 
+                    alt={member.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 {/* Decorative ring on hover */}
                 <div className="absolute inset-0 rounded-full border-2 border-transparent group-hover:border-accent/30 transition-colors duration-300"></div>
