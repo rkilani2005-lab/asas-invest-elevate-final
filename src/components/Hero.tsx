@@ -1,6 +1,5 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroVideo from "@/assets/hero-dubai.mp4";
 import heroImage from "@/assets/hero-real-estate.jpg";
 
 const Hero = () => {
@@ -16,7 +15,7 @@ const Hero = () => {
           poster={heroImage}
           className="w-full h-full object-cover"
         >
-          <source src={heroVideo} type="video/mp4" />
+          <source src="/videos/hero-dubai.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-hero-overlay"></div>
       </div>
