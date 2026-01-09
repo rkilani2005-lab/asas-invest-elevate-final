@@ -1,6 +1,5 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-real-estate.jpg";
 
 const Hero = () => {
   return (
@@ -12,10 +11,10 @@ const Hero = () => {
           muted
           loop
           playsInline
-          poster={heroImage}
+          poster="/images/dubai-palm.jpg"
           className="w-full h-full object-cover"
         >
-          <source src="/videos/hero-dubai.mp4" type="video/mp4" />
+          <source src="/videos/dubai-palm.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-hero-overlay"></div>
       </div>

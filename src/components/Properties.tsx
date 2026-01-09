@@ -1,13 +1,13 @@
 import { MapPin, BedDouble, Bath, Maximize, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import residentialImage from "@/assets/project-residential.jpg";
-import commercialImage from "@/assets/project-commercial.jpg";
-import hospitalityImage from "@/assets/project-hospitality.jpg";
+import marinaImage from "@/assets/property-marina.jpg";
+import villaImage from "@/assets/property-villa.jpg";
+import apartmentImage from "@/assets/property-apartment.jpg";
 
 const Properties = () => {
   const properties = [
     {
-      image: residentialImage,
+      image: marinaImage,
       title: "Marina Heights Residences",
       location: "Dubai Marina",
       type: "For Sale",
@@ -17,17 +17,17 @@ const Properties = () => {
       price: "AED 3.2M"
     },
     {
-      image: commercialImage,
-      title: "Business Bay Office",
+      image: apartmentImage,
+      title: "Business Bay Tower",
       location: "Business Bay",
       type: "For Lease",
-      beds: null,
-      baths: null,
-      area: "5,800 sqft",
-      price: "AED 450K/yr"
+      beds: 2,
+      baths: 2,
+      area: "1,800 sqft",
+      price: "AED 180K/yr"
     },
     {
-      image: hospitalityImage,
+      image: villaImage,
       title: "Palm Jumeirah Villa",
       location: "Palm Jumeirah",
       type: "Off-Plan",
