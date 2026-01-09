@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,49 +19,61 @@ const Contact = () => {
     {
       icon: Phone,
       title: "Phone",
-      details: "+1 (555) 123-4567",
-      link: "tel:+15551234567"
+      details: "+971 4 XXX XXXX",
+      link: "tel:+97140000000"
+    },
+    {
+      icon: MessageCircle,
+      title: "WhatsApp",
+      details: "+971 50 XXX XXXX",
+      link: "https://wa.me/971500000000"
     },
     {
       icon: Mail,
       title: "Email",
-      details: "invest@asasinvest.com",
-      link: "mailto:invest@asasinvest.com"
+      details: "info@asasinvest.ae",
+      link: "mailto:info@asasinvest.ae"
     },
     {
       icon: MapPin,
       title: "Office",
-      details: "123 Financial District, Suite 500",
+      details: "Business Bay, Dubai, UAE",
       link: "#"
     }
   ];
 
   return (
-    <section id="contact" className="py-20 bg-muted">
+    <section id="contact" className="py-24 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
+        {/* Section Header */}
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
             Get in Touch
+          </p>
+          <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-6">
+            Let's Discuss Your Investment Goals
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start your journey to building wealth through strategic real estate investments
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            Ready to start your real estate investment journey? Our team is here to help.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Contact Info */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             {contactInfo.map((info, index) => (
               <a
                 key={index}
                 href={info.link}
-                className="bg-card rounded-xl p-6 shadow-elegant hover:shadow-luxury transition-all duration-300 flex items-start space-x-4 group hover:-translate-y-1"
+                target={info.link.startsWith("http") ? "_blank" : undefined}
+                rel={info.link.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="bg-secondary/50 rounded-xl p-5 flex items-start space-x-4 group hover:bg-secondary transition-all duration-300 block"
               >
-                <div className="w-12 h-12 bg-gradient-accent rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                  <info.icon className="h-6 w-6 text-accent-foreground" />
+                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 transition-colors duration-300">
+                  <info.icon className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <div className="font-semibold text-foreground mb-1">{info.title}</div>
+                  <div className="font-medium text-foreground text-sm mb-0.5">{info.title}</div>
                   <div className="text-muted-foreground text-sm">{info.details}</div>
                 </div>
               </a>
@@ -69,9 +81,9 @@ const Contact = () => {
           </div>
 
           {/* Contact Form */}
-          <div className="lg:col-span-2 bg-card rounded-xl p-8 shadow-elegant">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="lg:col-span-2 bg-secondary/50 rounded-xl p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
                     Full Name
@@ -79,9 +91,9 @@ const Contact = () => {
                   <Input
                     id="name"
                     type="text"
-                    placeholder="John Doe"
+                    placeholder="Your name"
                     required
-                    className="border-2 focus:border-accent transition-colors"
+                    className="bg-background border-border focus:border-accent transition-colors"
                   />
                 </div>
                 <div>
@@ -91,9 +103,9 @@ const Contact = () => {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder="your@email.com"
                     required
-                    className="border-2 focus:border-accent transition-colors"
+                    className="bg-background border-border focus:border-accent transition-colors"
                   />
                 </div>
               </div>
@@ -104,26 +116,26 @@ const Contact = () => {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  className="border-2 focus:border-accent transition-colors"
+                  placeholder="+971 XX XXX XXXX"
+                  className="bg-background border-border focus:border-accent transition-colors"
                 />
               </div>
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                  Message
+                  How can we help?
                 </label>
                 <Textarea
                   id="message"
-                  placeholder="Tell us about your investment goals..."
-                  rows={5}
+                  placeholder="Tell us about your investment interests..."
+                  rows={4}
                   required
-                  className="border-2 focus:border-accent transition-colors resize-none"
+                  className="bg-background border-border focus:border-accent transition-colors resize-none"
                 />
               </div>
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gradient-accent text-accent-foreground hover:shadow-luxury transition-all duration-300"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 text-sm font-medium tracking-wide"
               >
                 Send Message
               </Button>

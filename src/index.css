@@ -2,83 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Asas Invest Real Estate - Clean & Elegant Design System
+   Colors: Light, calm palette with whites, soft greys, slate tones, muted gold accents
+   Typography: Inter for body, Playfair Display for headings
+   All colors MUST be HSL.
 */
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 220 40% 15%;
+    --foreground: 220 15% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 40% 15%;
+    --card-foreground: 220 15% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 40% 15%;
+    --popover-foreground: 220 15% 20%;
 
-    --primary: 220 40% 15%;
+    --primary: 220 20% 25%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 50% 20%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 220 10% 96%;
+    --secondary-foreground: 220 15% 20%;
 
-    --muted: 220 15% 95%;
+    --muted: 220 10% 97%;
     --muted-foreground: 220 10% 45%;
 
-    --accent: 45 80% 55%;
-    --accent-foreground: 220 40% 15%;
+    --accent: 40 35% 55%;
+    --accent-foreground: 220 15% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 90%;
-    --ring: 220 40% 15%;
+    --border: 220 10% 90%;
+    --input: 220 10% 90%;
+    --ring: 220 20% 25%;
 
     --radius: 0.5rem;
 
-    /* Luxury gradient tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(220, 40%, 15%) 0%, hsl(220, 45%, 25%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(45, 80%, 55%) 0%, hsl(45, 85%, 65%) 100%);
-    --gradient-hero: linear-gradient(to bottom, rgba(26, 40, 71, 0.9), rgba(26, 40, 71, 0.7));
+    /* Elegant gradient tokens - softer, more understated */
+    --gradient-primary: linear-gradient(135deg, hsl(220, 20%, 25%) 0%, hsl(220, 25%, 35%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(40, 35%, 55%) 0%, hsl(40, 40%, 62%) 100%);
+    --gradient-hero: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+    --gradient-hero-overlay: linear-gradient(to bottom, rgba(34, 45, 58, 0.75), rgba(34, 45, 58, 0.6));
     
-    /* Shadow tokens */
-    --shadow-elegant: 0 10px 40px -10px hsl(220 40% 15% / 0.15);
-    --shadow-luxury: 0 20px 60px -15px hsl(45 80% 55% / 0.25);
+    /* Shadow tokens - softer, more subtle */
+    --shadow-elegant: 0 4px 20px -4px hsl(220 15% 20% / 0.08);
+    --shadow-luxury: 0 8px 30px -8px hsl(40 35% 55% / 0.15);
+    --shadow-card: 0 2px 12px -2px hsl(220 15% 20% / 0.06);
     
     /* Animation timing */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Slate color tokens for text hierarchy */
+    --slate-50: 210 40% 98%;
+    --slate-100: 210 40% 96%;
+    --slate-200: 214 32% 91%;
+    --slate-300: 213 27% 84%;
+    --slate-400: 215 20% 65%;
+    --slate-500: 215 16% 47%;
+    --slate-600: 215 19% 35%;
+    --slate-700: 215 25% 27%;
+    --slate-800: 217 33% 17%;
+    --slate-900: 222 47% 11%;
   }
 
   .dark {
-    --background: 220 40% 10%;
-    --foreground: 0 0% 98%;
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
 
-    --card: 220 35% 12%;
-    --card-foreground: 0 0% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 220 35% 12%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 45 80% 55%;
-    --primary-foreground: 220 40% 15%;
+    --primary: 40 35% 55%;
+    --primary-foreground: 222 47% 11%;
 
-    --secondary: 160 45% 25%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 215 25% 20%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 30% 18%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 215 25% 15%;
+    --muted-foreground: 215 20% 60%;
 
-    --accent: 45 80% 55%;
-    --accent-foreground: 220 40% 15%;
+    --accent: 40 35% 55%;
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 220 30% 20%;
-    --input: 220 30% 20%;
-    --ring: 45 80% 55%;
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 40 35% 55%;
   }
 }
 
@@ -88,6 +104,41 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Subtle hover lift */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elegant);
   }
 }
