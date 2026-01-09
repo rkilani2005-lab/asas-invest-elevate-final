@@ -1,5 +1,6 @@
 import { Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Insights = () => {
   const articles = [
@@ -47,7 +48,7 @@ const Insights = () => {
           {articles.map((article, index) => (
             <article
               key={index}
-              className="group bg-card border border-border rounded-xl p-6 hover:border-accent/30 transition-all duration-300 hover:shadow-elegant"
+              className="group bg-card border border-border rounded-xl p-6 hover:border-accent/30 transition-all duration-300 hover:shadow-elegant cursor-pointer"
             >
               <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
                 {article.category}
@@ -71,10 +72,12 @@ const Insights = () => {
 
         {/* View All CTA */}
         <div className="text-center">
-          <Button variant="outline" size="lg" className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 text-sm font-medium tracking-wide">
-            View All Insights
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <Link to="/insights">
+            <Button variant="outline" size="lg" className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 text-sm font-medium tracking-wide">
+              View All Insights
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
