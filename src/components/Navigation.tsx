@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
@@ -17,8 +17,8 @@ const Navigation = () => {
   const navLinks = [
     { name: "Home", href: "#home" },
     { name: "About", href: "#about" },
-    { name: "Solutions", href: "#solutions" },
-    { name: "Projects", href: "#projects" },
+    { name: "Services", href: "#services" },
+    { name: "Properties", href: "#properties" },
     { name: "Insights", href: "#insights" },
     { name: "Contact", href: "#contact" },
   ];
@@ -26,17 +26,22 @@ const Navigation = () => {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-background/95 backdrop-blur-md shadow-elegant" : "bg-transparent"
+        isScrolled 
+          ? "bg-background/98 backdrop-blur-md shadow-card border-b border-border" 
+          : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <a href="#home" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
+          <a href="#home" className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-serif font-bold text-xl">A</span>
             </div>
-            <span className="font-serif text-xl font-semibold text-foreground">Asas Invest</span>
+            <div className="flex flex-col">
+              <span className="font-serif text-xl font-semibold text-foreground leading-tight">Asas Invest</span>
+              <span className="text-[10px] text-muted-foreground tracking-wider uppercase">Real Estate</span>
+            </div>
           </a>
 
           {/* Desktop Navigation */}
@@ -45,13 +50,21 @@ const Navigation = () => {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-foreground hover:text-accent transition-colors duration-300 font-medium"
+                className="text-foreground/80 hover:text-foreground transition-colors duration-300 text-sm font-medium tracking-wide"
               >
                 {link.name}
               </a>
             ))}
-            <Button className="bg-gradient-accent text-accent-foreground hover:shadow-luxury transition-all duration-300">
-              Book Consultation
+            <a 
+              href="https://wa.me/971000000000" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 text-foreground/80 hover:text-foreground transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </a>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 text-sm font-medium tracking-wide">
+              Contact Us
             </Button>
           </div>
 
@@ -67,21 +80,32 @@ const Navigation = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-border">
+          <div className="lg:hidden py-6 border-t border-border bg-background/98 backdrop-blur-md">
             <div className="flex flex-col space-y-4">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="text-foreground hover:text-accent transition-colors duration-300 font-medium py-2"
+                  className="text-foreground/80 hover:text-foreground transition-colors duration-300 font-medium py-2 text-sm tracking-wide"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.name}
                 </a>
               ))}
-              <Button className="bg-gradient-accent text-accent-foreground hover:shadow-luxury transition-all duration-300 w-full">
-                Book Consultation
-              </Button>
+              <div className="pt-4 flex flex-col space-y-3">
+                <a 
+                  href="https://wa.me/971000000000" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 text-foreground/80 hover:text-foreground transition-colors py-2"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  <span className="text-sm">WhatsApp</span>
+                </a>
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 w-full text-sm font-medium">
+                  Contact Us
+                </Button>
+              </div>
             </div>
           </div>
         )}
