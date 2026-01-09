@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import asasLogo from "@/assets/asas-logo.jpg";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -34,14 +35,12 @@ const Navigation = () => {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <a href="#home" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-serif font-bold text-xl">A</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-serif text-xl font-semibold text-foreground leading-tight">Asas Invest</span>
-              <span className="text-[10px] text-muted-foreground tracking-wider uppercase">Real Estate</span>
-            </div>
+          <a href="#home" className="flex items-center">
+            <img 
+              src={asasLogo} 
+              alt="Asas Invest Real Estate" 
+              className="h-14 w-14 rounded-full object-cover"
+            />
           </a>
 
           {/* Desktop Navigation */}

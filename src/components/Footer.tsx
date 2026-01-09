@@ -1,4 +1,5 @@
 import { Instagram, Linkedin, MessageCircle } from "lucide-react";
+import asasLogo from "@/assets/asas-logo.jpg";
 
 const Footer = () => {
   const footerLinks = {
@@ -37,13 +38,11 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                <span className="text-accent-foreground font-serif font-bold text-xl">A</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-serif text-xl font-semibold leading-tight">Asas Invest</span>
-                <span className="text-[10px] text-primary-foreground/60 tracking-wider uppercase">Real Estate</span>
-              </div>
+              <img 
+                src={asasLogo} 
+                alt="Asas Invest Real Estate" 
+                className="h-14 w-14 rounded-full object-cover"
+              />
             </div>
             <p className="text-primary-foreground/70 mb-6 max-w-sm text-sm leading-relaxed">
               Strategic real estate investment and asset management services in Dubai and the UAE. 
