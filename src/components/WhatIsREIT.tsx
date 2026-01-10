@@ -2,8 +2,19 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 const WhatIsREIT = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+
+  const imageY = useTransform(scrollYProgress, [0, 1], ["10%", "-10%"]);
+  const badgeY = useTransform(scrollYProgress, [0, 1], ["20%", "-20%"]);
+
   const benefits = [
     "Access to premium real estate without full ownership costs",
     "Professionally managed portfolio of diversified assets",
@@ -13,23 +24,27 @@ const WhatIsREIT = () => {
   ];
 
   return (
-    <section className="py-24 bg-secondary/30">
+    <section className="py-24 bg-secondary/30 overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Image Side */}
+          {/* Image Side with Parallax */}
           <ScrollReveal direction="left">
-            <div className="relative">
+            <div ref={ref} className="relative">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden">
-                <img
+                <motion.img
                   src="/images/dubai-skyline.jpg"
                   alt="Dubai Skyline"
-                  className="w-full h-full object-cover"
+                  className="w-full h-[120%] object-cover"
+                  style={{ y: imageY }}
                 />
               </div>
-              <div className="absolute -bottom-6 -right-6 bg-primary text-primary-foreground p-6 rounded-xl shadow-elegant hidden md:block">
+              <motion.div 
+                className="absolute -bottom-6 -right-6 bg-primary text-primary-foreground p-6 rounded-xl shadow-elegant hidden md:block"
+                style={{ y: badgeY }}
+              >
                 <div className="font-serif text-3xl font-bold">10+</div>
                 <div className="text-primary-foreground/80 text-sm">Years of Excellence</div>
-              </div>
+              </motion.div>
             </div>
           </ScrollReveal>
 
