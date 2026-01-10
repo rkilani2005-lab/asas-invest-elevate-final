@@ -1,4 +1,5 @@
 import { Key, Building2, ShoppingBag, LineChart, FileSearch, Briefcase } from "lucide-react";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 
 const Services = () => {
   const services = [
@@ -38,7 +39,7 @@ const Services = () => {
     <section id="services" className="py-24 bg-secondary/30">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
-        <div className="max-w-3xl mx-auto text-center mb-16">
+        <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
           <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
             Our Services
           </p>
@@ -49,27 +50,26 @@ const Services = () => {
             From property acquisition to ongoing management, we provide end-to-end services 
             to support every stage of your investment journey.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
-            <div
-              key={index}
-              className="group bg-card rounded-xl p-8 border border-border hover:border-accent/30 transition-all duration-300 hover:shadow-elegant"
-            >
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-6 group-hover:bg-accent/20 transition-colors duration-300">
-                <service.icon className="h-5 w-5 text-accent" />
+            <StaggerItem key={index}>
+              <div className="group bg-card rounded-xl p-8 border border-border hover:border-accent/30 transition-all duration-300 hover:shadow-elegant h-full">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-6 group-hover:bg-accent/20 transition-colors duration-300">
+                  <service.icon className="h-5 w-5 text-accent" />
+                </div>
+                <h3 className="font-serif text-xl font-medium text-foreground mb-3">
+                  {service.title}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {service.description}
+                </p>
               </div>
-              <h3 className="font-serif text-xl font-medium text-foreground mb-3">
-                {service.title}
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {service.description}
-              </p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );
