@@ -58,15 +58,15 @@ export default {
         },
       },
       backgroundImage: {
-        'gradient-primary': 'linear-gradient(135deg, hsl(0 0% 5%) 0%, hsl(0 0% 10%) 100%)',
-        'gradient-accent': 'linear-gradient(135deg, hsl(40 42% 56%) 0%, hsl(40 48% 62%) 100%)',
+        'gradient-primary': 'linear-gradient(135deg, hsl(0, 0%, 5%) 0%, hsl(0, 0%, 10%) 100%)',
+        'gradient-accent': 'linear-gradient(135deg, hsl(40, 42%, 56%) 0%, hsl(40, 48%, 62%) 100%)',
         'gradient-hero': 'linear-gradient(to bottom, rgba(13, 13, 13, 0.2), rgba(13, 13, 13, 0.5))',
         'gradient-hero-overlay': 'linear-gradient(to bottom, rgba(13, 13, 13, 0.4), rgba(13, 13, 13, 0.7))',
       },
       boxShadow: {
-        'elegant': 'var(--shadow-elegant)',
-        'luxury': 'var(--shadow-luxury)',
-        'card': 'var(--shadow-card)',
+        'elegant': '0 4px 20px -4px rgba(0, 0, 0, 0.4)',
+        'luxury': '0 8px 30px -8px rgba(197, 160, 89, 0.15)',
+        'card': 'none',
         'none': 'none',
       },
       fontFamily: {
