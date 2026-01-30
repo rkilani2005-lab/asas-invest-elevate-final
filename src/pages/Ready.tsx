@@ -110,10 +110,10 @@ const Ready = () => {
         <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
           {/* Header */}
           <ScrollReveal className="max-w-3xl mx-auto text-center mb-12">
-            <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
+            <p className="text-eyebrow text-accent mb-4">
               {t("readyPage.subtitle")}
             </p>
-            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-foreground mb-6">
+            <h1 className="heading-hero text-3xl md:text-4xl lg:text-5xl text-foreground mb-6">
               {t("readyPage.title")}
             </h1>
             <p className="text-muted-foreground text-lg leading-relaxed">

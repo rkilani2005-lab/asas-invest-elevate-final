@@ -51,15 +51,12 @@ const Contact = () => {
       <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
-          <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
+          <p className="text-eyebrow text-accent mb-4">
             {t("contact.title")}
           </p>
-          <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-6">
+          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
             {t("contact.subtitle")}
           </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            {t("contact.subtitle")}
-          </p>
         </ScrollReveal>
 
         <div className={cn(
@@ -171,7 +168,7 @@ const Contact = () => {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 text-sm font-medium tracking-wide"
+                  className="nav-link w-full bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   {t("buttons.submit")}
                 </Button>

@@ -31,10 +31,10 @@ const Stats = () => {
     <section className="py-16 bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 lg:px-8">
         <ScrollReveal className={cn("text-center mb-12", isRTL && "font-arabic")}>
-          <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
+          <p className="text-eyebrow text-accent mb-4">
             {t("stats.subtitle")}
           </p>
-          <h2 className="font-serif text-2xl md:text-3xl font-medium">
+          <h2 className="heading-section text-2xl md:text-3xl text-primary-foreground">
             {t("stats.title")}
           </h2>
           <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
@@ -52,7 +52,7 @@ const Stats = () => {
                 <div className="inline-flex items-center justify-center w-14 h-14 bg-accent/20 rounded-xl mb-4">
                   <stat.icon className="h-7 w-7 text-accent" />
                 </div>
-                <div className="font-serif text-3xl md:text-4xl font-bold mb-2">
+                <div className="heading-section text-3xl md:text-4xl font-bold mb-2">
                   {stat.value}{stat.suffix}
                 </div>
                 <div className="text-primary-foreground/70 text-sm tracking-wide uppercase">
