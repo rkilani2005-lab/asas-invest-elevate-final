@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import InsightsPage from "./pages/Insights";
 import OffPlan from "./pages/OffPlan";
 import Ready from "./pages/Ready";
+import PropertyDetail from "./pages/PropertyDetail";
 import NotFound from "./pages/NotFound";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 
@@ -29,6 +30,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/off-plan" element={<OffPlan />} />
                 <Route path="/ready" element={<Ready />} />
+                <Route path="/property/:slug" element={<PropertyDetail />} />
                 <Route path="/insights" element={<InsightsPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
