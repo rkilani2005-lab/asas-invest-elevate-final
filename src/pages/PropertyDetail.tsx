@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Share2, Heart } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -12,7 +12,8 @@ import PropertyGallery from "@/components/property-detail/PropertyGallery";
 import PropertyFloorPlans from "@/components/property-detail/PropertyFloorPlans";
 import PropertyPaymentPlan from "@/components/property-detail/PropertyPaymentPlan";
 import PropertyInquiry from "@/components/property-detail/PropertyInquiry";
-import PropertyStickyTabs from "@/components/property-detail/PropertyStickyTabs";
+import PropertyStickyTabs, { TabConfig } from "@/components/property-detail/PropertyStickyTabs";
+import PropertyTabContent from "@/components/property-detail/PropertyTabContent";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,9 +29,12 @@ type PropertyWithRelations = Tables<"properties"> & {
 
 const PropertyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t, isRTL, language } = useLanguage();
-  const [activeSection, setActiveSection] = useState("overview");
-  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  
+  // Get initial tab from URL or default to "overview"
+  const initialTab = searchParams.get("tab") || "overview";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   // Fetch property data
   const { data: property, isLoading, error } = useQuery({
@@ -54,39 +58,33 @@ const PropertyDetail = () => {
     enabled: !!slug,
   });
 
-  // Track active section on scroll
+  // Build tabs based on available content
+  const tabs: TabConfig[] = property ? [
+    { id: "overview", label: t("sections.overview"), show: true },
+    { id: "location", label: t("sections.location"), show: true },
+    { id: "amenities", label: t("sections.amenities"), show: property.amenities.length > 0 },
+    { id: "floorPlans", label: t("sections.floorPlans"), show: property.media.some(m => m.type === "floorplan") },
+    { id: "paymentPlan", label: t("sections.paymentPlan"), show: property.payment_milestones.length > 0 },
+    { id: "gallery", label: t("sections.gallery"), show: property.media.filter(m => m.type !== "floorplan").length > 0 },
+    { id: "inquire", label: t("sections.inquire"), show: true },
+  ] : [];
+
+  // Update URL when tab changes
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSearchParams({ tab }, { replace: true });
+  };
+
+  // Sync with URL param changes
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = Object.entries(sectionRefs.current);
-      const scrollPosition = window.scrollY + 200;
-
-      for (const [id, element] of sections) {
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveSection(id);
-            break;
-          }
-        }
+    const tabFromUrl = searchParams.get("tab");
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      const validTabs = tabs.filter(t => t.show).map(t => t.id);
+      if (validTabs.includes(tabFromUrl)) {
+        setActiveTab(tabFromUrl);
       }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToSection = (sectionId: string) => {
-    const element = sectionRefs.current[sectionId];
-    if (element) {
-      const offset = 140; // Account for sticky header + tabs
-      const top = element.offsetTop - offset;
-      window.scrollTo({ top, behavior: "smooth" });
     }
-  };
-
-  const setSectionRef = (id: string) => (el: HTMLElement | null) => {
-    sectionRefs.current[id] = el;
-  };
+  }, [searchParams, tabs]);
 
   if (isLoading) {
     return (
@@ -141,9 +139,9 @@ const PropertyDetail = () => {
 
       {/* Sticky Tabs Navigation */}
       <PropertyStickyTabs
-        activeSection={activeSection}
-        onSectionChange={scrollToSection}
-        property={property}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        tabs={tabs}
       />
 
       {/* Main Content */}
@@ -194,34 +192,44 @@ const PropertyDetail = () => {
           </div>
         </div>
 
-        {/* Sections */}
-        <section ref={setSectionRef("overview")} id="overview">
-          <PropertyOverview property={property} />
-        </section>
+        {/* Tab Content */}
+        <div className="min-h-[50vh]">
+          <PropertyTabContent activeTab={activeTab} tabId="overview">
+            <PropertyOverview property={property} />
+          </PropertyTabContent>
 
-        <section ref={setSectionRef("location")} id="location">
-          <PropertyLocation property={property} />
-        </section>
+          <PropertyTabContent activeTab={activeTab} tabId="location">
+            <PropertyLocation property={property} />
+          </PropertyTabContent>
 
-        <section ref={setSectionRef("amenities")} id="amenities">
-          <PropertyAmenities property={property} />
-        </section>
+          {property.amenities.length > 0 && (
+            <PropertyTabContent activeTab={activeTab} tabId="amenities">
+              <PropertyAmenities property={property} />
+            </PropertyTabContent>
+          )}
 
-        <section ref={setSectionRef("gallery")} id="gallery">
-          <PropertyGallery property={property} />
-        </section>
+          {property.media.some(m => m.type === "floorplan") && (
+            <PropertyTabContent activeTab={activeTab} tabId="floorPlans">
+              <PropertyFloorPlans property={property} />
+            </PropertyTabContent>
+          )}
 
-        <section ref={setSectionRef("floorPlans")} id="floorPlans">
-          <PropertyFloorPlans property={property} />
-        </section>
+          {property.payment_milestones.length > 0 && (
+            <PropertyTabContent activeTab={activeTab} tabId="paymentPlan">
+              <PropertyPaymentPlan property={property} />
+            </PropertyTabContent>
+          )}
 
-        <section ref={setSectionRef("paymentPlan")} id="paymentPlan">
-          <PropertyPaymentPlan property={property} />
-        </section>
+          {property.media.filter(m => m.type !== "floorplan").length > 0 && (
+            <PropertyTabContent activeTab={activeTab} tabId="gallery">
+              <PropertyGallery property={property} />
+            </PropertyTabContent>
+          )}
 
-        <section ref={setSectionRef("inquire")} id="inquire">
-          <PropertyInquiry property={property} />
-        </section>
+          <PropertyTabContent activeTab={activeTab} tabId="inquire">
+            <PropertyInquiry property={property} />
+          </PropertyTabContent>
+        </div>
       </main>
 
       <Footer />
