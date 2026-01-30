@@ -15,6 +15,15 @@ import PropertyDetail from "./pages/PropertyDetail";
 import NotFound from "./pages/NotFound";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 
+// Admin imports
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProperties from "./pages/admin/AdminProperties";
+import AdminInquiries from "./pages/admin/AdminInquiries";
+import AdminTranslations from "./pages/admin/AdminTranslations";
+import AdminSettings from "./pages/admin/AdminSettings";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -32,6 +41,15 @@ const App = () => (
                 <Route path="/ready" element={<Ready />} />
                 <Route path="/property/:slug" element={<PropertyDetail />} />
                 <Route path="/insights" element={<InsightsPage />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+                <Route path="/admin/properties" element={<AdminLayout><AdminProperties /></AdminLayout>} />
+                <Route path="/admin/inquiries" element={<AdminLayout><AdminInquiries /></AdminLayout>} />
+                <Route path="/admin/translations" element={<AdminLayout><AdminTranslations /></AdminLayout>} />
+                <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+                
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
