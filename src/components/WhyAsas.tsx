@@ -1,44 +1,47 @@
 import { Eye, Shield, Users, Sparkles } from "lucide-react";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 
 const WhyAsas = () => {
+  const { t, isRTL } = useLanguage();
+
   const values = [
     {
       icon: Eye,
-      title: "Fresh Vision",
-      description: "Modern investment strategies designed for today's dynamic real estate market"
+      titleKey: "whyAsas.values.freshVision.title",
+      descriptionKey: "whyAsas.values.freshVision.description"
     },
     {
       icon: Shield,
-      title: "UAE Expertise",
-      description: "Deep understanding of Dubai's property landscape and emerging opportunities"
+      titleKey: "whyAsas.values.uaeExpertise.title",
+      descriptionKey: "whyAsas.values.uaeExpertise.description"
     },
     {
       icon: Users,
-      title: "Client-Focused",
-      description: "Personalized service tailored to your unique investment goals and timeline"
+      titleKey: "whyAsas.values.clientFocused.title",
+      descriptionKey: "whyAsas.values.clientFocused.description"
     },
     {
       icon: Sparkles,
-      title: "Transparent Approach",
-      description: "Clear communication and honest guidance throughout your investment journey"
+      titleKey: "whyAsas.values.transparent.title",
+      descriptionKey: "whyAsas.values.transparent.description"
     }
   ];
 
   return (
     <section id="about" className="py-24 bg-background">
-      <div className="container mx-auto px-4 lg:px-8">
+      <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
           <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
-            Why Choose Us
+            {t("whyAsas.subtitle")}
           </p>
           <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-6">
-            A New Approach to Real Estate Investment
+            {t("whyAsas.title")}
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Asas Invest brings fresh perspectives to the UAE property market, combining innovative 
-            strategies with a client-first philosophy to help you build lasting wealth.
+            {t("whyAsas.description")}
           </p>
         </ScrollReveal>
 
@@ -51,10 +54,10 @@ const WhyAsas = () => {
                   <value.icon className="h-6 w-6 text-accent" />
                 </div>
                 <h3 className="font-serif text-xl font-medium text-foreground mb-3">
-                  {value.title}
+                  {t(value.titleKey)}
                 </h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  {value.description}
+                  {t(value.descriptionKey)}
                 </p>
               </div>
             </StaggerItem>
@@ -65,11 +68,10 @@ const WhyAsas = () => {
         <ScrollReveal delay={0.3} className="mt-20 max-w-4xl mx-auto text-center">
           <div className="bg-primary/5 rounded-2xl p-10 md:p-14">
             <blockquote className="font-serif text-xl md:text-2xl text-foreground leading-relaxed italic">
-              "Our mission is to make strategic real estate investment accessible, transparent, 
-              and rewarding for every client we serve."
+              "{t("whyAsas.mission")}"
             </blockquote>
             <p className="mt-6 text-muted-foreground text-sm tracking-wide">
-              — Asas Invest Real Estate
+              {t("whyAsas.missionAuthor")}
             </p>
           </div>
         </ScrollReveal>

@@ -4,40 +4,43 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 
 const Contact = () => {
   const { toast } = useToast();
+  const { t, isRTL } = useLanguage();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: "Message Sent",
-      description: "Thank you for your inquiry. We'll be in touch shortly.",
+      title: t("contact.success"),
+      description: t("contact.success"),
     });
   };
 
   const contactInfo = [
     {
       icon: Phone,
-      title: "Phone",
+      titleKey: "contact.phone",
       details: "+971 4 XXX XXXX",
       link: "tel:+97140000000"
     },
     {
       icon: MessageCircle,
-      title: "WhatsApp",
+      titleKey: "contact.whatsapp",
       details: "+971 50 XXX XXXX",
       link: "https://wa.me/971500000000"
     },
     {
       icon: Mail,
-      title: "Email",
+      titleKey: "contact.email",
       details: "info@asasinvest.ae",
       link: "mailto:info@asasinvest.ae"
     },
     {
       icon: MapPin,
-      title: "Office",
+      titleKey: "footer.address",
       details: "Business Bay, Dubai, UAE",
       link: "#"
     }
@@ -45,21 +48,24 @@ const Contact = () => {
 
   return (
     <section id="contact" className="py-24 bg-background">
-      <div className="container mx-auto px-4 lg:px-8">
+      <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
           <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
-            Get in Touch
+            {t("contact.title")}
           </p>
           <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-6">
-            Let's Discuss Your Investment Goals
+            {t("contact.subtitle")}
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Ready to start your real estate investment journey? Our team is here to help.
+            {t("contact.subtitle")}
           </p>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className={cn(
+          "grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto",
+          isRTL && "lg:flex-row-reverse"
+        )}>
           {/* Contact Info */}
           <StaggerContainer className="space-y-4">
             {contactInfo.map((info, index) => (
@@ -68,13 +74,16 @@ const Contact = () => {
                   href={info.link}
                   target={info.link.startsWith("http") ? "_blank" : undefined}
                   rel={info.link.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="bg-secondary/50 rounded-xl p-5 flex items-start space-x-4 group hover:bg-secondary transition-all duration-300 block"
+                  className={cn(
+                    "bg-secondary/50 rounded-xl p-5 flex items-start group hover:bg-secondary transition-all duration-300 block",
+                    isRTL ? "flex-row-reverse space-x-reverse space-x-4 text-right" : "space-x-4"
+                  )}
                 >
                   <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 transition-colors duration-300">
                     <info.icon className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <div className="font-medium text-foreground text-sm mb-0.5">{info.title}</div>
+                    <div className="font-medium text-foreground text-sm mb-0.5">{t(info.titleKey)}</div>
                     <div className="text-muted-foreground text-sm">{info.details}</div>
                   </div>
                 </a>
@@ -83,56 +92,80 @@ const Contact = () => {
           </StaggerContainer>
 
           {/* Contact Form */}
-          <ScrollReveal direction="right" className="lg:col-span-2">
+          <ScrollReveal direction={isRTL ? "left" : "right"} className="lg:col-span-2">
             <div className="bg-secondary/50 rounded-xl p-8 h-full">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                      Full Name
+                    <label htmlFor="name" className={cn(
+                      "block text-sm font-medium text-foreground mb-2",
+                      isRTL && "text-right"
+                    )}>
+                      {t("contact.name")}
                     </label>
                     <Input
                       id="name"
                       type="text"
-                      placeholder="Your name"
+                      placeholder={t("contact.name")}
                       required
-                      className="bg-background border-border focus:border-accent transition-colors"
+                      className={cn(
+                        "bg-background border-border focus:border-accent transition-colors",
+                        isRTL && "text-right"
+                      )}
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                      Email Address
+                    <label htmlFor="email" className={cn(
+                      "block text-sm font-medium text-foreground mb-2",
+                      isRTL && "text-right"
+                    )}>
+                      {t("contact.email")}
                     </label>
                     <Input
                       id="email"
                       type="email"
                       placeholder="your@email.com"
                       required
-                      className="bg-background border-border focus:border-accent transition-colors"
+                      className={cn(
+                        "bg-background border-border focus:border-accent transition-colors",
+                        isRTL && "text-right"
+                      )}
                     />
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
-                    Phone Number
+                  <label htmlFor="phone" className={cn(
+                    "block text-sm font-medium text-foreground mb-2",
+                    isRTL && "text-right"
+                  )}>
+                    {t("contact.phone")}
                   </label>
                   <Input
                     id="phone"
                     type="tel"
                     placeholder="+971 XX XXX XXXX"
-                    className="bg-background border-border focus:border-accent transition-colors"
+                    className={cn(
+                      "bg-background border-border focus:border-accent transition-colors",
+                      isRTL && "text-right"
+                    )}
                   />
                 </div>
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                    How can we help?
+                  <label htmlFor="message" className={cn(
+                    "block text-sm font-medium text-foreground mb-2",
+                    isRTL && "text-right"
+                  )}>
+                    {t("contact.message")}
                   </label>
                   <Textarea
                     id="message"
-                    placeholder="Tell us about your investment interests..."
+                    placeholder={t("contact.message")}
                     rows={4}
                     required
-                    className="bg-background border-border focus:border-accent transition-colors resize-none"
+                    className={cn(
+                      "bg-background border-border focus:border-accent transition-colors resize-none",
+                      isRTL && "text-right"
+                    )}
                   />
                 </div>
                 <Button
@@ -140,7 +173,7 @@ const Contact = () => {
                   size="lg"
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 text-sm font-medium tracking-wide"
                 >
-                  Send Message
+                  {t("buttons.submit")}
                 </Button>
               </form>
             </div>

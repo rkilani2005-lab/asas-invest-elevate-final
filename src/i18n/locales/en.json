@@ -8,47 +8,131 @@
     "insights": "Insights"
   },
   "hero": {
-    "headline": "Invest in Dubai's Future",
-    "tagline": "Premium real estate opportunities in the UAE's most dynamic market",
-    "exploreOffPlan": "Explore Off-Plan",
-    "browseReady": "Browse Ready"
+    "subtitle": "Real Estate Investment & Asset Management",
+    "headline": "Strategic Real Estate Investment in the",
+    "headlineHighlight": "UAE",
+    "tagline": "Building wealth through carefully selected properties in Dubai's most promising locations",
+    "exploreProperties": "Explore Properties",
+    "contactUs": "Contact Us"
   },
-  "categories": {
-    "offPlan": {
-      "title": "Off-Plan",
-      "subtitle": "The Vision",
-      "description": "Invest early in premium developments with flexible payment plans and maximum appreciation potential.",
-      "cta": "Explore Off-Plan"
-    },
-    "ready": {
-      "title": "Ready",
-      "subtitle": "The Reality",
-      "description": "Move-in ready properties with immediate rental income and established communities.",
-      "cta": "Browse Ready"
-    }
+  "stats": {
+    "subtitle": "Why Invest With Us",
+    "title": "Building Wealth Through Strategic Real Estate",
+    "description": "Our portfolio is composed of premium residential, commercial, and hospitality assets designed to provide investors with safe, stable, and steady returns.",
+    "propertiesManaged": "Properties Managed",
+    "totalSqFt": "Total Sq. Ft",
+    "portfolioValue": "Portfolio Value"
   },
   "whyAsas": {
-    "title": "Why Asas Invest",
-    "subtitle": "Your Trusted Partner",
-    "description": "We bring fresh perspectives to UAE real estate, combining market expertise with personalized service.",
+    "subtitle": "Why Choose Us",
+    "title": "A New Approach to Real Estate Investment",
+    "description": "Asas Invest brings fresh perspectives to the UAE property market, combining innovative strategies with a client-first philosophy to help you build lasting wealth.",
     "values": {
-      "expertise": {
-        "title": "Market Expertise",
+      "freshVision": {
+        "title": "Fresh Vision",
+        "description": "Modern investment strategies designed for today's dynamic real estate market"
+      },
+      "uaeExpertise": {
+        "title": "UAE Expertise",
         "description": "Deep understanding of Dubai's property landscape and emerging opportunities"
       },
-      "personalized": {
-        "title": "Personalized Service",
-        "description": "Tailored investment strategies aligned with your unique goals"
+      "clientFocused": {
+        "title": "Client-Focused",
+        "description": "Personalized service tailored to your unique investment goals and timeline"
       },
-      "transparency": {
-        "title": "Full Transparency",
-        "description": "Clear communication and honest guidance throughout your journey"
+      "transparent": {
+        "title": "Transparent Approach",
+        "description": "Clear communication and honest guidance throughout your investment journey"
+      }
+    },
+    "mission": "Our mission is to make strategic real estate investment accessible, transparent, and rewarding for every client we serve.",
+    "missionAuthor": "— Asas Invest Real Estate"
+  },
+  "services": {
+    "subtitle": "Our Services",
+    "title": "Comprehensive Real Estate Solutions",
+    "description": "From property acquisition to ongoing management, we provide end-to-end services to support every stage of your investment journey.",
+    "items": {
+      "leasing": {
+        "title": "Property Leasing",
+        "description": "Expert leasing services to maximize your rental income with quality tenants and optimal pricing strategies."
       },
-      "network": {
-        "title": "Developer Network",
-        "description": "Direct access to premium projects from leading developers"
+      "management": {
+        "title": "Property Management",
+        "description": "Comprehensive management solutions ensuring your properties are maintained, occupied, and performing."
+      },
+      "acquisitions": {
+        "title": "Acquisitions & Sales",
+        "description": "Strategic property acquisitions and sales, guiding you through every step of the transaction."
+      },
+      "advisory": {
+        "title": "Investment Advisory",
+        "description": "Tailored investment strategies aligned with your financial goals and risk appetite."
+      },
+      "valuation": {
+        "title": "Asset Valuation",
+        "description": "Accurate property valuations backed by market data and professional expertise."
+      },
+      "portfolio": {
+        "title": "Portfolio Services",
+        "description": "Holistic portfolio management to diversify and optimize your real estate investments."
       }
     }
+  },
+  "investorValue": {
+    "subtitle": "Investor Benefits",
+    "title": "Why Invest in UAE Real Estate?",
+    "description": "The UAE offers one of the world's most attractive environments for real estate investment. With strong rental yields, capital appreciation potential, and a business-friendly regulatory framework, Dubai continues to attract global investors.",
+    "rentalYields": "6-8% Rental Yields",
+    "propertyTax": "0% Property Tax",
+    "goldenVisa": "Golden Visa Eligible",
+    "benefits": {
+      "roi": {
+        "title": "Strategic ROI Focus",
+        "description": "Data-driven property selection designed to maximize your return on investment over time."
+      },
+      "tax": {
+        "title": "Tax-Efficient Structures",
+        "description": "Benefit from UAE's favorable tax environment with no income or capital gains taxes on property."
+      },
+      "diversification": {
+        "title": "Portfolio Diversification",
+        "description": "Spread risk across residential, commercial, and hospitality assets in prime locations."
+      },
+      "primeAssets": {
+        "title": "Prime Asset Selection",
+        "description": "Access to exclusive properties in Dubai's most promising and established communities."
+      }
+    }
+  },
+  "team": {
+    "subtitle": "Our Team",
+    "title": "Meet the Leadership",
+    "description": "A dedicated team of professionals committed to helping you achieve your real estate investment goals.",
+    "companyNote": "Our team is supported by a network of trusted partners including legal advisors, financial consultants, and property specialists across the UAE.",
+    "members": {
+      "ahmed": {
+        "name": "Ahmed Al Rashid",
+        "role": "Founder & CEO",
+        "bio": "With extensive experience in UAE real estate and investment banking, Ahmed founded Asas Invest to bring institutional-grade investment strategies to individual investors."
+      },
+      "sarah": {
+        "name": "Sarah Mitchell",
+        "role": "Head of Investments",
+        "bio": "Sarah leads our investment strategy and portfolio management, bringing over a decade of experience in commercial real estate across the GCC region."
+      },
+      "omar": {
+        "name": "Omar Hassan",
+        "role": "Director of Property Services",
+        "bio": "Omar oversees all property management and leasing operations, ensuring our clients' assets are maintained to the highest standards."
+      }
+    }
+  },
+  "insights": {
+    "subtitle": "Market Insights",
+    "title": "Latest from Our Team",
+    "description": "Stay informed with our expert analysis and insights on the UAE real estate market.",
+    "viewAll": "View All Insights"
   },
   "property": {
     "price": "Price",
@@ -59,6 +143,9 @@
     "handover": "Handover",
     "ownership": "Ownership",
     "parking": "Parking",
+    "beds": "Beds",
+    "sqft": "sq.ft",
+    "from": "From",
     "status": {
       "available": "Available",
       "reserved": "Reserved",
@@ -68,6 +155,20 @@
       "offPlan": "Off-Plan",
       "ready": "Ready"
     }
+  },
+  "offPlanPage": {
+    "subtitle": "The Vision",
+    "title": "Off-Plan Properties",
+    "description": "Invest early in premium developments with flexible payment plans and maximum appreciation potential.",
+    "noResults": "No off-plan properties found matching your criteria.",
+    "clearFilters": "Clear Filters"
+  },
+  "readyPage": {
+    "subtitle": "The Reality",
+    "title": "Ready Properties",
+    "description": "Move-in ready properties with immediate rental income and established communities.",
+    "noResults": "No ready properties found matching your criteria.",
+    "clearFilters": "Clear Filters"
   },
   "buttons": {
     "registerInterest": "Register Interest",
@@ -103,7 +204,7 @@
     "brochure": "Brochure",
     "vipPack": "VIP Pack",
     "success": "Thank you! We'll be in touch soon.",
-    "whatsapp": "Chat on WhatsApp"
+    "whatsapp": "WhatsApp"
   },
   "footer": {
     "about": "About Asas Invest",
@@ -114,11 +215,15 @@
     "copyright": "© 2026 Asas Invest. All rights reserved."
   },
   "filters": {
+    "search": "Search properties...",
     "location": "Location",
     "budget": "Budget",
-    "unitType": "Unit Type",
+    "bedrooms": "Bedrooms",
     "developer": "Developer",
     "allLocations": "All Locations",
-    "allDevelopers": "All Developers"
+    "allDevelopers": "All Developers",
+    "allBedrooms": "Any Beds",
+    "priceRange": "Price Range",
+    "any": "Any"
   }
 }
