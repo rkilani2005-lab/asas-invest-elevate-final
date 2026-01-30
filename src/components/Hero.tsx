@@ -49,7 +49,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-primary-foreground/80 text-sm md:text-base tracking-widest uppercase mb-4"
+          className="text-eyebrow text-primary-foreground/80 mb-4"
         >
           {t("hero.subtitle")}
         </motion.p>
@@ -57,7 +57,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-medium text-primary-foreground mb-6 leading-tight"
+          className="heading-hero text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-primary-foreground mb-6"
         >
           {t("hero.headline")} <br className="hidden md:block" />
           <span className="text-accent">{t("hero.headlineHighlight")}</span>

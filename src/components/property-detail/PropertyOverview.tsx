@@ -34,7 +34,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
         )}>
           {/* Main Content */}
           <div className={cn("lg:col-span-2", isRTL && "text-right")}>
-            <h2 className="font-serif text-2xl md:text-3xl font-medium text-foreground mb-6">
+            <h2 className="heading-section text-2xl md:text-3xl text-foreground mb-6">
               {t("sections.overview")}
             </h2>
             
@@ -89,7 +89,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
                   isRTL && "text-right"
                 )}>
                   <p className="text-sm text-muted-foreground mb-1">{t("property.price")}</p>
-                  <p className="font-serif text-2xl font-medium text-foreground">
+                  <p className="heading-section text-2xl text-foreground">
                     {property.price_range}
                   </p>
                 </div>

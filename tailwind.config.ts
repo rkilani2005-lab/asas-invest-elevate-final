@@ -77,14 +77,29 @@ export default {
         'card': 'var(--shadow-card)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Playfair Display', 'Georgia', 'serif'],
+        // English Fonts - Quiet Luxury
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+        display: ['"Tenor Sans"', 'system-ui', 'sans-serif'],
+        // Arabic Fonts
+        'arabic-heading': ['"Kufam"', 'system-ui', 'sans-serif'],
+        'arabic-body': ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
+        'tighter': '-0.03em',
         'tight': '-0.02em',
+        'normal': '0',
         'wide': '0.02em',
         'wider': '0.05em',
         'widest': '0.1em',
+        'luxury': '0.15em',
+      },
+      lineHeight: {
+        'tight': '1.2',
+        'snug': '1.4',
+        'normal': '1.5',
+        'relaxed': '1.7',
+        'loose': '1.8',
       },
       borderRadius: {
         lg: "var(--radius)",

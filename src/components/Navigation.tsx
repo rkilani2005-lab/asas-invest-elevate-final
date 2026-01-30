@@ -68,7 +68,7 @@ const Navigation = () => {
                   key={link.href}
                   to={link.href}
                   className={cn(
-                    "text-foreground/80 hover:text-foreground transition-colors duration-300 text-sm font-medium tracking-wide",
+                    "nav-link text-foreground/80 hover:text-foreground",
                     location.pathname === link.href && "text-accent"
                   )}
                 >
@@ -78,14 +78,14 @@ const Navigation = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-foreground/80 hover:text-foreground transition-colors duration-300 text-sm font-medium tracking-wide"
+                  className="nav-link text-foreground/80 hover:text-foreground"
                 >
                   {link.name}
                 </a>
               )
             ))}
             <LanguageSwitcher />
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 text-sm font-medium tracking-wide">
+            <Button className="nav-link bg-primary text-primary-foreground hover:bg-primary/90">
               {t("buttons.contactUs")}
             </Button>
           </div>
@@ -110,7 +110,7 @@ const Navigation = () => {
                     key={link.href}
                     to={link.href}
                     className={cn(
-                      "text-foreground/80 hover:text-foreground transition-colors duration-300 font-medium py-2 text-sm tracking-wide",
+                      "nav-link text-foreground/80 hover:text-foreground py-2",
                       isRTL && "text-right",
                       location.pathname === link.href && "text-accent"
                     )}
@@ -123,7 +123,7 @@ const Navigation = () => {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "text-foreground/80 hover:text-foreground transition-colors duration-300 font-medium py-2 text-sm tracking-wide",
+                      "nav-link text-foreground/80 hover:text-foreground py-2",
                       isRTL && "text-right"
                     )}
                     onClick={handleLinkClick}
@@ -136,7 +136,7 @@ const Navigation = () => {
                 <div className={cn("flex", isRTL ? "justify-end" : "justify-start")}>
                   <LanguageSwitcher />
                 </div>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 w-full text-sm font-medium">
+                <Button className="nav-link bg-primary text-primary-foreground hover:bg-primary/90 w-full">
                   {t("buttons.contactUs")}
                 </Button>
               </div>

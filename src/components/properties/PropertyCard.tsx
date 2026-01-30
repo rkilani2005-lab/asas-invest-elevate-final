@@ -74,7 +74,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           )}
 
           {/* Title */}
-          <h3 className="font-serif text-lg font-medium text-foreground mb-3 group-hover:text-accent transition-colors line-clamp-2">
+          <h3 className="heading-section text-lg text-foreground mb-3 group-hover:text-accent transition-colors line-clamp-2">
             {name}
           </h3>
 
@@ -114,7 +114,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             {property.price_range && (
               <div>
                 <p className="text-xs text-muted-foreground mb-0.5">{t("property.from")}</p>
-                <p className="font-serif text-lg font-medium text-foreground">{property.price_range}</p>
+                <p className="heading-section text-lg text-foreground">{property.price_range}</p>
               </div>
             )}
             <Button size="sm" variant="ghost" className="text-accent hover:text-accent hover:bg-accent/10">
