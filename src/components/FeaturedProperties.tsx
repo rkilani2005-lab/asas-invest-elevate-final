@@ -39,23 +39,23 @@ const FeaturedProperties = () => {
   const readyProperties = properties?.filter(p => p.type === "ready") || [];
 
   const PropertySkeleton = () => (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <Skeleton className="aspect-[4/3] w-full" />
-      <div className="p-5 space-y-3">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-6 w-3/4" />
+    <div className="card-luxury rounded-lg overflow-hidden">
+      <Skeleton className="aspect-[4/3] w-full bg-secondary" />
+      <div className="p-5 space-y-3 bg-card">
+        <Skeleton className="h-4 w-24 bg-secondary" />
+        <Skeleton className="h-6 w-3/4 bg-secondary" />
         <div className="grid grid-cols-2 gap-3">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full bg-secondary" />
+          <Skeleton className="h-4 w-full bg-secondary" />
         </div>
-        <Skeleton className="h-10 w-full mt-4" />
+        <Skeleton className="h-10 w-full mt-4 bg-secondary" />
       </div>
     </div>
   );
 
   return (
-    <section id="properties" className="py-24 bg-background">
-      <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
+    <section id="properties" className="py-24 bg-card grain-overlay">
+      <div className={cn("container mx-auto px-4 lg:px-8 relative z-10", isRTL && "font-arabic")}>
         {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-12">
           <p className="text-eyebrow text-accent mb-4">
@@ -72,16 +72,16 @@ const FeaturedProperties = () => {
         {/* Property Tabs */}
         <Tabs defaultValue="off-plan" className="w-full">
           <div className="flex justify-center mb-10">
-            <TabsList className="bg-secondary/50 p-1 rounded-full">
+            <TabsList className="bg-transparent border border-border p-1 rounded-none">
               <TabsTrigger 
                 value="off-plan" 
-                className="nav-link px-6 py-2.5 rounded-full data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                className="nav-link px-8 py-3 rounded-none data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:border-accent border border-transparent transition-all duration-300"
               >
                 {t("featuredProperties.offPlan")}
               </TabsTrigger>
               <TabsTrigger 
                 value="ready" 
-                className="nav-link px-6 py-2.5 rounded-full data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                className="nav-link px-8 py-3 rounded-none data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:border-accent border border-transparent transition-all duration-300"
               >
                 {t("featuredProperties.ready")}
               </TabsTrigger>
@@ -97,7 +97,7 @@ const FeaturedProperties = () => {
                 ))}
               </div>
             ) : offPlanProperties.length === 0 ? (
-              <div className="text-center py-16 bg-secondary/30 rounded-2xl">
+              <div className="text-center py-16 border border-border rounded-lg">
                 <p className="text-muted-foreground text-lg mb-4">
                   {t("featuredProperties.noOffPlan")}
                 </p>
@@ -114,10 +114,10 @@ const FeaturedProperties = () => {
             
             {offPlanProperties.length > 0 && (
               <div className="text-center mt-10">
-                <Button asChild variant="outline" size="lg" className="nav-link border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5">
+                <Button asChild variant="luxury" size="lg" className="px-10">
                   <Link to="/off-plan">
                     {t("featuredProperties.viewAllOffPlan")}
-                    <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} />
+                    <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} strokeWidth={1} />
                   </Link>
                 </Button>
               </div>
@@ -133,7 +133,7 @@ const FeaturedProperties = () => {
                 ))}
               </div>
             ) : readyProperties.length === 0 ? (
-              <div className="text-center py-16 bg-secondary/30 rounded-2xl">
+              <div className="text-center py-16 border border-border rounded-lg">
                 <p className="text-muted-foreground text-lg mb-4">
                   {t("featuredProperties.noReady")}
                 </p>
@@ -150,10 +150,10 @@ const FeaturedProperties = () => {
             
             {readyProperties.length > 0 && (
               <div className="text-center mt-10">
-                <Button asChild variant="outline" size="lg" className="nav-link border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5">
+                <Button asChild variant="luxury" size="lg" className="px-10">
                   <Link to="/ready">
                     {t("featuredProperties.viewAllReady")}
-                    <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} />
+                    <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} strokeWidth={1} />
                   </Link>
                 </Button>
               </div>

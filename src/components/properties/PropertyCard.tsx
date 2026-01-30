@@ -25,9 +25,9 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
                    "/placeholder.svg";
 
   const statusColors = {
-    available: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-    reserved: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-    sold: "bg-red-500/10 text-red-600 border-red-500/20"
+    available: "bg-accent/10 text-accent border-accent/30",
+    reserved: "bg-amber-500/10 text-amber-500 border-amber-500/30",
+    sold: "bg-red-500/10 text-red-500 border-red-500/30"
   };
 
   const typeLabel = property.type === "off-plan" 
@@ -37,7 +37,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   return (
     <Link to={`/property/${property.slug}`} className="group block">
       <article className={cn(
-        "bg-card border border-border rounded-xl overflow-hidden hover:border-accent/30 transition-all duration-300 hover:shadow-elegant h-full flex flex-col",
+        "card-luxury rounded-lg overflow-hidden h-full flex flex-col",
         isRTL && "text-right"
       )}>
         {/* Image Container */}
@@ -45,19 +45,21 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           <img
             src={heroImage}
             alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover grayscale-[15%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
           />
+          {/* Dark overlay for contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
           {/* Badges */}
           <div className={cn(
             "absolute top-4 flex gap-2",
             isRTL ? "right-4" : "left-4"
           )}>
-            <Badge variant="secondary" className="bg-primary/90 text-primary-foreground text-xs">
+            <Badge variant="secondary" className="bg-background/90 text-foreground text-xs border border-border">
               {typeLabel}
             </Badge>
             <Badge 
               variant="outline" 
-              className={cn("text-xs border", statusColors[property.status])}
+              className={cn("text-xs", statusColors[property.status])}
             >
               {t(`property.status.${property.status}`)}
             </Badge>
@@ -65,10 +67,10 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         </div>
 
         {/* Content */}
-        <div className="p-5 flex-1 flex flex-col">
+        <div className="p-5 flex-1 flex flex-col bg-card">
           {/* Developer */}
           {developer && (
-            <p className="text-accent text-xs font-medium tracking-wide uppercase mb-2">
+            <p className="text-accent text-xs font-medium tracking-widest uppercase mb-2">
               {developer}
             </p>
           )}
@@ -82,25 +84,25 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           <div className="grid grid-cols-2 gap-3 mb-4">
             {location && (
               <div className={cn("flex items-center text-muted-foreground text-sm", isRTL && "flex-row-reverse justify-end")}>
-                <MapPin className={cn("h-4 w-4 flex-shrink-0", isRTL ? "ml-1.5" : "mr-1.5")} />
+                <MapPin className={cn("h-4 w-4 flex-shrink-0 icon-luxury", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
                 <span className="truncate">{location}</span>
               </div>
             )}
             {property.unit_types && property.unit_types.length > 0 && (
               <div className={cn("flex items-center text-muted-foreground text-sm", isRTL && "flex-row-reverse justify-end")}>
-                <Building2 className={cn("h-4 w-4 flex-shrink-0", isRTL ? "ml-1.5" : "mr-1.5")} />
+                <Building2 className={cn("h-4 w-4 flex-shrink-0 icon-luxury", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
                 <span className="truncate">{property.unit_types.join(", ")}</span>
               </div>
             )}
             {property.size_range && (
               <div className={cn("flex items-center text-muted-foreground text-sm", isRTL && "flex-row-reverse justify-end")}>
-                <Maximize2 className={cn("h-4 w-4 flex-shrink-0", isRTL ? "ml-1.5" : "mr-1.5")} />
+                <Maximize2 className={cn("h-4 w-4 flex-shrink-0 icon-luxury", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
                 <span className="truncate">{property.size_range}</span>
               </div>
             )}
             {property.handover_date && (
               <div className={cn("flex items-center text-muted-foreground text-sm", isRTL && "flex-row-reverse justify-end")}>
-                <Calendar className={cn("h-4 w-4 flex-shrink-0", isRTL ? "ml-1.5" : "mr-1.5")} />
+                <Calendar className={cn("h-4 w-4 flex-shrink-0 icon-luxury", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
                 <span className="truncate">{new Date(property.handover_date).toLocaleDateString()}</span>
               </div>
             )}
@@ -119,7 +121,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             )}
             <Button size="sm" variant="ghost" className="text-accent hover:text-accent hover:bg-accent/10">
               {t("buttons.viewDetails")}
-              <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-1.5 rotate-180" : "ml-1.5")} />
+              <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-1.5 rotate-180" : "ml-1.5")} strokeWidth={1} />
             </Button>
           </div>
         </div>

@@ -34,7 +34,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
   };
 
   return (
-    <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden pt-20">
+    <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden pt-20 grain-overlay">
       {/* Image Carousel */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -48,9 +48,11 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
           <img
             src={images[currentIndex].url}
             alt={property.name_en}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover grayscale-[10%]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+          {/* 40% black overlay */}
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </motion.div>
       </AnimatePresence>
 
@@ -60,22 +62,22 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
           <button
             onClick={isRTL ? nextImage : prevImage}
             className={cn(
-              "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors",
+              "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300",
               isRTL ? "right-4" : "left-4"
             )}
             aria-label="Previous image"
           >
-            <ChevronLeft className={cn("h-6 w-6", isRTL && "rotate-180")} />
+            <ChevronLeft className={cn("h-5 w-5", isRTL && "rotate-180")} strokeWidth={1} />
           </button>
           <button
             onClick={isRTL ? prevImage : nextImage}
             className={cn(
-              "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors",
+              "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300",
               isRTL ? "left-4" : "right-4"
             )}
             aria-label="Next image"
           >
-            <ChevronRight className={cn("h-6 w-6", isRTL && "rotate-180")} />
+            <ChevronRight className={cn("h-5 w-5", isRTL && "rotate-180")} strokeWidth={1} />
           </button>
         </>
       )}
@@ -88,10 +90,10 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={cn(
-                "w-2 h-2 rounded-full transition-all duration-300",
+                "h-[2px] rounded-full transition-all duration-300",
                 index === currentIndex
-                  ? "bg-accent w-6"
-                  : "bg-primary-foreground/50 hover:bg-primary-foreground/70"
+                  ? "bg-accent w-8"
+                  : "bg-foreground/30 hover:bg-foreground/50 w-4"
               )}
               aria-label={`Go to image ${index + 1}`}
             />
@@ -106,10 +108,10 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
           isRTL ? "left-6" : "right-6"
         )}>
           <Button
-            variant="secondary"
-            className="gap-2 bg-background/80 backdrop-blur-sm hover:bg-background"
+            variant="luxury"
+            className="gap-2"
           >
-            <Play className="h-4 w-4" />
+            <Play className="h-4 w-4" strokeWidth={1} />
             Watch Video
           </Button>
         </div>

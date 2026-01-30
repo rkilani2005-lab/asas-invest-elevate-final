@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { X, ChevronLeft, ChevronRight, ZoomIn, Download } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -66,14 +65,14 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
   }
 
   return (
-    <div className="py-12 bg-secondary/30">
+    <div className="py-12 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
         <div className={cn(
           "flex flex-col md:flex-row md:items-center md:justify-between mb-8",
           isRTL && "md:flex-row-reverse"
         )}>
           <h2 className={cn(
-            "font-serif text-2xl md:text-3xl font-medium text-foreground mb-4 md:mb-0",
+            "heading-section text-2xl md:text-3xl text-foreground mb-4 md:mb-0",
             isRTL && "text-right"
           )}>
             {t("sections.gallery")}
@@ -82,7 +81,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
           {/* Tabs */}
           {tabs.length > 1 && (
             <div className={cn(
-              "flex gap-2",
+              "flex gap-1 border border-border p-1",
               isRTL && "flex-row-reverse"
             )}>
               {tabs.map((tab) => (
@@ -90,10 +89,10 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+                    "px-4 py-2 text-xs font-medium tracking-wider uppercase transition-all duration-300",
                     activeTab === tab.id
                       ? "bg-accent text-accent-foreground"
-                      : "bg-background text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {tab.label} ({tab.items.length})
@@ -114,17 +113,17 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="group relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer"
+                className="group relative aspect-[4/3] overflow-hidden border border-border cursor-pointer hover:border-accent/30 transition-colors"
                 onClick={() => openLightbox(index)}
               >
                 <img
                   src={item.url}
                   alt={caption || `Gallery image ${index + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-                  <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" strokeWidth={1} />
                 </div>
               </motion.div>
             );
@@ -138,7 +137,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+              className="fixed inset-0 z-50 bg-background/98 flex items-center justify-center"
               onClick={closeLightbox}
               onKeyDown={handleKeyDown}
               tabIndex={0}
@@ -146,9 +145,9 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
               {/* Close Button */}
               <button
                 onClick={closeLightbox}
-                className="absolute top-4 right-4 z-50 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+                className="absolute top-4 right-4 z-50 w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors"
               >
-                <X className="h-6 w-6 text-white" />
+                <X className="h-6 w-6 text-foreground" strokeWidth={1} />
               </button>
 
               {/* Navigation */}
@@ -157,20 +156,20 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                   <button
                     onClick={(e) => { e.stopPropagation(); isRTL ? nextImage() : prevImage(); }}
                     className={cn(
-                      "absolute top-1/2 -translate-y-1/2 z-50 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors",
+                      "absolute top-1/2 -translate-y-1/2 z-50 w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors",
                       isRTL ? "right-4" : "left-4"
                     )}
                   >
-                    <ChevronLeft className={cn("h-6 w-6 text-white", isRTL && "rotate-180")} />
+                    <ChevronLeft className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); isRTL ? prevImage() : nextImage(); }}
                     className={cn(
-                      "absolute top-1/2 -translate-y-1/2 z-50 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors",
+                      "absolute top-1/2 -translate-y-1/2 z-50 w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors",
                       isRTL ? "left-4" : "right-4"
                     )}
                   >
-                    <ChevronRight className={cn("h-6 w-6 text-white", isRTL && "rotate-180")} />
+                    <ChevronRight className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
                   </button>
                 </>
               )}
@@ -192,7 +191,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
               </motion.div>
 
               {/* Counter */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-muted-foreground text-sm tracking-wider">
                 {currentIndex + 1} / {currentMedia.length}
               </div>
             </motion.div>

@@ -39,7 +39,7 @@ const Navigation = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled 
-          ? "bg-background/98 backdrop-blur-md shadow-card border-b border-border" 
+          ? "bg-background/95 backdrop-blur-md border-b border-border" 
           : "bg-transparent"
       )}
     >
@@ -53,7 +53,7 @@ const Navigation = () => {
             <img 
               src={asasLogo} 
               alt="Asas Invest Real Estate" 
-              className="h-14 w-14 rounded-full object-cover"
+              className="h-14 w-14 rounded-full object-cover border border-accent/30"
             />
           </Link>
 
@@ -68,7 +68,7 @@ const Navigation = () => {
                   key={link.href}
                   to={link.href}
                   className={cn(
-                    "nav-link text-foreground/80 hover:text-foreground",
+                    "nav-link text-foreground/70 hover:text-accent transition-colors duration-300",
                     location.pathname === link.href && "text-accent"
                   )}
                 >
@@ -78,14 +78,14 @@ const Navigation = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="nav-link text-foreground/80 hover:text-foreground"
+                  className="nav-link text-foreground/70 hover:text-accent transition-colors duration-300"
                 >
                   {link.name}
                 </a>
               )
             ))}
             <LanguageSwitcher />
-            <Button className="nav-link bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button variant="luxury" size="sm" className="px-6">
               {t("buttons.contactUs")}
             </Button>
           </div>
@@ -96,7 +96,7 @@ const Navigation = () => {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isMobileMenuOpen ? <X className="h-6 w-6" strokeWidth={1} /> : <Menu className="h-6 w-6" strokeWidth={1} />}
           </button>
         </div>
 
@@ -110,7 +110,7 @@ const Navigation = () => {
                     key={link.href}
                     to={link.href}
                     className={cn(
-                      "nav-link text-foreground/80 hover:text-foreground py-2",
+                      "nav-link text-foreground/70 hover:text-accent py-2 transition-colors duration-300",
                       isRTL && "text-right",
                       location.pathname === link.href && "text-accent"
                     )}
@@ -123,7 +123,7 @@ const Navigation = () => {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "nav-link text-foreground/80 hover:text-foreground py-2",
+                      "nav-link text-foreground/70 hover:text-accent py-2 transition-colors duration-300",
                       isRTL && "text-right"
                     )}
                     onClick={handleLinkClick}
@@ -136,7 +136,7 @@ const Navigation = () => {
                 <div className={cn("flex", isRTL ? "justify-end" : "justify-start")}>
                   <LanguageSwitcher />
                 </div>
-                <Button className="nav-link bg-primary text-primary-foreground hover:bg-primary/90 w-full">
+                <Button variant="luxury" className="w-full">
                   {t("buttons.contactUs")}
                 </Button>
               </div>

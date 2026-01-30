@@ -1,6 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
-import type { Tables } from "@/integrations/supabase/types";
 
 export interface TabConfig {
   id: string;
@@ -32,10 +31,10 @@ const PropertyStickyTabs = ({ activeTab, onTabChange, tabs }: PropertyStickyTabs
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "px-4 py-4 text-sm font-medium whitespace-nowrap transition-all duration-300 border-b-2 -mb-[1px]",
+                  "nav-link px-5 py-4 whitespace-nowrap transition-all duration-300 border-b-2 -mb-[1px] relative",
                   activeTab === tab.id
-                    ? "text-foreground border-foreground"
-                    : "text-muted-foreground hover:text-foreground border-transparent hover:border-muted"
+                    ? "text-accent border-accent"
+                    : "text-muted-foreground hover:text-foreground border-transparent hover:border-accent/30"
                 )}
               >
                 {tab.label}

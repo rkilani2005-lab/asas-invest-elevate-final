@@ -23,7 +23,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <button
         onClick={toggleLanguage}
         className={cn(
-          "text-sm font-medium hover:text-accent transition-colors",
+          "text-sm font-medium text-muted-foreground hover:text-accent transition-colors",
           className
         )}
         aria-label="Switch language"
@@ -34,15 +34,15 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   }
 
   return (
-    <div className={cn("flex items-center gap-1 rounded-full bg-secondary p-1", className)}>
+    <div className={cn("flex items-center gap-1 border border-border p-1", className)}>
       {(Object.keys(languages) as LanguageCode[]).map((lang) => (
         <button
           key={lang}
           onClick={() => setLanguage(lang)}
           className={cn(
-            "px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200",
+            "px-3 py-1.5 text-xs font-medium transition-all duration-300 tracking-wider",
             language === lang
-              ? "bg-primary text-primary-foreground shadow-sm"
+              ? "bg-accent text-accent-foreground"
               : "text-muted-foreground hover:text-foreground"
           )}
           aria-label={`Switch to ${languages[lang].name}`}

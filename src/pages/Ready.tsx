@@ -103,10 +103,10 @@ const Ready = () => {
   }, [properties, filters, language]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
 
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-16 relative z-10">
         <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
           {/* Header */}
           <ScrollReveal className="max-w-3xl mx-auto text-center mb-12">
@@ -133,27 +133,27 @@ const Ready = () => {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
-                  <Skeleton className="aspect-[4/3] w-full" />
-                  <div className="p-5 space-y-3">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-6 w-3/4" />
+                <div key={i} className="card-luxury rounded-lg overflow-hidden">
+                  <Skeleton className="aspect-[4/3] w-full bg-secondary" />
+                  <div className="p-5 space-y-3 bg-card">
+                    <Skeleton className="h-4 w-24 bg-secondary" />
+                    <Skeleton className="h-6 w-3/4 bg-secondary" />
                     <div className="grid grid-cols-2 gap-3">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-full bg-secondary" />
+                      <Skeleton className="h-4 w-full bg-secondary" />
                     </div>
-                    <Skeleton className="h-10 w-full mt-4" />
+                    <Skeleton className="h-10 w-full mt-4 bg-secondary" />
                   </div>
                 </div>
               ))}
             </div>
           ) : filteredProperties.length === 0 ? (
-            <div className="text-center py-16">
+            <div className="text-center py-16 border border-border">
               <p className="text-muted-foreground text-lg mb-4">
                 {t("readyPage.noResults")}
               </p>
               <Button
-                variant="outline"
+                variant="luxury"
                 onClick={() =>
                   setFilters({
                     search: "",

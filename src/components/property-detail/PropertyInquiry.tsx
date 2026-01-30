@@ -81,25 +81,24 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
   if (isSubmitted) {
     return (
-      <div className="py-12 bg-primary text-primary-foreground">
+      <div className="py-12 bg-card border-y border-border">
         <div className="container mx-auto px-4 lg:px-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="max-w-xl mx-auto text-center py-12"
           >
-            <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="h-10 w-10 text-accent" />
+            <div className="w-20 h-20 border border-accent rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="h-10 w-10 text-accent" strokeWidth={1} />
             </div>
-            <h3 className="font-serif text-2xl font-medium mb-4">
+            <h3 className="font-serif text-2xl font-medium text-foreground mb-4">
               {t("contact.success")}
             </h3>
-            <p className="text-primary-foreground/80 mb-6">
+            <p className="text-muted-foreground mb-6">
               Our team will review your inquiry about {propertyName} and get back to you shortly.
             </p>
             <Button
-              variant="outline"
-              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+              variant="luxury"
               onClick={() => setIsSubmitted(false)}
             >
               Submit Another Inquiry
@@ -111,7 +110,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
   }
 
   return (
-    <div className="py-12 bg-primary text-primary-foreground">
+    <div className="py-12 bg-card border-y border-border">
       <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         <div className={cn(
           "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
@@ -119,27 +118,27 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
         )}>
           {/* Left - Info */}
           <div className={cn(isRTL && "text-right lg:order-2")}>
-            <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
+            <p className="text-accent text-xs font-medium tracking-widest uppercase mb-4">
               {t("sections.inquire")}
             </p>
-            <h2 className="font-serif text-3xl md:text-4xl font-medium mb-6">
+            <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-6">
               Interested in {propertyName}?
             </h2>
-            <p className="text-primary-foreground/80 text-lg leading-relaxed mb-8">
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
               Our investment advisors are ready to help you explore this opportunity. 
               Fill out the form and we'll get back to you within 24 hours.
             </p>
 
             {/* WhatsApp Option */}
             <div className={cn(
-              "flex items-center gap-4 p-4 bg-primary-foreground/10 rounded-xl",
+              "flex items-center gap-4 p-4 border border-border",
               isRTL && "flex-row-reverse"
             )}>
-              <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <MessageCircle className="h-6 w-6 text-accent" />
+              <div className="w-12 h-12 border border-accent/30 rounded-full flex items-center justify-center flex-shrink-0">
+                <MessageCircle className="h-6 w-6 text-accent" strokeWidth={1} />
               </div>
               <div>
-                <p className="font-medium mb-1">Prefer WhatsApp?</p>
+                <p className="font-medium text-foreground mb-1">Prefer WhatsApp?</p>
                 <a
                   href={`https://wa.me/971500000000?text=I'm interested in ${encodeURIComponent(propertyName)}`}
                   target="_blank"
@@ -154,11 +153,11 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
           {/* Right - Form */}
           <div className={cn("lg:order-1", isRTL && "lg:order-1")}>
-            <form onSubmit={handleSubmit} className="bg-primary-foreground/5 rounded-xl p-8 space-y-5">
+            <form onSubmit={handleSubmit} className="border border-border p-8 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={cn(
-                    "block text-sm font-medium mb-2",
+                    "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
                     isRTL && "text-right"
                   )}>
                     {t("contact.name")} *
@@ -168,7 +167,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     className={cn(
-                      "bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50",
+                      "bg-transparent border-border rounded-none focus:border-accent",
                       isRTL && "text-right"
                     )}
                     placeholder={t("contact.name")}
@@ -176,7 +175,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 </div>
                 <div>
                   <label className={cn(
-                    "block text-sm font-medium mb-2",
+                    "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
                     isRTL && "text-right"
                   )}>
                     {t("contact.email")} *
@@ -187,7 +186,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     className={cn(
-                      "bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50",
+                      "bg-transparent border-border rounded-none focus:border-accent",
                       isRTL && "text-right"
                     )}
                     placeholder="your@email.com"
@@ -197,7 +196,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
               <div>
                 <label className={cn(
-                  "block text-sm font-medium mb-2",
+                  "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
                   isRTL && "text-right"
                 )}>
                   {t("contact.phone")}
@@ -207,7 +206,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   className={cn(
-                    "bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50",
+                    "bg-transparent border-border rounded-none focus:border-accent",
                     isRTL && "text-right"
                   )}
                   placeholder="+971 XX XXX XXXX"
@@ -216,7 +215,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
               <div>
                 <label className={cn(
-                  "block text-sm font-medium mb-3",
+                  "block text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider",
                   isRTL && "text-right"
                 )}>
                   {t("contact.interests")}
@@ -236,9 +235,9 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                       <Checkbox
                         checked={formData.interests.includes(option.id)}
                         onCheckedChange={(checked) => handleInterestChange(option.id, checked as boolean)}
-                        className="border-primary-foreground/30 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                        className="border-border data-[state=checked]:bg-accent data-[state=checked]:border-accent rounded-none"
                       />
-                      <span className="text-sm">{option.label}</span>
+                      <span className="text-sm text-foreground">{option.label}</span>
                     </label>
                   ))}
                 </div>
@@ -246,7 +245,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
               <div>
                 <label className={cn(
-                  "block text-sm font-medium mb-2",
+                  "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
                   isRTL && "text-right"
                 )}>
                   {t("contact.message")}
@@ -255,7 +254,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   value={formData.message}
                   onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   className={cn(
-                    "bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 resize-none",
+                    "bg-transparent border-border rounded-none focus:border-accent resize-none",
                     isRTL && "text-right"
                   )}
                   rows={4}
@@ -266,15 +265,16 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <Button
                 type="submit"
                 size="lg"
+                variant="luxury"
                 disabled={isSubmitting}
-                className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+                className="w-full rounded-none"
               >
                 {isSubmitting ? (
                   "Submitting..."
                 ) : (
                   <>
                     {t("buttons.registerInterest")}
-                    <Send className={cn("h-4 w-4", isRTL ? "mr-2" : "ml-2")} />
+                    <Send className={cn("h-4 w-4", isRTL ? "mr-2" : "ml-2")} strokeWidth={1} />
                   </>
                 )}
               </Button>

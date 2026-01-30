@@ -69,7 +69,7 @@ const PropertyDetail = () => {
     { id: "inquire", label: t("sections.inquire"), show: true },
   ] : [];
 
-  // Update URL when tab changes
+  // Update URL when tab changes (no page scroll)
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setSearchParams({ tab }, { replace: true });
@@ -91,13 +91,13 @@ const PropertyDetail = () => {
       <div className="min-h-screen bg-background">
         <Navigation />
         <div className="pt-20">
-          <Skeleton className="h-[60vh] w-full" />
+          <Skeleton className="h-[60vh] w-full bg-secondary" />
           <div className="container mx-auto px-4 py-12 space-y-8">
-            <Skeleton className="h-12 w-1/2" />
-            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-12 w-1/2 bg-secondary" />
+            <Skeleton className="h-6 w-3/4 bg-secondary" />
             <div className="grid grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-24" />
+                <Skeleton key={i} className="h-24 bg-secondary" />
               ))}
             </div>
           </div>
@@ -119,7 +119,7 @@ const PropertyDetail = () => {
             The property you're looking for doesn't exist or has been removed.
           </p>
           <Link to="/">
-            <Button>Return Home</Button>
+            <Button variant="luxury">Return Home</Button>
           </Link>
         </div>
         <Footer />
@@ -131,7 +131,7 @@ const PropertyDetail = () => {
   const tagline = language === "ar" && property.tagline_ar ? property.tagline_ar : property.tagline_en;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
 
       {/* Hero Section */}
@@ -145,7 +145,7 @@ const PropertyDetail = () => {
       />
 
       {/* Main Content */}
-      <main className={cn("pb-20", isRTL && "font-arabic")}>
+      <main className={cn("pb-20 relative z-10", isRTL && "font-arabic")}>
         {/* Back Button & Actions */}
         <div className="container mx-auto px-4 lg:px-8 py-6">
           <div className={cn(
@@ -155,20 +155,20 @@ const PropertyDetail = () => {
             <Link
               to={property.type === "off-plan" ? "/off-plan" : "/ready"}
               className={cn(
-                "flex items-center text-muted-foreground hover:text-foreground transition-colors",
+                "flex items-center text-muted-foreground hover:text-accent transition-colors",
                 isRTL && "flex-row-reverse"
               )}
             >
-              <ArrowLeft className={cn("h-4 w-4", isRTL ? "ml-2 rotate-180" : "mr-2")} />
+              <ArrowLeft className={cn("h-4 w-4", isRTL ? "ml-2 rotate-180" : "mr-2")} strokeWidth={1} />
               <span className="text-sm">{t("property.type." + property.type.replace("-", ""))}</span>
             </Link>
             <div className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}>
               <Button variant="outline" size="sm" className="gap-2">
-                <Share2 className="h-4 w-4" />
+                <Share2 className="h-4 w-4" strokeWidth={1} />
                 <span className="hidden sm:inline">Share</span>
               </Button>
               <Button variant="outline" size="sm" className="gap-2">
-                <Heart className="h-4 w-4" />
+                <Heart className="h-4 w-4" strokeWidth={1} />
                 <span className="hidden sm:inline">Save</span>
               </Button>
             </div>
@@ -178,7 +178,7 @@ const PropertyDetail = () => {
         {/* Title Section */}
         <div className="container mx-auto px-4 lg:px-8 pb-8">
           <div className={cn("max-w-4xl", isRTL && "text-right mr-auto ml-0")}>
-            <p className="text-accent text-sm font-medium tracking-widest uppercase mb-2">
+            <p className="text-accent text-xs font-medium tracking-widest uppercase mb-2">
               {language === "ar" && property.developer_ar ? property.developer_ar : property.developer_en}
             </p>
             <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-foreground mb-4">
@@ -192,7 +192,7 @@ const PropertyDetail = () => {
           </div>
         </div>
 
-        {/* Tab Content */}
+        {/* Tab Content - No page scroll, just component swap */}
         <div className="min-h-[50vh]">
           <PropertyTabContent activeTab={activeTab} tabId="overview">
             <PropertyOverview property={property} />

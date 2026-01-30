@@ -1,4 +1,4 @@
-import { Check, CircleDot } from "lucide-react";
+import { Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -32,10 +32,10 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
   });
 
   return (
-    <div className="py-12 bg-secondary/30">
+    <div className="py-12 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
-          "font-serif text-2xl md:text-3xl font-medium text-foreground mb-4",
+          "heading-section text-2xl md:text-3xl text-foreground mb-4",
           isRTL && "text-right"
         )}>
           {t("sections.paymentPlan")}
@@ -49,12 +49,12 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
 
         {/* Progress Bar */}
         <div className="mb-12">
-          <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+          <div className="relative h-[2px] bg-border overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-accent to-accent/70 rounded-full"
+              className="absolute inset-y-0 left-0 bg-accent"
             />
           </div>
           
@@ -70,9 +70,9 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.5 + index * 0.1 }}
-                  className="w-4 h-4 bg-accent rounded-full border-2 border-background shadow-sm -mt-[22px]"
+                  className="w-3 h-3 bg-accent border-2 border-background -mt-[7px]"
                 />
-                <p className="text-xs text-muted-foreground mt-2 whitespace-nowrap">
+                <p className="text-xs text-accent mt-2 whitespace-nowrap font-medium">
                   {milestone.percentage}%
                 </p>
               </div>
@@ -97,21 +97,21 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + index * 0.1 }}
                 className={cn(
-                  "relative bg-background rounded-xl p-6 border border-border hover:border-accent/30 transition-all duration-300",
+                  "relative border border-border p-6 hover:border-accent/30 transition-all duration-300",
                   isRTL && "text-right"
                 )}
               >
                 {/* Step Number */}
                 <div className={cn(
-                  "absolute -top-3 bg-accent text-accent-foreground text-xs font-bold px-3 py-1 rounded-full",
+                  "absolute -top-3 bg-accent text-accent-foreground text-xs font-medium px-3 py-1 tracking-wider",
                   isRTL ? "right-4" : "left-4"
                 )}>
-                  Step {index + 1}
+                  STEP {index + 1}
                 </div>
 
                 {/* Percentage */}
                 <div className="mt-4 mb-4">
-                  <span className="font-serif text-4xl font-bold text-foreground">
+                  <span className="font-serif text-4xl text-accent">
                     {milestone.percentage}
                   </span>
                   <span className="text-2xl text-muted-foreground">%</span>
@@ -125,7 +125,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
                 {/* Connector Line (except last) */}
                 {!milestone.isLast && (
                   <div className={cn(
-                    "hidden lg:block absolute top-1/2 -translate-y-1/2 w-6 h-0.5 bg-border",
+                    "hidden lg:block absolute top-1/2 -translate-y-1/2 w-6 h-[1px] bg-border",
                     isRTL ? "-left-6" : "-right-6"
                   )} />
                 )}
@@ -136,14 +136,14 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
 
         {/* Summary */}
         <div className={cn(
-          "mt-10 p-6 bg-accent/10 rounded-xl border border-accent/20",
+          "mt-10 p-6 border border-accent/30",
           isRTL && "text-right"
         )}>
           <div className={cn(
             "flex items-center gap-3",
             isRTL && "flex-row-reverse"
           )}>
-            <Check className="h-5 w-5 text-accent flex-shrink-0" />
+            <Check className="h-5 w-5 text-accent flex-shrink-0" strokeWidth={1} />
             <p className="text-foreground font-medium">
               Total payment structure spans from booking to handover, with flexible milestone-based payments.
             </p>

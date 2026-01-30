@@ -1,4 +1,4 @@
-import { MapPin, Building2, Maximize2, Calendar, Car, Key, Home } from "lucide-react";
+import { MapPin, Building2, Maximize2, Calendar, Car, Key } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -47,7 +47,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
             {/* Highlights */}
             {highlights.length > 0 && (
               <div className="mt-8">
-                <h3 className="font-medium text-foreground mb-4">Key Highlights</h3>
+                <h3 className="text-accent text-xs font-medium tracking-widest uppercase mb-4">Key Highlights</h3>
                 <ul className={cn(
                   "grid grid-cols-1 md:grid-cols-2 gap-3",
                   isRTL && "text-right"
@@ -61,7 +61,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
                       )}
                     >
                       <div className={cn(
-                        "w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0",
+                        "w-1.5 h-1.5 bg-accent flex-shrink-0",
                         isRTL ? "ml-3" : "mr-3"
                       )} />
                       {highlight}
@@ -74,9 +74,9 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
 
           {/* Specs Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-secondary/50 rounded-xl p-6 sticky top-40">
+            <div className="border border-border p-6 sticky top-40">
               <h3 className={cn(
-                "font-medium text-foreground mb-6",
+                "text-accent text-xs font-medium tracking-widest uppercase mb-6",
                 isRTL && "text-right"
               )}>
                 Property Details
@@ -88,7 +88,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
                   "pb-4 mb-4 border-b border-border",
                   isRTL && "text-right"
                 )}>
-                  <p className="text-sm text-muted-foreground mb-1">{t("property.price")}</p>
+                  <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">{t("property.price")}</p>
                   <p className="heading-section text-2xl text-foreground">
                     {property.price_range}
                   </p>
@@ -106,13 +106,13 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
                     )}
                   >
                     <div className={cn(
-                      "w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0",
+                      "w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0",
                       isRTL ? "ml-3" : "mr-3"
                     )}>
-                      <spec.icon className="h-5 w-5 text-accent" />
+                      <spec.icon className="h-5 w-5 text-accent" strokeWidth={1} />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-0.5">{spec.label}</p>
+                      <p className="text-xs text-muted-foreground mb-0.5 uppercase tracking-wider">{spec.label}</p>
                       <p className="text-sm font-medium text-foreground">{spec.value}</p>
                     </div>
                   </div>
