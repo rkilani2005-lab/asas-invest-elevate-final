@@ -2,8 +2,11 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 
 const Hero = () => {
+  const { t, isRTL } = useLanguage();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -36,7 +39,10 @@ const Hero = () => {
 
       {/* Content with Parallax */}
       <motion.div 
-        className="relative z-10 container mx-auto px-4 lg:px-8 text-center"
+        className={cn(
+          "relative z-10 container mx-auto px-4 lg:px-8 text-center",
+          isRTL && "font-arabic"
+        )}
         style={{ y: textY, opacity }}
       >
         <motion.p 
@@ -45,7 +51,7 @@ const Hero = () => {
           transition={{ duration: 0.6 }}
           className="text-primary-foreground/80 text-sm md:text-base tracking-widest uppercase mb-4"
         >
-          Real Estate Investment & Asset Management
+          {t("hero.subtitle")}
         </motion.p>
         <motion.h1 
           initial={{ opacity: 0, y: 30 }}
@@ -53,8 +59,8 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-medium text-primary-foreground mb-6 leading-tight"
         >
-          Strategic Real Estate <br className="hidden md:block" />
-          Investment in the <span className="text-accent">UAE</span>
+          {t("hero.headline")} <br className="hidden md:block" />
+          <span className="text-accent">{t("hero.headlineHighlight")}</span>
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 30 }}
@@ -62,27 +68,30 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-lg md:text-xl text-primary-foreground/85 mb-10 max-w-2xl mx-auto leading-relaxed"
         >
-          Building wealth through carefully selected properties in Dubai's most promising locations
+          {t("hero.tagline")}
         </motion.p>
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className={cn(
+            "flex flex-col sm:flex-row gap-4 justify-center",
+            isRTL && "sm:flex-row-reverse"
+          )}
         >
           <Button 
             size="lg" 
             className="bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 text-sm font-medium tracking-wide px-8 py-6"
           >
-            Explore Properties
-            <ArrowRight className="ml-2 h-4 w-4" />
+            {t("hero.exploreProperties")}
+            <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} />
           </Button>
           <Button 
             size="lg" 
             variant="outline" 
             className="border-2 border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground/60 transition-all duration-300 text-sm font-medium tracking-wide px-8 py-6"
           >
-            Contact Us
+            {t("hero.contactUs")}
           </Button>
         </motion.div>
       </motion.div>

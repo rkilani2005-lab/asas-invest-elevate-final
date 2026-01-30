@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,6 +11,7 @@ const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, isRTL } = useLanguage();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,13 +22,17 @@ const Navigation = () => {
   }, []);
 
   const navLinks = [
-    { name: t("nav.home"), href: "#home" },
-    { name: t("nav.about"), href: "#about" },
-    { name: t("nav.offPlan"), href: "#properties" },
-    { name: t("nav.ready"), href: "#properties" },
-    { name: t("nav.insights"), href: "#insights" },
-    { name: t("nav.contact"), href: "#contact" },
+    { name: t("nav.home"), href: "/", isRoute: true },
+    { name: t("nav.offPlan"), href: "/off-plan", isRoute: true },
+    { name: t("nav.ready"), href: "/ready", isRoute: true },
+    { name: t("nav.about"), href: location.pathname === "/" ? "#about" : "/#about", isRoute: false },
+    { name: t("nav.insights"), href: "/insights", isRoute: true },
+    { name: t("nav.contact"), href: location.pathname === "/" ? "#contact" : "/#contact", isRoute: false },
   ];
+
+  const handleLinkClick = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <nav
@@ -43,13 +49,13 @@ const Navigation = () => {
           isRTL && "flex-row-reverse"
         )}>
           {/* Logo */}
-          <a href="#home" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <img 
               src={asasLogo} 
               alt="Asas Invest Real Estate" 
               className="h-14 w-14 rounded-full object-cover"
             />
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className={cn(
@@ -57,13 +63,26 @@ const Navigation = () => {
             isRTL ? "space-x-reverse space-x-8" : "space-x-8"
           )}>
             {navLinks.map((link) => (
-              <a
-                key={link.href + link.name}
-                href={link.href}
-                className="text-foreground/80 hover:text-foreground transition-colors duration-300 text-sm font-medium tracking-wide"
-              >
-                {link.name}
-              </a>
+              link.isRoute ? (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className={cn(
+                    "text-foreground/80 hover:text-foreground transition-colors duration-300 text-sm font-medium tracking-wide",
+                    location.pathname === link.href && "text-accent"
+                  )}
+                >
+                  {link.name}
+                </Link>
+              ) : (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-foreground/80 hover:text-foreground transition-colors duration-300 text-sm font-medium tracking-wide"
+                >
+                  {link.name}
+                </a>
+              )
             ))}
             <LanguageSwitcher />
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 text-sm font-medium tracking-wide">
@@ -86,17 +105,32 @@ const Navigation = () => {
           <div className="lg:hidden py-6 border-t border-border bg-background/98 backdrop-blur-md">
             <div className="flex flex-col space-y-4">
               {navLinks.map((link) => (
-                <a
-                  key={link.href + link.name}
-                  href={link.href}
-                  className={cn(
-                    "text-foreground/80 hover:text-foreground transition-colors duration-300 font-medium py-2 text-sm tracking-wide",
-                    isRTL && "text-right"
-                  )}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.name}
-                </a>
+                link.isRoute ? (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className={cn(
+                      "text-foreground/80 hover:text-foreground transition-colors duration-300 font-medium py-2 text-sm tracking-wide",
+                      isRTL && "text-right",
+                      location.pathname === link.href && "text-accent"
+                    )}
+                    onClick={handleLinkClick}
+                  >
+                    {link.name}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "text-foreground/80 hover:text-foreground transition-colors duration-300 font-medium py-2 text-sm tracking-wide",
+                      isRTL && "text-right"
+                    )}
+                    onClick={handleLinkClick}
+                  >
+                    {link.name}
+                  </a>
+                )
               ))}
               <div className="pt-4 flex flex-col space-y-3">
                 <div className={cn("flex", isRTL ? "justify-end" : "justify-start")}>
