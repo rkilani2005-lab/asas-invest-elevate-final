@@ -39,10 +39,10 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
   };
 
   return (
-    <div className="py-12 bg-secondary/30">
+    <div className="py-12 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
-          "font-serif text-2xl md:text-3xl font-medium text-foreground mb-8",
+          "heading-section text-2xl md:text-3xl text-foreground mb-8",
           isRTL && "text-right"
         )}>
           {t("sections.location")}
@@ -53,12 +53,12 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
           isRTL && "lg:flex-row-reverse"
         )}>
           {/* Map */}
-          <div className="aspect-[4/3] rounded-xl overflow-hidden bg-muted">
+          <div className="aspect-[4/3] overflow-hidden border border-border">
             <iframe
               src={getMapUrl()}
               width="100%"
               height="100%"
-              style={{ border: 0 }}
+              style={{ border: 0, filter: "grayscale(80%) contrast(1.1)" }}
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -72,13 +72,13 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
               "flex items-center mb-6",
               isRTL && "flex-row-reverse"
             )}>
-              <MapPin className={cn("h-5 w-5 text-accent", isRTL ? "ml-2" : "mr-2")} />
+              <MapPin className={cn("h-5 w-5 text-accent", isRTL ? "ml-2" : "mr-2")} strokeWidth={1} />
               <span className="text-lg font-medium text-foreground">{location}</span>
             </div>
 
             {nearby.length > 0 && (
               <div className="space-y-4">
-                <h3 className="font-medium text-foreground mb-4">Nearby Attractions</h3>
+                <h3 className="text-accent text-xs font-medium tracking-widest uppercase mb-4">Nearby Attractions</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {nearby.map((place, index) => {
                     const Icon = getIcon(place.type);
@@ -86,15 +86,15 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
                       <div
                         key={index}
                         className={cn(
-                          "flex items-center p-4 bg-background rounded-lg border border-border",
+                          "flex items-center p-4 border border-border hover:border-accent/30 transition-colors",
                           isRTL && "flex-row-reverse"
                         )}
                       >
                         <div className={cn(
-                          "w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0",
+                          "w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0",
                           isRTL ? "ml-3" : "mr-3"
                         )}>
-                          <Icon className="h-5 w-5 text-accent" />
+                          <Icon className="h-5 w-5 text-accent" strokeWidth={1} />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-foreground">{place.name}</p>
@@ -108,7 +108,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
             )}
 
             {nearby.length === 0 && (
-              <div className="bg-background rounded-lg border border-border p-6">
+              <div className="border border-border p-6">
                 <p className="text-muted-foreground">
                   Located in {location}, this property offers excellent connectivity to Dubai's key landmarks and amenities.
                 </p>

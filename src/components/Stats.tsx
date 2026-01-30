@@ -28,16 +28,16 @@ const Stats = () => {
   ];
 
   return (
-    <section className="py-16 bg-primary text-primary-foreground">
-      <div className="container mx-auto px-4 lg:px-8">
+    <section className="py-16 bg-background border-y border-border grain-overlay">
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <ScrollReveal className={cn("text-center mb-12", isRTL && "font-arabic")}>
           <p className="text-eyebrow text-accent mb-4">
             {t("stats.subtitle")}
           </p>
-          <h2 className="heading-section text-2xl md:text-3xl text-primary-foreground">
+          <h2 className="heading-section text-2xl md:text-3xl text-foreground">
             {t("stats.title")}
           </h2>
-          <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
             {t("stats.description")}
           </p>
         </ScrollReveal>
@@ -46,16 +46,16 @@ const Stats = () => {
           {stats.map((stat, index) => (
             <StaggerItem key={index}>
               <div className={cn(
-                "text-center p-8 rounded-xl bg-primary-foreground/10 backdrop-blur-sm hover:bg-primary-foreground/15 transition-all duration-300",
+                "text-center p-8 border border-border hover:border-accent/30 transition-all duration-300",
                 isRTL && "font-arabic"
               )}>
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-accent/20 rounded-xl mb-4">
-                  <stat.icon className="h-7 w-7 text-accent" />
+                <div className="inline-flex items-center justify-center w-14 h-14 border border-accent/30 rounded-lg mb-4">
+                  <stat.icon className="h-6 w-6 text-accent" strokeWidth={1} />
                 </div>
-                <div className="heading-section text-3xl md:text-4xl font-bold mb-2">
+                <div className="heading-section text-3xl md:text-4xl text-accent mb-2">
                   {stat.value}{stat.suffix}
                 </div>
-                <div className="text-primary-foreground/70 text-sm tracking-wide uppercase">
+                <div className="text-muted-foreground text-xs tracking-widest uppercase">
                   {t(stat.labelKey)}
                 </div>
               </div>

@@ -18,7 +18,7 @@ const Hero = () => {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   return (
-    <section ref={ref} id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section ref={ref} id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden grain-overlay">
       {/* Background Video with Parallax */}
       <motion.div 
         className="absolute inset-0"
@@ -34,6 +34,8 @@ const Hero = () => {
         >
           <source src="/videos/hero-dubai.mp4" type="video/mp4" />
         </video>
+        {/* 40% black overlay for gold text legibility */}
+        <div className="absolute inset-0 bg-black/40"></div>
         <div className="absolute inset-0 bg-gradient-hero-overlay"></div>
       </motion.div>
 
@@ -49,7 +51,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-eyebrow text-primary-foreground/80 mb-4"
+          className="text-eyebrow text-accent mb-4"
         >
           {t("hero.subtitle")}
         </motion.p>
@@ -57,7 +59,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="heading-hero text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-primary-foreground mb-6"
+          className="heading-hero text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-foreground mb-6"
         >
           {t("hero.headline")} <br className="hidden md:block" />
           <span className="text-accent">{t("hero.headlineHighlight")}</span>
@@ -66,7 +68,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg md:text-xl text-primary-foreground/85 mb-10 max-w-2xl mx-auto leading-relaxed"
+          className="text-lg md:text-xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed"
         >
           {t("hero.tagline")}
         </motion.p>
@@ -81,15 +83,16 @@ const Hero = () => {
         >
           <Button 
             size="lg" 
-            className="bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 text-sm font-medium tracking-wide px-8 py-6"
+            variant="luxury"
+            className="px-10 py-6"
           >
             {t("hero.exploreProperties")}
-            <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} />
+            <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} strokeWidth={1} />
           </Button>
           <Button 
             size="lg" 
             variant="outline" 
-            className="border-2 border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground/60 transition-all duration-300 text-sm font-medium tracking-wide px-8 py-6"
+            className="border border-foreground/30 text-foreground hover:bg-foreground/10 hover:border-foreground/50 transition-all duration-300 px-10 py-6"
           >
             {t("hero.contactUs")}
           </Button>
@@ -105,7 +108,7 @@ const Hero = () => {
         style={{ opacity }}
       >
         <motion.div 
-          className="w-[1px] h-16 bg-gradient-to-b from-primary-foreground/0 via-primary-foreground/50 to-primary-foreground/0"
+          className="w-[1px] h-16 bg-gradient-to-b from-accent/0 via-accent/50 to-accent/0"
           animate={{ scaleY: [1, 1.2, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         />

@@ -47,8 +47,8 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contact" className="py-24 bg-background">
-      <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
+    <section id="contact" className="py-24 bg-background grain-overlay">
+      <div className={cn("container mx-auto px-4 lg:px-8 relative z-10", isRTL && "font-arabic")}>
         {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
           <p className="text-eyebrow text-accent mb-4">
@@ -72,12 +72,12 @@ const Contact = () => {
                   target={info.link.startsWith("http") ? "_blank" : undefined}
                   rel={info.link.startsWith("http") ? "noopener noreferrer" : undefined}
                   className={cn(
-                    "bg-secondary/50 rounded-xl p-5 flex items-start group hover:bg-secondary transition-all duration-300 block",
+                    "border border-border p-5 flex items-start group hover:border-accent/30 transition-all duration-300 block",
                     isRTL ? "flex-row-reverse space-x-reverse space-x-4 text-right" : "space-x-4"
                   )}
                 >
-                  <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 transition-colors duration-300">
-                    <info.icon className="h-5 w-5 text-accent" />
+                  <div className="w-10 h-10 border border-accent/30 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:border-accent transition-colors duration-300">
+                    <info.icon className="h-5 w-5 text-accent" strokeWidth={1} />
                   </div>
                   <div>
                     <div className="font-medium text-foreground text-sm mb-0.5">{t(info.titleKey)}</div>
@@ -90,12 +90,12 @@ const Contact = () => {
 
           {/* Contact Form */}
           <ScrollReveal direction={isRTL ? "left" : "right"} className="lg:col-span-2">
-            <div className="bg-secondary/50 rounded-xl p-8 h-full">
+            <div className="border border-border p-8 h-full">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
                     <label htmlFor="name" className={cn(
-                      "block text-sm font-medium text-foreground mb-2",
+                      "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
                       isRTL && "text-right"
                     )}>
                       {t("contact.name")}
@@ -106,14 +106,14 @@ const Contact = () => {
                       placeholder={t("contact.name")}
                       required
                       className={cn(
-                        "bg-background border-border focus:border-accent transition-colors",
+                        "bg-transparent border-border focus:border-accent transition-colors rounded-none",
                         isRTL && "text-right"
                       )}
                     />
                   </div>
                   <div>
                     <label htmlFor="email" className={cn(
-                      "block text-sm font-medium text-foreground mb-2",
+                      "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
                       isRTL && "text-right"
                     )}>
                       {t("contact.email")}
@@ -124,7 +124,7 @@ const Contact = () => {
                       placeholder="your@email.com"
                       required
                       className={cn(
-                        "bg-background border-border focus:border-accent transition-colors",
+                        "bg-transparent border-border focus:border-accent transition-colors rounded-none",
                         isRTL && "text-right"
                       )}
                     />
@@ -132,7 +132,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <label htmlFor="phone" className={cn(
-                    "block text-sm font-medium text-foreground mb-2",
+                    "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
                     isRTL && "text-right"
                   )}>
                     {t("contact.phone")}
@@ -142,14 +142,14 @@ const Contact = () => {
                     type="tel"
                     placeholder="+971 XX XXX XXXX"
                     className={cn(
-                      "bg-background border-border focus:border-accent transition-colors",
+                      "bg-transparent border-border focus:border-accent transition-colors rounded-none",
                       isRTL && "text-right"
                     )}
                   />
                 </div>
                 <div>
                   <label htmlFor="message" className={cn(
-                    "block text-sm font-medium text-foreground mb-2",
+                    "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
                     isRTL && "text-right"
                   )}>
                     {t("contact.message")}
@@ -160,7 +160,7 @@ const Contact = () => {
                     rows={4}
                     required
                     className={cn(
-                      "bg-background border-border focus:border-accent transition-colors resize-none",
+                      "bg-transparent border-border focus:border-accent transition-colors resize-none rounded-none",
                       isRTL && "text-right"
                     )}
                   />
@@ -168,7 +168,8 @@ const Contact = () => {
                 <Button
                   type="submit"
                   size="lg"
-                  className="nav-link w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  variant="luxury"
+                  className="w-full rounded-none"
                 >
                   {t("buttons.submit")}
                 </Button>

@@ -61,7 +61,7 @@ const PropertyFilters = ({
 
   return (
     <div className={cn(
-      "bg-card border border-border rounded-xl p-6 mb-8",
+      "border border-border p-6 mb-8",
       isRTL && "font-arabic"
     )}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -70,12 +70,15 @@ const PropertyFilters = ({
           <Search className={cn(
             "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground",
             isRTL ? "right-3" : "left-3"
-          )} />
+          )} strokeWidth={1} />
           <Input
             placeholder={t("filters.search")}
             value={filters.search}
             onChange={(e) => updateFilter("search", e.target.value)}
-            className={cn("h-11", isRTL ? "pr-10 text-right" : "pl-10")}
+            className={cn(
+              "h-11 bg-transparent border-border rounded-none focus:border-accent",
+              isRTL ? "pr-10 text-right" : "pl-10"
+            )}
           />
         </div>
 
@@ -84,10 +87,13 @@ const PropertyFilters = ({
           value={filters.location}
           onValueChange={(value) => updateFilter("location", value === "all" ? "" : value)}
         >
-          <SelectTrigger className={cn("h-11", isRTL && "text-right")}>
+          <SelectTrigger className={cn(
+            "h-11 bg-transparent border-border rounded-none focus:border-accent",
+            isRTL && "text-right"
+          )}>
             <SelectValue placeholder={t("filters.allLocations")} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-card border-border">
             <SelectItem value="all">{t("filters.allLocations")}</SelectItem>
             {locations.map((location) => (
               <SelectItem key={location} value={location}>
@@ -102,10 +108,13 @@ const PropertyFilters = ({
           value={filters.developer}
           onValueChange={(value) => updateFilter("developer", value === "all" ? "" : value)}
         >
-          <SelectTrigger className={cn("h-11", isRTL && "text-right")}>
+          <SelectTrigger className={cn(
+            "h-11 bg-transparent border-border rounded-none focus:border-accent",
+            isRTL && "text-right"
+          )}>
             <SelectValue placeholder={t("filters.allDevelopers")} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-card border-border">
             <SelectItem value="all">{t("filters.allDevelopers")}</SelectItem>
             {developers.map((developer) => (
               <SelectItem key={developer} value={developer}>
@@ -120,10 +129,13 @@ const PropertyFilters = ({
           value={filters.bedrooms}
           onValueChange={(value) => updateFilter("bedrooms", value === "all" ? "" : value)}
         >
-          <SelectTrigger className={cn("h-11", isRTL && "text-right")}>
+          <SelectTrigger className={cn(
+            "h-11 bg-transparent border-border rounded-none focus:border-accent",
+            isRTL && "text-right"
+          )}>
             <SelectValue placeholder={t("filters.allBedrooms")} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-card border-border">
             <SelectItem value="all">{t("filters.allBedrooms")}</SelectItem>
             {bedroomOptions.map((bed) => (
               <SelectItem key={bed} value={bed}>
@@ -144,9 +156,9 @@ const PropertyFilters = ({
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-accent"
           >
-            <X className={cn("h-4 w-4", isRTL ? "ml-1.5" : "mr-1.5")} />
+            <X className={cn("h-4 w-4", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
             {t("buttons.clearFilters")}
           </Button>
         </div>
