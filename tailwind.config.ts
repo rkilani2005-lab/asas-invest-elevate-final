@@ -58,10 +58,10 @@ export default {
         },
       },
       backgroundImage: {
-        'gradient-primary': 'var(--gradient-primary)',
-        'gradient-accent': 'var(--gradient-accent)',
-        'gradient-hero': 'var(--gradient-hero)',
-        'gradient-hero-overlay': 'var(--gradient-hero-overlay)',
+        'gradient-primary': 'linear-gradient(135deg, hsl(0 0% 5%) 0%, hsl(0 0% 10%) 100%)',
+        'gradient-accent': 'linear-gradient(135deg, hsl(40 42% 56%) 0%, hsl(40 48% 62%) 100%)',
+        'gradient-hero': 'linear-gradient(to bottom, rgba(13, 13, 13, 0.2), rgba(13, 13, 13, 0.5))',
+        'gradient-hero-overlay': 'linear-gradient(to bottom, rgba(13, 13, 13, 0.4), rgba(13, 13, 13, 0.7))',
       },
       boxShadow: {
         'elegant': 'var(--shadow-elegant)',
