@@ -1,101 +1,111 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Kufam:wght@400;500;700&family=Tenor+Sans&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Asas Invest Real Estate - Clean & Elegant Design System
-   Colors: Light, calm palette with whites, soft greys, slate tones, muted gold accents
-   Typography: Inter for body (EN), IBM Plex Sans Arabic (AR), Playfair Display for headings
-   All colors MUST be HSL.
+/* Asas Invest Real Estate - Quiet Luxury Design System
+   =====================================================
+   Typography:
+   - Primary Heading: Instrument Serif (signature italic look)
+   - Secondary/Nav: Tenor Sans (magazine aesthetic)
+   - Body: Plus Jakarta Sans (premium readability)
+   - Arabic Headings: Kufam
+   - Arabic Body: IBM Plex Sans Arabic
+   
+   Colors:
+   - Deep Charcoal (#1A1A1A) instead of pure black
+   - Off-White (#FAFAFA) instead of pure white
+   - Muted Champagne Gold accents
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 15% 20%;
+    /* Quiet Luxury Color Palette */
+    --background: 0 0% 98%; /* Off-White #FAFAFA */
+    --foreground: 0 0% 10%; /* Deep Charcoal #1A1A1A */
 
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 20%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 20%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 220 20% 25%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 10%; /* Deep Charcoal for primary */
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 10% 96%;
-    --secondary-foreground: 220 15% 20%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 220 10% 97%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 40 35% 55%;
-    --accent-foreground: 220 15% 15%;
+    --accent: 40 35% 55%; /* Muted Champagne Gold */
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 220 10% 90%;
-    --input: 220 10% 90%;
-    --ring: 220 20% 25%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 10%;
 
     --radius: 0.5rem;
 
-    /* Elegant gradient tokens - softer, more understated */
-    --gradient-primary: linear-gradient(135deg, hsl(220, 20%, 25%) 0%, hsl(220, 25%, 35%) 100%);
+    /* Elegant gradient tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(0, 0%, 10%) 0%, hsl(0, 0%, 20%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(40, 35%, 55%) 0%, hsl(40, 40%, 62%) 100%);
-    --gradient-hero: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
-    --gradient-hero-overlay: linear-gradient(to bottom, rgba(34, 45, 58, 0.75), rgba(34, 45, 58, 0.6));
+    --gradient-hero: linear-gradient(to bottom, rgba(250, 250, 250, 0.1), rgba(250, 250, 250, 0.3));
+    --gradient-hero-overlay: linear-gradient(to bottom, rgba(26, 26, 26, 0.75), rgba(26, 26, 26, 0.6));
     
-    /* Shadow tokens - softer, more subtle */
-    --shadow-elegant: 0 4px 20px -4px hsl(220 15% 20% / 0.08);
+    /* Refined shadow tokens */
+    --shadow-elegant: 0 4px 20px -4px hsl(0 0% 10% / 0.08);
     --shadow-luxury: 0 8px 30px -8px hsl(40 35% 55% / 0.15);
-    --shadow-card: 0 2px 12px -2px hsl(220 15% 20% / 0.06);
+    --shadow-card: 0 2px 12px -2px hsl(0 0% 10% / 0.06);
     
-    /* Animation timing */
+    /* Smooth transitions for all hover states */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Slate color tokens for text hierarchy */
-    --slate-50: 210 40% 98%;
-    --slate-100: 210 40% 96%;
-    --slate-200: 214 32% 91%;
-    --slate-300: 213 27% 84%;
-    --slate-400: 215 20% 65%;
-    --slate-500: 215 16% 47%;
-    --slate-600: 215 19% 35%;
-    --slate-700: 215 25% 27%;
-    --slate-800: 217 33% 17%;
-    --slate-900: 222 47% 11%;
+    --slate-50: 0 0% 98%;
+    --slate-100: 0 0% 96%;
+    --slate-200: 0 0% 91%;
+    --slate-300: 0 0% 84%;
+    --slate-400: 0 0% 65%;
+    --slate-500: 0 0% 47%;
+    --slate-600: 0 0% 35%;
+    --slate-700: 0 0% 27%;
+    --slate-800: 0 0% 17%;
+    --slate-900: 0 0% 10%;
   }
 
   .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
 
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
 
     --primary: 40 35% 55%;
-    --primary-foreground: 222 47% 11%;
+    --primary-foreground: 0 0% 7%;
 
-    --secondary: 215 25% 20%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 215 25% 15%;
-    --muted-foreground: 215 20% 60%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
     --accent: 40 35% 55%;
-    --accent-foreground: 222 47% 11%;
+    --accent-foreground: 0 0% 7%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 215 25% 20%;
-    --input: 215 25% 20%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 40 35% 55%;
   }
 }
@@ -105,14 +115,109 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "cv11", "ss01";
-  }
-
-  /* Smooth scroll behavior */
   html {
     scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-feature-settings: "cv11", "ss01";
+    line-height: 1.7; /* Spacious brochure feel */
+  }
+
+  /* RTL Font Swap */
+  [dir="rtl"] body {
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  }
+
+  /* Heading Typography - Instrument Serif */
+  h1, h2 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  h1 {
+    font-style: italic; /* Signature italic look for hero headings */
+  }
+
+  h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  /* RTL Heading Font Swap */
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6 {
+    font-family: 'Kufam', system-ui, sans-serif;
+    font-style: normal;
+    letter-spacing: 0;
+  }
+}
+
+@layer components {
+  /* Navigation & Labels - Tenor Sans, All Caps, Wide Tracking */
+  .nav-link,
+  .label-luxury {
+    font-family: 'Tenor Sans', system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+  }
+
+  [dir="rtl"] .nav-link,
+  [dir="rtl"] .label-luxury {
+    font-family: 'Kufam', system-ui, sans-serif;
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+
+  /* Hero Heading Style */
+  .heading-hero {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  [dir="rtl"] .heading-hero {
+    font-family: 'Kufam', system-ui, sans-serif;
+    font-style: normal;
+    letter-spacing: 0;
+  }
+
+  /* Section Heading Style */
+  .heading-section {
+    font-family: 'Instrument Serif', Georgia, serif;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+
+  [dir="rtl"] .heading-section {
+    font-family: 'Kufam', system-ui, sans-serif;
+    letter-spacing: 0;
+  }
+
+  /* Eyebrow/Label Text */
+  .text-eyebrow {
+    font-family: 'Tenor Sans', system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.6875rem;
+    font-weight: 400;
+  }
+
+  [dir="rtl"] .text-eyebrow {
+    font-family: 'Kufam', system-ui, sans-serif;
+    text-transform: none;
+    letter-spacing: 0.02em;
   }
 }
 
@@ -136,12 +241,17 @@
 
   /* Subtle hover lift */
   .hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: var(--transition-smooth);
   }
 
   .hover-lift:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-elegant);
+  }
+
+  /* Smooth hover transitions for all interactive elements */
+  a, button, [role="button"] {
+    transition: var(--transition-smooth);
   }
 
   /* RTL utilities */
@@ -156,13 +266,39 @@
   [dir="rtl"] .text-right {
     text-align: left;
   }
-}
 
-/* Font family base */
-body {
-  font-family: var(--font-body, 'Inter', sans-serif);
-}
+  /* Font utilities */
+  .font-heading {
+    font-family: 'Instrument Serif', Georgia, serif;
+  }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', serif;
+  .font-nav {
+    font-family: 'Tenor Sans', system-ui, sans-serif;
+  }
+
+  .font-body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  [dir="rtl"] .font-heading {
+    font-family: 'Kufam', system-ui, sans-serif;
+  }
+
+  [dir="rtl"] .font-nav {
+    font-family: 'Kufam', system-ui, sans-serif;
+  }
+
+  [dir="rtl"] .font-body {
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  }
+
+  /* Hide scrollbar utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

@@ -34,10 +34,10 @@ const WhyAsas = () => {
       <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
-          <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
+          <p className="text-eyebrow text-accent mb-4">
             {t("whyAsas.subtitle")}
           </p>
-          <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-6">
+          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
             {t("whyAsas.title")}
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
@@ -53,7 +53,7 @@ const WhyAsas = () => {
                 <div className="inline-flex items-center justify-center w-14 h-14 bg-background rounded-xl mb-6 group-hover:bg-accent/10 transition-colors duration-300">
                   <value.icon className="h-6 w-6 text-accent" />
                 </div>
-                <h3 className="font-serif text-xl font-medium text-foreground mb-3">
+                <h3 className="heading-section text-xl text-foreground mb-3">
                   {t(value.titleKey)}
                 </h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">

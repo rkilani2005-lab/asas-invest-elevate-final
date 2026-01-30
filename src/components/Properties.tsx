@@ -68,7 +68,7 @@ const PropertyCard = ({ property, index }: PropertyCardProps) => {
             <MapPin className="h-3.5 w-3.5 mr-1.5" />
             <span>{property.location}</span>
           </div>
-          <h3 className="font-serif text-xl font-medium text-foreground mb-4 group-hover:text-accent transition-colors">
+          <h3 className="heading-section text-xl text-foreground mb-4 group-hover:text-accent transition-colors">
             {property.title}
           </h3>
 
@@ -94,7 +94,7 @@ const PropertyCard = ({ property, index }: PropertyCardProps) => {
 
           {/* Price */}
           <div className="flex items-center justify-between">
-            <span className="font-serif text-lg font-medium text-foreground">
+            <span className="heading-section text-lg text-foreground">
               {property.price}
             </span>
             <Button variant="ghost" size="sm" className="text-accent hover:text-accent hover:bg-accent/10">
@@ -147,10 +147,10 @@ const Properties = () => {
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
-          <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
+          <p className="text-eyebrow text-accent mb-4">
             Featured Properties
           </p>
-          <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-6">
+          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
             Curated Properties in Prime Locations
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
