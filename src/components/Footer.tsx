@@ -66,13 +66,13 @@ const Footer = () => {
 
           {/* Company Links */}
           <div>
-            <h3 className="font-medium text-sm mb-4 tracking-wide">{t("footer.about")}</h3>
+            <h3 className="nav-link mb-4">{t("footer.about")}</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link, index) => (
                 <li key={index}>
                   <a
                     href={link.href}
-                    className="text-primary-foreground/70 hover:text-accent transition-colors duration-300 text-sm"
+                    className="text-primary-foreground/70 hover:text-accent text-sm"
                   >
                     {link.name}
                   </a>
@@ -83,13 +83,13 @@ const Footer = () => {
 
           {/* Services Links */}
           <div>
-            <h3 className="font-medium text-sm mb-4 tracking-wide">{t("footer.quickLinks")}</h3>
+            <h3 className="nav-link mb-4">{t("footer.quickLinks")}</h3>
             <ul className="space-y-2">
               {footerLinks.services.map((link, index) => (
                 <li key={index}>
                   <a
                     href={link.href}
-                    className="text-primary-foreground/70 hover:text-accent transition-colors duration-300 text-sm"
+                    className="text-primary-foreground/70 hover:text-accent text-sm"
                   >
                     {link.name}
                   </a>

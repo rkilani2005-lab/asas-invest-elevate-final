@@ -134,6 +134,17 @@
     "description": "Stay informed with our expert analysis and insights on the UAE real estate market.",
     "viewAll": "View All Insights"
   },
+  "featuredProperties": {
+    "subtitle": "Our Portfolio",
+    "title": "Exceptional Properties, Exceptional Returns",
+    "description": "Discover carefully curated investment opportunities across Dubai's most sought-after locations.",
+    "offPlan": "Off-Plan",
+    "ready": "Ready to Move",
+    "viewAllOffPlan": "View All Off-Plan",
+    "viewAllReady": "View All Ready",
+    "noOffPlan": "No off-plan properties available at the moment.",
+    "noReady": "No ready properties available at the moment."
+  },
   "property": {
     "price": "Price",
     "developer": "Developer",
