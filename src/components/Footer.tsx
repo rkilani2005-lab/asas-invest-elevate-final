@@ -1,28 +1,20 @@
 import { Instagram, Linkedin, MessageCircle } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import asasLogo from "@/assets/asas-logo.jpg";
+import { cn } from "@/lib/utils";
 
 const Footer = () => {
+  const { t, isRTL } = useLanguage();
+
   const footerLinks = {
     company: [
-      { name: "About Us", href: "#about" },
-      { name: "Our Team", href: "#about" },
-      { name: "Careers", href: "#" }
+      { name: t("nav.about"), href: "#about" },
+      { name: t("nav.insights"), href: "#insights" },
     ],
     services: [
-      { name: "Property Leasing", href: "#services" },
-      { name: "Property Management", href: "#services" },
-      { name: "Investment Advisory", href: "#services" }
+      { name: t("nav.offPlan"), href: "#properties" },
+      { name: t("nav.ready"), href: "#properties" },
     ],
-    resources: [
-      { name: "Market Insights", href: "#insights" },
-      { name: "Property Guide", href: "#" },
-      { name: "FAQs", href: "#" }
-    ],
-    legal: [
-      { name: "Privacy Policy", href: "#" },
-      { name: "Terms of Service", href: "#" },
-      { name: "Disclaimer", href: "#" }
-    ]
   };
 
   const socialLinks = [
@@ -34,10 +26,16 @@ const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground py-16">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-12">
+        <div className={cn(
+          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12",
+          isRTL && "text-right"
+        )}>
           {/* Brand */}
           <div className="lg:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
+            <div className={cn(
+              "flex items-center mb-4",
+              isRTL ? "space-x-reverse space-x-3 justify-end md:justify-start" : "space-x-3"
+            )}>
               <img 
                 src={asasLogo} 
                 alt="Asas Invest Real Estate" 
@@ -45,10 +43,12 @@ const Footer = () => {
               />
             </div>
             <p className="text-primary-foreground/70 mb-6 max-w-sm text-sm leading-relaxed">
-              Strategic real estate investment and asset management services in Dubai and the UAE. 
-              Building wealth through carefully selected properties.
+              {t("footer.aboutText")}
             </p>
-            <div className="flex space-x-3">
+            <div className={cn(
+              "flex",
+              isRTL ? "space-x-reverse space-x-3 justify-end md:justify-start" : "space-x-3"
+            )}>
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
@@ -64,9 +64,9 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Links */}
+          {/* Company Links */}
           <div>
-            <h3 className="font-medium text-sm mb-4 tracking-wide">Company</h3>
+            <h3 className="font-medium text-sm mb-4 tracking-wide">{t("footer.about")}</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link, index) => (
                 <li key={index}>
@@ -81,42 +81,11 @@ const Footer = () => {
             </ul>
           </div>
 
+          {/* Services Links */}
           <div>
-            <h3 className="font-medium text-sm mb-4 tracking-wide">Services</h3>
+            <h3 className="font-medium text-sm mb-4 tracking-wide">{t("footer.quickLinks")}</h3>
             <ul className="space-y-2">
               {footerLinks.services.map((link, index) => (
-                <li key={index}>
-                  <a
-                    href={link.href}
-                    className="text-primary-foreground/70 hover:text-accent transition-colors duration-300 text-sm"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-medium text-sm mb-4 tracking-wide">Resources</h3>
-            <ul className="space-y-2">
-              {footerLinks.resources.map((link, index) => (
-                <li key={index}>
-                  <a
-                    href={link.href}
-                    className="text-primary-foreground/70 hover:text-accent transition-colors duration-300 text-sm"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-medium text-sm mb-4 tracking-wide">Legal</h3>
-            <ul className="space-y-2">
-              {footerLinks.legal.map((link, index) => (
                 <li key={index}>
                   <a
                     href={link.href}
@@ -132,12 +101,18 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-primary-foreground/10 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div className={cn(
+            "flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0",
+            isRTL && "md:flex-row-reverse"
+          )}>
             <p className="text-primary-foreground/50 text-xs">
-              © 2026 Asas Invest Real Estate. All rights reserved.
+              {t("footer.copyright")}
             </p>
-            <p className="text-primary-foreground/50 text-xs text-center md:text-right">
-              Licensed by Dubai Land Department. Investment services subject to regulatory compliance.
+            <p className={cn(
+              "text-primary-foreground/50 text-xs text-center",
+              isRTL ? "md:text-left" : "md:text-right"
+            )}>
+              {t("footer.address")}
             </p>
           </div>
         </div>

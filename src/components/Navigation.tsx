@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import asasLogo from "@/assets/asas-logo.jpg";
+import { cn } from "@/lib/utils";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t, isRTL } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,24 +20,28 @@ const Navigation = () => {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Services", href: "#services" },
-    { name: "Properties", href: "#properties" },
-    { name: "Insights", href: "#insights" },
-    { name: "Contact", href: "#contact" },
+    { name: t("nav.home"), href: "#home" },
+    { name: t("nav.about"), href: "#about" },
+    { name: t("nav.offPlan"), href: "#properties" },
+    { name: t("nav.ready"), href: "#properties" },
+    { name: t("nav.insights"), href: "#insights" },
+    { name: t("nav.contact"), href: "#contact" },
   ];
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled 
           ? "bg-background/98 backdrop-blur-md shadow-card border-b border-border" 
           : "bg-transparent"
-      }`}
+      )}
     >
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className={cn(
+          "flex items-center justify-between h-20",
+          isRTL && "flex-row-reverse"
+        )}>
           {/* Logo */}
           <a href="#home" className="flex items-center">
             <img 
@@ -44,26 +52,22 @@ const Navigation = () => {
           </a>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className={cn(
+            "hidden lg:flex items-center",
+            isRTL ? "space-x-reverse space-x-8" : "space-x-8"
+          )}>
             {navLinks.map((link) => (
               <a
-                key={link.name}
+                key={link.href + link.name}
                 href={link.href}
                 className="text-foreground/80 hover:text-foreground transition-colors duration-300 text-sm font-medium tracking-wide"
               >
                 {link.name}
               </a>
             ))}
-            <a 
-              href="https://wa.me/971000000000" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center space-x-2 text-foreground/80 hover:text-foreground transition-colors"
-            >
-              <MessageCircle className="h-4 w-4" />
-            </a>
+            <LanguageSwitcher />
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 text-sm font-medium tracking-wide">
-              Contact Us
+              {t("buttons.contactUs")}
             </Button>
           </div>
 
@@ -83,26 +87,23 @@ const Navigation = () => {
             <div className="flex flex-col space-y-4">
               {navLinks.map((link) => (
                 <a
-                  key={link.name}
+                  key={link.href + link.name}
                   href={link.href}
-                  className="text-foreground/80 hover:text-foreground transition-colors duration-300 font-medium py-2 text-sm tracking-wide"
+                  className={cn(
+                    "text-foreground/80 hover:text-foreground transition-colors duration-300 font-medium py-2 text-sm tracking-wide",
+                    isRTL && "text-right"
+                  )}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.name}
                 </a>
               ))}
               <div className="pt-4 flex flex-col space-y-3">
-                <a 
-                  href="https://wa.me/971000000000" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-foreground/80 hover:text-foreground transition-colors py-2"
-                >
-                  <MessageCircle className="h-5 w-5" />
-                  <span className="text-sm">WhatsApp</span>
-                </a>
+                <div className={cn("flex", isRTL ? "justify-end" : "justify-start")}>
+                  <LanguageSwitcher />
+                </div>
                 <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 w-full text-sm font-medium">
-                  Contact Us
+                  {t("buttons.contactUs")}
                 </Button>
               </div>
             </div>

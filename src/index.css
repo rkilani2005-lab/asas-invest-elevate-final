@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Asas Invest Real Estate - Clean & Elegant Design System
    Colors: Light, calm palette with whites, soft greys, slate tones, muted gold accents
-   Typography: Inter for body, Playfair Display for headings
+   Typography: Inter for body (EN), IBM Plex Sans Arabic (AR), Playfair Display for headings
    All colors MUST be HSL.
 */
 
@@ -141,4 +143,26 @@
     transform: translateY(-4px);
     box-shadow: var(--shadow-elegant);
   }
+
+  /* RTL utilities */
+  [dir="rtl"] .rtl-flip {
+    transform: scaleX(-1);
+  }
+
+  [dir="rtl"] .text-left {
+    text-align: right;
+  }
+
+  [dir="rtl"] .text-right {
+    text-align: left;
+  }
+}
+
+/* Font family base */
+body {
+  font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
 }
