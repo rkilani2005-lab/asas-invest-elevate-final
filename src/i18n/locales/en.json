@@ -1,0 +1,124 @@
+{
+  "nav": {
+    "home": "Home",
+    "offPlan": "Off-Plan",
+    "ready": "Ready",
+    "about": "About",
+    "contact": "Contact",
+    "insights": "Insights"
+  },
+  "hero": {
+    "headline": "Invest in Dubai's Future",
+    "tagline": "Premium real estate opportunities in the UAE's most dynamic market",
+    "exploreOffPlan": "Explore Off-Plan",
+    "browseReady": "Browse Ready"
+  },
+  "categories": {
+    "offPlan": {
+      "title": "Off-Plan",
+      "subtitle": "The Vision",
+      "description": "Invest early in premium developments with flexible payment plans and maximum appreciation potential.",
+      "cta": "Explore Off-Plan"
+    },
+    "ready": {
+      "title": "Ready",
+      "subtitle": "The Reality",
+      "description": "Move-in ready properties with immediate rental income and established communities.",
+      "cta": "Browse Ready"
+    }
+  },
+  "whyAsas": {
+    "title": "Why Asas Invest",
+    "subtitle": "Your Trusted Partner",
+    "description": "We bring fresh perspectives to UAE real estate, combining market expertise with personalized service.",
+    "values": {
+      "expertise": {
+        "title": "Market Expertise",
+        "description": "Deep understanding of Dubai's property landscape and emerging opportunities"
+      },
+      "personalized": {
+        "title": "Personalized Service",
+        "description": "Tailored investment strategies aligned with your unique goals"
+      },
+      "transparency": {
+        "title": "Full Transparency",
+        "description": "Clear communication and honest guidance throughout your journey"
+      },
+      "network": {
+        "title": "Developer Network",
+        "description": "Direct access to premium projects from leading developers"
+      }
+    }
+  },
+  "property": {
+    "price": "Price",
+    "developer": "Developer",
+    "location": "Location",
+    "unitTypes": "Unit Types",
+    "sizeRange": "Size Range",
+    "handover": "Handover",
+    "ownership": "Ownership",
+    "parking": "Parking",
+    "status": {
+      "available": "Available",
+      "reserved": "Reserved",
+      "sold": "Sold"
+    },
+    "type": {
+      "offPlan": "Off-Plan",
+      "ready": "Ready"
+    }
+  },
+  "buttons": {
+    "registerInterest": "Register Interest",
+    "requestViewing": "Request Viewing",
+    "requestVipPack": "Request VIP Pack",
+    "downloadBrochure": "Download Brochure",
+    "viewDetails": "View Details",
+    "contactUs": "Contact Us",
+    "learnMore": "Learn More",
+    "submit": "Submit",
+    "clearFilters": "Clear Filters"
+  },
+  "sections": {
+    "overview": "Overview",
+    "location": "Location",
+    "amenities": "Amenities",
+    "gallery": "Gallery",
+    "floorPlans": "Floor Plans",
+    "paymentPlan": "Payment Plan",
+    "video": "Video",
+    "investment": "Investment",
+    "inquire": "Inquire"
+  },
+  "contact": {
+    "title": "Get in Touch",
+    "subtitle": "We're here to help you find your perfect investment",
+    "name": "Full Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "message": "Message",
+    "interests": "I'm interested in:",
+    "floorPlan": "Floor Plans",
+    "brochure": "Brochure",
+    "vipPack": "VIP Pack",
+    "success": "Thank you! We'll be in touch soon.",
+    "whatsapp": "Chat on WhatsApp"
+  },
+  "footer": {
+    "about": "About Asas Invest",
+    "aboutText": "Premium real estate investment opportunities in Dubai and the UAE.",
+    "quickLinks": "Quick Links",
+    "contact": "Contact",
+    "address": "Dubai, United Arab Emirates",
+    "copyright": "© 2026 Asas Invest. All rights reserved."
+  },
+  "filters": {
+    "location": "Location",
+    "budget": "Budget",
+    "unitType": "Unit Type",
+    "developer": "Developer",
+    "allLocations": "All Locations",
+    "allDevelopers": "All Developers"
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "offPlan": "قيد الإنشاء",
+    "ready": "جاهز",
+    "about": "عن الشركة",
+    "contact": "تواصل معنا",
+    "insights": "رؤى"
+  },
+  "hero": {
+    "headline": "استثمر في مستقبل دبي",
+    "tagline": "فرص عقارية متميزة في أكثر أسواق الإمارات ديناميكية",
+    "exploreOffPlan": "استكشف قيد الإنشاء",
+    "browseReady": "تصفح الجاهز"
+  },
+  "categories": {
+    "offPlan": {
+      "title": "قيد الإنشاء",
+      "subtitle": "الرؤية",
+      "description": "استثمر مبكراً في مشاريع متميزة مع خطط سداد مرنة وإمكانية ارتفاع قيمة قصوى.",
+      "cta": "استكشف قيد الإنشاء"
+    },
+    "ready": {
+      "title": "جاهز",
+      "subtitle": "الواقع",
+      "description": "عقارات جاهزة للسكن مع دخل إيجاري فوري ومجتمعات راسخة.",
+      "cta": "تصفح الجاهز"
+    }
+  },
+  "whyAsas": {
+    "title": "لماذا أساس للاستثمار",
+    "subtitle": "شريكك الموثوق",
+    "description": "نقدم رؤى جديدة في عقارات الإمارات، نجمع بين الخبرة السوقية والخدمة الشخصية.",
+    "values": {
+      "expertise": {
+        "title": "خبرة سوقية",
+        "description": "فهم عميق لمشهد عقارات دبي والفرص الناشئة"
+      },
+      "personalized": {
+        "title": "خدمة شخصية",
+        "description": "استراتيجيات استثمار مصممة حسب أهدافك الفريدة"
+      },
+      "transparency": {
+        "title": "شفافية كاملة",
+        "description": "تواصل واضح وإرشاد صادق طوال رحلتك"
+      },
+      "network": {
+        "title": "شبكة مطورين",
+        "description": "وصول مباشر لمشاريع متميزة من كبار المطورين"
+      }
+    }
+  },
+  "property": {
+    "price": "السعر",
+    "developer": "المطور",
+    "location": "الموقع",
+    "unitTypes": "أنواع الوحدات",
+    "sizeRange": "نطاق المساحة",
+    "handover": "التسليم",
+    "ownership": "الملكية",
+    "parking": "المواقف",
+    "status": {
+      "available": "متاح",
+      "reserved": "محجوز",
+      "sold": "مباع"
+    },
+    "type": {
+      "offPlan": "قيد الإنشاء",
+      "ready": "جاهز"
+    }
+  },
+  "buttons": {
+    "registerInterest": "سجل اهتمامك",
+    "requestViewing": "طلب معاينة",
+    "requestVipPack": "طلب حزمة VIP",
+    "downloadBrochure": "تحميل الكتيب",
+    "viewDetails": "عرض التفاصيل",
+    "contactUs": "تواصل معنا",
+    "learnMore": "اعرف المزيد",
+    "submit": "إرسال",
+    "clearFilters": "مسح الفلاتر"
+  },
+  "sections": {
+    "overview": "نظرة عامة",
+    "location": "الموقع",
+    "amenities": "المرافق",
+    "gallery": "المعرض",
+    "floorPlans": "مخططات الطوابق",
+    "paymentPlan": "خطة الدفع",
+    "video": "فيديو",
+    "investment": "الاستثمار",
+    "inquire": "استفسار"
+  },
+  "contact": {
+    "title": "تواصل معنا",
+    "subtitle": "نحن هنا لمساعدتك في إيجاد استثمارك المثالي",
+    "name": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "message": "الرسالة",
+    "interests": "أنا مهتم بـ:",
+    "floorPlan": "مخططات الطوابق",
+    "brochure": "الكتيب",
+    "vipPack": "حزمة VIP",
+    "success": "شكراً لك! سنتواصل معك قريباً.",
+    "whatsapp": "تحدث عبر واتساب"
+  },
+  "footer": {
+    "about": "عن أساس للاستثمار",
+    "aboutText": "فرص استثمار عقاري متميزة في دبي والإمارات.",
+    "quickLinks": "روابط سريعة",
+    "contact": "تواصل",
+    "address": "دبي، الإمارات العربية المتحدة",
+    "copyright": "© ٢٠٢٦ أساس للاستثمار. جميع الحقوق محفوظة."
+  },
+  "filters": {
+    "location": "الموقع",
+    "budget": "الميزانية",
+    "unitType": "نوع الوحدة",
+    "developer": "المطور",
+    "allLocations": "جميع المواقع",
+    "allDevelopers": "جميع المطورين"
+  }
+}
