@@ -113,7 +113,7 @@ const OffPlan = () => {
             <p className="text-eyebrow text-accent mb-4">
               {t("offPlanPage.subtitle")}
             </p>
-            <h1 className="heading-hero text-3xl md:text-4xl lg:text-5xl text-foreground mb-6">
+            <h1 className="heading-hero text-3xl md:text-4xl lg:text-5xl text-accent mb-6">
               {t("offPlanPage.title")}
             </h1>
             <p className="text-muted-foreground text-lg leading-relaxed">

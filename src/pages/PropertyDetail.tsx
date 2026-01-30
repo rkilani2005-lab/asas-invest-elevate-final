@@ -163,11 +163,11 @@ const PropertyDetail = () => {
               <span className="text-sm">{t("property.type." + property.type.replace("-", ""))}</span>
             </Link>
             <div className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2 border-accent/30 text-foreground hover:border-accent">
                 <Share2 className="h-4 w-4" strokeWidth={1} />
                 <span className="hidden sm:inline">Share</span>
               </Button>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2 border-accent/30 text-foreground hover:border-accent">
                 <Heart className="h-4 w-4" strokeWidth={1} />
                 <span className="hidden sm:inline">Save</span>
               </Button>
@@ -181,7 +181,7 @@ const PropertyDetail = () => {
             <p className="text-accent text-xs font-medium tracking-widest uppercase mb-2">
               {language === "ar" && property.developer_ar ? property.developer_ar : property.developer_en}
             </p>
-            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-foreground mb-4">
+            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-accent mb-4">
               {name}
             </h1>
             {tagline && (

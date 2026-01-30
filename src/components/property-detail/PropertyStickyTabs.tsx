@@ -19,8 +19,8 @@ const PropertyStickyTabs = ({ activeTab, onTabChange, tabs }: PropertyStickyTabs
   const visibleTabs = tabs.filter(tab => tab.show);
 
   return (
-    <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-md border-b border-border">
-      <div className="container mx-auto px-4 lg:px-8">
+    <div className="sticky top-20 z-40 bg-background/98 backdrop-blur-md border-b border-accent/20 grain-overlay">
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <nav className="overflow-x-auto scrollbar-hide">
           <div className={cn(
             "flex min-w-max",
@@ -33,8 +33,8 @@ const PropertyStickyTabs = ({ activeTab, onTabChange, tabs }: PropertyStickyTabs
                 className={cn(
                   "nav-link px-5 py-4 whitespace-nowrap transition-all duration-300 border-b-2 -mb-[1px] relative",
                   activeTab === tab.id
-                    ? "text-accent border-accent"
-                    : "text-muted-foreground hover:text-foreground border-transparent hover:border-accent/30"
+                    ? "text-accent border-accent font-medium"
+                    : "text-foreground/70 hover:text-accent border-transparent hover:border-accent/30"
                 )}
               >
                 {tab.label}

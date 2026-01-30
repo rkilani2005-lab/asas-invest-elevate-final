@@ -81,12 +81,12 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
   if (isSubmitted) {
     return (
-      <div className="py-12 bg-card border-y border-border">
-        <div className="container mx-auto px-4 lg:px-8">
+    <div className="py-12 bg-card border-y border-accent/20">
+      <div className="container mx-auto px-4 lg:px-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="max-w-xl mx-auto text-center py-12"
+            className="max-w-xl mx-auto text-center py-12 bg-white border border-accent/30 shadow-card"
           >
             <div className="w-20 h-20 border border-accent rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 className="h-10 w-10 text-accent" strokeWidth={1} />
@@ -110,7 +110,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
   }
 
   return (
-    <div className="py-12 bg-card border-y border-border">
+    <div className="py-12 bg-background border-y border-accent/20">
       <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         <div className={cn(
           "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
@@ -121,7 +121,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
             <p className="text-accent text-xs font-medium tracking-widest uppercase mb-4">
               {t("sections.inquire")}
             </p>
-            <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-6">
+            <h2 className="font-serif text-3xl md:text-4xl font-medium text-accent mb-6">
               Interested in {propertyName}?
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8">
@@ -131,7 +131,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
             {/* WhatsApp Option */}
             <div className={cn(
-              "flex items-center gap-4 p-4 border border-border",
+              "flex items-center gap-4 p-4 border border-accent/30 bg-white shadow-card",
               isRTL && "flex-row-reverse"
             )}>
               <div className="w-12 h-12 border border-accent/30 rounded-full flex items-center justify-center flex-shrink-0">
@@ -153,7 +153,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
           {/* Right - Form */}
           <div className={cn("lg:order-1", isRTL && "lg:order-1")}>
-            <form onSubmit={handleSubmit} className="border border-border p-8 space-y-5">
+            <form onSubmit={handleSubmit} className="bg-white border border-accent/30 p-8 space-y-5 shadow-card">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={cn(
@@ -167,7 +167,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     className={cn(
-                      "bg-transparent border-border rounded-none focus:border-accent",
+                      "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
                       isRTL && "text-right"
                     )}
                     placeholder={t("contact.name")}
@@ -186,7 +186,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     className={cn(
-                      "bg-transparent border-border rounded-none focus:border-accent",
+                      "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
                       isRTL && "text-right"
                     )}
                     placeholder="your@email.com"
@@ -206,7 +206,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   className={cn(
-                    "bg-transparent border-border rounded-none focus:border-accent",
+                    "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
                     isRTL && "text-right"
                   )}
                   placeholder="+971 XX XXX XXXX"
@@ -254,7 +254,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   value={formData.message}
                   onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   className={cn(
-                    "bg-transparent border-border rounded-none focus:border-accent resize-none",
+                    "bg-white border-accent/30 rounded-none focus:border-accent resize-none text-foreground",
                     isRTL && "text-right"
                   )}
                   rows={4}

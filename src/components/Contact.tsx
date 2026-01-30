@@ -54,7 +54,7 @@ const Contact = () => {
           <p className="text-eyebrow text-accent mb-4">
             {t("contact.title")}
           </p>
-          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
+          <h2 className="heading-section text-3xl md:text-4xl text-accent mb-6">
             {t("contact.subtitle")}
           </h2>
         </ScrollReveal>
@@ -72,7 +72,7 @@ const Contact = () => {
                   target={info.link.startsWith("http") ? "_blank" : undefined}
                   rel={info.link.startsWith("http") ? "noopener noreferrer" : undefined}
                   className={cn(
-                    "border border-border p-5 flex items-start group hover:border-accent/30 transition-all duration-300 block",
+                    "border border-accent/30 p-5 flex items-start group hover:border-accent transition-all duration-300 block bg-white shadow-card",
                     isRTL ? "flex-row-reverse space-x-reverse space-x-4 text-right" : "space-x-4"
                   )}
                 >
@@ -90,7 +90,7 @@ const Contact = () => {
 
           {/* Contact Form */}
           <ScrollReveal direction={isRTL ? "left" : "right"} className="lg:col-span-2">
-            <div className="border border-border p-8 h-full">
+            <div className="bg-white border border-accent/30 p-8 h-full shadow-card">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
@@ -106,7 +106,7 @@ const Contact = () => {
                       placeholder={t("contact.name")}
                       required
                       className={cn(
-                        "bg-transparent border-border focus:border-accent transition-colors rounded-none",
+                        "bg-white border-accent/30 focus:border-accent transition-colors rounded-none text-foreground",
                         isRTL && "text-right"
                       )}
                     />
@@ -124,7 +124,7 @@ const Contact = () => {
                       placeholder="your@email.com"
                       required
                       className={cn(
-                        "bg-transparent border-border focus:border-accent transition-colors rounded-none",
+                        "bg-white border-accent/30 focus:border-accent transition-colors rounded-none text-foreground",
                         isRTL && "text-right"
                       )}
                     />
@@ -142,7 +142,7 @@ const Contact = () => {
                     type="tel"
                     placeholder="+971 XX XXX XXXX"
                     className={cn(
-                      "bg-transparent border-border focus:border-accent transition-colors rounded-none",
+                      "bg-white border-accent/30 focus:border-accent transition-colors rounded-none text-foreground",
                       isRTL && "text-right"
                     )}
                   />
@@ -160,7 +160,7 @@ const Contact = () => {
                     rows={4}
                     required
                     className={cn(
-                      "bg-transparent border-border focus:border-accent transition-colors resize-none rounded-none",
+                      "bg-white border-accent/30 focus:border-accent transition-colors resize-none rounded-none text-foreground",
                       isRTL && "text-right"
                     )}
                   />

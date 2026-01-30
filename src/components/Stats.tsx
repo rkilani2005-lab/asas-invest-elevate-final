@@ -28,13 +28,13 @@ const Stats = () => {
   ];
 
   return (
-    <section className="py-16 bg-background border-y border-border grain-overlay">
+    <section className="py-16 bg-background border-y border-accent/20 grain-overlay">
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <ScrollReveal className={cn("text-center mb-12", isRTL && "font-arabic")}>
           <p className="text-eyebrow text-accent mb-4">
             {t("stats.subtitle")}
           </p>
-          <h2 className="heading-section text-2xl md:text-3xl text-foreground">
+          <h2 className="heading-section text-2xl md:text-3xl text-accent">
             {t("stats.title")}
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
@@ -46,7 +46,7 @@ const Stats = () => {
           {stats.map((stat, index) => (
             <StaggerItem key={index}>
               <div className={cn(
-                "text-center p-8 border border-border hover:border-accent/30 transition-all duration-300",
+                "text-center p-8 bg-white border border-accent/30 hover:border-accent transition-all duration-300 shadow-card",
                 isRTL && "font-arabic"
               )}>
                 <div className="inline-flex items-center justify-center w-14 h-14 border border-accent/30 rounded-lg mb-4">

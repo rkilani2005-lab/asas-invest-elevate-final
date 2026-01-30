@@ -24,7 +24,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-card text-foreground py-16 border-t border-border grain-overlay">
+    <footer className="bg-background text-foreground py-16 border-t border-accent/20 grain-overlay">
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className={cn(
           "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12",
@@ -56,7 +56,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="w-10 h-10 border border-border rounded-lg flex items-center justify-center hover:border-accent hover:text-accent transition-all duration-300"
+                  className="w-10 h-10 border border-accent/30 rounded-lg flex items-center justify-center hover:border-accent hover:text-accent transition-all duration-300 text-foreground"
                 >
                   <social.icon className="h-4 w-4" strokeWidth={1} />
                 </a>
