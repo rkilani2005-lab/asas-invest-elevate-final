@@ -30,13 +30,13 @@ const Hero = () => {
           loop
           playsInline
           poster="/images/dubai-skyline.jpg"
-          className="w-full h-[120%] object-cover"
+          className="w-full h-[120%] object-cover brightness-105 saturate-110"
         >
           <source src="/videos/hero-dubai.mp4" type="video/mp4" />
         </video>
-        {/* 40% black overlay for gold text legibility */}
-        <div className="absolute inset-0 bg-black/40"></div>
-        <div className="absolute inset-0 bg-gradient-hero-overlay"></div>
+        {/* Bright warm gold gradient overlay for gold text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-gold/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/20 to-transparent"></div>
       </motion.div>
 
       {/* Content with Parallax */}
@@ -59,7 +59,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="heading-hero text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-foreground mb-6"
+          className="heading-hero text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-accent mb-6 drop-shadow-sm"
         >
           {t("hero.headline")} <br className="hidden md:block" />
           <span className="text-accent">{t("hero.headlineHighlight")}</span>
@@ -68,7 +68,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg md:text-xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed"
+          className="text-lg md:text-xl text-foreground mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-sm"
         >
           {t("hero.tagline")}
         </motion.p>
@@ -92,7 +92,7 @@ const Hero = () => {
           <Button 
             size="lg" 
             variant="outline" 
-            className="border border-foreground/30 text-foreground hover:bg-foreground/10 hover:border-foreground/50 transition-all duration-300 px-10 py-6"
+            className="border border-accent/50 text-accent hover:bg-accent hover:text-white transition-all duration-300 px-10 py-6"
           >
             {t("hero.contactUs")}
           </Button>

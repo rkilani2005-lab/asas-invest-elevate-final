@@ -58,15 +58,15 @@ export default {
         },
       },
       backgroundImage: {
-        'gradient-primary': 'linear-gradient(135deg, hsl(0, 0%, 5%) 0%, hsl(0, 0%, 10%) 100%)',
+        'gradient-primary': 'linear-gradient(135deg, hsl(0, 0%, 98%) 0%, hsl(0, 0%, 96%) 100%)',
         'gradient-accent': 'linear-gradient(135deg, hsl(40, 42%, 56%) 0%, hsl(40, 48%, 62%) 100%)',
-        'gradient-hero': 'linear-gradient(to bottom, rgba(13, 13, 13, 0.2), rgba(13, 13, 13, 0.5))',
-        'gradient-hero-overlay': 'linear-gradient(to bottom, rgba(13, 13, 13, 0.4), rgba(13, 13, 13, 0.7))',
+        'gradient-hero': 'linear-gradient(to bottom, rgba(250, 250, 250, 0.1), rgba(197, 160, 89, 0.15))',
+        'gradient-hero-overlay': 'linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(250, 250, 250, 0.6))',
       },
       boxShadow: {
-        'elegant': '0 4px 20px -4px rgba(0, 0, 0, 0.4)',
-        'luxury': '0 8px 30px -8px rgba(197, 160, 89, 0.15)',
-        'card': 'none',
+        'elegant': '0 4px 20px -4px rgba(197, 160, 89, 0.15)',
+        'luxury': '0 8px 30px -8px rgba(197, 160, 89, 0.2)',
+        'card': '0 2px 12px -2px rgba(0, 0, 0, 0.08)',
         'none': 'none',
       },
       fontFamily: {

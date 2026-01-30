@@ -61,7 +61,7 @@ const PropertyFilters = ({
 
   return (
     <div className={cn(
-      "border border-border p-6 mb-8",
+      "bg-white/80 backdrop-blur-sm border border-accent/30 p-6 mb-8 shadow-card",
       isRTL && "font-arabic"
     )}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -76,7 +76,7 @@ const PropertyFilters = ({
             value={filters.search}
             onChange={(e) => updateFilter("search", e.target.value)}
             className={cn(
-              "h-11 bg-transparent border-border rounded-none focus:border-accent",
+              "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
               isRTL ? "pr-10 text-right" : "pl-10"
             )}
           />
@@ -88,12 +88,12 @@ const PropertyFilters = ({
           onValueChange={(value) => updateFilter("location", value === "all" ? "" : value)}
         >
           <SelectTrigger className={cn(
-            "h-11 bg-transparent border-border rounded-none focus:border-accent",
+            "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
             isRTL && "text-right"
           )}>
             <SelectValue placeholder={t("filters.allLocations")} />
           </SelectTrigger>
-          <SelectContent className="bg-card border-border">
+          <SelectContent className="bg-white border-accent/30">
             <SelectItem value="all">{t("filters.allLocations")}</SelectItem>
             {locations.map((location) => (
               <SelectItem key={location} value={location}>
@@ -109,12 +109,12 @@ const PropertyFilters = ({
           onValueChange={(value) => updateFilter("developer", value === "all" ? "" : value)}
         >
           <SelectTrigger className={cn(
-            "h-11 bg-transparent border-border rounded-none focus:border-accent",
+            "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
             isRTL && "text-right"
           )}>
             <SelectValue placeholder={t("filters.allDevelopers")} />
           </SelectTrigger>
-          <SelectContent className="bg-card border-border">
+          <SelectContent className="bg-white border-accent/30">
             <SelectItem value="all">{t("filters.allDevelopers")}</SelectItem>
             {developers.map((developer) => (
               <SelectItem key={developer} value={developer}>
@@ -130,12 +130,12 @@ const PropertyFilters = ({
           onValueChange={(value) => updateFilter("bedrooms", value === "all" ? "" : value)}
         >
           <SelectTrigger className={cn(
-            "h-11 bg-transparent border-border rounded-none focus:border-accent",
+            "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
             isRTL && "text-right"
           )}>
             <SelectValue placeholder={t("filters.allBedrooms")} />
           </SelectTrigger>
-          <SelectContent className="bg-card border-border">
+          <SelectContent className="bg-white border-accent/30">
             <SelectItem value="all">{t("filters.allBedrooms")}</SelectItem>
             {bedroomOptions.map((bed) => (
               <SelectItem key={bed} value={bed}>

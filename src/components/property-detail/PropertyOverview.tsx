@@ -34,7 +34,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
         )}>
           {/* Main Content */}
           <div className={cn("lg:col-span-2", isRTL && "text-right")}>
-            <h2 className="heading-section text-2xl md:text-3xl text-foreground mb-6">
+            <h2 className="heading-section text-2xl md:text-3xl text-accent mb-6">
               {t("sections.overview")}
             </h2>
             
@@ -74,7 +74,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
 
           {/* Specs Sidebar */}
           <div className="lg:col-span-1">
-            <div className="border border-border p-6 sticky top-40">
+            <div className="bg-white border border-accent/30 p-6 sticky top-40 shadow-card">
               <h3 className={cn(
                 "text-accent text-xs font-medium tracking-widest uppercase mb-6",
                 isRTL && "text-right"

@@ -37,7 +37,7 @@ const WhyAsas = () => {
           <p className="text-eyebrow text-accent mb-4">
             {t("whyAsas.subtitle")}
           </p>
-          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
+          <h2 className="heading-section text-3xl md:text-4xl text-accent mb-6">
             {t("whyAsas.title")}
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
@@ -49,11 +49,11 @@ const WhyAsas = () => {
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {values.map((value, index) => (
             <StaggerItem key={index}>
-              <div className="group text-center p-8 border border-border hover:border-accent/30 transition-all duration-300 h-full">
+              <div className="group text-center p-8 bg-white border border-accent/30 hover:border-accent transition-all duration-300 h-full shadow-card">
                 <div className="inline-flex items-center justify-center w-14 h-14 border border-accent/30 rounded-lg mb-6 group-hover:border-accent transition-colors duration-300">
                   <value.icon className="h-6 w-6 text-accent" strokeWidth={1} />
                 </div>
-                <h3 className="heading-section text-xl text-foreground mb-3">
+                <h3 className="heading-section text-xl text-accent mb-3">
                   {t(value.titleKey)}
                 </h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
@@ -66,7 +66,7 @@ const WhyAsas = () => {
 
         {/* Mission Statement */}
         <ScrollReveal delay={0.3} className="mt-20 max-w-4xl mx-auto text-center">
-          <div className="border border-accent/30 p-10 md:p-14">
+          <div className="border border-accent/30 p-10 md:p-14 bg-white shadow-card">
             <blockquote className="font-serif text-xl md:text-2xl text-foreground leading-relaxed italic">
               "{t("whyAsas.mission")}"
             </blockquote>

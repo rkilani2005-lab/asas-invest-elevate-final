@@ -45,21 +45,19 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           <img
             src={heroImage}
             alt={name}
-            className="w-full h-full object-cover grayscale-[15%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+            className="w-full h-full object-cover brightness-105 saturate-105 group-hover:scale-105 transition-all duration-500"
           />
-          {/* Dark overlay for contrast */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
           {/* Badges */}
           <div className={cn(
             "absolute top-4 flex gap-2",
             isRTL ? "right-4" : "left-4"
           )}>
-            <Badge variant="secondary" className="bg-background/90 text-foreground text-xs border border-border">
+            <Badge variant="secondary" className="bg-white/95 text-foreground text-xs border border-accent/30 shadow-sm">
               {typeLabel}
             </Badge>
             <Badge 
               variant="outline" 
-              className={cn("text-xs", statusColors[property.status])}
+              className={cn("text-xs bg-white/95 shadow-sm", statusColors[property.status])}
             >
               {t(`property.status.${property.status}`)}
             </Badge>
@@ -75,8 +73,8 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             </p>
           )}
 
-          {/* Title */}
-          <h3 className="heading-section text-lg text-foreground mb-3 group-hover:text-accent transition-colors line-clamp-2">
+          {/* Title - Gold heading */}
+          <h3 className="heading-section text-lg text-accent mb-3 group-hover:text-gold-dark transition-colors line-clamp-2">
             {name}
           </h3>
 

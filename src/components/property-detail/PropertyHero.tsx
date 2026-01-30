@@ -48,11 +48,11 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
           <img
             src={images[currentIndex].url}
             alt={property.name_en}
-            className="w-full h-full object-cover grayscale-[10%]"
+            className="w-full h-full object-cover brightness-105 saturate-110"
           />
-          {/* 40% black overlay */}
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+          {/* Warm bright overlay for gold text legibility */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-background/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-transparent" />
         </motion.div>
       </AnimatePresence>
 

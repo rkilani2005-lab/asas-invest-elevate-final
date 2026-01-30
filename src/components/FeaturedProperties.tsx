@@ -61,7 +61,7 @@ const FeaturedProperties = () => {
           <p className="text-eyebrow text-accent mb-4">
             {t("featuredProperties.subtitle")}
           </p>
-          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
+          <h2 className="heading-section text-3xl md:text-4xl text-accent mb-6">
             {t("featuredProperties.title")}
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
@@ -72,16 +72,16 @@ const FeaturedProperties = () => {
         {/* Property Tabs */}
         <Tabs defaultValue="off-plan" className="w-full">
           <div className="flex justify-center mb-10">
-            <TabsList className="bg-transparent border border-border p-1 rounded-none">
+          <TabsList className="bg-transparent border border-accent/30 p-1 rounded-none">
               <TabsTrigger 
                 value="off-plan" 
-                className="nav-link px-8 py-3 rounded-none data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:border-accent border border-transparent transition-all duration-300"
+                className="nav-link px-8 py-3 rounded-none data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:border-accent border border-transparent transition-all duration-300"
               >
                 {t("featuredProperties.offPlan")}
               </TabsTrigger>
               <TabsTrigger 
                 value="ready" 
-                className="nav-link px-8 py-3 rounded-none data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:border-accent border border-transparent transition-all duration-300"
+                className="nav-link px-8 py-3 rounded-none data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:border-accent border border-transparent transition-all duration-300"
               >
                 {t("featuredProperties.ready")}
               </TabsTrigger>
