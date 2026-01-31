@@ -70,12 +70,12 @@ export default {
         'none': 'none',
       },
       fontFamily: {
-        // English Fonts - Quiet Luxury
-        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        serif: ['"Instrument Serif"', 'Georgia', 'serif'],
-        display: ['"Tenor Sans"', 'system-ui', 'sans-serif'],
+        // English Fonts - Modernist Landmark
+        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+        heading: ['"Satoshi"', 'system-ui', 'sans-serif'],
+        display: ['"Satoshi"', 'system-ui', 'sans-serif'],
         // Arabic Fonts
-        'arabic-heading': ['"Kufam"', 'system-ui', 'sans-serif'],
+        'arabic-heading': ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
         'arabic-body': ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {

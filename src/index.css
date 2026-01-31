@@ -1,23 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Kufam:wght@400;500;700&family=Tenor+Sans&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Asas Invest Real Estate - Bespoke Luxury Design System
-   =====================================================
+/* Asas Invest Real Estate - Modernist Landmark Design System
+   ==========================================================
    Typography:
-   - Primary Heading: Instrument Serif (signature italic look, -0.04em tracking)
-   - Secondary/Nav: Tenor Sans (All-caps, wide tracking)
-   - Body: Plus Jakarta Sans (1.7 line-height, spacious feel)
-   - Arabic Headings: Kufam
-   - Arabic Body: IBM Plex Sans Arabic
+   - Primary Heading: Satoshi (Bold/Black, tight tracking)
+   - Secondary/Nav: Satoshi (Medium/Regular, title case)
+   - Body: Inter (Regular, 1.7 line-height, spacious feel)
+   - Arabic: IBM Plex Sans Arabic (all weights)
    
    Colors:
-   - Obsidian (#0D0D0D) - Global background
-   - Off-Black (#121212) - Secondary sections
+   - Textured Off-White (#FAFAFA) - Global background
    - Aureolin Gold (#C5A059) - Primary accent
-   - Charcoal borders (#222222)
+   - Deep Charcoal (#333333) - Body text
 */
 
 @layer base {
@@ -84,7 +83,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: "cv11", "ss01";
     line-height: 1.7; /* Spacious brochure feel */
   }
@@ -94,22 +93,22 @@
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   }
 
-  /* Heading Typography - Instrument Serif with tighter tracking */
+  /* Heading Typography - Satoshi Bold with tight tracking */
   h1, h2 {
-    font-family: 'Instrument Serif', Georgia, serif;
-    letter-spacing: -0.04em;
-    font-weight: 400;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    font-weight: 700;
     line-height: 1.1;
   }
 
   h1 {
-    font-style: italic; /* Signature italic look for hero headings */
+    font-weight: 900; /* Black weight for hero headings */
   }
 
   h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Satoshi', system-ui, sans-serif;
     font-weight: 500;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
   }
 
   /* RTL Heading Font Swap */
@@ -119,66 +118,67 @@
   [dir="rtl"] h4,
   [dir="rtl"] h5,
   [dir="rtl"] h6 {
-    font-family: 'Kufam', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
     font-style: normal;
     letter-spacing: 0;
   }
 }
 
 @layer components {
-  /* Navigation & Labels - Tenor Sans, All Caps, Wide Tracking */
+  /* Navigation & Labels - Satoshi Medium, Title Case */
   .nav-link,
   .label-luxury {
-    font-family: 'Tenor Sans', system-ui, sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.6875rem;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0;
+    font-size: 0.875rem;
   }
 
   [dir="rtl"] .nav-link,
   [dir="rtl"] .label-luxury {
-    font-family: 'Kufam', system-ui, sans-serif;
-    text-transform: none;
-    letter-spacing: 0.02em;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0;
   }
 
   /* Hero Heading Style */
   .heading-hero {
-    font-family: 'Instrument Serif', Georgia, serif;
-    font-style: italic;
-    letter-spacing: -0.04em;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.02em;
     line-height: 1.05;
   }
 
   [dir="rtl"] .heading-hero {
-    font-family: 'Kufam', system-ui, sans-serif;
-    font-style: normal;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-weight: 700;
     letter-spacing: 0;
   }
 
   /* Section Heading Style */
   .heading-section {
-    font-family: 'Instrument Serif', Georgia, serif;
-    letter-spacing: -0.03em;
-    font-weight: 400;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    font-weight: 700;
   }
 
   [dir="rtl"] .heading-section {
-    font-family: 'Kufam', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-weight: 700;
     letter-spacing: 0;
   }
 
   /* Eyebrow/Label Text */
   .text-eyebrow {
-    font-family: 'Tenor Sans', system-ui, sans-serif;
+    font-family: 'Satoshi', system-ui, sans-serif;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-size: 0.625rem;
-    font-weight: 400;
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    font-weight: 500;
   }
 
   [dir="rtl"] .text-eyebrow {
-    font-family: 'Kufam', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
     text-transform: none;
     letter-spacing: 0.02em;
   }
@@ -187,10 +187,10 @@
   .btn-luxury {
     @apply relative bg-transparent text-accent border border-accent 
            px-8 py-3 transition-all duration-300 overflow-hidden;
-    font-family: 'Tenor Sans', system-ui, sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    font-size: 0.6875rem;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    font-size: 0.875rem;
   }
 
   .btn-luxury::before {
@@ -208,9 +208,9 @@
   }
 
   [dir="rtl"] .btn-luxury {
-    font-family: 'Kufam', system-ui, sans-serif;
-    text-transform: none;
-    letter-spacing: 0.02em;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0;
   }
 
   /* Luxury Card - White with gold border and soft shadow */
@@ -299,23 +299,23 @@
 
   /* Font utilities */
   .font-heading {
-    font-family: 'Instrument Serif', Georgia, serif;
+    font-family: 'Satoshi', system-ui, sans-serif;
   }
 
   .font-nav {
-    font-family: 'Tenor Sans', system-ui, sans-serif;
+    font-family: 'Satoshi', system-ui, sans-serif;
   }
 
   .font-body {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   [dir="rtl"] .font-heading {
-    font-family: 'Kufam', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   }
 
   [dir="rtl"] .font-nav {
-    font-family: 'Kufam', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   }
 
   [dir="rtl"] .font-body {
