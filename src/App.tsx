@@ -23,6 +23,10 @@ import AdminProperties from "./pages/admin/AdminProperties";
 import AdminInquiries from "./pages/admin/AdminInquiries";
 import AdminTranslations from "./pages/admin/AdminTranslations";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminInsights from "./pages/admin/AdminInsights";
+import InsightEditorPage from "./pages/admin/InsightEditorPage";
+import AdminHomeContent from "./pages/admin/AdminHomeContent";
+import PropertyWizardPage from "./pages/admin/PropertyWizardPage";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +50,13 @@ const App = () => (
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
                 <Route path="/admin/properties" element={<AdminLayout><AdminProperties /></AdminLayout>} />
+                <Route path="/admin/properties/new" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
+                <Route path="/admin/properties/:id/edit" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
                 <Route path="/admin/inquiries" element={<AdminLayout><AdminInquiries /></AdminLayout>} />
+                <Route path="/admin/insights" element={<AdminLayout><AdminInsights /></AdminLayout>} />
+                <Route path="/admin/insights/new" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
+                <Route path="/admin/insights/:id/edit" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
+                <Route path="/admin/home-content" element={<AdminLayout><AdminHomeContent /></AdminLayout>} />
                 <Route path="/admin/translations" element={<AdminLayout><AdminTranslations /></AdminLayout>} />
                 <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
                 
