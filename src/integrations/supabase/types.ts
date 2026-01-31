@@ -52,6 +52,36 @@ export type Database = {
           },
         ]
       }
+      amenity_library: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          icon: string
+          id: string
+          is_active: boolean | null
+          name_ar: string | null
+          name_en: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          icon: string
+          id?: string
+          is_active?: boolean | null
+          name_ar?: string | null
+          name_en: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean | null
+          name_ar?: string | null
+          name_en?: string
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
           created_at: string | null
@@ -102,10 +132,86 @@ export type Database = {
           },
         ]
       }
+      insights: {
+        Row: {
+          author_ar: string | null
+          author_en: string | null
+          category: string
+          content_ar: string | null
+          content_en: string | null
+          created_at: string | null
+          excerpt_ar: string | null
+          excerpt_en: string | null
+          featured_image: string | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          meta_description_ar: string | null
+          meta_description_en: string | null
+          meta_title_ar: string | null
+          meta_title_en: string | null
+          published_at: string | null
+          read_time_minutes: number | null
+          slug: string
+          title_ar: string | null
+          title_en: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_ar?: string | null
+          author_en?: string | null
+          category?: string
+          content_ar?: string | null
+          content_en?: string | null
+          created_at?: string | null
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
+          featured_image?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          meta_description_ar?: string | null
+          meta_description_en?: string | null
+          meta_title_ar?: string | null
+          meta_title_en?: string | null
+          published_at?: string | null
+          read_time_minutes?: number | null
+          slug: string
+          title_ar?: string | null
+          title_en: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_ar?: string | null
+          author_en?: string | null
+          category?: string
+          content_ar?: string | null
+          content_en?: string | null
+          created_at?: string | null
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
+          featured_image?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          meta_description_ar?: string | null
+          meta_description_en?: string | null
+          meta_title_ar?: string | null
+          meta_title_en?: string | null
+          published_at?: string | null
+          read_time_minutes?: number | null
+          slug?: string
+          title_ar?: string | null
+          title_en?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       media: {
         Row: {
           caption_ar: string | null
           caption_en: string | null
+          category: string | null
           created_at: string | null
           id: string
           order_index: number | null
@@ -116,6 +222,7 @@ export type Database = {
         Insert: {
           caption_ar?: string | null
           caption_en?: string | null
+          category?: string | null
           created_at?: string | null
           id?: string
           order_index?: number | null
@@ -126,6 +233,7 @@ export type Database = {
         Update: {
           caption_ar?: string | null
           caption_en?: string | null
+          category?: string | null
           created_at?: string | null
           id?: string
           order_index?: number | null
@@ -225,6 +333,7 @@ export type Database = {
           location_ar: string | null
           location_coords: unknown
           location_en: string | null
+          map_embed_code: string | null
           name_ar: string | null
           name_en: string
           nearby_ar: Json | null
@@ -261,6 +370,7 @@ export type Database = {
           location_ar?: string | null
           location_coords?: unknown
           location_en?: string | null
+          map_embed_code?: string | null
           name_ar?: string | null
           name_en: string
           nearby_ar?: Json | null
@@ -297,6 +407,7 @@ export type Database = {
           location_ar?: string | null
           location_coords?: unknown
           location_en?: string | null
+          map_embed_code?: string | null
           name_ar?: string | null
           name_en?: string
           nearby_ar?: Json | null
