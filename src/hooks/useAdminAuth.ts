@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -15,71 +15,76 @@ export function useAdminAuth() {
     isLoading: true,
   });
 
+  const checkAdminRole = useCallback(async (user: User | null) => {
+    if (!user) {
+      setState({
+        user: null,
+        isAdmin: false,
+        isLoading: false,
+      });
+      return;
+    }
+
+    try {
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      setState({
+        user,
+        isAdmin: !!roleData,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error("Error checking admin role:", error);
+      setState({
+        user,
+        isAdmin: false,
+        isLoading: false,
+      });
+    }
+  }, []);
+
   useEffect(() => {
-    // Set up auth state listener BEFORE getting session
+    // Get initial session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      checkAdminRole(session?.user ?? null);
+    });
+
+    // Then set up listener for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        const user = session?.user ?? null;
-        
-        if (user) {
-          // Check if user has admin role
-          const { data: roleData } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", user.id)
-            .eq("role", "admin")
-            .maybeSingle();
-          
-          setState({
-            user,
-            isAdmin: !!roleData,
-            isLoading: false,
-          });
-        } else {
-          setState({
-            user: null,
-            isAdmin: false,
-            isLoading: false,
-          });
+        // Only handle actual state changes, not initial session
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          checkAdminRole(session?.user ?? null);
         }
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const user = session?.user ?? null;
-      
-      if (user) {
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .maybeSingle();
-        
-        setState({
-          user,
-          isAdmin: !!roleData,
-          isLoading: false,
-        });
-      } else {
-        setState({
-          user: null,
-          isAdmin: false,
-          isLoading: false,
-        });
-      }
-    });
-
     return () => subscription.unsubscribe();
-  }, []);
+  }, [checkAdminRole]);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    setState(prev => ({ ...prev, isLoading: true }));
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    return { error };
+    
+    if (error) {
+      setState(prev => ({ ...prev, isLoading: false }));
+      return { error };
+    }
+
+    // Manually check admin role after sign in
+    if (data.user) {
+      await checkAdminRole(data.user);
+    }
+    
+    return { error: null };
   };
 
   const signOut = async () => {
