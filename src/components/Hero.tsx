@@ -49,7 +49,7 @@ const Hero = () => {
           "relative z-10 container mx-auto px-4 lg:px-8 text-center",
           isRTL && "font-arabic"
         )}
-        style={{ y: textY, opacity }}
+        style={{ y: textY }}
       >
         <motion.p 
           initial={{ opacity: 0, y: 20 }}
