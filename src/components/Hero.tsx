@@ -4,9 +4,48 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+interface HeroContent {
+  subtitle?: string;
+  headline?: string;
+  headlineHighlight?: string;
+  tagline?: string;
+  video_url?: string;
+  exploreProperties?: string;
+  contactUs?: string;
+}
 
 const Hero = () => {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
+
+  // Fetch hero content from database
+  const { data: heroContent } = useQuery({
+    queryKey: ['pages_content', 'home', 'hero', language],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('pages_content')
+        .select('content_en, content_ar')
+        .eq('page_slug', 'home')
+        .eq('section_key', 'hero')
+        .maybeSingle();
+      
+      if (error || !data) return null;
+      return (language === 'ar' ? data.content_ar : data.content_en) as HeroContent;
+    },
+  });
+
+  // Use database content with i18n fallback
+  const content = {
+    subtitle: heroContent?.subtitle || t("hero.subtitle"),
+    headline: heroContent?.headline || t("hero.headline"),
+    headlineHighlight: heroContent?.headlineHighlight || t("hero.headlineHighlight"),
+    tagline: heroContent?.tagline || t("hero.tagline"),
+    video_url: heroContent?.video_url || "/videos/hero-dubai.mp4",
+    exploreProperties: heroContent?.exploreProperties || t("hero.exploreProperties"),
+    contactUs: heroContent?.contactUs || t("hero.contactUs"),
+  };
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -32,7 +71,7 @@ const Hero = () => {
           poster="/images/dubai-skyline.jpg"
           className="w-full h-[120%] object-cover brightness-105 saturate-110"
         >
-          <source src="/videos/hero-dubai.mp4" type="video/mp4" />
+          <source src={content.video_url} type="video/mp4" />
         </video>
         {/* Classic Header: Deep Charcoal top-down linear gradient overlay */}
         <div 
@@ -61,7 +100,7 @@ const Hero = () => {
             textShadow: '0px 4px 12px rgba(0, 0, 0, 0.6)'
           }}
         >
-          {t("hero.subtitle")}
+          {content.subtitle}
         </motion.p>
         <motion.h1 
           initial={{ opacity: 0, y: 30 }}
@@ -73,8 +112,8 @@ const Hero = () => {
             textShadow: '0px 4px 12px rgba(0, 0, 0, 0.6)'
           }}
         >
-          {t("hero.headline")} <br className="hidden md:block" />
-          <span style={{ color: '#C5A059' }}>{t("hero.headlineHighlight")}</span>
+          {content.headline} <br className="hidden md:block" />
+          <span style={{ color: '#C5A059' }}>{content.headlineHighlight}</span>
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 30 }}
@@ -85,7 +124,7 @@ const Hero = () => {
             textShadow: '0px 2px 8px rgba(0, 0, 0, 0.5)'
           }}
         >
-          {t("hero.tagline")}
+          {content.tagline}
         </motion.p>
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
@@ -103,7 +142,7 @@ const Hero = () => {
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.4)'
             }}
           >
-            {t("hero.exploreProperties")}
+            {content.exploreProperties}
             <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} strokeWidth={1} />
           </Button>
           <Button 
@@ -111,7 +150,7 @@ const Hero = () => {
             variant="outline" 
             className="border border-white/50 text-white hover:bg-white/10 hover:text-white transition-all duration-300 px-10 py-6"
           >
-            {t("hero.contactUs")}
+            {content.contactUs}
           </Button>
         </motion.div>
       </motion.div>
