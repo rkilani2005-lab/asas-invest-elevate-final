@@ -1,573 +1,313 @@
 
-# Asas Invest - Architectural Grade Real Estate Platform
 
-## Executive Summary
-
-A premium bilingual (English/Arabic RTL) digital brochure platform for UAE/Kuwait real estate, featuring Off-Plan and Ready property categories, developer-grade marketing asset pages, and a complete Admin CMS.
+# Complete CMS Implementation Plan
+## Advanced Property Management + Global Content Management
 
 ---
 
-## Phase 1: Foundation & Infrastructure
+## Part A: Advanced Property Management CMS (Original Plan)
 
-### 1.1 Enable Lovable Cloud (Supabase)
+### A1. Database Schema Updates
 
-First step is to enable the backend which will provision:
-- PostgreSQL database
-- Authentication system
-- File storage buckets
-- Edge Functions capability
-
-### 1.2 Database Schema
-
-```text
-CORE TABLES
------------
-
-properties                    translations
-├── id (uuid, PK)            ├── key (text, PK)
-├── slug (text, unique)      ├── en_text (text)
-├── type (enum: off-plan/    ├── ar_text (text)
-│   ready)                   └── category (enum: ui/
-├── name_en / name_ar            content/property)
-├── tagline_en / tagline_ar
-├── overview_en / overview_ar   media
-├── highlights_en/ar (jsonb)   ├── id (uuid, PK)
-├── location_en / location_ar  ├── property_id (fk)
-├── location_coords (point)    ├── type (enum: render/
-├── developer_en / developer_ar│   floorplan/material/
-├── price_range (text)         │   video/interior/hero)
-├── unit_types (text[])        ├── url (text)
-├── size_range (text)          ├── caption_en/ar
-├── handover_date (date)       └── order_index (int)
-├── status (enum: available/
-│   reserved/sold)            payment_milestones
-├── ownership_type (text)     ├── id (uuid, PK)
-├── parking (text)            ├── property_id (fk)
-├── nearby_en/ar (jsonb)      ├── percentage (int)
-├── investment_en/ar (text)   ├── milestone_en/ar
-├── enduser_text_en/ar        └── sort_order (int)
-├── video_url (text)
-├── is_featured (bool)        amenities
-├── sort_order (int)          ├── id (uuid, PK)
-└── created_at                ├── property_id (fk)
-                              ├── name_en / name_ar
-inquiries                     ├── icon (text)
-├── id (uuid, PK)             └── category (text)
-├── property_id (fk)
-├── name, email, phone        pages_content
-├── message (text)            ├── id (uuid, PK)
-├── interests (text[])        ├── page_slug (text)
-│   (floorplan/brochure/etc)  ├── section_key (text)
-├── inquiry_type (text)       ├── content_en/ar (jsonb)
-├── status (enum: new/        └── updated_at
-│   contacted/closed)
-└── created_at                site_settings
-                              ├── key (text, PK)
-user_roles                    ├── value (jsonb)
-├── id (uuid, PK)             └── updated_at
-├── user_id (fk -> auth.users)
-└── role (enum: admin/user)   seo_meta
-                              ├── id (uuid, PK)
-                              ├── page_type (text)
-                              ├── reference_id (uuid)
-                              ├── title_en/ar
-                              ├── description_en/ar
-                              └── og_image (text)
+**A1.1 Add Category to Media Table**
+```sql
+ALTER TABLE public.media ADD COLUMN category text DEFAULT 'general';
 ```
 
-### 1.3 Storage Buckets
+**A1.2 Add Map Embed Support**
+```sql
+ALTER TABLE public.properties ADD COLUMN map_embed_code text;
+```
 
-- `property-media` - Renders, floor plans, material boards, brochures
-- `site-assets` - Hero images, general site assets
+**A1.3 Predefined Amenities Library**
+```sql
+CREATE TABLE public.amenity_library (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name_en text NOT NULL,
+  name_ar text,
+  icon text NOT NULL,
+  category text DEFAULT 'General',
+  is_active boolean DEFAULT true
+);
+-- Insert standard Dubai amenities (Pool, Gym, Security, etc.)
+-- RLS policies for admin management
+```
 
-### 1.4 Row-Level Security
+### A2. Multi-Step Property Wizard
 
-- Admin-only write access to all content tables
-- Public read access for published properties
-- Secure `has_role()` function to prevent RLS recursion
+```text
+src/components/admin/property-wizard/
++-- PropertyWizard.tsx          (Main container)
++-- WizardStepper.tsx           (Visual progress)
++-- steps/
+|   +-- GeneralInfoStep.tsx     (Name, Location, Price)
+|   +-- MediaStep.tsx           (Images & Video)
+|   +-- DetailsStep.tsx         (Amenities, Landmarks)
+|   +-- FinancialsStep.tsx      (Payment Plan, Status)
++-- components/
+    +-- MediaUploader.tsx       (Drag-drop + categories)
+    +-- VideoUploader.tsx       (Native .mp4 upload)
+    +-- AmenitiesSelector.tsx   (Checklist + custom)
+    +-- LandmarksBuilder.tsx    (Nearby places)
+    +-- PaymentPlanBuilder.tsx  (Milestone reordering)
+```
+
+**Step Details:**
+- **Step 1 - General Info**: Bilingual name/tagline, slug, developer, location, price/size ranges, unit types, ownership, handover date
+- **Step 2 - Media**: Categorized image uploads (Exterior, Interior, Material Board, Amenities, Floor Plans), native video upload to `property-media` bucket
+- **Step 3 - Details**: Amenities checklist from library + custom, nearby landmarks builder, rich text overview (EN/AR side-by-side)
+- **Step 4 - Financials**: Payment milestone builder with drag-to-reorder, status toggle (Available/Reserved/Sold), featured toggle
 
 ---
 
-## Phase 2: Bilingual System (i18n + RTL)
+## Part B: Global Content Management System (New Addition)
 
-### 2.1 Technology
+### B1. Database Schema - New Tables
 
-- `react-i18next` for translation management
-- Language context with `useLanguage` hook
-- RTL/LTR switching via `dir` attribute
+**B1.1 Insights/Blog Table**
+```sql
+CREATE TABLE public.insights (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug text UNIQUE NOT NULL,
+  title_en text NOT NULL,
+  title_ar text,
+  excerpt_en text,
+  excerpt_ar text,
+  content_en text,          -- Rich text/HTML
+  content_ar text,
+  category text NOT NULL,   -- 'market_news', 'project_updates', 'lifestyle', 'investment_guide'
+  featured_image text,      -- URL from storage
+  author_en text,
+  author_ar text,
+  read_time_minutes integer DEFAULT 5,
+  is_featured boolean DEFAULT false,
+  is_published boolean DEFAULT false,
+  published_at timestamp with time zone,
+  meta_title_en text,
+  meta_title_ar text,
+  meta_description_en text,
+  meta_description_ar text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now()
+);
 
-### 2.2 Font Strategy
-
-| Language | Font Family | Weights |
-|----------|-------------|---------|
-| English | Inter | 400, 500, 600 |
-| Arabic | IBM Plex Sans Arabic | 400, 500, 600 |
-| Headings (both) | Playfair Display | 500, 600 |
-
-### 2.3 URL Structure
-
-```text
-/                    -> Redirect to /en
-/en                  -> Home (English)
-/ar                  -> Home (Arabic RTL)
-/en/off-plan         -> Off-Plan Listings
-/ar/off-plan         -> Off-Plan (Arabic)
-/en/ready            -> Ready Listings
-/ar/ready            -> Ready (Arabic)
-/en/property/:slug   -> Property Detail
-/ar/property/:slug   -> Property Detail (Arabic)
-/en/about            -> About Page
-/ar/about            -> About (Arabic)
-/en/contact          -> Contact Page
-/ar/contact          -> Contact (Arabic)
-/admin               -> Protected Admin Dashboard
+-- RLS policies for public read, admin write
+ALTER TABLE public.insights ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can view published insights" ON public.insights FOR SELECT USING (is_published = true);
+CREATE POLICY "Admins can manage insights" ON public.insights FOR ALL USING (has_role(auth.uid(), 'admin'));
 ```
 
-### 2.4 Translation Architecture
+**B1.2 Extend pages_content Table (Already Exists)**
+The existing `pages_content` table with `page_slug`, `section_key`, `content_en`, `content_ar` will be populated with:
 
-All UI strings stored in `translations` table, loaded at app init:
+| page_slug | section_key | content_en (JSONB) | content_ar (JSONB) |
+|-----------|-------------|--------------------|--------------------|
+| home | hero | `{subtitle, headline, highlight, tagline, video_url}` | Arabic equivalents |
+| home | featured_properties | `{subtitle, title, description}` | Arabic equivalents |
+| home | why_asas | `{subtitle, title, description, mission, mission_author}` | Arabic equivalents |
+| home | why_asas_values | `[{icon, title, description}, ...]` | Arabic array |
+| home | stats | `[{value, label}, ...]` | Arabic array |
+| insights | hero | `{eyebrow, title, description}` | Arabic equivalents |
+| insights | newsletter | `{title, description, disclaimer}` | Arabic equivalents |
+
+**B1.3 Extend site_settings Table (Already Exists)**
+Already has contact/social/seo keys. Will be used as-is.
+
+### B2. Admin Module Architecture
 
 ```text
-key                    | en_text        | ar_text
------------------------|----------------|----------------
-nav.home               | Home           | الرئيسية
-nav.off_plan           | Off-Plan       | قيد الإنشاء
-btn.register_interest  | Register Interest | سجل اهتمامك
-btn.request_viewing    | Request Viewing | طلب معاينة
+src/pages/admin/
++-- AdminDashboard.tsx         (Enhanced with recent insights)
++-- AdminProperties.tsx        (Links to wizard)
++-- AdminInquiries.tsx         (Existing)
++-- AdminTranslations.tsx      (Existing)
++-- AdminSettings.tsx          (Contact, Social, SEO)
++-- AdminInsights.tsx          (NEW - Blog management)
++-- AdminHomeContent.tsx       (NEW - Home page sections)
++-- PropertyWizardPage.tsx     (NEW - Multi-step wizard)
+
+src/components/admin/
++-- AdminSidebar.tsx           (Add new nav items)
++-- insights/
+|   +-- InsightsList.tsx       (Table with status badges)
+|   +-- InsightEditor.tsx      (Full article editor)
++-- home-content/
+|   +-- HeroEditor.tsx         (Video + headlines)
+|   +-- WhyAsasEditor.tsx      (Values cards manager)
+|   +-- StatsEditor.tsx        (Metrics editor)
 ```
+
+### B3. Home Page Manager Features
+
+**B3.1 Hero Content Editor**
+- Video file upload to `site-assets` bucket
+- Bilingual headline fields (EN/AR side-by-side)
+- Subtitle and tagline fields
+- Live preview thumbnail
+
+**B3.2 Why Asas Section Editor**
+- Dynamic list of value cards
+- Each card: Icon selector (from Lucide), Title (EN/AR), Description (EN/AR)
+- Add/Remove/Reorder cards
+- Mission statement editor with author field
+
+**B3.3 Stats Section Editor**
+- Dynamic metrics list
+- Each metric: Value (number), Label (EN/AR)
+- Add/Remove/Reorder
+
+### B4. Insights (Blog) Editor Features
+
+**B4.1 Article List View**
+- Table with columns: Title, Category, Status, Date, Actions
+- Status badges: Draft (gray), Published (green), Featured (gold)
+- Filters: Category, Status
+- Search by title
+
+**B4.2 Article Editor**
+- Bilingual title and excerpt (EN/AR side-by-side)
+- Rich text editor for content (Tiptap)
+- Featured image upload
+- Category selector (Market News, Project Updates, Lifestyle, Investment Guide)
+- SEO fields: Meta title, Meta description (bilingual)
+- Publish controls: Save Draft, Publish, Schedule
+
+### B5. Contact Settings (Extend Existing)
+
+The existing `AdminSettings.tsx` already handles:
+- Contact info (phone, email, WhatsApp, address EN/AR)
+- Social links (Instagram, LinkedIn, YouTube)
+- SEO settings
+
+**Enhancement needed:**
+- Add Google Maps embed code field
+- Add map preview
 
 ---
 
-## Phase 3: Public Website Pages
+## Part C: Implementation Details
 
-### 3.1 Home Page Structure
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ STICKY HEADER                                                │
-│ Logo | Off-Plan | Ready | About | Contact | [EN|AR] | CTA   │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ HERO SECTION (Full viewport, video background)              │
-│ ├── Buttery-smooth parallax on scroll                       │
-│ ├── Headline + Tagline (bilingual)                          │
-│ └── Two CTAs: "Explore Off-Plan" | "Browse Ready"           │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ CATEGORY BLOCKS (Side-by-side cards)                        │
-│ ┌─────────────────────┐  ┌─────────────────────┐            │
-│ │ OFF-PLAN            │  │ READY               │            │
-│ │ "The Vision"        │  │ "The Reality"       │            │
-│ │ Investment focus    │  │ Move-in ready       │            │
-│ │ Payment plans       │  │ Immediate ROI       │            │
-│ │ [Explore ->]        │  │ [Browse ->]         │            │
-│ └─────────────────────┘  └─────────────────────┘            │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ FEATURED PROJECTS SLIDER                                     │
-│ Horizontal carousel with property cards                      │
-│ Hero image | Name | Location | Price | Badge | CTA          │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ WHY ASAS (Trust Section - Advisory Tone)                    │
-│ Icon grid with value propositions                           │
-│ Market expertise | Personalized service | Transparency      │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ CONTACT CTA + FLOATING WHATSAPP BUTTON                      │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+### C1. New Routes
+```typescript
+// In App.tsx
+<Route path="/admin/insights" element={<AdminLayout><AdminInsights /></AdminLayout>} />
+<Route path="/admin/insights/new" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
+<Route path="/admin/insights/:id/edit" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
+<Route path="/admin/home-content" element={<AdminLayout><AdminHomeContent /></AdminLayout>} />
+<Route path="/admin/properties/new" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
+<Route path="/admin/properties/:id/edit" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
 ```
 
-### 3.2 Category Listing Pages (Off-Plan / Ready)
-
-**Property Card Design:**
-- Hero image with subtle hover lift
-- Property name + location
-- Price range
-- Unit type badges
-- Status badge (Handover Q4 2026 / Available Now)
-- CTA button
-
-**Filter Panel:**
-- Location dropdown (Dubai areas)
-- Budget range slider
-- Unit type checkboxes
-- Developer filter (Off-Plan only)
-- Clear all filters
-
-### 3.3 Property Detail Page - "Marketing Pack" UX
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ STICKY CONVERSION BAR (appears on scroll)                   │
-│ Property Name | Price | [Request VIP Pack] button           │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ HERO SECTION                                                 │
-│ ├── Full-width video/render with parallax                   │
-│ ├── Badges: Off-Plan | Available                            │
-│ ├── Property name, developer, location                      │
-│ ├── Price range prominently displayed                       │
-│ └── Primary CTA: "Register Interest" / "Request Viewing"    │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ QUICK FACTS GRID (Fact Sheet Visualized)                    │
-│ ┌─────────┬─────────┬─────────┬─────────┬─────────┐        │
-│ │Developer│Unit Types│Size Range│Handover │Ownership│        │
-│ │Emaar    │1-4 BR   │800-3200 │Q4 2026  │Freehold │        │
-│ └─────────┴─────────┴─────────┴─────────┴─────────┘        │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ STICKY IN-PAGE TABS (scroll-aware highlighting)             │
-│ Overview | Location | Amenities | Gallery | Floor Plans |   │
-│ Payment Plan* | Video | Investment | Inquire                │
-│ (* Off-Plan only)                                           │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ SECTION: OVERVIEW (Storytelling Layout)                     │
-│ ├── Brochure-style narrative description                    │
-│ └── Highlights list with icons                              │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ SECTION: LOCATION                                           │
-│ ├── Google Maps embed (interactive)                         │
-│ └── Nearby landmarks grid with distances                    │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ SECTION: AMENITIES                                          │
-│ Icon grid organized by category:                            │
-│ Recreation | Wellness | Convenience | Security              │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ SECTION: GALLERY (Marketing Asset Hub)                      │
-│ Internal tabs: Renders | Interiors | Material Board         │
-│ ┌─────────────────────────────────────────────────────┐    │
-│ │ MATERIAL BOARD COMPONENT                             │    │
-│ │ Grid of texture swatches (marble, oak, brass)       │    │
-│ │ Click to expand with full description               │    │
-│ └─────────────────────────────────────────────────────┘    │
-│ Lightbox/zoom on click for all images                       │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ SECTION: FLOOR PLANS (Interactive)                          │
-│ Tabs: Floor Plans | Floor Plates                            │
-│ Filter by unit type: 1BR | 2BR | 3BR | Penthouse           │
-│ High-res PDF viewer with zoom capability                    │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ SECTION: PAYMENT PLAN (Off-Plan only)                       │
-│ Step-Progress Timeline (NOT a table):                       │
-│                                                              │
-│ ●────────●────────●────────●────────●                      │
-│ 20%      10%      10%      30%      30%                    │
-│ Down     Const.   Const.   Const.   Handover               │
-│ Payment  Mile 1   Mile 2   Mile 3                          │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ SECTION: VIDEO                                              │
-│ Embedded video player (YouTube/Vimeo or direct)             │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ SECTION: INVESTMENT (Split View)                            │
-│ ┌─────────────────────┐  ┌─────────────────────┐            │
-│ │ FOR INVESTORS       │  │ FOR END-USERS       │            │
-│ │ ROI projections     │  │ Lifestyle benefits  │            │
-│ │ Rental yields       │  │ Community features  │            │
-│ │ Capital appreciation│  │ Move-in timeline    │            │
-│ └─────────────────────┘  └─────────────────────┘            │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ SECTION: INQUIRE                                            │
-│ ├── Contact form with Zod validation                        │
-│ ├── Checkbox interests: Floor Plan | Brochure | VIP Pack   │
-│ ├── WhatsApp CTA button                                     │
-│ └── Success toast on submission                             │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+### C2. Updated Admin Sidebar Navigation
+```typescript
+const navItems = [
+  { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/properties", icon: Building2, label: "Properties" },
+  { href: "/admin/inquiries", icon: Users, label: "Inquiries" },
+  { href: "/admin/insights", icon: Newspaper, label: "Insights" },        // NEW
+  { href: "/admin/home-content", icon: Home, label: "Home Page" },       // NEW
+  { href: "/admin/translations", icon: Languages, label: "Translations" },
+  { href: "/admin/settings", icon: Settings, label: "Settings" },
+];
 ```
 
-### 3.4 About & Contact Pages
+### C3. Frontend Integration
 
-- CMS-editable content sections
-- Team showcase
-- Company values
-- Contact form with inquiry storage
+**C3.1 Home Page - Fetch from Database**
+Modify `Hero.tsx`, `WhyAsas.tsx`, `Stats.tsx`, `Contact.tsx` to:
+1. Query `pages_content` table for section data
+2. Use fetched content instead of i18n translations
+3. Fallback to i18n if database content not found
+
+**C3.2 Insights Page - Dynamic Content**
+Modify `src/pages/Insights.tsx` to:
+1. Query `insights` table for published articles
+2. Support category filtering from database
+3. Display featured article from database
+4. Link to individual insight pages (new route needed)
+
+**C3.3 Contact Component - Dynamic Settings**
+Modify `Contact.tsx` to:
+1. Query `site_settings` for contact info
+2. Display real phone/email/address from database
+
+### C4. File Changes Summary
+
+**New Files (17 total):**
+1. `src/pages/admin/AdminInsights.tsx`
+2. `src/pages/admin/InsightEditorPage.tsx`
+3. `src/pages/admin/AdminHomeContent.tsx`
+4. `src/pages/admin/PropertyWizardPage.tsx`
+5. `src/components/admin/insights/InsightsList.tsx`
+6. `src/components/admin/insights/InsightEditor.tsx`
+7. `src/components/admin/home-content/HeroEditor.tsx`
+8. `src/components/admin/home-content/WhyAsasEditor.tsx`
+9. `src/components/admin/home-content/StatsEditor.tsx`
+10. `src/components/admin/property-wizard/PropertyWizard.tsx`
+11. `src/components/admin/property-wizard/WizardStepper.tsx`
+12. `src/components/admin/property-wizard/steps/GeneralInfoStep.tsx`
+13. `src/components/admin/property-wizard/steps/MediaStep.tsx`
+14. `src/components/admin/property-wizard/steps/DetailsStep.tsx`
+15. `src/components/admin/property-wizard/steps/FinancialsStep.tsx`
+16. `src/components/admin/property-wizard/components/MediaUploader.tsx`
+17. `src/components/admin/property-wizard/components/PaymentPlanBuilder.tsx`
+
+**Modified Files (10 total):**
+1. `src/App.tsx` - Add new routes
+2. `src/components/admin/AdminSidebar.tsx` - Add nav items
+3. `src/pages/admin/AdminProperties.tsx` - Link to wizard
+4. `src/pages/admin/AdminSettings.tsx` - Add map embed field
+5. `src/components/Hero.tsx` - Fetch from database
+6. `src/components/WhyAsas.tsx` - Fetch from database
+7. `src/components/Stats.tsx` - Fetch from database
+8. `src/components/Contact.tsx` - Fetch settings
+9. `src/components/Footer.tsx` - Fetch settings
+10. `src/pages/Insights.tsx` - Fetch from insights table
+
+**Database Migrations (4 total):**
+1. Add `category` column to `media` table
+2. Add `map_embed_code` to `properties` table
+3. Create `amenity_library` table with seed data
+4. Create `insights` table with RLS policies
 
 ---
 
-## Phase 4: Admin CMS Dashboard
+## Part D: Technical Notes
 
-### 4.1 Authentication
+### D1. Rich Text Editor
+Will use **Tiptap** for:
+- Property overview (bilingual)
+- Insight article content (bilingual)
 
-- Supabase Auth with email/password
-- Role check via `has_role()` function
-- Protected `/admin` routes
+Features: Bold, italic, bullet points, numbered lists, headings, block quotes.
 
-### 4.2 Dashboard Structure
+### D2. Drag-and-Drop
+Will use **@dnd-kit/core** for:
+- Media image reordering
+- Payment milestone reordering
+- Why Asas value cards reordering
+- Stats metrics reordering
 
-```text
-/admin
-├── /dashboard          -> Stats overview, recent inquiries
-├── /properties         -> List, add, edit properties
-│   ├── /new            -> Multi-step wizard
-│   └── /:id/edit       -> Edit existing
-├── /media              -> Central media library
-├── /pages              -> Edit page content
-├── /translations       -> Global strings editor
-├── /settings           -> Site settings (WhatsApp, socials)
-├── /seo                -> Meta tags manager
-└── /inquiries          -> Lead CRM inbox
-```
+### D3. File Storage Strategy
+All uploads go to existing Supabase storage buckets:
+- `property-media`: Property images and videos
+- `site-assets`: Hero video, insight featured images, logos
 
-### 4.3 Property Multi-Step Wizard
-
-```text
-Step 1: General Info
-├── Name (EN/AR)
-├── Tagline (EN/AR)
-├── Type (Off-Plan / Ready)
-├── Developer
-├── Location + Coordinates
-├── Price Range
-├── Status
-
-Step 2: Details
-├── Overview (EN/AR) - Rich text editor
-├── Highlights (EN/AR)
-├── Unit Types
-├── Size Range
-├── Handover Date
-├── Ownership Type
-├── Parking
-
-Step 3: Media Uploads
-├── Hero Image/Video
-├── Renders (drag-and-drop ordering)
-├── Interior Photos
-├── Material Board Images
-├── Floor Plans (with unit type tags)
-├── Floor Plates
-├── Brochure PDF
-├── Video URL
-
-Step 4: Payment Plan (Off-Plan only)
-├── Add milestones
-├── Percentage + Description (EN/AR)
-├── Reorderable
-
-Step 5: Amenities
-├── Add amenities by category
-├── Icon selection
-├── Name (EN/AR)
-
-Step 6: Investment Content
-├── For Investors text (EN/AR)
-├── For End-Users text (EN/AR)
-├── Nearby landmarks (EN/AR)
-
-Step 7: SEO
-├── Meta title (EN/AR)
-├── Meta description (EN/AR)
-├── OG Image
-├── URL slug
-```
-
-### 4.4 Lead CRM (Inquiries)
-
-- Inbox view with filters (property, date, status)
-- Status management: New -> Contacted -> Closed
-- View checkbox interests per inquiry
-- Export to CSV functionality
-- Linked to specific property
-
-### 4.5 Global Translations Editor
-
-- Table view of all translation keys
-- Edit EN and AR text inline
-- Category filtering (UI, Content, Property)
-- Search functionality
-
----
-
-## Phase 5: Visual & Interaction Design
-
-### 5.1 "Quiet Luxury" Aesthetic
-
-| Element | Specification |
-|---------|---------------|
-| Background | Pure white (#FFFFFF) |
-| Borders | 1px solid #E5E5E5 |
-| Shadows | Subtle, 4-8px blur |
-| Spacing | Generous whitespace |
-| Typography | Clean, high contrast |
-| Accents | Muted champagne gold |
-
-### 5.2 Animations (Framer Motion)
-
-- Buttery-smooth parallax on hero images
-- Scroll-triggered reveals for sections
-- Subtle hover lifts on cards (4px)
-- Tab content transitions
-- Gallery lightbox animations
-- Form submission feedback
-
-### 5.3 Mobile-First Responsive
-
-- Stacked layouts on mobile
-- Collapsible filters
-- Touch-optimized gallery
-- Floating WhatsApp button
-- Sticky conversion bar
-
----
-
-## Phase 6: Technical Implementation
-
-### 6.1 New Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| react-i18next | Internationalization |
-| i18next-browser-languagedetector | Auto language detection |
-| react-intersection-observer | Sticky tabs awareness |
-| yet-another-react-lightbox | Image gallery lightbox |
-| @react-google-maps/api | Google Maps embed |
-| react-beautiful-dnd | Drag-and-drop in admin |
-
-### 6.2 File Structure
-
-```text
-src/
-├── components/
-│   ├── layout/
-│   │   ├── Header.tsx (bilingual nav)
-│   │   ├── Footer.tsx (bilingual)
-│   │   ├── LanguageSwitcher.tsx
-│   │   └── WhatsAppButton.tsx
-│   ├── property/
-│   │   ├── PropertyCard.tsx
-│   │   ├── PropertyHero.tsx
-│   │   ├── QuickFacts.tsx
-│   │   ├── StickyTabs.tsx
-│   │   ├── OverviewSection.tsx
-│   │   ├── LocationSection.tsx
-│   │   ├── AmenitiesSection.tsx
-│   │   ├── GallerySection.tsx
-│   │   ├── MaterialBoard.tsx
-│   │   ├── FloorPlansSection.tsx
-│   │   ├── PaymentTimeline.tsx
-│   │   ├── VideoSection.tsx
-│   │   ├── InvestmentSection.tsx
-│   │   └── InquiryForm.tsx
-│   ├── listing/
-│   │   ├── PropertyGrid.tsx
-│   │   └── FilterPanel.tsx
-│   ├── home/
-│   │   ├── HeroSection.tsx
-│   │   ├── CategoryBlocks.tsx
-│   │   ├── FeaturedSlider.tsx
-│   │   └── WhyAsas.tsx
-│   └── admin/
-│       ├── Sidebar.tsx
-│       ├── PropertyWizard/
-│       │   ├── Step1General.tsx
-│       │   ├── Step2Details.tsx
-│       │   ├── Step3Media.tsx
-│       │   ├── Step4Payment.tsx
-│       │   ├── Step5Amenities.tsx
-│       │   ├── Step6Investment.tsx
-│       │   └── Step7SEO.tsx
-│       ├── MediaLibrary.tsx
-│       ├── TranslationsEditor.tsx
-│       ├── InquiriesInbox.tsx
-│       └── PagesEditor.tsx
-├── contexts/
-│   └── LanguageContext.tsx
-├── hooks/
-│   ├── useProperties.ts
-│   ├── useTranslations.ts
-│   ├── useInquiries.ts
-│   └── useAdmin.ts
-├── i18n/
-│   ├── config.ts
-│   └── resources/ (fallback)
-├── pages/
-│   ├── Home.tsx
-│   ├── OffPlan.tsx
-│   ├── Ready.tsx
-│   ├── PropertyDetail.tsx
-│   ├── About.tsx
-│   ├── Contact.tsx
-│   └── admin/
-│       ├── Dashboard.tsx
-│       ├── Properties.tsx
-│       ├── PropertyEdit.tsx
-│       ├── Media.tsx
-│       ├── Pages.tsx
-│       ├── Translations.tsx
-│       ├── Settings.tsx
-│       ├── SEO.tsx
-│       └── Inquiries.tsx
-└── lib/
-    └── supabase.ts
-```
-
-### 6.3 Google Maps Integration
-
-You will need to provide a Google Maps API key. This can be added as a publishable key in the codebase since it's client-side and restricted by domain.
+### D4. Performance Note
+The user mentioned ISR (Incremental Static Regeneration). Since this is a React/Vite SPA (not Next.js), we will use:
+- React Query with caching for data fetching
+- Stale-while-revalidate pattern for content updates
+- Skeleton loaders during fetch
 
 ---
 
 ## Implementation Order
 
-| Step | Description | Estimated Complexity |
-|------|-------------|---------------------|
-| 1 | Enable Lovable Cloud + Create schema | Medium |
-| 2 | Bilingual system (i18n, RTL, fonts) | Medium |
-| 3 | Layout components (Header, Footer, Language Switcher) | Low |
-| 4 | Home page with all sections | Medium |
-| 5 | Category listing pages with filters | Medium |
-| 6 | Property detail page (all sections) | High |
-| 7 | About & Contact pages | Low |
-| 8 | Admin authentication + dashboard | Medium |
-| 9 | Property wizard (multi-step) | High |
-| 10 | Media library with drag-drop | Medium |
-| 11 | Translations editor | Medium |
-| 12 | Inquiries CRM | Medium |
-| 13 | SEO & final polish | Low |
+1. **Phase 1 - Database**: Run all migrations (media category, insights table, amenity_library)
+2. **Phase 2 - Admin Sidebar**: Update navigation with new menu items
+3. **Phase 3 - Insights Module**: InsightsList + InsightEditor pages
+4. **Phase 4 - Home Content Module**: Hero, WhyAsas, Stats editors
+5. **Phase 5 - Property Wizard**: Multi-step form with all sub-components
+6. **Phase 6 - Frontend Integration**: Connect public pages to database content
+7. **Phase 7 - Testing**: Verify bilingual sync, media uploads, content display
 
----
-
-## Security Considerations
-
-1. Admin routes protected by role check using `has_role()` function
-2. RLS policies on all tables
-3. User roles stored in separate `user_roles` table (not profiles)
-4. Security definer functions to prevent RLS recursion
-5. Zod validation on all forms (EN and AR)
-6. Input sanitization for user content
-
----
-
-## Notes
-
-- **Framework**: Using React + Vite + React Router (Lovable's stack) - equivalent functionality to Next.js App Router
-- **Email Notifications**: Skipped for now, inquiries stored in database
-- **Maps**: Google Maps embed - will need API key
-- **RTL**: Native implementation with `dir="rtl"` and font swapping
