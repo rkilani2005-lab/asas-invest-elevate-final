@@ -55,7 +55,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-eyebrow mb-4"
+          className="text-eyebrow mb-4 text-sm md:text-base"
           style={{ 
             color: '#C5A059',
             textShadow: '0px 4px 12px rgba(0, 0, 0, 0.6)'
@@ -67,7 +67,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="heading-hero text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6"
+          className="heading-hero text-5xl md:text-6xl lg:text-7xl xl:text-8xl mb-6"
           style={{ 
             color: '#C5A059',
             textShadow: '0px 4px 12px rgba(0, 0, 0, 0.6)'
