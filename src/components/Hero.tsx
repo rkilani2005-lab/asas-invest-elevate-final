@@ -34,9 +34,13 @@ const Hero = () => {
         >
           <source src="/videos/hero-dubai.mp4" type="video/mp4" />
         </video>
-        {/* Bright warm gold gradient overlay for gold text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-gold/20"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/20 to-transparent"></div>
+        {/* Classic Header: Deep Charcoal top-down linear gradient overlay */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(18, 18, 18, 0.75) 0%, rgba(18, 18, 18, 0.4) 40%, rgba(18, 18, 18, 0) 70%)'
+          }}
+        />
       </motion.div>
 
       {/* Content with Parallax */}
@@ -51,7 +55,11 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-eyebrow text-accent mb-4"
+          className="text-eyebrow mb-4"
+          style={{ 
+            color: '#C5A059',
+            textShadow: '0px 4px 12px rgba(0, 0, 0, 0.6)'
+          }}
         >
           {t("hero.subtitle")}
         </motion.p>
@@ -59,16 +67,23 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="heading-hero text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-accent mb-6 drop-shadow-sm"
+          className="heading-hero text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6"
+          style={{ 
+            color: '#C5A059',
+            textShadow: '0px 4px 12px rgba(0, 0, 0, 0.6)'
+          }}
         >
           {t("hero.headline")} <br className="hidden md:block" />
-          <span className="text-accent">{t("hero.headlineHighlight")}</span>
+          <span style={{ color: '#C5A059' }}>{t("hero.headlineHighlight")}</span>
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg md:text-xl text-foreground mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-sm"
+          className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed text-white/90"
+          style={{ 
+            textShadow: '0px 2px 8px rgba(0, 0, 0, 0.5)'
+          }}
         >
           {t("hero.tagline")}
         </motion.p>
@@ -83,8 +98,10 @@ const Hero = () => {
         >
           <Button 
             size="lg" 
-            variant="luxury"
-            className="px-10 py-6"
+            className="px-10 py-6 bg-accent text-white hover:bg-accent/90 font-display uppercase tracking-widest text-xs"
+            style={{
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.4)'
+            }}
           >
             {t("hero.exploreProperties")}
             <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} strokeWidth={1} />
@@ -92,7 +109,7 @@ const Hero = () => {
           <Button 
             size="lg" 
             variant="outline" 
-            className="border border-accent/50 text-accent hover:bg-accent hover:text-white transition-all duration-300 px-10 py-6"
+            className="border border-white/50 text-white hover:bg-white/10 hover:text-white transition-all duration-300 px-10 py-6"
           >
             {t("hero.contactUs")}
           </Button>
