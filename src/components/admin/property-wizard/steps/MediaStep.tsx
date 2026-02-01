@@ -105,6 +105,21 @@ function SortableMediaItem({
       </div>
       <div className="p-2 space-y-2">
         <Select
+          value={item.type}
+          onValueChange={(value) => onUpdate(id, { type: value as MediaType })}
+        >
+          <SelectTrigger className="h-8 text-xs">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent>
+            {mediaTypes.map((type) => (
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
           value={item.category}
           onValueChange={(value) => onUpdate(id, { category: value })}
         >
@@ -150,20 +165,25 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const fileName = `properties/${propertyId || "new"}/${Date.now()}-${file.name}`;
+      const fileName = `properties/${propertyId || "new"}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
 
+      console.log("Uploading file:", fileName);
+      
       const { error } = await supabase.storage
         .from("property-media")
         .upload(fileName, file);
 
       if (error) {
-        toast.error(`Failed to upload ${file.name}`);
+        console.error("Upload error:", error);
+        toast.error(`Failed to upload ${file.name}: ${error.message}`);
         continue;
       }
 
       const { data: urlData } = supabase.storage
         .from("property-media")
         .getPublicUrl(fileName);
+
+      console.log("Uploaded successfully, URL:", urlData.publicUrl);
 
       newMedia.push({
         id: crypto.randomUUID(),
@@ -175,8 +195,9 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
     }
 
     if (newMedia.length > 0) {
+      console.log("Adding media to state:", newMedia);
       onChange({ media: [...data.media, ...newMedia] });
-      toast.success(`${newMedia.length} image(s) uploaded`);
+      toast.success(`${newMedia.length} image(s) uploaded successfully`);
     }
 
     setIsUploading(false);

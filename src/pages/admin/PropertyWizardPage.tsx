@@ -181,7 +181,8 @@ export default function PropertyWizardPage() {
       // Handle amenities
       if (propertyId) {
         // Delete existing amenities and re-insert
-        await supabase.from("amenities").delete().eq("property_id", propertyId);
+        const { error: deleteAmenitiesError } = await supabase.from("amenities").delete().eq("property_id", propertyId);
+        if (deleteAmenitiesError) console.error("Delete amenities error:", deleteAmenitiesError);
         
         if (data.amenities.length > 0) {
           const amenitiesPayload = data.amenities.map(a => ({
@@ -191,11 +192,16 @@ export default function PropertyWizardPage() {
             icon: a.icon,
             category: a.category,
           }));
-          await supabase.from("amenities").insert(amenitiesPayload);
+          const { error: insertAmenitiesError } = await supabase.from("amenities").insert(amenitiesPayload);
+          if (insertAmenitiesError) {
+            console.error("Insert amenities error:", insertAmenitiesError);
+            throw new Error(`Failed to save amenities: ${insertAmenitiesError.message}`);
+          }
         }
 
         // Handle payment milestones
-        await supabase.from("payment_milestones").delete().eq("property_id", propertyId);
+        const { error: deleteMilestonesError } = await supabase.from("payment_milestones").delete().eq("property_id", propertyId);
+        if (deleteMilestonesError) console.error("Delete milestones error:", deleteMilestonesError);
         
         if (data.payment_milestones.length > 0) {
           const milestonesPayload = data.payment_milestones.map((m, index) => ({
@@ -205,11 +211,16 @@ export default function PropertyWizardPage() {
             percentage: m.percentage,
             sort_order: index,
           }));
-          await supabase.from("payment_milestones").insert(milestonesPayload);
+          const { error: insertMilestonesError } = await supabase.from("payment_milestones").insert(milestonesPayload);
+          if (insertMilestonesError) {
+            console.error("Insert milestones error:", insertMilestonesError);
+            throw new Error(`Failed to save milestones: ${insertMilestonesError.message}`);
+          }
         }
 
         // Handle media
-        await supabase.from("media").delete().eq("property_id", propertyId);
+        const { error: deleteMediaError } = await supabase.from("media").delete().eq("property_id", propertyId);
+        if (deleteMediaError) console.error("Delete media error:", deleteMediaError);
         
         if (data.media.length > 0) {
           const mediaPayload = data.media.map((m, index) => ({
@@ -221,7 +232,11 @@ export default function PropertyWizardPage() {
             caption_ar: m.caption_ar,
             order_index: index,
           }));
-          await supabase.from("media").insert(mediaPayload);
+          const { error: insertMediaError } = await supabase.from("media").insert(mediaPayload);
+          if (insertMediaError) {
+            console.error("Insert media error:", insertMediaError);
+            throw new Error(`Failed to save media: ${insertMediaError.message}`);
+          }
         }
       }
 
