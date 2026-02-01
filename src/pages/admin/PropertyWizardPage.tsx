@@ -207,6 +207,22 @@ export default function PropertyWizardPage() {
           }));
           await supabase.from("payment_milestones").insert(milestonesPayload);
         }
+
+        // Handle media
+        await supabase.from("media").delete().eq("property_id", propertyId);
+        
+        if (data.media.length > 0) {
+          const mediaPayload = data.media.map((m, index) => ({
+            property_id: propertyId,
+            url: m.url,
+            type: m.type,
+            category: m.category || "general",
+            caption_en: m.caption_en,
+            caption_ar: m.caption_ar,
+            order_index: index,
+          }));
+          await supabase.from("media").insert(mediaPayload);
+        }
       }
 
       toast.success(isEditing ? "Property updated" : "Property created");
