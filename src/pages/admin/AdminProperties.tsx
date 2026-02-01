@@ -23,21 +23,23 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Search, Eye, Star, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Eye, Star, Loader2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Property = Tables<"properties">;
+type PropertyWithMedia = Tables<"properties"> & {
+  media: Tables<"media">[];
+};
 
 export default function AdminProperties() {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<PropertyWithMedia[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchProperties = async () => {
     const { data, error } = await supabase
       .from("properties")
-      .select("*")
+      .select("*, media(*)")
       .order("sort_order", { ascending: true });
 
     if (error) {
@@ -45,7 +47,7 @@ export default function AdminProperties() {
       return;
     }
 
-    setProperties(data || []);
+    setProperties((data as PropertyWithMedia[]) || []);
     setIsLoading(false);
   };
 
@@ -132,6 +134,7 @@ export default function AdminProperties() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[60px]">Image</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Type</TableHead>
@@ -142,19 +145,36 @@ export default function AdminProperties() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                 </TableCell>
               </TableRow>
             ) : filteredProperties.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   No properties found
                 </TableCell>
               </TableRow>
             ) : (
-              filteredProperties.map((property) => (
+              filteredProperties.map((property) => {
+                const heroImage = property.media?.find(m => m.type === "hero")?.url || 
+                                 property.media?.find(m => m.type === "render")?.url ||
+                                 property.media?.[0]?.url;
+                return (
                 <TableRow key={property.id}>
+                  <TableCell>
+                    {heroImage ? (
+                      <img 
+                        src={heroImage} 
+                        alt={property.name_en} 
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {property.is_featured && (
@@ -235,7 +255,7 @@ export default function AdminProperties() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
+              );})
             )}
           </TableBody>
         </Table>
