@@ -9,6 +9,7 @@ import i18n from "@/i18n/config";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import InsightsPage from "./pages/Insights";
+import InsightDetail from "./pages/InsightDetail";
 import OffPlan from "./pages/OffPlan";
 import Ready from "./pages/Ready";
 import PropertyDetail from "./pages/PropertyDetail";
@@ -45,6 +46,7 @@ const App = () => (
                 <Route path="/ready" element={<Ready />} />
                 <Route path="/property/:slug" element={<PropertyDetail />} />
                 <Route path="/insights" element={<InsightsPage />} />
+                <Route path="/insights/:slug" element={<InsightDetail />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
