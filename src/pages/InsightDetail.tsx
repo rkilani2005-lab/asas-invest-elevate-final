@@ -189,13 +189,18 @@ const InsightDetail = () => {
         <div className="container mx-auto px-4 lg:px-8 max-w-4xl">
           <article 
             className={cn(
-              "prose prose-lg max-w-none",
-              "prose-headings:font-serif prose-headings:text-foreground",
-              "prose-p:text-muted-foreground prose-p:leading-relaxed",
-              "prose-a:text-accent prose-a:no-underline hover:prose-a:underline",
-              "prose-strong:text-foreground",
-              "prose-ul:text-muted-foreground prose-ol:text-muted-foreground",
-              "prose-blockquote:border-accent prose-blockquote:text-foreground/80",
+              "max-w-none space-y-6",
+              "[&_h1]:font-heading [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-foreground [&_h1]:mb-4",
+              "[&_h2]:font-heading [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-foreground [&_h2]:mb-3 [&_h2]:mt-8",
+              "[&_h3]:font-heading [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mb-2 [&_h3]:mt-6",
+              "[&_p]:text-muted-foreground [&_p]:leading-relaxed [&_p]:mb-4",
+              "[&_a]:text-accent [&_a]:no-underline hover:[&_a]:underline",
+              "[&_strong]:text-foreground [&_strong]:font-semibold",
+              "[&_ul]:text-muted-foreground [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4",
+              "[&_ol]:text-muted-foreground [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4",
+              "[&_li]:mb-2",
+              "[&_blockquote]:border-l-4 [&_blockquote]:border-accent [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-foreground/80",
+              "[&_img]:rounded-lg [&_img]:my-6",
               isRTL && "text-right font-arabic"
             )}
             dangerouslySetInnerHTML={{ __html: content.content || '' }}
