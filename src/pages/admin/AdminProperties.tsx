@@ -255,7 +255,8 @@ export default function AdminProperties() {
                     </div>
                   </TableCell>
                 </TableRow>
-              );})
+              );
+              })
             )}
           </TableBody>
         </Table>
