@@ -284,19 +284,6 @@
     transition: var(--transition-smooth);
   }
 
-  /* RTL utilities */
-  [dir="rtl"] .rtl-flip {
-    transform: scaleX(-1);
-  }
-
-  [dir="rtl"] .text-left {
-    text-align: right;
-  }
-
-  [dir="rtl"] .text-right {
-    text-align: left;
-  }
-
   /* Font utilities */
   .font-heading {
     font-family: 'Satoshi', system-ui, sans-serif;
@@ -341,4 +328,172 @@
   .border-gold {
     border-color: hsl(var(--accent));
   }
+}
+
+/* ============================================
+   RTL (Right-to-Left) Global Styles
+   Automatically flips layout when dir="rtl"
+   ============================================ */
+
+/* RTL: Flip flex directions */
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .md\:flex-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .lg\:flex-row {
+  flex-direction: row-reverse;
+}
+
+/* RTL: Text alignment */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+[dir="rtl"] .text-center {
+  text-align: center;
+}
+
+/* RTL: Flip margins */
+[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+[dir="rtl"] .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+[dir="rtl"] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+[dir="rtl"] .ml-3 { margin-left: 0; margin-right: 0.75rem; }
+[dir="rtl"] .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+[dir="rtl"] .ml-4 { margin-left: 0; margin-right: 1rem; }
+[dir="rtl"] .mr-4 { margin-right: 0; margin-left: 1rem; }
+[dir="rtl"] .ml-6 { margin-left: 0; margin-right: 1.5rem; }
+[dir="rtl"] .mr-6 { margin-right: 0; margin-left: 1.5rem; }
+[dir="rtl"] .ml-8 { margin-left: 0; margin-right: 2rem; }
+[dir="rtl"] .mr-8 { margin-right: 0; margin-left: 2rem; }
+
+/* RTL: Flip paddings */
+[dir="rtl"] .pl-2 { padding-left: 0; padding-right: 0.5rem; }
+[dir="rtl"] .pr-2 { padding-right: 0; padding-left: 0.5rem; }
+[dir="rtl"] .pl-3 { padding-left: 0; padding-right: 0.75rem; }
+[dir="rtl"] .pr-3 { padding-right: 0; padding-left: 0.75rem; }
+[dir="rtl"] .pl-4 { padding-left: 0; padding-right: 1rem; }
+[dir="rtl"] .pr-4 { padding-right: 0; padding-left: 1rem; }
+[dir="rtl"] .pl-6 { padding-left: 0; padding-right: 1.5rem; }
+[dir="rtl"] .pr-6 { padding-right: 0; padding-left: 1.5rem; }
+[dir="rtl"] .pl-8 { padding-left: 0; padding-right: 2rem; }
+[dir="rtl"] .pr-8 { padding-right: 0; padding-left: 2rem; }
+
+/* RTL: Flip left/right positioning */
+[dir="rtl"] .left-0 { left: auto; right: 0; }
+[dir="rtl"] .right-0 { right: auto; left: 0; }
+[dir="rtl"] .left-4 { left: auto; right: 1rem; }
+[dir="rtl"] .right-4 { right: auto; left: 1rem; }
+[dir="rtl"] .left-6 { left: auto; right: 1.5rem; }
+[dir="rtl"] .right-6 { right: auto; left: 1.5rem; }
+
+/* RTL: Flip border radius */
+[dir="rtl"] .rounded-l { border-radius: 0 var(--radius) var(--radius) 0; }
+[dir="rtl"] .rounded-r { border-radius: var(--radius) 0 0 var(--radius); }
+[dir="rtl"] .rounded-l-lg { border-radius: 0 0.5rem 0.5rem 0; }
+[dir="rtl"] .rounded-r-lg { border-radius: 0.5rem 0 0 0.5rem; }
+
+/* RTL: Flip borders */
+[dir="rtl"] .border-l { border-left: 0; border-right-width: 1px; }
+[dir="rtl"] .border-r { border-right: 0; border-left-width: 1px; }
+[dir="rtl"] .border-l-2 { border-left: 0; border-right-width: 2px; }
+[dir="rtl"] .border-r-2 { border-right: 0; border-left-width: 2px; }
+
+/* RTL: Flip space-x */
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-x-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* RTL: Flip gap directions work automatically with flex-direction */
+
+/* RTL: Flip transform origins */
+[dir="rtl"] .origin-left { transform-origin: right; }
+[dir="rtl"] .origin-right { transform-origin: left; }
+
+/* RTL: Flip icons/arrows */
+[dir="rtl"] .rtl-flip,
+[dir="rtl"] [data-rtl-flip="true"] {
+  transform: scaleX(-1);
+}
+
+/* RTL: Grid adjustments - items should flow RTL */
+[dir="rtl"] .grid {
+  direction: rtl;
+}
+
+[dir="rtl"] .grid > * {
+  direction: rtl;
+}
+
+/* RTL: Justify content adjustments */
+[dir="rtl"] .justify-start {
+  justify-content: flex-end;
+}
+
+[dir="rtl"] .justify-end {
+  justify-content: flex-start;
+}
+
+/* RTL: Items alignment for flex containers */
+[dir="rtl"] .items-start {
+  align-items: flex-start; /* Keep vertical alignment */
+}
+
+/* RTL: Float adjustments */
+[dir="rtl"] .float-left {
+  float: right;
+}
+
+[dir="rtl"] .float-right {
+  float: left;
+}
+
+/* RTL: Scroll snap */
+[dir="rtl"] .snap-start {
+  scroll-snap-align: end;
+}
+
+[dir="rtl"] .snap-end {
+  scroll-snap-align: start;
+}
+
+/* RTL: Prevent double-flip for elements that manually handle RTL */
+[dir="rtl"] .no-rtl-flip {
+  direction: ltr;
+}
+
+[dir="rtl"] .rtl-preserve {
+  flex-direction: row !important;
 }
