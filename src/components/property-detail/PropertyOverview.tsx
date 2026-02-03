@@ -39,9 +39,10 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
             </h2>
             
             {overview && (
-              <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed mb-8">
-                <p>{overview}</p>
-              </div>
+              <div 
+                className="max-w-none text-muted-foreground leading-relaxed mb-8 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-2 [&_strong]:font-semibold [&_em]:italic"
+                dangerouslySetInnerHTML={{ __html: overview }}
+              />
             )}
 
             {/* Highlights */}
