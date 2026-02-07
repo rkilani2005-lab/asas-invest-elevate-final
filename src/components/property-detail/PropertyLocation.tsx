@@ -85,21 +85,26 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
                     return (
                       <div
                         key={index}
-                        className={cn(
-                          "flex items-center p-4 border border-border hover:border-accent/30 transition-colors",
-                          isRTL && "flex-row-reverse"
-                        )}
+                        className="p-4 border border-border hover:border-accent/30 transition-colors"
                       >
                         <div className={cn(
-                          "w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0",
-                          isRTL ? "ml-3" : "mr-3"
+                          "flex items-center mb-2",
+                          isRTL && "flex-row-reverse"
                         )}>
-                          <Icon className="h-5 w-5 text-accent" strokeWidth={1} />
-                        </div>
-                        <div>
+                          <div className={cn(
+                            "w-8 h-8 border border-accent/30 flex items-center justify-center flex-shrink-0",
+                            isRTL ? "ml-2" : "mr-2"
+                          )}>
+                            <Icon className="h-4 w-4 text-accent" strokeWidth={1} />
+                          </div>
                           <p className="text-sm font-medium text-foreground">{place.name}</p>
-                          <p className="text-xs text-muted-foreground">{place.distance}</p>
                         </div>
+                        <p className={cn(
+                          "text-xs text-muted-foreground",
+                          isRTL ? "pr-10 text-right" : "pl-10"
+                        )}>
+                          {place.distance}
+                        </p>
                       </div>
                     );
                   })}
