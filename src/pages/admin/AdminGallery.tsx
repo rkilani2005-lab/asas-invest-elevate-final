@@ -35,6 +35,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
+  Pencil,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import {
@@ -79,9 +80,10 @@ interface SortableImageProps {
   image: MediaRow;
   onDelete: (id: string) => void;
   onPreview: (url: string) => void;
+  onEdit: (image: MediaRow) => void;
 }
 
-function SortableImage({ image, onDelete, onPreview }: SortableImageProps) {
+function SortableImage({ image, onDelete, onPreview, onEdit }: SortableImageProps) {
   const {
     attributes,
     listeners,
@@ -120,14 +122,23 @@ function SortableImage({ image, onDelete, onPreview }: SortableImageProps) {
         </div>
         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
+            onClick={() => onEdit(image)}
+            className="p-1.5 bg-background/90 rounded hover:bg-background"
+            title="Edit"
+          >
+            <Pencil className="h-4 w-4 text-muted-foreground" />
+          </button>
+          <button
             onClick={() => onPreview(image.url)}
             className="p-1.5 bg-background/90 rounded hover:bg-background"
+            title="Preview"
           >
             <Eye className="h-4 w-4 text-muted-foreground" />
           </button>
           <button
             onClick={() => onDelete(image.id)}
             className="p-1.5 bg-destructive/90 rounded hover:bg-destructive"
+            title="Delete"
           >
             <Trash2 className="h-4 w-4 text-destructive-foreground" />
           </button>
@@ -156,6 +167,13 @@ export default function AdminGallery() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadForm, setUploadForm] = useState({
     category: "exterior",
+    caption_en: "",
+    caption_ar: "",
+  });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingImage, setEditingImage] = useState<MediaRow | null>(null);
+  const [editForm, setEditForm] = useState({
+    category: "",
     caption_en: "",
     caption_ar: "",
   });
@@ -283,6 +301,52 @@ export default function AdminGallery() {
       });
     },
   });
+
+  // Update mutation for editing
+  const updateMutation = useMutation({
+    mutationFn: async (data: { id: string; category: string; caption_en: string | null; caption_ar: string | null }) => {
+      const { error } = await supabase
+        .from("media")
+        .update({
+          category: data.category,
+          caption_en: data.caption_en,
+          caption_ar: data.caption_ar,
+        })
+        .eq("id", data.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["admin-gallery-media", selectedPropertyId],
+      });
+      toast.success("Image updated successfully");
+      setEditDialogOpen(false);
+      setEditingImage(null);
+    },
+    onError: () => {
+      toast.error("Failed to update image");
+    },
+  });
+
+  const handleOpenEdit = useCallback((image: MediaRow) => {
+    setEditingImage(image);
+    setEditForm({
+      category: image.category || "exterior",
+      caption_en: image.caption_en || "",
+      caption_ar: image.caption_ar || "",
+    });
+    setEditDialogOpen(true);
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    if (!editingImage) return;
+    updateMutation.mutate({
+      id: editingImage.id,
+      category: editForm.category,
+      caption_en: editForm.caption_en || null,
+      caption_ar: editForm.caption_ar || null,
+    });
+  }, [editingImage, editForm, updateMutation]);
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -684,6 +748,7 @@ export default function AdminGallery() {
                             image={media}
                             onDelete={(id) => deleteMutation.mutate(id)}
                             onPreview={setPreviewImage}
+                            onEdit={handleOpenEdit}
                           />
                         ))}
                       </div>
@@ -703,6 +768,96 @@ export default function AdminGallery() {
           </CardContent>
         </Card>
       )}
+
+      {/* Edit Image Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Image</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {editingImage && (
+              <div className="flex justify-center">
+                <img
+                  src={editingImage.url}
+                  alt="Preview"
+                  className="max-h-40 rounded-lg object-contain"
+                />
+              </div>
+            )}
+            <div>
+              <Label>Category</Label>
+              <Select
+                value={editForm.category}
+                onValueChange={(v) =>
+                  setEditForm((prev) => ({ ...prev, category: v }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {GALLERY_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label} / {cat.labelAr}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Caption (EN)</Label>
+                <Input
+                  value={editForm.caption_en}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      caption_en: e.target.value,
+                    }))
+                  }
+                  placeholder="Image caption"
+                />
+              </div>
+              <div>
+                <Label>Caption (AR)</Label>
+                <Input
+                  value={editForm.caption_ar}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      caption_ar: e.target.value,
+                    }))
+                  }
+                  placeholder="عنوان الصورة"
+                  dir="rtl"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setEditDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveEdit}
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Image Preview Modal */}
       {previewImage && (
