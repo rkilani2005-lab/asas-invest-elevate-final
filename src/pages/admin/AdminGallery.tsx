@@ -101,6 +101,8 @@ function SortableImage({ image, onDelete, onPreview, onEdit }: SortableImageProp
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const isHero = image.type === "hero";
+
   return (
     <div
       ref={setNodeRef}
@@ -112,8 +114,13 @@ function SortableImage({ image, onDelete, onPreview, onEdit }: SortableImageProp
         alt={image.caption_en || "Gallery image"}
         className="w-full h-full object-cover"
       />
+      {isHero && (
+        <div className="absolute top-2 left-2 px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-medium rounded z-10">
+          Hero
+        </div>
+      )}
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors">
-        <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className={`absolute top-2 ${isHero ? 'left-14' : 'left-2'} opacity-0 group-hover:opacity-100 transition-opacity`}>
           <button
             {...attributes}
             {...listeners}
