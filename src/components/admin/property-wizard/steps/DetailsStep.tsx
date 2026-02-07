@@ -49,6 +49,19 @@ interface AmenityLibraryItem {
   category: string | null;
 }
 
+const AMENITY_CATEGORIES = [
+  "General",
+  "Recreation",
+  "Security",
+  "Fitness",
+  "Wellness",
+  "Business",
+  "Family",
+  "Outdoor",
+  "Parking",
+  "Services",
+];
+
 const landmarkTypes = [
   { value: "metro", label: "Metro Station" },
   { value: "mall", label: "Shopping Mall" },
@@ -133,8 +146,8 @@ export default function DetailsStep({ data, onChange }: DetailsStepProps) {
   const [customAmenity, setCustomAmenity] = useState({
     name_en: "",
     name_ar: "",
-    icon: "star",
-    category: "Custom",
+    icon: "Star",
+    category: "",
   });
 
   const sensors = useSensors(
@@ -183,10 +196,13 @@ export default function DetailsStep({ data, onChange }: DetailsStepProps) {
 
   function addCustomAmenity() {
     if (!customAmenity.name_en) return;
+    if (!customAmenity.category) {
+      return; // Category is required
+    }
     onChange({
       amenities: [...data.amenities, { ...customAmenity }],
     });
-    setCustomAmenity({ name_en: "", name_ar: "", icon: "star", category: "Custom" });
+    setCustomAmenity({ name_en: "", name_ar: "", icon: "Star", category: "" });
   }
 
   function removeAmenity(name: string) {
@@ -355,8 +371,8 @@ export default function DetailsStep({ data, onChange }: DetailsStepProps) {
           {/* Custom Amenity */}
           <div className="border-t pt-4">
             <h4 className="text-sm font-medium mb-3">Add Custom Amenity</h4>
-            <div className="flex items-end gap-3">
-              <div className="w-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+              <div>
                 <Label className="text-xs">Icon</Label>
                 <IconSelector
                   value={customAmenity.icon}
@@ -365,8 +381,28 @@ export default function DetailsStep({ data, onChange }: DetailsStepProps) {
                   }
                 />
               </div>
-              <div className="flex-1">
-                <Label className="text-xs">Name (EN)</Label>
+              <div>
+                <Label className="text-xs">Category *</Label>
+                <Select
+                  value={customAmenity.category}
+                  onValueChange={(value) =>
+                    setCustomAmenity((prev) => ({ ...prev, category: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AMENITY_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="lg:col-span-2">
+                <Label className="text-xs">Name (EN) *</Label>
                 <Input
                   value={customAmenity.name_en}
                   onChange={(e) =>
@@ -378,7 +414,7 @@ export default function DetailsStep({ data, onChange }: DetailsStepProps) {
                   placeholder="Amenity name"
                 />
               </div>
-              <div className="flex-1">
+              <div>
                 <Label className="text-xs">Name (AR)</Label>
                 <Input
                   value={customAmenity.name_ar}
@@ -392,9 +428,16 @@ export default function DetailsStep({ data, onChange }: DetailsStepProps) {
                   dir="rtl"
                 />
               </div>
-              <Button onClick={addCustomAmenity}>
-                <Plus className="h-4 w-4" />
-              </Button>
+              <div>
+                <Button 
+                  onClick={addCustomAmenity} 
+                  disabled={!customAmenity.name_en || !customAmenity.category}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
