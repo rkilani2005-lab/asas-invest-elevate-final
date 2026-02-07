@@ -213,6 +213,7 @@ export type Database = {
           caption_en: string | null
           category: string | null
           created_at: string | null
+          file_size: number | null
           id: string
           order_index: number | null
           property_id: string | null
@@ -224,6 +225,7 @@ export type Database = {
           caption_en?: string | null
           category?: string | null
           created_at?: string | null
+          file_size?: number | null
           id?: string
           order_index?: number | null
           property_id?: string | null
@@ -235,6 +237,7 @@ export type Database = {
           caption_en?: string | null
           category?: string | null
           created_at?: string | null
+          file_size?: number | null
           id?: string
           order_index?: number | null
           property_id?: string | null

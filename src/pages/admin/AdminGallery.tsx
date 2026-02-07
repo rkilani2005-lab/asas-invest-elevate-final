@@ -58,7 +58,7 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { compressImage, getExtensionFromBlob } from "@/lib/image-compression";
+import { compressImage, getExtensionFromBlob, formatFileSize } from "@/lib/image-compression";
 
 interface UploadProgress {
   fileName: string;
@@ -81,13 +81,21 @@ const GALLERY_CATEGORIES = [
 const MEDIA_TYPES_FOR_GALLERY = ["render", "interior"] as const;
 
 interface SortableImageProps {
-  image: MediaRow;
+  image: MediaRow & { file_size?: number | null };
   onDelete: (id: string) => void;
   onPreview: (url: string) => void;
   onEdit: (image: MediaRow) => void;
   isSelectionMode: boolean;
   isSelected: boolean;
   onToggleSelect: (id: string) => void;
+}
+
+// Helper to get file size indicator color
+function getFileSizeColor(bytes: number | null | undefined): string {
+  if (!bytes) return "text-muted-foreground";
+  if (bytes < 200 * 1024) return "text-green-500"; // < 200KB = good
+  if (bytes < 500 * 1024) return "text-yellow-500"; // 200-500KB = okay
+  return "text-red-500"; // > 500KB = large
 }
 
 function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, isSelected, onToggleSelect }: SortableImageProps) {
@@ -186,9 +194,16 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
         </div>
       )}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-        <p className="text-white text-xs truncate">
-          {image.caption_en || "No caption"}
-        </p>
+        <div className="flex items-center justify-between gap-1">
+          <p className="text-white text-xs truncate flex-1">
+            {image.caption_en || "No caption"}
+          </p>
+          {image.file_size && (
+            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded bg-black/40 ${getFileSizeColor(image.file_size)}`}>
+              {formatFileSize(image.file_size)}
+            </span>
+          )}
+        </div>
         <p className="text-white/70 text-[10px] capitalize">
           {image.category || "uncategorized"}
         </p>
@@ -523,6 +538,7 @@ export default function AdminGallery() {
           caption_en: uploadForm.caption_en || null,
           caption_ar: uploadForm.caption_ar || null,
           order_index: currentMaxOrder,
+          file_size: compressedBlob.size,
         });
 
         if (insertError) throw insertError;
