@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
+
+interface ImageDimensions {
+  width: number;
+  height: number;
+  aspectRatio: string;
+}
 
 interface PropertyGalleryProps {
   property: Tables<"properties"> & {
@@ -24,6 +30,65 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [imageDimensions, setImageDimensions] = useState<Record<string, ImageDimensions>>({});
+
+  // Calculate aspect ratio string (e.g., "16:9", "4:3")
+  const calculateAspectRatio = (width: number, height: number): string => {
+    const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
+    const divisor = gcd(width, height);
+    const ratioW = width / divisor;
+    const ratioH = height / divisor;
+    
+    // Simplify common ratios
+    const ratio = width / height;
+    if (Math.abs(ratio - 16/9) < 0.05) return "16:9";
+    if (Math.abs(ratio - 4/3) < 0.05) return "4:3";
+    if (Math.abs(ratio - 3/2) < 0.05) return "3:2";
+    if (Math.abs(ratio - 1) < 0.05) return "1:1";
+    if (Math.abs(ratio - 9/16) < 0.05) return "9:16";
+    if (Math.abs(ratio - 3/4) < 0.05) return "3:4";
+    if (Math.abs(ratio - 2/3) < 0.05) return "2:3";
+    if (Math.abs(ratio - 21/9) < 0.05) return "21:9";
+    
+    // For non-standard ratios, show simplified version
+    if (ratioW <= 30 && ratioH <= 30) return `${ratioW}:${ratioH}`;
+    return `${ratio.toFixed(2)}:1`;
+  };
+
+  // Load image dimensions
+  const loadImageDimensions = (url: string, id: string) => {
+    if (imageDimensions[id]) return;
+    
+    const img = new Image();
+    img.onload = () => {
+      setImageDimensions(prev => ({
+        ...prev,
+        [id]: {
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          aspectRatio: calculateAspectRatio(img.naturalWidth, img.naturalHeight)
+        }
+      }));
+    };
+    img.src = url;
+  };
+
+  // Load dimensions for all visible media
+  useEffect(() => {
+    property.media.forEach(item => {
+      if (item.type === "render" || item.type === "interior") {
+        loadImageDimensions(item.url, item.id);
+      }
+    });
+  }, [property.media]);
+
+  // Format file size
+  const formatFileSize = (bytes: number | null): string => {
+    if (!bytes) return "";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   // Filter gallery media (exclude hero and floorplans)
   const allMedia = property.media.filter(m => 
@@ -124,6 +189,8 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {currentMedia.map((item, index) => {
             const caption = language === "ar" && item.caption_ar ? item.caption_ar : item.caption_en;
+            const dims = imageDimensions[item.id];
+            const fileSize = formatFileSize(item.file_size);
             
             return (
               <motion.div
@@ -142,6 +209,32 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
                   <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" strokeWidth={1} />
+                </div>
+                {/* Image metadata overlay */}
+                <div className={cn(
+                  "absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent",
+                  "opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                )}>
+                  <div className={cn(
+                    "flex items-center gap-2 text-[10px] text-white/90 font-medium tracking-wider",
+                    isRTL && "flex-row-reverse"
+                  )}>
+                    {dims && (
+                      <span className="bg-black/40 px-1.5 py-0.5 rounded">
+                        {dims.aspectRatio}
+                      </span>
+                    )}
+                    {fileSize && (
+                      <span className="bg-black/40 px-1.5 py-0.5 rounded">
+                        {fileSize}
+                      </span>
+                    )}
+                    {dims && (
+                      <span className="bg-black/40 px-1.5 py-0.5 rounded">
+                        {dims.width}×{dims.height}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             );
