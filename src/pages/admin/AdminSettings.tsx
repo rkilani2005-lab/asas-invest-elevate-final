@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, Instagram, Linkedin, Youtube, Twitter, Facebook } from "lucide-react";
 import { toast } from "sonner";
 
 interface SiteSettings {
@@ -21,6 +21,10 @@ interface SiteSettings {
     instagram: string;
     linkedin: string;
     youtube: string;
+    twitter: string;
+    facebook: string;
+    tiktok: string;
+    snapchat: string;
   };
   seo: {
     title_en: string;
@@ -43,6 +47,10 @@ const defaultSettings: SiteSettings = {
     instagram: "",
     linkedin: "",
     youtube: "",
+    twitter: "",
+    facebook: "",
+    tiktok: "",
+    snapchat: "",
   },
   seo: {
     title_en: "",
@@ -232,36 +240,108 @@ export default function AdminSettings() {
             <CardHeader>
               <CardTitle>Social Media Links</CardTitle>
               <CardDescription>
-                Connect your social media profiles
+                Connect your social media profiles. These links will appear in the website footer and contact sections.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="instagram">Instagram URL</Label>
-                <Input
-                  id="instagram"
-                  value={settings.social.instagram}
-                  onChange={(e) => updateSetting("social", "instagram", e.target.value)}
-                  placeholder="https://instagram.com/yourprofile"
-                />
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="instagram" className="flex items-center gap-2">
+                    <Instagram className="h-4 w-4 text-pink-500" />
+                    Instagram
+                  </Label>
+                  <Input
+                    id="instagram"
+                    value={settings.social.instagram}
+                    onChange={(e) => updateSetting("social", "instagram", e.target.value)}
+                    placeholder="https://instagram.com/yourprofile"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="facebook" className="flex items-center gap-2">
+                    <Facebook className="h-4 w-4 text-blue-600" />
+                    Facebook
+                  </Label>
+                  <Input
+                    id="facebook"
+                    value={settings.social.facebook}
+                    onChange={(e) => updateSetting("social", "facebook", e.target.value)}
+                    placeholder="https://facebook.com/yourpage"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="linkedin">LinkedIn URL</Label>
-                <Input
-                  id="linkedin"
-                  value={settings.social.linkedin}
-                  onChange={(e) => updateSetting("social", "linkedin", e.target.value)}
-                  placeholder="https://linkedin.com/company/yourcompany"
-                />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="twitter" className="flex items-center gap-2">
+                    <Twitter className="h-4 w-4 text-sky-500" />
+                    X (Twitter)
+                  </Label>
+                  <Input
+                    id="twitter"
+                    value={settings.social.twitter}
+                    onChange={(e) => updateSetting("social", "twitter", e.target.value)}
+                    placeholder="https://x.com/yourhandle"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin" className="flex items-center gap-2">
+                    <Linkedin className="h-4 w-4 text-blue-700" />
+                    LinkedIn
+                  </Label>
+                  <Input
+                    id="linkedin"
+                    value={settings.social.linkedin}
+                    onChange={(e) => updateSetting("social", "linkedin", e.target.value)}
+                    placeholder="https://linkedin.com/company/yourcompany"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="youtube">YouTube URL</Label>
-                <Input
-                  id="youtube"
-                  value={settings.social.youtube}
-                  onChange={(e) => updateSetting("social", "youtube", e.target.value)}
-                  placeholder="https://youtube.com/@yourchannel"
-                />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="youtube" className="flex items-center gap-2">
+                    <Youtube className="h-4 w-4 text-red-600" />
+                    YouTube
+                  </Label>
+                  <Input
+                    id="youtube"
+                    value={settings.social.youtube}
+                    onChange={(e) => updateSetting("social", "youtube", e.target.value)}
+                    placeholder="https://youtube.com/@yourchannel"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tiktok" className="flex items-center gap-2">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                    </svg>
+                    TikTok
+                  </Label>
+                  <Input
+                    id="tiktok"
+                    value={settings.social.tiktok}
+                    onChange={(e) => updateSetting("social", "tiktok", e.target.value)}
+                    placeholder="https://tiktok.com/@yourhandle"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="snapchat" className="flex items-center gap-2">
+                    <svg className="h-4 w-4 text-yellow-400" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301a.36.36 0 0 1 .163-.039c.088 0 .174.026.251.078.158.103.267.291.267.484 0 .137-.047.27-.138.373-.127.145-.336.245-.565.309-.147.045-.3.078-.45.105-.12.019-.24.039-.36.064-.118.022-.18.066-.2.136-.02.079.007.177.067.3.195.398.494.748.888 1.056 1.092.877 2.505 1.33 3.888 1.5.242.032.385.145.39.322.01.338-.364.64-.93.88-.337.143-.718.226-1.104.244-.243.012-.484.03-.725.06l-.13.02c-.167.029-.346.105-.445.286-.064.116-.147.33-.107.57.024.147.054.292.085.436.063.294.127.588.182.888.04.21-.007.393-.139.538-.193.216-.528.338-.935.338-.14 0-.277-.012-.413-.035-.404-.068-.776-.175-1.132-.309-.335-.126-.648-.263-.933-.376l-.086-.035c-.26-.106-.514-.162-.76-.162a1.7 1.7 0 0 0-.524.077c-.437.131-.9.41-1.338.764a6.6 6.6 0 0 1-1.041.703 3.23 3.23 0 0 1-1.583.404c-.55 0-1.102-.14-1.584-.404a6.63 6.63 0 0 1-1.041-.703c-.438-.354-.9-.633-1.338-.764a1.71 1.71 0 0 0-.524-.077c-.246 0-.5.056-.76.162l-.086.035c-.285.113-.598.25-.933.376-.356.134-.728.24-1.132.309a2.33 2.33 0 0 1-.413.035c-.407 0-.742-.122-.935-.338-.132-.145-.18-.328-.14-.538.056-.3.12-.594.183-.888.03-.144.061-.289.085-.436.04-.24-.043-.454-.107-.57-.1-.181-.278-.257-.445-.286l-.13-.02c-.24-.03-.482-.048-.724-.06-.387-.018-.768-.101-1.105-.244-.565-.24-.94-.542-.93-.88.005-.177.148-.29.39-.322 1.383-.17 2.796-.623 3.888-1.5.394-.308.693-.658.888-1.056.06-.123.087-.221.067-.3-.02-.07-.082-.114-.2-.136-.12-.025-.24-.045-.36-.064-.15-.027-.303-.06-.45-.105-.23-.064-.438-.164-.565-.309a.505.505 0 0 1-.138-.373c0-.193.109-.381.267-.484a.49.49 0 0 1 .251-.078.36.36 0 0 1 .163.039c.374.18.733.285 1.033.301.198 0 .326-.045.401-.09-.008-.165-.018-.33-.03-.51l-.003-.06c-.104-1.628-.23-3.654.3-4.847C7.86 1.069 11.216.793 12.206.793z"/>
+                    </svg>
+                    Snapchat
+                  </Label>
+                  <Input
+                    id="snapchat"
+                    value={settings.social.snapchat}
+                    onChange={(e) => updateSetting("social", "snapchat", e.target.value)}
+                    placeholder="https://snapchat.com/add/yourusername"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
