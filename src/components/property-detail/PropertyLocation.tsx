@@ -11,9 +11,14 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
   const { t, isRTL, language } = useLanguage();
 
   const location = language === "ar" && property.location_ar ? property.location_ar : property.location_en;
-  const nearby = language === "ar" && property.nearby_ar 
-    ? property.nearby_ar as Array<{ name: string; distance: string; type: string }>
-    : property.nearby_en as Array<{ name: string; distance: string; type: string }> || [];
+  const nearbyData = (property.nearby_en || []) as Array<{ name?: string; name_en?: string; name_ar?: string; distance: string; type: string }>;
+  
+  // Helper to get the name based on language, supporting both old (name) and new (name_en/name_ar) formats
+  const getPlaceName = (place: { name?: string; name_en?: string; name_ar?: string }) => {
+    if (language === "ar" && place.name_ar) return place.name_ar;
+    if (place.name_en) return place.name_en;
+    return place.name || "";
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -76,11 +81,11 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
               <span className="text-lg font-medium text-foreground">{location}</span>
             </div>
 
-            {nearby.length > 0 && (
+            {nearbyData.length > 0 && (
               <div className="space-y-4">
                 <h3 className="text-accent text-xs font-medium tracking-widest uppercase mb-4">Nearby Attractions</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {nearby.map((place, index) => {
+                  {nearbyData.map((place, index) => {
                     const Icon = getIcon(place.type);
                     return (
                       <div
@@ -97,7 +102,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
                           )}>
                             <Icon className="h-4 w-4 text-accent" strokeWidth={1} />
                           </div>
-                          <p className="text-sm font-medium text-foreground">{place.name}</p>
+                          <p className="text-sm font-medium text-foreground">{getPlaceName(place)}</p>
                         </div>
                         <p className={cn(
                           "text-xs text-muted-foreground",
@@ -112,7 +117,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
               </div>
             )}
 
-            {nearby.length === 0 && (
+            {nearbyData.length === 0 && (
               <div className="border border-border p-6">
                 <p className="text-muted-foreground">
                   Located in {location}, this property offers excellent connectivity to Dubai's key landmarks and amenities.
