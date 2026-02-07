@@ -273,7 +273,7 @@ export default function PropertyWizardPage() {
         name_en: amenity.name_en,
         name_ar: amenity.name_ar || null,
         icon: amenity.icon || "Star",
-        category: amenity.category || "Custom",
+        category: amenity.category || "General",
         is_active: true,
       }));
 
