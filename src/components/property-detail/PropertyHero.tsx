@@ -60,7 +60,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
 
   return (
     <>
-      <div className="relative h-[60vh] md:h-auto md:aspect-[16/9] w-full overflow-hidden pt-20 grain-overlay bg-secondary">
+      <div className="relative h-[60vh] md:h-auto md:aspect-[4/3] w-full overflow-hidden pt-20 grain-overlay bg-secondary">
         {/* Image Carousel */}
         <AnimatePresence mode="wait">
           <motion.div
