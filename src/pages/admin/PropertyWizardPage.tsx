@@ -127,7 +127,10 @@ export default function PropertyWizardPage() {
     setIsSaving(true);
 
     try {
-    // Prepare property data (exclude related data)
+      // First, check for custom amenities and add them to the library
+      await saveCustomAmenitiesToLibrary();
+
+      // Prepare property data (exclude related data)
       const propertyPayload: any = {
         name_en: data.name_en,
         name_ar: data.name_ar,
@@ -246,6 +249,43 @@ export default function PropertyWizardPage() {
       toast.error(error.message || "Failed to save property");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function saveCustomAmenitiesToLibrary() {
+    // Fetch existing library amenities
+    const { data: libraryAmenities } = await supabase
+      .from("amenity_library")
+      .select("name_en");
+
+    const existingNames = new Set(
+      (libraryAmenities || []).map((a) => a.name_en.toLowerCase())
+    );
+
+    // Find custom amenities not in library
+    const customAmenities = data.amenities.filter(
+      (amenity) => !existingNames.has(amenity.name_en.toLowerCase())
+    );
+
+    // Add custom amenities to library
+    if (customAmenities.length > 0) {
+      const newLibraryItems = customAmenities.map((amenity) => ({
+        name_en: amenity.name_en,
+        name_ar: amenity.name_ar || null,
+        icon: amenity.icon || "Star",
+        category: amenity.category || "Custom",
+        is_active: true,
+      }));
+
+      const { error } = await supabase
+        .from("amenity_library")
+        .insert(newLibraryItems);
+
+      if (error) {
+        console.error("Failed to add custom amenities to library:", error);
+      } else if (customAmenities.length > 0) {
+        toast.info(`${customAmenities.length} custom amenity(ies) added to library`);
+      }
     }
   }
 
