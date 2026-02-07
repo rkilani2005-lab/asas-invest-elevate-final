@@ -118,6 +118,7 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
   };
 
   const isHero = image.type === "hero";
+  const isLargeFile = (image.file_size || 0) > 500 * 1024; // > 500KB
 
   const handleClick = () => {
     if (isSelectionMode) {
@@ -135,7 +136,9 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
       } ${
         isSelected 
           ? "border-primary ring-2 ring-primary/30" 
-          : "border-border hover:border-accent/50"
+          : isLargeFile
+            ? "border-red-400 ring-1 ring-red-300/50"
+            : "border-border hover:border-accent/50"
       }`}
     >
       <img
@@ -143,6 +146,14 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
         alt={image.caption_en || "Gallery image"}
         className="w-full h-full object-cover"
       />
+      {/* Large file warning indicator */}
+      {isLargeFile && !isSelectionMode && (
+        <div className="absolute top-2 right-2 z-20" title="File size over 500KB - consider re-compressing">
+          <div className="p-1.5 bg-red-500 rounded-full shadow-md animate-pulse">
+            <AlertCircle className="h-4 w-4 text-white" />
+          </div>
+        </div>
+      )}
       {/* Selection checkbox */}
       {isSelectionMode && (
         <div className="absolute top-2 left-2 z-20">
@@ -171,7 +182,7 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
-          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className={`absolute ${isLargeFile ? 'top-12' : 'top-2'} right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity`}>
             <button
               onClick={() => onEdit(image)}
               className="p-1.5 bg-background/90 rounded hover:bg-background"
