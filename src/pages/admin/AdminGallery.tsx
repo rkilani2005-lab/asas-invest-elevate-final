@@ -41,6 +41,7 @@ import {
   Square,
   RefreshCw,
   FileWarning,
+  ScanSearch,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import {
@@ -705,6 +706,56 @@ export default function AdminGallery() {
     setIsSelectionMode(false);
   }, [selectedIds, galleryMedia, selectedPropertyId, queryClient]);
 
+  // Scan file sizes for existing images
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
+
+  const handleScanSizes = useCallback(async () => {
+    if (!galleryMedia) return;
+    
+    // Get images without file_size
+    const imagesWithoutSize = galleryMedia.filter((m) => m.file_size === null);
+    
+    if (imagesWithoutSize.length === 0) {
+      toast.info("All images already have file sizes recorded");
+      return;
+    }
+
+    setIsScanning(true);
+    setScanProgress({ current: 0, total: imagesWithoutSize.length });
+    
+    let successCount = 0;
+    
+    for (let i = 0; i < imagesWithoutSize.length; i++) {
+      const image = imagesWithoutSize[i];
+      setScanProgress({ current: i + 1, total: imagesWithoutSize.length });
+      
+      try {
+        const response = await fetch(image.url, { method: "HEAD" });
+        const contentLength = response.headers.get("content-length");
+        
+        if (contentLength) {
+          const fileSize = parseInt(contentLength, 10);
+          
+          await supabase
+            .from("media")
+            .update({ file_size: fileSize })
+            .eq("id", image.id);
+          
+          successCount++;
+        }
+      } catch (error) {
+        console.error(`Failed to get size for ${image.id}:`, error);
+      }
+    }
+    
+    setIsScanning(false);
+    setScanProgress({ current: 0, total: 0 });
+    
+    queryClient.invalidateQueries({ queryKey: ["admin-gallery-media", selectedPropertyId] });
+    toast.success(`Updated file sizes for ${successCount} of ${imagesWithoutSize.length} images`);
+  }, [galleryMedia, selectedPropertyId, queryClient]);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id || !filteredMedia) return;
@@ -824,6 +875,26 @@ export default function AdminGallery() {
                   >
                     <CheckSquare className="h-4 w-4" />
                     Select
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="gap-2"
+                    onClick={handleScanSizes}
+                    disabled={isScanning || !galleryMedia || galleryMedia.length === 0}
+                    title="Scan and update file sizes for existing images"
+                  >
+                    {isScanning ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {scanProgress.current}/{scanProgress.total}
+                      </>
+                    ) : (
+                      <>
+                        <ScanSearch className="h-4 w-4" />
+                        Scan Sizes
+                      </>
+                    )}
                   </Button>
                   <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
                     <DialogTrigger asChild>
