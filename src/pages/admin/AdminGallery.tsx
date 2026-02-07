@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
   Plus,
@@ -31,6 +32,9 @@ import {
   Eye,
   X,
   GripVertical,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import {
@@ -50,6 +54,13 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+
+interface UploadProgress {
+  fileName: string;
+  status: "pending" | "uploading" | "success" | "error";
+  progress: number;
+  error?: string;
+}
 
 type MediaRow = Tables<"media">;
 type PropertyRow = Tables<"properties">;
@@ -141,6 +152,8 @@ export default function AdminGallery() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadForm, setUploadForm] = useState({
     category: "exterior",
     caption_en: "",
@@ -271,17 +284,111 @@ export default function AdminGallery() {
     },
   });
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    setSelectedFiles(Array.from(files));
+    setUploadProgress(
+      Array.from(files).map((f) => ({
+        fileName: f.name,
+        status: "pending" as const,
+        progress: 0,
+      }))
+    );
+  }, []);
 
+  const removeSelectedFile = useCallback((index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setUploadProgress((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleBulkUpload = async () => {
+    if (selectedFiles.length === 0) return;
     setUploading(true);
-    for (const file of Array.from(files)) {
-      await uploadMutation.mutateAsync(file);
+
+    let currentMaxOrder =
+      galleryMedia?.reduce((max, m) => Math.max(max, m.order_index || 0), 0) || 0;
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+      
+      setUploadProgress((prev) =>
+        prev.map((p, idx) =>
+          idx === i ? { ...p, status: "uploading" as const, progress: 30 } : p
+        )
+      );
+
+      try {
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${selectedPropertyId}/${Date.now()}-${i}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("property-media")
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        setUploadProgress((prev) =>
+          prev.map((p, idx) =>
+            idx === i ? { ...p, progress: 70 } : p
+          )
+        );
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("property-media").getPublicUrl(fileName);
+
+        currentMaxOrder += 1;
+
+        const { error: insertError } = await supabase.from("media").insert({
+          property_id: selectedPropertyId,
+          url: publicUrl,
+          type: "render",
+          category: uploadForm.category,
+          caption_en: uploadForm.caption_en || null,
+          caption_ar: uploadForm.caption_ar || null,
+          order_index: currentMaxOrder,
+        });
+
+        if (insertError) throw insertError;
+
+        setUploadProgress((prev) =>
+          prev.map((p, idx) =>
+            idx === i ? { ...p, status: "success" as const, progress: 100 } : p
+          )
+        );
+      } catch (error) {
+        console.error(`Error uploading ${file.name}:`, error);
+        setUploadProgress((prev) =>
+          prev.map((p, idx) =>
+            idx === i
+              ? { ...p, status: "error" as const, error: "Upload failed" }
+              : p
+          )
+        );
+      }
     }
-    setUploading(false);
-    setUploadDialogOpen(false);
+
+    const successCount = uploadProgress.filter((p) => p.status === "success").length;
+    queryClient.invalidateQueries({
+      queryKey: ["admin-gallery-media", selectedPropertyId],
+    });
+
+    setTimeout(() => {
+      setUploading(false);
+      setSelectedFiles([]);
+      setUploadProgress([]);
+      setUploadDialogOpen(false);
+      setUploadForm({ category: "exterior", caption_en: "", caption_ar: "" });
+      toast.success(`${selectedFiles.length} images uploaded successfully`);
+    }, 1000);
   };
+
+  const resetUploadDialog = useCallback(() => {
+    setSelectedFiles([]);
+    setUploadProgress([]);
+    setUploadForm({ category: "exterior", caption_en: "", caption_ar: "" });
+  }, []);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -421,14 +528,14 @@ export default function AdminGallery() {
                   </div>
                   <div>
                     <Label>Select Images</Label>
-                    <div className="mt-2 border-2 border-dashed border-border rounded-lg p-8 text-center">
+                    <div className="mt-2 border-2 border-dashed border-border rounded-lg p-6 text-center">
                       <input
                         type="file"
                         id="gallery-upload"
                         multiple
                         accept="image/*"
                         className="hidden"
-                        onChange={handleFileUpload}
+                        onChange={handleFileSelect}
                         disabled={uploading}
                       />
                       <label
@@ -437,13 +544,96 @@ export default function AdminGallery() {
                       >
                         <Upload className="h-8 w-8 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">
-                          {uploading
-                            ? "Uploading..."
-                            : "Click to select images or drag & drop"}
+                          Click to select images or drag & drop
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          You can select multiple files at once
                         </span>
                       </label>
                     </div>
                   </div>
+
+                  {/* Selected Files Preview */}
+                  {selectedFiles.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label>{selectedFiles.length} file(s) selected</Label>
+                        {!uploading && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={resetUploadDialog}
+                          >
+                            Clear all
+                          </Button>
+                        )}
+                      </div>
+                      <div className="max-h-48 overflow-y-auto space-y-2">
+                        {selectedFiles.map((file, index) => {
+                          const progress = uploadProgress[index];
+                          return (
+                            <div
+                              key={`${file.name}-${index}`}
+                              className="flex items-center gap-3 p-2 bg-muted/50 rounded-lg"
+                            >
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt={file.name}
+                                className="w-10 h-10 object-cover rounded"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm truncate">{file.name}</p>
+                                {progress?.status === "uploading" && (
+                                  <Progress value={progress.progress} className="h-1 mt-1" />
+                                )}
+                                {progress?.status === "error" && (
+                                  <p className="text-xs text-destructive">
+                                    {progress.error}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {progress?.status === "pending" && !uploading && (
+                                  <button
+                                    onClick={() => removeSelectedFile(index)}
+                                    className="p-1 hover:bg-muted rounded"
+                                  >
+                                    <X className="h-4 w-4 text-muted-foreground" />
+                                  </button>
+                                )}
+                                {progress?.status === "uploading" && (
+                                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                                )}
+                                {progress?.status === "success" && (
+                                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                )}
+                                {progress?.status === "error" && (
+                                  <AlertCircle className="h-4 w-4 text-destructive" />
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <Button
+                        onClick={handleBulkUpload}
+                        disabled={uploading || selectedFiles.length === 0}
+                        className="w-full gap-2"
+                      >
+                        {uploading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4" />
+                            Upload {selectedFiles.length} Image(s)
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </DialogContent>
             </Dialog>
