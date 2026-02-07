@@ -37,6 +37,8 @@ import {
   AlertCircle,
   Loader2,
   Pencil,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import {
@@ -83,9 +85,12 @@ interface SortableImageProps {
   onDelete: (id: string) => void;
   onPreview: (url: string) => void;
   onEdit: (image: MediaRow) => void;
+  isSelectionMode: boolean;
+  isSelected: boolean;
+  onToggleSelect: (id: string) => void;
 }
 
-function SortableImage({ image, onDelete, onPreview, onEdit }: SortableImageProps) {
+function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, isSelected, onToggleSelect }: SortableImageProps) {
   const {
     attributes,
     listeners,
@@ -93,7 +98,7 @@ function SortableImage({ image, onDelete, onPreview, onEdit }: SortableImageProp
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: image.id });
+  } = useSortable({ id: image.id, disabled: isSelectionMode });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -103,56 +108,83 @@ function SortableImage({ image, onDelete, onPreview, onEdit }: SortableImageProp
 
   const isHero = image.type === "hero";
 
+  const handleClick = () => {
+    if (isSelectionMode) {
+      onToggleSelect(image.id);
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="group relative aspect-[4/3] bg-muted rounded-lg overflow-hidden border border-border hover:border-accent/50 transition-colors"
+      onClick={handleClick}
+      className={`group relative aspect-[4/3] bg-muted rounded-lg overflow-hidden border-2 transition-colors ${
+        isSelectionMode ? "cursor-pointer" : ""
+      } ${
+        isSelected 
+          ? "border-primary ring-2 ring-primary/30" 
+          : "border-border hover:border-accent/50"
+      }`}
     >
       <img
         src={image.url}
         alt={image.caption_en || "Gallery image"}
         className="w-full h-full object-cover"
       />
+      {/* Selection checkbox */}
+      {isSelectionMode && (
+        <div className="absolute top-2 left-2 z-20">
+          <div className={`p-1 rounded ${isSelected ? "bg-primary" : "bg-background/90"}`}>
+            {isSelected ? (
+              <CheckSquare className="h-5 w-5 text-primary-foreground" />
+            ) : (
+              <Square className="h-5 w-5 text-muted-foreground" />
+            )}
+          </div>
+        </div>
+      )}
       {isHero && (
-        <div className="absolute top-2 left-2 px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-medium rounded z-10">
+        <div className={`absolute top-2 ${isSelectionMode ? 'left-10' : 'left-2'} px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-medium rounded z-10`}>
           Hero
         </div>
       )}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors">
-        <div className={`absolute top-2 ${isHero ? 'left-14' : 'left-2'} opacity-0 group-hover:opacity-100 transition-opacity`}>
-          <button
-            {...attributes}
-            {...listeners}
-            className="p-1.5 bg-background/90 rounded hover:bg-background cursor-grab active:cursor-grabbing"
-          >
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
-          </button>
+      {!isSelectionMode && (
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors">
+          <div className={`absolute top-2 ${isHero ? 'left-14' : 'left-2'} opacity-0 group-hover:opacity-100 transition-opacity`}>
+            <button
+              {...attributes}
+              {...listeners}
+              className="p-1.5 bg-background/90 rounded hover:bg-background cursor-grab active:cursor-grabbing"
+            >
+              <GripVertical className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
+          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => onEdit(image)}
+              className="p-1.5 bg-background/90 rounded hover:bg-background"
+              title="Edit"
+            >
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button
+              onClick={() => onPreview(image.url)}
+              className="p-1.5 bg-background/90 rounded hover:bg-background"
+              title="Preview"
+            >
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button
+              onClick={() => onDelete(image.id)}
+              className="p-1.5 bg-destructive/90 rounded hover:bg-destructive"
+              title="Delete"
+            >
+              <Trash2 className="h-4 w-4 text-destructive-foreground" />
+            </button>
+          </div>
         </div>
-        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => onEdit(image)}
-            className="p-1.5 bg-background/90 rounded hover:bg-background"
-            title="Edit"
-          >
-            <Pencil className="h-4 w-4 text-muted-foreground" />
-          </button>
-          <button
-            onClick={() => onPreview(image.url)}
-            className="p-1.5 bg-background/90 rounded hover:bg-background"
-            title="Preview"
-          >
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </button>
-          <button
-            onClick={() => onDelete(image.id)}
-            className="p-1.5 bg-destructive/90 rounded hover:bg-destructive"
-            title="Delete"
-          >
-            <Trash2 className="h-4 w-4 text-destructive-foreground" />
-          </button>
-        </div>
-      </div>
+      )}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
         <p className="text-white text-xs truncate">
           {image.caption_en || "No caption"}
@@ -188,6 +220,12 @@ export default function AdminGallery() {
     caption_ar: "",
     showInHero: false,
   });
+
+  // Bulk selection state
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkCategoryDialogOpen, setBulkCategoryDialogOpen] = useState(false);
+  const [bulkCategory, setBulkCategory] = useState("exterior");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -340,6 +378,48 @@ export default function AdminGallery() {
     },
   });
 
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("media").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["admin-gallery-media", selectedPropertyId],
+      });
+      toast.success(`${selectedIds.size} images deleted`);
+      setSelectedIds(new Set());
+      setIsSelectionMode(false);
+    },
+    onError: () => {
+      toast.error("Failed to delete images");
+    },
+  });
+
+  // Bulk update category mutation
+  const bulkUpdateCategoryMutation = useMutation({
+    mutationFn: async ({ ids, category }: { ids: string[]; category: string }) => {
+      const { error } = await supabase
+        .from("media")
+        .update({ category })
+        .in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["admin-gallery-media", selectedPropertyId],
+      });
+      toast.success(`Category updated for ${selectedIds.size} images`);
+      setSelectedIds(new Set());
+      setIsSelectionMode(false);
+      setBulkCategoryDialogOpen(false);
+    },
+    onError: () => {
+      toast.error("Failed to update category");
+    },
+  });
+
   const handleOpenEdit = useCallback((image: MediaRow) => {
     setEditingImage(image);
     setEditForm({
@@ -485,6 +565,47 @@ export default function AdminGallery() {
     setUploadForm({ category: "exterior", caption_en: "", caption_ar: "", showInHero: false });
   }, []);
 
+  const toggleSelectImage = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    if (!filteredMedia) return;
+    if (selectedIds.size === filteredMedia.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredMedia.map((m) => m.id)));
+    }
+  }, [filteredMedia, selectedIds.size]);
+
+  const handleExitSelectionMode = useCallback(() => {
+    setIsSelectionMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleBulkDelete = useCallback(() => {
+    if (selectedIds.size === 0) return;
+    if (confirm(`Are you sure you want to delete ${selectedIds.size} images?`)) {
+      bulkDeleteMutation.mutate(Array.from(selectedIds));
+    }
+  }, [selectedIds, bulkDeleteMutation]);
+
+  const handleBulkCategoryChange = useCallback(() => {
+    if (selectedIds.size === 0) return;
+    bulkUpdateCategoryMutation.mutate({
+      ids: Array.from(selectedIds),
+      category: bulkCategory,
+    });
+  }, [selectedIds, bulkCategory, bulkUpdateCategoryMutation]);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id || !filteredMedia) return;
@@ -560,14 +681,44 @@ export default function AdminGallery() {
               <ImageIcon className="h-5 w-5" />
               Gallery Images
             </CardTitle>
-            <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Add Images
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
+            <div className="flex items-center gap-2">
+              {isSelectionMode ? (
+                <>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleSelectAll}
+                  >
+                    {selectedIds.size === filteredMedia?.length ? "Deselect All" : "Select All"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleExitSelectionMode}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => setIsSelectionMode(true)}
+                    disabled={!filteredMedia || filteredMedia.length === 0}
+                  >
+                    <CheckSquare className="h-4 w-4" />
+                    Select
+                  </Button>
+                  <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="gap-2">
+                        <Plus className="h-4 w-4" />
+                        Add Images
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Upload Gallery Images</DialogTitle>
                 </DialogHeader>
@@ -740,12 +891,93 @@ export default function AdminGallery() {
                         )}
                       </Button>
                     </div>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          )}
+        </div>
           </CardHeader>
           <CardContent>
+            {/* Bulk Action Bar */}
+            {isSelectionMode && selectedIds.size > 0 && (
+              <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-between flex-wrap gap-3">
+                <span className="text-sm font-medium">
+                  {selectedIds.size} image{selectedIds.size > 1 ? "s" : ""} selected
+                </span>
+                <div className="flex items-center gap-2">
+                  <Dialog open={bulkCategoryDialogOpen} onOpenChange={setBulkCategoryDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="gap-2">
+                        <Pencil className="h-4 w-4" />
+                        Change Category
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Change Category for {selectedIds.size} Images</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div>
+                          <Label>New Category</Label>
+                          <Select
+                            value={bulkCategory}
+                            onValueChange={setBulkCategory}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {GALLERY_CATEGORIES.map((cat) => (
+                                <SelectItem key={cat.value} value={cat.value}>
+                                  {cat.label} / {cat.labelAr}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setBulkCategoryDialogOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleBulkCategoryChange}
+                            disabled={bulkUpdateCategoryMutation.isPending}
+                          >
+                            {bulkUpdateCategoryMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Updating...
+                              </>
+                            ) : (
+                              "Update Category"
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="gap-2"
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isPending}
+                  >
+                    {bulkDeleteMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    Delete Selected
+                  </Button>
+                </div>
+              </div>
+            )}
             {/* Category Tabs */}
             <Tabs
               value={activeCategory}
@@ -792,6 +1024,9 @@ export default function AdminGallery() {
                             onDelete={(id) => deleteMutation.mutate(id)}
                             onPreview={setPreviewImage}
                             onEdit={handleOpenEdit}
+                            isSelectionMode={isSelectionMode}
+                            isSelected={selectedIds.has(media.id)}
+                            onToggleSelect={toggleSelectImage}
                           />
                         ))}
                       </div>
