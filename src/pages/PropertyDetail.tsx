@@ -12,6 +12,7 @@ import PropertyGallery from "@/components/property-detail/PropertyGallery";
 import PropertyFloorPlans from "@/components/property-detail/PropertyFloorPlans";
 import PropertyPaymentPlan from "@/components/property-detail/PropertyPaymentPlan";
 import PropertyInquiry from "@/components/property-detail/PropertyInquiry";
+import PropertyBrochures from "@/components/property-detail/PropertyBrochures";
 import PropertyStickyTabs, { TabConfig } from "@/components/property-detail/PropertyStickyTabs";
 import PropertyTabContent from "@/components/property-detail/PropertyTabContent";
 import { Button } from "@/components/ui/button";
@@ -58,14 +59,20 @@ const PropertyDetail = () => {
     enabled: !!slug,
   });
 
+  // Check for content availability
+  const hasFloorPlans = property?.media.some(m => m.type === "floorplan" || m.type === "floor_plate") ?? false;
+  const hasBrochures = property?.media.some(m => m.type === "brochure") ?? false;
+  const hasGalleryImages = property?.media.filter(m => m.type === "render" || m.type === "interior").length > 0;
+
   // Build tabs based on available content
   const tabs: TabConfig[] = property ? [
     { id: "overview", label: t("sections.overview"), show: true },
     { id: "location", label: t("sections.location"), show: true },
     { id: "amenities", label: t("sections.amenities"), show: property.amenities.length > 0 },
-    { id: "floorPlans", label: t("sections.floorPlans"), show: property.media.some(m => m.type === "floorplan") },
+    { id: "floorPlans", label: t("sections.floorPlans"), show: hasFloorPlans },
     { id: "paymentPlan", label: t("sections.paymentPlan"), show: property.payment_milestones.length > 0 },
-    { id: "gallery", label: t("sections.gallery"), show: property.media.filter(m => m.type === "render" || m.type === "interior").length > 0 },
+    { id: "gallery", label: t("sections.gallery"), show: hasGalleryImages },
+    { id: "brochures", label: language === "ar" ? "الكتيبات" : "Brochures", show: hasBrochures },
     { id: "inquire", label: t("sections.inquire"), show: true },
   ] : [];
 
@@ -208,7 +215,7 @@ const PropertyDetail = () => {
             </PropertyTabContent>
           )}
 
-          {property.media.some(m => m.type === "floorplan") && (
+          {hasFloorPlans && (
             <PropertyTabContent activeTab={activeTab} tabId="floorPlans">
               <PropertyFloorPlans property={property} />
             </PropertyTabContent>
@@ -220,9 +227,15 @@ const PropertyDetail = () => {
             </PropertyTabContent>
           )}
 
-        {property.media.filter(m => m.type === "render" || m.type === "interior").length > 0 && (
+          {hasGalleryImages && (
             <PropertyTabContent activeTab={activeTab} tabId="gallery">
               <PropertyGallery property={property} />
+            </PropertyTabContent>
+          )}
+
+          {hasBrochures && (
+            <PropertyTabContent activeTab={activeTab} tabId="brochures">
+              <PropertyBrochures property={property} />
             </PropertyTabContent>
           )}
 

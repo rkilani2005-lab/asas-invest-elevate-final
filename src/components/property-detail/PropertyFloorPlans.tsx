@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, ZoomIn, Download, Maximize2 } from "lucide-react";
+import { X, Download, Maximize2, FileText, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,6 +12,10 @@ interface PropertyFloorPlansProps {
   };
 }
 
+function isPDF(url: string): boolean {
+  return url.toLowerCase().endsWith('.pdf');
+}
+
 const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
   const { t, isRTL, language } = useLanguage();
   const [selectedPlan, setSelectedPlan] = useState<Tables<"media"> | null>(null);
@@ -21,6 +25,10 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
   const floorPlans = property.media
     .filter(m => m.type === "floorplan" || m.type === "floor_plate")
     .sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
+
+  // Separate PDFs and images
+  const pdfPlans = floorPlans.filter(p => isPDF(p.url));
+  const imagePlans = floorPlans.filter(p => !isPDF(p.url));
 
   const openLightbox = (plan: Tables<"media">) => {
     setSelectedPlan(plan);
@@ -47,58 +55,159 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
           {t("sections.floorPlans")}
         </h2>
 
-        {/* Floor Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {floorPlans.map((plan, index) => {
-            const caption = language === "ar" && plan.caption_ar ? plan.caption_ar : plan.caption_en;
-            
-            return (
-              <motion.div
-                key={plan.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="group bg-secondary/50 rounded-xl overflow-hidden border border-border hover:border-accent/30 transition-all duration-300"
-              >
-                {/* Image */}
-                <div 
-                  className="relative aspect-square p-6 cursor-pointer"
-                  onClick={() => openLightbox(plan)}
-                >
-                  <img
-                    src={plan.url}
-                    alt={caption || `Floor plan ${index + 1}`}
-                    className="w-full h-full object-contain"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
-                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
-                        <Maximize2 className="h-5 w-5 text-foreground" />
+        {/* PDF Floor Plans */}
+        {pdfPlans.length > 0 && (
+          <div className="mb-8">
+            <h3 className={cn(
+              "text-lg font-medium text-foreground mb-4",
+              isRTL && "text-right"
+            )}>
+              {language === "ar" ? "مخططات PDF" : "PDF Floor Plans"}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pdfPlans.map((plan, index) => {
+                const caption = language === "ar" && plan.caption_ar 
+                  ? plan.caption_ar 
+                  : plan.caption_en || `Floor Plan ${index + 1}`;
+                
+                return (
+                  <motion.div
+                    key={plan.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className={cn(
+                      "group bg-secondary/50 rounded-xl border border-border p-4 hover:border-accent/30 hover:shadow-md transition-all duration-300",
+                      isRTL && "text-right"
+                    )}
+                  >
+                    <div className={cn(
+                      "flex items-center gap-4",
+                      isRTL && "flex-row-reverse"
+                    )}>
+                      <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <FileText className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate">
+                          {caption}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {plan.type === "floor_plate" 
+                            ? (language === "ar" ? "مخطط الطابق" : "Floor Plate") 
+                            : (language === "ar" ? "مخطط الوحدة" : "Unit Layout")}
+                        </p>
+                      </div>
+                      <div className={cn(
+                        "flex items-center gap-2",
+                        isRTL && "flex-row-reverse"
+                      )}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-9 w-9"
+                          asChild
+                        >
+                          <a
+                            href={plan.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={language === "ar" ? "عرض" : "View"}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-9 w-9"
+                          asChild
+                        >
+                          <a
+                            href={plan.url}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={language === "ar" ? "تحميل" : "Download"}
+                          >
+                            <Download className="h-4 w-4" />
+                          </a>
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-                {/* Info */}
-                <div className={cn(
-                  "p-4 border-t border-border bg-background",
-                  isRTL && "text-right"
-                )}>
-                  <p className="font-medium text-foreground mb-1">
-                    {caption || `Floor Plan ${index + 1}`}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {plan.type === "floor_plate" ? "Floor Plate" : "Unit Layout"}
-                  </p>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+        {/* Image Floor Plans Grid */}
+        {imagePlans.length > 0 && (
+          <>
+            {pdfPlans.length > 0 && (
+              <h3 className={cn(
+                "text-lg font-medium text-foreground mb-4",
+                isRTL && "text-right"
+              )}>
+                {language === "ar" ? "مخططات صور" : "Image Floor Plans"}
+              </h3>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {imagePlans.map((plan, index) => {
+                const caption = language === "ar" && plan.caption_ar ? plan.caption_ar : plan.caption_en;
+                
+                return (
+                  <motion.div
+                    key={plan.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="group bg-secondary/50 rounded-xl overflow-hidden border border-border hover:border-accent/30 transition-all duration-300"
+                  >
+                    {/* Image */}
+                    <div 
+                      className="relative aspect-square p-6 cursor-pointer"
+                      onClick={() => openLightbox(plan)}
+                    >
+                      <img
+                        src={plan.url}
+                        alt={caption || `Floor plan ${index + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
+                          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                            <Maximize2 className="h-5 w-5 text-foreground" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-        {/* Lightbox */}
+                    {/* Info */}
+                    <div className={cn(
+                      "p-4 border-t border-border bg-background",
+                      isRTL && "text-right"
+                    )}>
+                      <p className="font-medium text-foreground mb-1">
+                        {caption || `Floor Plan ${index + 1}`}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {plan.type === "floor_plate" 
+                          ? (language === "ar" ? "مخطط الطابق" : "Floor Plate") 
+                          : (language === "ar" ? "مخطط الوحدة" : "Unit Layout")}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* Lightbox for Images */}
         <AnimatePresence>
-          {lightboxOpen && selectedPlan && (
+          {lightboxOpen && selectedPlan && !isPDF(selectedPlan.url) && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
