@@ -55,6 +55,7 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { compressImage, getExtensionFromBlob } from "@/lib/image-compression";
 
 interface UploadProgress {
   fileName: string;
@@ -376,19 +377,36 @@ export default function AdminGallery() {
     for (let i = 0; i < selectedFiles.length; i++) {
       const file = selectedFiles[i];
       
+      // Show compressing status
       setUploadProgress((prev) =>
         prev.map((p, idx) =>
-          idx === i ? { ...p, status: "uploading" as const, progress: 30 } : p
+          idx === i ? { ...p, status: "uploading" as const, progress: 10 } : p
         )
       );
 
       try {
-        const fileExt = file.name.split(".").pop();
+        // Compress the image
+        const originalSize = file.size;
+        const compressedBlob = await compressImage(file);
+        const compressionRatio = ((1 - compressedBlob.size / originalSize) * 100).toFixed(0);
+        
+        console.log(`Compressed ${file.name}: ${(originalSize / 1024).toFixed(0)}KB → ${(compressedBlob.size / 1024).toFixed(0)}KB (${compressionRatio}% reduction)`);
+
+        setUploadProgress((prev) =>
+          prev.map((p, idx) =>
+            idx === i ? { ...p, progress: 40 } : p
+          )
+        );
+
+        // Determine file extension based on blob type
+        const fileExt = getExtensionFromBlob(compressedBlob);
         const fileName = `${selectedPropertyId}/${Date.now()}-${i}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from("property-media")
-          .upload(fileName, file);
+          .upload(fileName, compressedBlob, {
+            contentType: compressedBlob.type,
+          });
 
         if (uploadError) throw uploadError;
 

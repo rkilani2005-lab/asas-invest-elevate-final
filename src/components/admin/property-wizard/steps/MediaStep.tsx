@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { PropertyData, MediaItem, MediaType } from "../types";
+import { compressImage, getExtensionFromBlob } from "@/lib/image-compression";
 
 interface MediaStepProps {
   data: PropertyData;
@@ -272,33 +273,49 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const fileName = `properties/${propertyId || "new"}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-
-      console.log("Uploading file:", fileName);
       
-      const { error } = await supabase.storage
-        .from("property-media")
-        .upload(fileName, file);
+      try {
+        // Compress the image before upload
+        const originalSize = file.size;
+        const compressedBlob = await compressImage(file);
+        const compressionRatio = ((1 - compressedBlob.size / originalSize) * 100).toFixed(0);
+        
+        console.log(`Compressed ${file.name}: ${(originalSize / 1024).toFixed(0)}KB → ${(compressedBlob.size / 1024).toFixed(0)}KB (${compressionRatio}% reduction)`);
 
-      if (error) {
-        console.error("Upload error:", error);
-        toast.error(`Failed to upload ${file.name}: ${error.message}`);
-        continue;
+        const fileExt = getExtensionFromBlob(compressedBlob);
+        const fileName = `properties/${propertyId || "new"}/${Date.now()}-${i}.${fileExt}`;
+
+        console.log("Uploading compressed file:", fileName);
+        
+        const { error } = await supabase.storage
+          .from("property-media")
+          .upload(fileName, compressedBlob, {
+            contentType: compressedBlob.type,
+          });
+
+        if (error) {
+          console.error("Upload error:", error);
+          toast.error(`Failed to upload ${file.name}: ${error.message}`);
+          continue;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from("property-media")
+          .getPublicUrl(fileName);
+
+        console.log("Uploaded successfully, URL:", urlData.publicUrl);
+
+        newMedia.push({
+          id: crypto.randomUUID(),
+          url: urlData.publicUrl,
+          type: "render",
+          category: "exterior",
+          order_index: data.media.length + i,
+        });
+      } catch (error) {
+        console.error("Compression/upload error:", error);
+        toast.error(`Failed to process ${file.name}`);
       }
-
-      const { data: urlData } = supabase.storage
-        .from("property-media")
-        .getPublicUrl(fileName);
-
-      console.log("Uploaded successfully, URL:", urlData.publicUrl);
-
-      newMedia.push({
-        id: crypto.randomUUID(),
-        url: urlData.publicUrl,
-        type: "render",
-        category: "exterior",
-        order_index: data.media.length + i,
-      });
     }
 
     if (newMedia.length > 0) {
