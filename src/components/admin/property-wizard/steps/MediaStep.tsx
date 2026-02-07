@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, X, Loader2, GripVertical, Video, Image } from "lucide-react";
+import { Upload, X, Loader2, GripVertical, Video, Image, FileText, File } from "lucide-react";
 import { toast } from "sonner";
 import {
   DndContext,
@@ -58,6 +58,10 @@ const mediaTypes: { value: MediaType; label: string }[] = [
   { value: "brochure", label: "Brochure" },
 ];
 
+function isPDF(url: string): boolean {
+  return url.toLowerCase().endsWith('.pdf');
+}
+
 function SortableMediaItem({
   item,
   onUpdate,
@@ -77,17 +81,28 @@ function SortableMediaItem({
     transition,
   };
 
+  const isFilePDF = isPDF(item.url);
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className="relative group bg-muted rounded-lg overflow-hidden"
     >
-      <img
-        src={item.url}
-        alt={item.caption_en || "Property media"}
-        className="w-full h-32 object-cover"
-      />
+      {isFilePDF ? (
+        <div className="w-full h-32 flex flex-col items-center justify-center bg-muted/50">
+          <FileText className="h-10 w-10 text-primary mb-1" />
+          <span className="text-xs text-muted-foreground px-2 text-center truncate w-full">
+            {item.caption_en || "PDF Document"}
+          </span>
+        </div>
+      ) : (
+        <img
+          src={item.url}
+          alt={item.caption_en || "Property media"}
+          className="w-full h-32 object-cover"
+        />
+      )}
       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
         <button
           {...attributes}
@@ -96,6 +111,17 @@ function SortableMediaItem({
         >
           <GripVertical className="h-4 w-4 text-white" />
         </button>
+        {isFilePDF && (
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 bg-white/20 rounded-lg hover:bg-white/30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <File className="h-4 w-4 text-white" />
+          </a>
+        )}
         <button
           onClick={() => onDelete(id)}
           className="p-2 bg-destructive/80 rounded-lg hover:bg-destructive"
@@ -145,15 +171,96 @@ function SortableMediaItem({
   );
 }
 
+function SortablePDFItem({
+  item,
+  onUpdate,
+  onDelete,
+  typeLabel,
+}: {
+  item: MediaItem;
+  onUpdate: (id: string, updates: Partial<MediaItem>) => void;
+  onDelete: (id: string) => void;
+  typeLabel: string;
+}) {
+  const id = item.id || item.url;
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 p-3 bg-muted rounded-lg group"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="p-1 hover:bg-muted-foreground/20 rounded cursor-grab"
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </button>
+      <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+        <FileText className="h-5 w-5 text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <Input
+          value={item.caption_en || ""}
+          onChange={(e) => onUpdate(id, { caption_en: e.target.value })}
+          placeholder={`${typeLabel} name (EN)`}
+          className="h-8 text-sm mb-1"
+        />
+        <Input
+          value={item.caption_ar || ""}
+          onChange={(e) => onUpdate(id, { caption_ar: e.target.value })}
+          placeholder={`${typeLabel} name (AR)`}
+          className="h-8 text-sm"
+          dir="rtl"
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <a
+          href={item.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
+        >
+          <File className="h-4 w-4 text-primary" />
+        </a>
+        <button
+          onClick={() => onDelete(id)}
+          className="p-2 bg-destructive/10 rounded-lg hover:bg-destructive/20 transition-colors"
+        >
+          <X className="h-4 w-4 text-destructive" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function MediaStep({ data, onChange, propertyId }: MediaStepProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [isVideoUploading, setIsVideoUploading] = useState(false);
+  const [isBrochureUploading, setIsBrochureUploading] = useState(false);
+  const [isFloorPlanUploading, setIsFloorPlanUploading] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
+  );
+
+  // Filter media by type
+  const imageMedia = data.media.filter(m => !isPDF(m.url) && m.type !== "brochure");
+  const brochureMedia = data.media.filter(m => m.type === "brochure");
+  const floorPlanMedia = data.media.filter(m => 
+    (m.type === "floorplan" || m.type === "floor_plate") && isPDF(m.url)
   );
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -201,6 +308,59 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
     }
 
     setIsUploading(false);
+    e.target.value = "";
+  }
+
+  async function handlePDFUpload(
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "brochure" | "floorplan" | "floor_plate",
+    setLoading: (v: boolean) => void
+  ) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setLoading(true);
+    const newMedia: MediaItem[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.type !== "application/pdf") {
+        toast.error(`${file.name} is not a PDF file`);
+        continue;
+      }
+
+      const fileName = `properties/${propertyId || "new"}/${type}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+
+      const { error } = await supabase.storage
+        .from("property-media")
+        .upload(fileName, file, { contentType: "application/pdf" });
+
+      if (error) {
+        console.error("Upload error:", error);
+        toast.error(`Failed to upload ${file.name}: ${error.message}`);
+        continue;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("property-media")
+        .getPublicUrl(fileName);
+
+      newMedia.push({
+        id: crypto.randomUUID(),
+        url: urlData.publicUrl,
+        type: type,
+        category: type === "brochure" ? "brochure" : "floorplan",
+        caption_en: file.name.replace(".pdf", "").replace(/_/g, " "),
+        order_index: data.media.length + i,
+      });
+    }
+
+    if (newMedia.length > 0) {
+      onChange({ media: [...data.media, ...newMedia] });
+      toast.success(`${newMedia.length} PDF(s) uploaded successfully`);
+    }
+
+    setLoading(false);
     e.target.value = "";
   }
 
@@ -298,23 +458,167 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
           </label>
 
           {/* Image Grid */}
-          {data.media.length > 0 && (
+          {imageMedia.length > 0 && (
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={data.media.map((m) => m.id || m.url)}
+                items={imageMedia.map((m) => m.id || m.url)}
                 strategy={rectSortingStrategy}
               >
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {data.media.map((item) => (
+                  {imageMedia.map((item) => (
                     <SortableMediaItem
                       key={item.id || item.url}
                       item={item}
                       onUpdate={updateMediaItem}
                       onDelete={deleteMediaItem}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Brochures (PDF) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Brochures
+          </CardTitle>
+          <CardDescription>
+            Upload property brochures in PDF format for download
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+            {isBrochureUploading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            ) : (
+              <>
+                <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                <span className="text-sm text-muted-foreground">
+                  Upload Brochures (PDF)
+                </span>
+              </>
+            )}
+            <input
+              type="file"
+              accept=".pdf,application/pdf"
+              multiple
+              className="hidden"
+              onChange={(e) => handlePDFUpload(e, "brochure", setIsBrochureUploading)}
+              disabled={isBrochureUploading}
+            />
+          </label>
+
+          {brochureMedia.length > 0 && (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={brochureMedia.map((m) => m.id || m.url)}
+                strategy={rectSortingStrategy}
+              >
+                <div className="space-y-2">
+                  {brochureMedia.map((item) => (
+                    <SortablePDFItem
+                      key={item.id || item.url}
+                      item={item}
+                      onUpdate={updateMediaItem}
+                      onDelete={deleteMediaItem}
+                      typeLabel="Brochure"
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Floor Plans & Floor Plates (PDF) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Floor Plans & Floor Plates (PDF)
+          </CardTitle>
+          <CardDescription>
+            Upload floor plans and floor plates in PDF format
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm mb-2 block">Floor Plans</Label>
+              <label className="flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                {isFloorPlanUploading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <>
+                    <Upload className="h-5 w-5 text-muted-foreground mb-1" />
+                    <span className="text-xs text-muted-foreground">Upload PDF</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => handlePDFUpload(e, "floorplan", setIsFloorPlanUploading)}
+                  disabled={isFloorPlanUploading}
+                />
+              </label>
+            </div>
+            <div>
+              <Label className="text-sm mb-2 block">Floor Plates</Label>
+              <label className="flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                {isFloorPlanUploading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <>
+                    <Upload className="h-5 w-5 text-muted-foreground mb-1" />
+                    <span className="text-xs text-muted-foreground">Upload PDF</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => handlePDFUpload(e, "floor_plate", setIsFloorPlanUploading)}
+                  disabled={isFloorPlanUploading}
+                />
+              </label>
+            </div>
+          </div>
+
+          {floorPlanMedia.length > 0 && (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={floorPlanMedia.map((m) => m.id || m.url)}
+                strategy={rectSortingStrategy}
+              >
+                <div className="space-y-2">
+                  {floorPlanMedia.map((item) => (
+                    <SortablePDFItem
+                      key={item.id || item.url}
+                      item={item}
+                      onUpdate={updateMediaItem}
+                      onDelete={deleteMediaItem}
+                      typeLabel={item.type === "floor_plate" ? "Floor Plate" : "Floor Plan"}
                     />
                   ))}
                 </div>
