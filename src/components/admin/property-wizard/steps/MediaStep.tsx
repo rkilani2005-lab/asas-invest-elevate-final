@@ -11,7 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, X, Loader2, GripVertical, Video, Image, FileText, File } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Upload, X, Loader2, GripVertical, Video, Image, FileText, File, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import {
   DndContext,
@@ -67,10 +74,12 @@ function SortableMediaItem({
   item,
   onUpdate,
   onDelete,
+  onEdit,
 }: {
   item: MediaItem;
   onUpdate: (id: string, updates: Partial<MediaItem>) => void;
   onDelete: (id: string) => void;
+  onEdit: (item: MediaItem) => void;
 }) {
   const id = item.id || item.url;
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -83,6 +92,7 @@ function SortableMediaItem({
   };
 
   const isFilePDF = isPDF(item.url);
+  const isHero = item.type === "hero";
 
   return (
     <div
@@ -104,6 +114,11 @@ function SortableMediaItem({
           className="w-full h-32 object-cover"
         />
       )}
+      {isHero && (
+        <div className="absolute top-2 left-2 px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-medium rounded">
+          Hero
+        </div>
+      )}
       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
         <button
           {...attributes}
@@ -111,6 +126,12 @@ function SortableMediaItem({
           className="p-2 bg-white/20 rounded-lg hover:bg-white/30 cursor-grab"
         >
           <GripVertical className="h-4 w-4 text-white" />
+        </button>
+        <button
+          onClick={() => onEdit(item)}
+          className="p-2 bg-white/20 rounded-lg hover:bg-white/30"
+        >
+          <Pencil className="h-4 w-4 text-white" />
         </button>
         {isFilePDF && (
           <a
@@ -130,43 +151,11 @@ function SortableMediaItem({
           <X className="h-4 w-4 text-white" />
         </button>
       </div>
-      <div className="p-2 space-y-2">
-        <Select
-          value={item.type}
-          onValueChange={(value) => onUpdate(id, { type: value as MediaType })}
-        >
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
-          <SelectContent>
-            {mediaTypes.map((type) => (
-              <SelectItem key={type.value} value={type.value}>
-                {type.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={item.category}
-          onValueChange={(value) => onUpdate(id, { category: value })}
-        >
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            {mediaCategories.map((cat) => (
-              <SelectItem key={cat.value} value={cat.value}>
-                {cat.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Input
-          value={item.caption_en || ""}
-          onChange={(e) => onUpdate(id, { caption_en: e.target.value })}
-          placeholder="Caption (EN)"
-          className="h-8 text-xs"
-        />
+      <div className="p-2">
+        <p className="text-xs font-medium truncate">{item.caption_en || "No caption"}</p>
+        <p className="text-[10px] text-muted-foreground capitalize">
+          {mediaTypes.find(t => t.value === item.type)?.label || item.type} • {item.category || "uncategorized"}
+        </p>
       </div>
     </div>
   );
@@ -249,6 +238,14 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
   const [isVideoUploading, setIsVideoUploading] = useState(false);
   const [isBrochureUploading, setIsBrochureUploading] = useState(false);
   const [isFloorPlanUploading, setIsFloorPlanUploading] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
+  const [editForm, setEditForm] = useState({
+    type: "render" as MediaType,
+    category: "exterior",
+    caption_en: "",
+    caption_ar: "",
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -435,6 +432,31 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
     });
   }
 
+  function handleOpenEdit(item: MediaItem) {
+    setEditingItem(item);
+    setEditForm({
+      type: item.type,
+      category: item.category || "exterior",
+      caption_en: item.caption_en || "",
+      caption_ar: item.caption_ar || "",
+    });
+    setEditDialogOpen(true);
+  }
+
+  function handleSaveEdit() {
+    if (!editingItem) return;
+    const id = editingItem.id || editingItem.url;
+    updateMediaItem(id, {
+      type: editForm.type,
+      category: editForm.category,
+      caption_en: editForm.caption_en,
+      caption_ar: editForm.caption_ar,
+    });
+    setEditDialogOpen(false);
+    setEditingItem(null);
+    toast.success("Image updated successfully");
+  }
+
   return (
     <div className="space-y-6">
       {/* Image Upload */}
@@ -492,6 +514,7 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
                       item={item}
                       onUpdate={updateMediaItem}
                       onDelete={deleteMediaItem}
+                      onEdit={handleOpenEdit}
                     />
                   ))}
                 </div>
@@ -733,6 +756,121 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Image Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Image</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {editingItem && !isPDF(editingItem.url) && (
+              <div className="flex justify-center">
+                <img
+                  src={editingItem.url}
+                  alt="Preview"
+                  className="max-h-40 rounded-lg object-contain"
+                />
+              </div>
+            )}
+            <div>
+              <Label>Type</Label>
+              <Select
+                value={editForm.type}
+                onValueChange={(v) =>
+                  setEditForm((prev) => ({ ...prev, type: v as MediaType }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {mediaTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select
+                value={editForm.category}
+                onValueChange={(v) =>
+                  setEditForm((prev) => ({ ...prev, category: v }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {mediaCategories.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Caption (EN)</Label>
+                <Input
+                  value={editForm.caption_en}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      caption_en: e.target.value,
+                    }))
+                  }
+                  placeholder="Image caption"
+                />
+              </div>
+              <div>
+                <Label>Caption (AR)</Label>
+                <Input
+                  value={editForm.caption_ar}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      caption_ar: e.target.value,
+                    }))
+                  }
+                  placeholder="عنوان الصورة"
+                  dir="rtl"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+              <Checkbox
+                id="mediaShowInHero"
+                checked={editForm.type === "hero"}
+                onCheckedChange={(checked) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    type: checked ? "hero" : "render",
+                  }))
+                }
+              />
+              <Label htmlFor="mediaShowInHero" className="text-sm cursor-pointer">
+                Show in Property Hero Slider
+              </Label>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setEditDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
