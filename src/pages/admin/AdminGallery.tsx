@@ -22,6 +22,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
   Plus,
@@ -170,6 +171,7 @@ export default function AdminGallery() {
     category: "exterior",
     caption_en: "",
     caption_ar: "",
+    showInHero: false,
   });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingImage, setEditingImage] = useState<MediaRow | null>(null);
@@ -177,6 +179,7 @@ export default function AdminGallery() {
     category: "",
     caption_en: "",
     caption_ar: "",
+    showInHero: false,
   });
 
   const sensors = useSensors(
@@ -261,7 +264,7 @@ export default function AdminGallery() {
         queryKey: ["admin-gallery-media", selectedPropertyId],
       });
       toast.success("Image uploaded successfully");
-      setUploadForm({ category: "exterior", caption_en: "", caption_ar: "" });
+      setUploadForm({ category: "exterior", caption_en: "", caption_ar: "", showInHero: false });
     },
     onError: (error) => {
       toast.error("Failed to upload image");
@@ -305,13 +308,14 @@ export default function AdminGallery() {
 
   // Update mutation for editing
   const updateMutation = useMutation({
-    mutationFn: async (data: { id: string; category: string; caption_en: string | null; caption_ar: string | null }) => {
+    mutationFn: async (data: { id: string; category: string; caption_en: string | null; caption_ar: string | null; type: "hero" | "render" }) => {
       const { error } = await supabase
         .from("media")
         .update({
           category: data.category,
           caption_en: data.caption_en,
           caption_ar: data.caption_ar,
+          type: data.type,
         })
         .eq("id", data.id);
       if (error) throw error;
@@ -335,6 +339,7 @@ export default function AdminGallery() {
       category: image.category || "exterior",
       caption_en: image.caption_en || "",
       caption_ar: image.caption_ar || "",
+      showInHero: image.type === "hero",
     });
     setEditDialogOpen(true);
   }, []);
@@ -346,6 +351,7 @@ export default function AdminGallery() {
       category: editForm.category,
       caption_en: editForm.caption_en || null,
       caption_ar: editForm.caption_ar || null,
+      type: editForm.showInHero ? "hero" : "render",
     });
   }, [editingImage, editForm, updateMutation]);
 
@@ -425,7 +431,7 @@ export default function AdminGallery() {
         const { error: insertError } = await supabase.from("media").insert({
           property_id: selectedPropertyId,
           url: publicUrl,
-          type: "render",
+          type: uploadForm.showInHero ? "hero" : "render",
           category: uploadForm.category,
           caption_en: uploadForm.caption_en || null,
           caption_ar: uploadForm.caption_ar || null,
@@ -461,7 +467,7 @@ export default function AdminGallery() {
       setSelectedFiles([]);
       setUploadProgress([]);
       setUploadDialogOpen(false);
-      setUploadForm({ category: "exterior", caption_en: "", caption_ar: "" });
+      setUploadForm({ category: "exterior", caption_en: "", caption_ar: "", showInHero: false });
       toast.success(`${selectedFiles.length} images uploaded successfully`);
     }, 1000);
   };
@@ -469,7 +475,7 @@ export default function AdminGallery() {
   const resetUploadDialog = useCallback(() => {
     setSelectedFiles([]);
     setUploadProgress([]);
-    setUploadForm({ category: "exterior", caption_en: "", caption_ar: "" });
+    setUploadForm({ category: "exterior", caption_en: "", caption_ar: "", showInHero: false });
   }, []);
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -607,6 +613,18 @@ export default function AdminGallery() {
                         dir="rtl"
                       />
                     </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                    <Checkbox
+                      id="showInHero"
+                      checked={uploadForm.showInHero}
+                      onCheckedChange={(checked) =>
+                        setUploadForm((prev) => ({ ...prev, showInHero: checked === true }))
+                      }
+                    />
+                    <Label htmlFor="showInHero" className="text-sm cursor-pointer">
+                      Show in Property Hero Slider
+                    </Label>
                   </div>
                   <div>
                     <Label>Select Images</Label>
@@ -851,6 +869,18 @@ export default function AdminGallery() {
                   dir="rtl"
                 />
               </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+              <Checkbox
+                id="editShowInHero"
+                checked={editForm.showInHero}
+                onCheckedChange={(checked) =>
+                  setEditForm((prev) => ({ ...prev, showInHero: checked === true }))
+                }
+              />
+              <Label htmlFor="editShowInHero" className="text-sm cursor-pointer">
+                Show in Property Hero Slider
+              </Label>
             </div>
             <div className="flex justify-end gap-2">
               <Button

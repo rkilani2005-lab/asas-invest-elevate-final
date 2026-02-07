@@ -18,9 +18,9 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
-  // Get hero and render images
+  // Get only hero images (not render images)
   const heroImages = property.media
-    .filter((m) => m.type === "hero" || m.type === "render")
+    .filter((m) => m.type === "hero")
     .sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
 
   const images = heroImages.length > 0 
