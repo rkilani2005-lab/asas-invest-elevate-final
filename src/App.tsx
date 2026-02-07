@@ -28,6 +28,7 @@ import AdminInsights from "./pages/admin/AdminInsights";
 import InsightEditorPage from "./pages/admin/InsightEditorPage";
 import AdminHomeContent from "./pages/admin/AdminHomeContent";
 import PropertyWizardPage from "./pages/admin/PropertyWizardPage";
+import AdminAmenityLibrary from "./pages/admin/AdminAmenityLibrary";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
                 <Route path="/admin/insights/new" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
                 <Route path="/admin/insights/:id/edit" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
                 <Route path="/admin/home-content" element={<AdminLayout><AdminHomeContent /></AdminLayout>} />
+                <Route path="/admin/amenities" element={<AdminLayout><AdminAmenityLibrary /></AdminLayout>} />
                 <Route path="/admin/translations" element={<AdminLayout><AdminTranslations /></AdminLayout>} />
                 <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
                 
