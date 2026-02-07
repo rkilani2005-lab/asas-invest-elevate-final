@@ -60,7 +60,13 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
 
   return (
     <>
-      <div className="relative h-[60vh] md:h-[80vh] w-full overflow-hidden pt-20 grain-overlay">
+      <div className="relative h-[60vh] md:h-[80vh] w-full overflow-hidden grain-overlay">
+        {/* Cinematic Letterbox - Top Bar */}
+        <div className="absolute top-0 left-0 right-0 h-20 md:h-24 bg-gradient-to-b from-charcoal via-charcoal/90 to-transparent z-10" />
+        
+        {/* Cinematic Letterbox - Bottom Bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 md:h-20 bg-gradient-to-t from-charcoal via-charcoal/80 to-transparent z-10" />
+        
         {/* Image Carousel */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -76,9 +82,6 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
               alt={property.name_en}
               className="w-full h-full object-cover object-center brightness-105 saturate-110"
             />
-            {/* Warm bright overlay for gold text legibility */}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-background/60" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-transparent" />
           </motion.div>
         </AnimatePresence>
 
