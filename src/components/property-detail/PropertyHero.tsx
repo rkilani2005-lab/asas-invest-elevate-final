@@ -60,7 +60,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
 
   return (
     <>
-      <div className="relative h-[60vh] md:h-auto md:aspect-[21/9] w-full overflow-hidden pt-20 grain-overlay">
+      <div className="relative h-[60vh] md:h-auto md:aspect-[16/9] w-full overflow-hidden pt-20 grain-overlay bg-secondary">
         {/* Image Carousel */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -74,7 +74,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
             <img
               src={images[currentIndex].url}
               alt={property.name_en}
-              className="w-full h-full object-cover object-center brightness-105 saturate-110"
+              className="w-full h-full object-cover md:object-contain object-center brightness-105 saturate-110"
             />
             {/* Warm bright overlay for gold text legibility */}
             <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-background/60" />
