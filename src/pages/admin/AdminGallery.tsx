@@ -39,6 +39,8 @@ import {
   Pencil,
   CheckSquare,
   Square,
+  RefreshCw,
+  FileWarning,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import {
@@ -241,6 +243,8 @@ export default function AdminGallery() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkCategoryDialogOpen, setBulkCategoryDialogOpen] = useState(false);
   const [bulkCategory, setBulkCategory] = useState("exterior");
+  const [isRecompressing, setIsRecompressing] = useState(false);
+  const [recompressProgress, setRecompressProgress] = useState({ current: 0, total: 0 });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -622,6 +626,85 @@ export default function AdminGallery() {
     });
   }, [selectedIds, bulkCategory, bulkUpdateCategoryMutation]);
 
+  // Bulk re-compress handler
+  const handleBulkRecompress = useCallback(async () => {
+    if (selectedIds.size === 0 || !galleryMedia) return;
+    
+    const selectedImages = galleryMedia.filter((m) => selectedIds.has(m.id));
+    // Only recompress images > 200KB
+    const largeImages = selectedImages.filter((m) => (m.file_size || 0) > 200 * 1024);
+    
+    if (largeImages.length === 0) {
+      toast.info("No large images to re-compress (all selected are under 200KB)");
+      return;
+    }
+
+    setIsRecompressing(true);
+    setRecompressProgress({ current: 0, total: largeImages.length });
+    
+    let successCount = 0;
+    
+    for (let i = 0; i < largeImages.length; i++) {
+      const image = largeImages[i];
+      setRecompressProgress({ current: i + 1, total: largeImages.length });
+      
+      try {
+        // Fetch the image
+        const response = await fetch(image.url);
+        const blob = await response.blob();
+        const file = new File([blob], `image.${blob.type.split("/")[1] || "jpg"}`, { type: blob.type });
+        
+        // Compress with higher compression
+        const compressedBlob = await compressImage(file, 0.75);
+        
+        // Only update if we achieved meaningful compression (>10%)
+        if (compressedBlob.size < blob.size * 0.9) {
+          const fileExt = getExtensionFromBlob(compressedBlob);
+          const fileName = `${selectedPropertyId}/${Date.now()}-recompressed-${i}.${fileExt}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from("property-media")
+            .upload(fileName, compressedBlob, { contentType: compressedBlob.type });
+          
+          if (uploadError) throw uploadError;
+          
+          const { data: { publicUrl } } = supabase.storage
+            .from("property-media")
+            .getPublicUrl(fileName);
+          
+          // Update the media record
+          const { error: updateError } = await supabase
+            .from("media")
+            .update({ url: publicUrl, file_size: compressedBlob.size })
+            .eq("id", image.id);
+          
+          if (updateError) throw updateError;
+          
+          successCount++;
+          console.log(`Re-compressed ${image.id}: ${formatFileSize(blob.size)} → ${formatFileSize(compressedBlob.size)}`);
+        } else {
+          console.log(`Skipped ${image.id}: compression would not improve size significantly`);
+        }
+      } catch (error) {
+        console.error(`Failed to re-compress image ${image.id}:`, error);
+      }
+    }
+    
+    setIsRecompressing(false);
+    setRecompressProgress({ current: 0, total: 0 });
+    
+    queryClient.invalidateQueries({ queryKey: ["admin-gallery-media", selectedPropertyId] });
+    
+    if (successCount > 0) {
+      toast.success(`Re-compressed ${successCount} of ${largeImages.length} images`);
+    } else {
+      toast.info("No images needed re-compression");
+    }
+    
+    setSelectedIds(new Set());
+    setIsSelectionMode(false);
+  }, [selectedIds, galleryMedia, selectedPropertyId, queryClient]);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id || !filteredMedia) return;
@@ -706,6 +789,21 @@ export default function AdminGallery() {
                     onClick={handleSelectAll}
                   >
                     {selectedIds.size === filteredMedia?.length ? "Deselect All" : "Select All"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="gap-1 text-yellow-600 hover:text-yellow-700"
+                    onClick={() => {
+                      if (!filteredMedia) return;
+                      const largeIds = filteredMedia
+                        .filter((m) => (m.file_size || 0) > 200 * 1024)
+                        .map((m) => m.id);
+                      setSelectedIds(new Set(largeIds));
+                    }}
+                  >
+                    <FileWarning className="h-4 w-4" />
+                    Select Large
                   </Button>
                   <Button
                     size="sm"
@@ -977,6 +1075,25 @@ export default function AdminGallery() {
                       </div>
                     </DialogContent>
                   </Dialog>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="gap-2"
+                    onClick={handleBulkRecompress}
+                    disabled={isRecompressing}
+                  >
+                    {isRecompressing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {recompressProgress.current}/{recompressProgress.total}
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4" />
+                        Re-compress
+                      </>
+                    )}
+                  </Button>
                   <Button
                     size="sm"
                     variant="destructive"
