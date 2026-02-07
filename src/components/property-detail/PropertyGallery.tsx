@@ -11,25 +11,43 @@ interface PropertyGalleryProps {
   };
 }
 
+const GALLERY_CATEGORIES = {
+  exterior: { en: "Exterior", ar: "الخارج" },
+  interior: { en: "Interior", ar: "الداخل" },
+  amenities: { en: "Amenities", ar: "المرافق" },
+  views: { en: "Views", ar: "الإطلالات" },
+  lifestyle: { en: "Lifestyle", ar: "نمط الحياة" },
+};
+
 const PropertyGallery = ({ property }: PropertyGalleryProps) => {
   const { t, isRTL, language } = useLanguage();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("all");
 
-  // Filter and categorize media
+  // Filter gallery media (exclude hero and floorplans)
   const allMedia = property.media.filter(m => 
-    m.type === "render" || m.type === "interior" || m.type === "hero"
+    m.type === "render" || m.type === "interior"
   );
-  const interiors = property.media.filter(m => m.type === "interior");
-  const renders = property.media.filter(m => m.type === "render" || m.type === "hero");
-  const materials = property.media.filter(m => m.type === "material");
+
+  // Categorize by the category field
+  const exterior = allMedia.filter(m => m.category === "exterior");
+  const interior = allMedia.filter(m => m.category === "interior");
+  const amenitiesMedia = allMedia.filter(m => m.category === "amenities");
+  const views = allMedia.filter(m => m.category === "views");
+  const lifestyle = allMedia.filter(m => m.category === "lifestyle");
+  const uncategorized = allMedia.filter(m => 
+    !m.category || !Object.keys(GALLERY_CATEGORIES).includes(m.category)
+  );
 
   const tabs = [
-    { id: "all", label: "All", items: allMedia },
-    { id: "renders", label: "Renders", items: renders },
-    { id: "interiors", label: "Interiors", items: interiors },
-    { id: "materials", label: "Materials", items: materials },
+    { id: "all", label: language === "ar" ? "الكل" : "All", items: allMedia },
+    { id: "exterior", label: GALLERY_CATEGORIES.exterior[language === "ar" ? "ar" : "en"], items: exterior },
+    { id: "interior", label: GALLERY_CATEGORIES.interior[language === "ar" ? "ar" : "en"], items: interior },
+    { id: "amenities", label: GALLERY_CATEGORIES.amenities[language === "ar" ? "ar" : "en"], items: amenitiesMedia },
+    { id: "views", label: GALLERY_CATEGORIES.views[language === "ar" ? "ar" : "en"], items: views },
+    { id: "lifestyle", label: GALLERY_CATEGORIES.lifestyle[language === "ar" ? "ar" : "en"], items: lifestyle },
+    ...(uncategorized.length > 0 ? [{ id: "other", label: language === "ar" ? "أخرى" : "Other", items: uncategorized }] : []),
   ].filter(tab => tab.items.length > 0);
 
   const currentMedia = tabs.find(t => t.id === activeTab)?.items || allMedia;

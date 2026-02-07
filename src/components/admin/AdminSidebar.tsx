@@ -12,12 +12,14 @@ import {
   Newspaper,
   Home,
   Sparkles,
+  Images,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/properties", icon: Building2, label: "Properties" },
+  { href: "/admin/gallery", icon: Images, label: "Gallery" },
   { href: "/admin/amenities", icon: Sparkles, label: "Amenity Library" },
   { href: "/admin/inquiries", icon: Users, label: "Inquiries" },
   { href: "/admin/insights", icon: Newspaper, label: "Insights" },

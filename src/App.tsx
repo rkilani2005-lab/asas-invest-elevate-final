@@ -21,6 +21,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProperties from "./pages/admin/AdminProperties";
+import AdminGallery from "./pages/admin/AdminGallery";
 import AdminInquiries from "./pages/admin/AdminInquiries";
 import AdminTranslations from "./pages/admin/AdminTranslations";
 import AdminSettings from "./pages/admin/AdminSettings";
@@ -55,6 +56,7 @@ const App = () => (
                 <Route path="/admin/properties" element={<AdminLayout><AdminProperties /></AdminLayout>} />
                 <Route path="/admin/properties/new" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
                 <Route path="/admin/properties/:id/edit" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
+                <Route path="/admin/gallery" element={<AdminLayout><AdminGallery /></AdminLayout>} />
                 <Route path="/admin/inquiries" element={<AdminLayout><AdminInquiries /></AdminLayout>} />
                 <Route path="/admin/insights" element={<AdminLayout><AdminInsights /></AdminLayout>} />
                 <Route path="/admin/insights/new" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />

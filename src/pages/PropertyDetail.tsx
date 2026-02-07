@@ -65,7 +65,7 @@ const PropertyDetail = () => {
     { id: "amenities", label: t("sections.amenities"), show: property.amenities.length > 0 },
     { id: "floorPlans", label: t("sections.floorPlans"), show: property.media.some(m => m.type === "floorplan") },
     { id: "paymentPlan", label: t("sections.paymentPlan"), show: property.payment_milestones.length > 0 },
-    { id: "gallery", label: t("sections.gallery"), show: property.media.filter(m => m.type !== "floorplan").length > 0 },
+    { id: "gallery", label: t("sections.gallery"), show: property.media.filter(m => m.type === "render" || m.type === "interior").length > 0 },
     { id: "inquire", label: t("sections.inquire"), show: true },
   ] : [];
 
@@ -220,7 +220,7 @@ const PropertyDetail = () => {
             </PropertyTabContent>
           )}
 
-          {property.media.filter(m => m.type !== "floorplan").length > 0 && (
+        {property.media.filter(m => m.type === "render" || m.type === "interior").length > 0 && (
             <PropertyTabContent activeTab={activeTab} tabId="gallery">
               <PropertyGallery property={property} />
             </PropertyTabContent>
