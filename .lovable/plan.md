@@ -1,69 +1,141 @@
 
-# Fix Property Hero Image Display on Desktop
+
+# Navigation Visibility Fix
 
 ## Problem Analysis
-The Property Hero currently uses viewport-height sizing (`h-[60vh]` mobile, `h-[70vh]` desktop) which creates display issues:
-- **Desktop**: Full-width container (~1920px) with 70vh height creates an ultra-wide landscape container (roughly 2.5:1 ratio). Portrait images get heavily cropped on the sides.
-- **Mobile**: Narrower screens (~375px) with 60vh creates a more square-ish container where portrait images fit naturally.
 
-## Solution
-Implement responsive aspect ratio control:
-- **Mobile**: Keep the current viewport-height approach (`h-[60vh]`) which works well
-- **Desktop**: Switch to a fixed cinematic aspect ratio (`aspect-[21/9]` or `aspect-[16/9]`) that ensures consistent landscape display regardless of image orientation
+The navigation bar uses `text-foreground/70` for link colors, which is a dark charcoal color. This works well on light backgrounds but becomes invisible when placed over:
 
-## Implementation Details
+1. **Home Page Video**: The video hero has a dark charcoal gradient overlay at the top, making dark text invisible
+2. **Property Detail Hero**: The new cinematic letterbox uses `from-charcoal` gradient bars, also making dark text invisible
 
-### File to Modify
-`src/components/property-detail/PropertyHero.tsx`
+Currently, the navigation only gets a solid background when scrolled (`isScrolled` state), leaving it transparent and unreadable at the top of both pages.
 
-### Changes
+---
 
-1. **Update Hero Container Classes** (Line 63)
-   - Current: `h-[60vh] md:h-[70vh]`
-   - New: `h-[60vh] md:h-auto md:aspect-[21/9]`
-   
-   This applies:
-   - Mobile: Fixed 60vh height (existing behavior - works well)
-   - Desktop: Auto height with 21:9 cinematic aspect ratio (fixes the vertical image issue)
+## Solution Options
 
-2. **Adjust Image Wrapper** (Line 72 - motion.div)
-   - Add `md:relative md:h-full` to ensure proper containment on desktop
-   - The `absolute inset-0` already handles mobile
+### Option A: Always-Visible Scrolled State (Simple)
+Add a semi-transparent dark background to the nav bar at all times, not just when scrolled.
 
-3. **Add Object Position** (Line 77 - img tag)
-   - Add `object-center` to ensure images are centered when cropped
-   - This focuses on the center of the image which is typically the most important part
+**Pros**: Simple, consistent across all pages
+**Cons**: Reduces the immersive feel of the hero sections
 
-### Visual Result
-```text
-┌────────────────────────────────────────────────────────────┐
-│                    DESKTOP (21:9 aspect)                   │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │                                                      │  │
-│  │        Image cropped to 21:9 landscape format        │  │
-│  │         (center-focused, sides cropped)              │  │
-│  │                                                      │  │
-│  └──────────────────────────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────┘
+### Option B: Smart Context-Aware Navigation (Recommended)
+Detect which page/section the user is on and adjust text colors accordingly:
+- On hero sections (home video, property detail): Use white/light text with text shadows
+- After scrolling: Use the current scrolled style with background
 
-┌──────────────┐
-│   MOBILE     │
-│ ┌──────────┐ │
-│ │          │ │
-│ │  60vh    │ │
-│ │  height  │ │
-│ │  (works) │ │
-│ └──────────┘ │
-└──────────────┘
+**Pros**: Maintains immersive design, readable everywhere
+**Cons**: Slightly more complex
+
+### Option C: Persistent Dark Header Bar
+Keep the dark gradient bar from the cinematic letterbox but extend it to cover the navigation height properly, and change nav text to light colors when not scrolled.
+
+**Pros**: Elegant solution that works with existing design
+**Cons**: Requires coordinating nav and hero gradients
+
+---
+
+## Recommended Implementation: Option B
+
+### Changes Required
+
+**1. Navigation Component (`src/components/Navigation.tsx`)**
+
+Add logic to detect if user is on a "dark hero" page (home or property detail):
+
+```typescript
+const isDarkHeroPage = location.pathname === "/" || location.pathname.startsWith("/property/");
+
+// When not scrolled on dark hero pages, use light text
+const navTextClass = !isScrolled && isDarkHeroPage 
+  ? "text-white/90 hover:text-white" 
+  : "text-foreground/70 hover:text-accent";
+
+const activeNavClass = !isScrolled && isDarkHeroPage
+  ? "text-white"
+  : "text-accent";
 ```
 
-## Alternative Aspect Ratios (if 21:9 feels too cinematic)
-- `aspect-[16/9]`: Standard widescreen - slightly taller hero
-- `aspect-[2/1]`: Simple 2:1 ratio - balanced option
-- `aspect-[21/9]`: Ultra-wide cinematic - dramatic, shorter hero
+**2. Add Text Shadows for Legibility**
 
-## Technical Notes
-- The `pt-20` padding for navigation will be preserved
-- Gradient overlays will continue to work as they use `absolute inset-0`
-- Navigation arrows and indicators remain properly positioned
-- No changes needed to mobile behavior
+When on dark hero backgrounds, add subtle text shadows to ensure readability:
+
+```typescript
+const navStyle = !isScrolled && isDarkHeroPage 
+  ? { textShadow: '0px 2px 8px rgba(0, 0, 0, 0.5)' }
+  : undefined;
+```
+
+**3. Mobile Menu Button Color**
+
+Update the hamburger icon color to be white when on dark hero pages:
+
+```typescript
+className={cn(
+  "lg:hidden p-2",
+  !isScrolled && isDarkHeroPage ? "text-white" : "text-foreground"
+)}
+```
+
+**4. Logo Border Adjustment**
+
+Make the logo border more visible on dark backgrounds:
+
+```typescript
+className={cn(
+  "h-14 w-14 rounded-full object-cover",
+  !isScrolled && isDarkHeroPage 
+    ? "border-2 border-white/50" 
+    : "border border-accent/30"
+)}
+```
+
+**5. Language Switcher & CTA Button**
+
+Pass a prop or use context to style these components appropriately on dark backgrounds.
+
+---
+
+## Technical Details
+
+### Files to Modify
+
+| File | Change |
+|------|--------|
+| `src/components/Navigation.tsx` | Add dark hero detection, conditional text colors, text shadows |
+| `src/components/layout/LanguageSwitcher.tsx` | Accept variant prop for light/dark styling |
+
+### Conditional Logic Summary
+
+```
+if (isScrolled) {
+  // Current scrolled behavior: solid background, dark text
+} else if (isDarkHeroPage) {
+  // NEW: Light text with shadows on transparent background
+} else {
+  // Default: Dark text on transparent background (for light hero pages)
+}
+```
+
+### Visual Result
+
+| State | Background | Text Color | Additional |
+|-------|------------|------------|------------|
+| Scrolled (all pages) | Semi-transparent with blur | Dark charcoal | Border + shadow |
+| Not scrolled (dark hero) | Transparent | White/light | Text shadow |
+| Not scrolled (light page) | Transparent | Dark charcoal | None |
+
+---
+
+## Implementation Order
+
+1. Update Navigation component with dark hero page detection
+2. Add conditional text color classes for nav links
+3. Add text shadows for legibility on dark backgrounds
+4. Update mobile menu button color
+5. Adjust logo border for better visibility
+6. Update CTA button styling for dark backgrounds
+7. Test on home page, property detail page, and other pages
+
