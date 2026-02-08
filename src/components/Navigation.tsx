@@ -13,6 +13,22 @@ const Navigation = () => {
   const { t, isRTL } = useLanguage();
   const location = useLocation();
 
+  // Detect if we're on a page with a dark hero background
+  const isDarkHeroPage = location.pathname === "/" || location.pathname.startsWith("/property/");
+  
+  // Text styling based on scroll state and background
+  const navTextClass = !isScrolled && isDarkHeroPage 
+    ? "text-white/90 hover:text-white" 
+    : "text-foreground/70 hover:text-accent";
+  
+  const activeNavClass = !isScrolled && isDarkHeroPage
+    ? "text-white"
+    : "text-accent";
+  
+  const navStyle = !isScrolled && isDarkHeroPage 
+    ? { textShadow: '0px 2px 8px rgba(0, 0, 0, 0.5)' }
+    : undefined;
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -53,7 +69,12 @@ const Navigation = () => {
             <img 
               src={asasLogo} 
               alt="Asas Invest Real Estate" 
-              className="h-14 w-14 rounded-full object-cover border border-accent/30"
+              className={cn(
+                "h-14 w-14 rounded-full object-cover transition-all duration-300",
+                !isScrolled && isDarkHeroPage 
+                  ? "border-2 border-white/50" 
+                  : "border border-accent/30"
+              )}
             />
           </Link>
 
@@ -68,9 +89,10 @@ const Navigation = () => {
                   key={link.href}
                   to={link.href}
                   className={cn(
-                    "nav-link text-foreground/70 hover:text-accent transition-colors duration-300",
-                    location.pathname === link.href && "text-accent"
+                    "nav-link transition-colors duration-300",
+                    location.pathname === link.href ? activeNavClass : navTextClass
                   )}
+                  style={navStyle}
                 >
                   {link.name}
                 </Link>
@@ -78,21 +100,32 @@ const Navigation = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="nav-link text-foreground/70 hover:text-accent transition-colors duration-300"
+                  className={cn("nav-link transition-colors duration-300", navTextClass)}
+                  style={navStyle}
                 >
                   {link.name}
                 </a>
               )
             ))}
-            <LanguageSwitcher />
-            <Button variant="luxury" size="sm" className="px-6">
+            <LanguageSwitcher isDarkBackground={!isScrolled && isDarkHeroPage} />
+            <Button 
+              variant={!isScrolled && isDarkHeroPage ? "outline" : "luxury"} 
+              size="sm" 
+              className={cn(
+                "px-6 transition-all duration-300",
+                !isScrolled && isDarkHeroPage && "border-white/50 text-white hover:bg-white/10"
+              )}
+            >
               {t("buttons.contactUs")}
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2 text-foreground"
+            className={cn(
+              "lg:hidden p-2 transition-colors duration-300",
+              !isScrolled && isDarkHeroPage ? "text-white" : "text-foreground"
+            )}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >

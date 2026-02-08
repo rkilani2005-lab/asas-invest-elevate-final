@@ -5,11 +5,13 @@ import { cn } from '@/lib/utils';
 interface LanguageSwitcherProps {
   variant?: 'default' | 'minimal';
   className?: string;
+  isDarkBackground?: boolean;
 }
 
 const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ 
   variant = 'default',
-  className 
+  className,
+  isDarkBackground = false
 }) => {
   const { language, setLanguage } = useLanguage();
 
@@ -34,7 +36,11 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   }
 
   return (
-    <div className={cn("flex items-center gap-1 border border-border p-1", className)}>
+    <div className={cn(
+      "flex items-center gap-1 border p-1",
+      isDarkBackground ? "border-white/30" : "border-border",
+      className
+    )}>
       {(Object.keys(languages) as LanguageCode[]).map((lang) => (
         <button
           key={lang}
@@ -42,8 +48,12 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           className={cn(
             "px-3 py-1.5 text-xs font-medium transition-all duration-300 tracking-wider",
             language === lang
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
+              ? isDarkBackground 
+                ? "bg-white/20 text-white" 
+                : "bg-accent text-accent-foreground"
+              : isDarkBackground
+                ? "text-white/70 hover:text-white"
+                : "text-muted-foreground hover:text-foreground"
           )}
           aria-label={`Switch to ${languages[lang].name}`}
         >
