@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -241,73 +242,76 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
           })}
         </div>
 
-        {/* Lightbox */}
-        <AnimatePresence>
-          {lightboxOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-background/98 flex items-center justify-center"
-              onClick={closeLightbox}
-              onKeyDown={handleKeyDown}
-              tabIndex={0}
-            >
-              {/* Close Button */}
-              <button
-                onClick={closeLightbox}
-                className="absolute top-4 right-4 z-50 w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors"
-              >
-                <X className="h-6 w-6 text-foreground" strokeWidth={1} />
-              </button>
-
-              {/* Navigation */}
-              {currentMedia.length > 1 && (
-                <>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); isRTL ? nextImage() : prevImage(); }}
-                    className={cn(
-                      "absolute top-1/2 -translate-y-1/2 z-50 w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors",
-                      isRTL ? "right-4" : "left-4"
-                    )}
-                  >
-                    <ChevronLeft className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); isRTL ? prevImage() : nextImage(); }}
-                    className={cn(
-                      "absolute top-1/2 -translate-y-1/2 z-50 w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors",
-                      isRTL ? "left-4" : "right-4"
-                    )}
-                  >
-                    <ChevronRight className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
-                  </button>
-                </>
-              )}
-
-              {/* Image */}
+        {/* Lightbox - rendered via portal to escape stacking context */}
+        {createPortal(
+          <AnimatePresence>
+            {lightboxOpen && (
               <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="max-w-[90vw] max-h-[85vh]"
-                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] bg-background/98 flex items-center justify-center"
+                onClick={closeLightbox}
+                onKeyDown={handleKeyDown}
+                tabIndex={0}
               >
-                <img
-                  src={currentMedia[currentIndex].url}
-                  alt={`Gallery image ${currentIndex + 1}`}
-                  className="max-w-full max-h-[85vh] object-contain"
-                />
-              </motion.div>
+                {/* Close Button */}
+                <button
+                  onClick={closeLightbox}
+                  className="absolute top-4 right-4 z-[110] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80"
+                >
+                  <X className="h-6 w-6 text-foreground" strokeWidth={1} />
+                </button>
 
-              {/* Counter */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-muted-foreground text-sm tracking-wider">
-                {currentIndex + 1} / {currentMedia.length}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                {/* Navigation */}
+                {currentMedia.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); isRTL ? nextImage() : prevImage(); }}
+                      className={cn(
+                        "absolute top-1/2 -translate-y-1/2 z-[110] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
+                        isRTL ? "right-4" : "left-4"
+                      )}
+                    >
+                      <ChevronLeft className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); isRTL ? prevImage() : nextImage(); }}
+                      className={cn(
+                        "absolute top-1/2 -translate-y-1/2 z-[110] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
+                        isRTL ? "left-4" : "right-4"
+                      )}
+                    >
+                      <ChevronRight className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
+                    </button>
+                  </>
+                )}
+
+                {/* Image */}
+                <motion.div
+                  key={currentIndex}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="max-w-[90vw] max-h-[85vh]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={currentMedia[currentIndex].url}
+                    alt={`Gallery image ${currentIndex + 1}`}
+                    className="max-w-full max-h-[85vh] object-contain"
+                  />
+                </motion.div>
+
+                {/* Counter */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-muted-foreground text-sm tracking-wider">
+                  {currentIndex + 1} / {currentMedia.length}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
       </div>
     </div>
   );
