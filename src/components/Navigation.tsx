@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,6 +13,7 @@ const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, isRTL } = useLanguage();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Detect if we're on a page with a dark hero background
   const isDarkHeroPage = location.pathname === "/" || location.pathname.startsWith("/property/");
@@ -47,8 +48,16 @@ const Navigation = () => {
     { name: t("nav.contact"), href: location.pathname === "/" ? "#contact" : "/#contact", isRoute: false },
   ];
 
-  const handleLinkClick = () => {
+  const handleMobileLinkClick = (e: React.MouseEvent, href: string, isRoute: boolean) => {
+    e.preventDefault();
     setIsMobileMenuOpen(false);
+    setTimeout(() => {
+      if (isRoute) {
+        navigate(href);
+      } else {
+        window.location.href = href;
+      }
+    }, 300);
   };
 
   return (
@@ -163,7 +172,7 @@ const Navigation = () => {
                   "flex items-center justify-between h-20 px-6 border-b border-border",
                   isRTL && "flex-row-reverse"
                 )}>
-                  <Link to="/" onClick={handleLinkClick} className="flex items-center">
+                  <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/', true)} className="flex items-center">
                     <img 
                       src={asasLogo} 
                       alt="Asas Invest" 
@@ -184,20 +193,20 @@ const Navigation = () => {
                   <div className="flex flex-col space-y-1">
                     {navLinks.map((link) => (
                       link.isRoute ? (
-                        <Link
+                        <a
                           key={link.href}
-                          to={link.href}
+                          href={link.href}
                           className={cn(
-                            "nav-link py-3 px-3 rounded-lg transition-colors duration-200",
+                            "nav-link py-3 px-3 rounded-lg transition-colors duration-200 cursor-pointer",
                             location.pathname === link.href 
                               ? "text-accent bg-accent/5 font-medium" 
                               : "text-foreground/70 hover:text-accent hover:bg-accent/5",
                             isRTL && "text-right"
                           )}
-                          onClick={handleLinkClick}
+                          onClick={(e) => handleMobileLinkClick(e, link.href, true)}
                         >
                           {link.name}
-                        </Link>
+                        </a>
                       ) : (
                         <a
                           key={link.href}
@@ -206,7 +215,7 @@ const Navigation = () => {
                             "nav-link py-3 px-3 rounded-lg transition-colors duration-200 text-foreground/70 hover:text-accent hover:bg-accent/5",
                             isRTL && "text-right"
                           )}
-                          onClick={handleLinkClick}
+                          onClick={(e) => handleMobileLinkClick(e, link.href, false)}
                         >
                           {link.name}
                         </a>
