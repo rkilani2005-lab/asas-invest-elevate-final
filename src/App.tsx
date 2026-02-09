@@ -30,6 +30,7 @@ import InsightEditorPage from "./pages/admin/InsightEditorPage";
 import AdminHomeContent from "./pages/admin/AdminHomeContent";
 import PropertyWizardPage from "./pages/admin/PropertyWizardPage";
 import AdminAmenityLibrary from "./pages/admin/AdminAmenityLibrary";
+import AdminBulkImport from "./pages/admin/AdminBulkImport";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
                 <Route path="/admin/properties" element={<AdminLayout><AdminProperties /></AdminLayout>} />
                 <Route path="/admin/properties/new" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
                 <Route path="/admin/properties/:id/edit" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
+                <Route path="/admin/properties/import" element={<AdminLayout><AdminBulkImport /></AdminLayout>} />
                 <Route path="/admin/gallery" element={<AdminLayout><AdminGallery /></AdminLayout>} />
                 <Route path="/admin/inquiries" element={<AdminLayout><AdminInquiries /></AdminLayout>} />
                 <Route path="/admin/insights" element={<AdminLayout><AdminInsights /></AdminLayout>} />

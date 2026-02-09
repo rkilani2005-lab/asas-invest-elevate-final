@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Search, Eye, Star, Loader2, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Eye, Star, Loader2, Building2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -110,12 +110,20 @@ export default function AdminProperties() {
             Manage property listings
           </p>
         </div>
-        <Button asChild>
-          <Link to="/admin/properties/new">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Property
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/admin/properties/import">
+              <Upload className="w-4 h-4 mr-2" />
+              Bulk Import
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to="/admin/properties/new">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Property
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
