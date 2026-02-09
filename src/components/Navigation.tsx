@@ -135,7 +135,12 @@ const Navigation = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden py-6 border-t border-border bg-background/98 backdrop-blur-md">
+          <div className={cn(
+            "lg:hidden py-6 border-t backdrop-blur-md",
+            !isScrolled && isDarkHeroPage
+              ? "bg-[#121212] border-white/10"
+              : "bg-background/98 border-border"
+          )}>
             <div className="flex flex-col space-y-4">
               {navLinks.map((link) => (
                 link.isRoute ? (
@@ -143,9 +148,11 @@ const Navigation = () => {
                     key={link.href}
                     to={link.href}
                     className={cn(
-                      "nav-link text-foreground/70 hover:text-accent py-2 transition-colors duration-300",
-                      isRTL && "text-right",
-                      location.pathname === link.href && "text-accent"
+                      "nav-link py-2 transition-colors duration-300",
+                      !isScrolled && isDarkHeroPage
+                        ? (location.pathname === link.href ? "text-white" : "text-white/70 hover:text-white")
+                        : (location.pathname === link.href ? "text-accent" : "text-foreground/70 hover:text-accent"),
+                      isRTL && "text-right"
                     )}
                     onClick={handleLinkClick}
                   >
@@ -156,7 +163,10 @@ const Navigation = () => {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "nav-link text-foreground/70 hover:text-accent py-2 transition-colors duration-300",
+                      "nav-link py-2 transition-colors duration-300",
+                      !isScrolled && isDarkHeroPage
+                        ? "text-white/70 hover:text-white"
+                        : "text-foreground/70 hover:text-accent",
                       isRTL && "text-right"
                     )}
                     onClick={handleLinkClick}
@@ -167,9 +177,15 @@ const Navigation = () => {
               ))}
               <div className="pt-4 flex flex-col space-y-3">
                 <div className={cn("flex", isRTL ? "justify-end" : "justify-start")}>
-                  <LanguageSwitcher />
+                  <LanguageSwitcher isDarkBackground={!isScrolled && isDarkHeroPage} />
                 </div>
-                <Button variant="luxury" className="w-full">
+                <Button 
+                  variant={!isScrolled && isDarkHeroPage ? "outline" : "luxury"} 
+                  className={cn(
+                    "w-full",
+                    !isScrolled && isDarkHeroPage && "border-white/50 text-white hover:bg-white/10"
+                  )}
+                >
                   {t("buttons.contactUs")}
                 </Button>
               </div>
