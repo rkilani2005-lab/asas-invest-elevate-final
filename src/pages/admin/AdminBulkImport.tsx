@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -43,16 +43,13 @@ export default function AdminBulkImport() {
     failed: { slug: string; error: string }[];
   } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processFile = useCallback((file: File) => {
     if (!file.name.endsWith(".csv")) {
       toast.error("Please upload a CSV file");
       return;
     }
-
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
@@ -61,7 +58,32 @@ export default function AdminBulkImport() {
       setStep("preview");
     };
     reader.readAsText(file);
+  }, []);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   };
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
+  }, [processFile]);
 
   const handleImport = async () => {
     if (!parseResult?.valid.length) return;
@@ -179,32 +201,33 @@ export default function AdminBulkImport() {
             </div>
           </Card>
 
-          {/* Upload area */}
-          <Card className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <Upload className="w-6 h-6 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">Upload CSV</h3>
-                <p className="text-muted-foreground text-sm mt-1 mb-4">
-                  Upload your completed CSV file to preview and import
-                  properties.
-                </p>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                <Button onClick={() => fileRef.current?.click()}>
-                  <Upload className="w-4 h-4 mr-2" />
-                  Select CSV File
-                </Button>
-              </div>
-            </div>
-          </Card>
+          {/* Upload area with drag-and-drop */}
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileRef.current?.click()}
+            className={`relative cursor-pointer border-2 border-dashed rounded-lg p-10 text-center transition-colors ${
+              isDragging
+                ? "border-primary bg-primary/5"
+                : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+            }`}
+          >
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".csv"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <Upload className={`w-10 h-10 mx-auto mb-3 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+            <h3 className="font-semibold text-lg">
+              {isDragging ? "Drop your CSV here" : "Drag & drop your CSV file"}
+            </h3>
+            <p className="text-muted-foreground text-sm mt-1">
+              or click anywhere to browse
+            </p>
+          </div>
 
           {/* Field reference */}
           <Card className="p-6">
