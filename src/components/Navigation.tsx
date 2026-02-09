@@ -180,7 +180,7 @@ const Navigation = () => {
                 </div>
 
                 {/* Nav links */}
-                <div className="flex-1 overflow-y-auto py-6 px-6">
+                <div className={cn("flex-1 overflow-y-auto py-6 px-6", isRTL && "direction-rtl")}>
                   <div className="flex flex-col space-y-1">
                     {navLinks.map((link) => (
                       link.isRoute ? (
