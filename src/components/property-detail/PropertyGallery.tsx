@@ -250,7 +250,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] bg-background/98 flex items-center justify-center"
+                className="fixed inset-0 z-[9999] bg-background/98 flex items-center justify-center"
                 onClick={closeLightbox}
                 onKeyDown={handleKeyDown}
                 tabIndex={0}
@@ -258,7 +258,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 {/* Close Button */}
                 <button
                   onClick={closeLightbox}
-                  className="absolute top-4 right-4 z-[110] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80"
+                  className="absolute top-4 right-4 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80"
                 >
                   <X className="h-6 w-6 text-foreground" strokeWidth={1} />
                 </button>
@@ -269,7 +269,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                     <button
                       onClick={(e) => { e.stopPropagation(); isRTL ? nextImage() : prevImage(); }}
                       className={cn(
-                        "absolute top-1/2 -translate-y-1/2 z-[110] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
+                        "absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
                         isRTL ? "right-4" : "left-4"
                       )}
                     >
@@ -278,7 +278,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                     <button
                       onClick={(e) => { e.stopPropagation(); isRTL ? prevImage() : nextImage(); }}
                       className={cn(
-                        "absolute top-1/2 -translate-y-1/2 z-[110] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
+                        "absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
                         isRTL ? "left-4" : "right-4"
                       )}
                     >
