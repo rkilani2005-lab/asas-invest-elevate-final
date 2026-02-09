@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -133,65 +134,100 @@ const Navigation = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className={cn(
-            "lg:hidden py-6 border-t backdrop-blur-md",
-            !isScrolled && isDarkHeroPage
-              ? "bg-[#121212] border-white/10"
-              : "bg-background/98 border-border"
-          )}>
-            <div className="flex flex-col space-y-4">
-              {navLinks.map((link) => (
-                link.isRoute ? (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    className={cn(
-                      "nav-link py-2 transition-colors duration-300",
-                      !isScrolled && isDarkHeroPage
-                        ? (location.pathname === link.href ? "text-white" : "text-white/70 hover:text-white")
-                        : (location.pathname === link.href ? "text-accent" : "text-foreground/70 hover:text-accent"),
-                      isRTL && "text-right"
-                    )}
-                    onClick={handleLinkClick}
-                  >
-                    {link.name}
+        {/* Mobile Slide-in Panel */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
+              {/* Backdrop overlay */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-[60] lg:hidden"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+              {/* Panel */}
+              <motion.div
+                initial={{ x: isRTL ? "-100%" : "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: isRTL ? "-100%" : "100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className={cn(
+                  "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col",
+                  isRTL ? "left-0" : "right-0"
+                )}
+              >
+                {/* Panel header */}
+                <div className={cn(
+                  "flex items-center justify-between h-20 px-6 border-b border-border",
+                  isRTL && "flex-row-reverse"
+                )}>
+                  <Link to="/" onClick={handleLinkClick} className="flex items-center">
+                    <img 
+                      src={asasLogo} 
+                      alt="Asas Invest" 
+                      className="h-11 w-11 rounded-full object-cover border border-accent/30"
+                    />
                   </Link>
-                ) : (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "nav-link py-2 transition-colors duration-300",
-                      !isScrolled && isDarkHeroPage
-                        ? "text-white/70 hover:text-white"
-                        : "text-foreground/70 hover:text-accent",
-                      isRTL && "text-right"
-                    )}
-                    onClick={handleLinkClick}
+                  <button
+                    className="p-2 text-foreground hover:text-accent transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    aria-label="Close menu"
                   >
-                    {link.name}
-                  </a>
-                )
-              ))}
-              <div className="pt-4 flex flex-col space-y-3">
-                <div className={cn("flex", isRTL ? "justify-end" : "justify-start")}>
-                  <LanguageSwitcher isDarkBackground={!isScrolled && isDarkHeroPage} />
+                    <X className="h-5 w-5" strokeWidth={1.5} />
+                  </button>
                 </div>
-                <Button 
-                  variant={!isScrolled && isDarkHeroPage ? "outline" : "luxury"} 
-                  className={cn(
-                    "w-full",
-                    !isScrolled && isDarkHeroPage && "border-white/50 text-white hover:bg-white/10"
-                  )}
-                >
-                  {t("buttons.contactUs")}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+
+                {/* Nav links */}
+                <div className="flex-1 overflow-y-auto py-6 px-6">
+                  <div className="flex flex-col space-y-1">
+                    {navLinks.map((link) => (
+                      link.isRoute ? (
+                        <Link
+                          key={link.href}
+                          to={link.href}
+                          className={cn(
+                            "nav-link py-3 px-3 rounded-lg transition-colors duration-200",
+                            location.pathname === link.href 
+                              ? "text-accent bg-accent/5 font-medium" 
+                              : "text-foreground/70 hover:text-accent hover:bg-accent/5",
+                            isRTL && "text-right"
+                          )}
+                          onClick={handleLinkClick}
+                        >
+                          {link.name}
+                        </Link>
+                      ) : (
+                        <a
+                          key={link.href}
+                          href={link.href}
+                          className={cn(
+                            "nav-link py-3 px-3 rounded-lg transition-colors duration-200 text-foreground/70 hover:text-accent hover:bg-accent/5",
+                            isRTL && "text-right"
+                          )}
+                          onClick={handleLinkClick}
+                        >
+                          {link.name}
+                        </a>
+                      )
+                    ))}
+                  </div>
+                </div>
+
+                {/* Panel footer */}
+                <div className="px-6 py-6 border-t border-border space-y-4">
+                  <div className={cn("flex", isRTL ? "justify-end" : "justify-start")}>
+                    <LanguageSwitcher />
+                  </div>
+                  <Button variant="luxury" className="w-full">
+                    {t("buttons.contactUs")}
+                  </Button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );
