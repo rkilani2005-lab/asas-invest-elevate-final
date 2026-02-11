@@ -255,8 +255,9 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
   );
 
   // Filter media by type
-  const imageMedia = data.media.filter(m => !isPDF(m.url) && m.type !== "brochure");
+  const imageMedia = data.media.filter(m => !isPDF(m.url) && m.type !== "brochure" && m.type !== "video");
   const brochureMedia = data.media.filter(m => m.type === "brochure");
+  const videoMedia = data.media.filter(m => m.type === "video");
   const floorPlanMedia = data.media.filter(m => 
     (m.type === "floorplan" || m.type === "floor_plate") && isPDF(m.url)
   );
@@ -379,24 +380,43 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
   }
 
   async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setIsVideoUploading(true);
-    const fileName = `properties/${propertyId || "new"}/video-${Date.now()}.mp4`;
+    const newMedia: MediaItem[] = [];
 
-    const { error } = await supabase.storage
-      .from("property-media")
-      .upload(fileName, file, { contentType: "video/mp4" });
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = file.name.split('.').pop() || 'mp4';
+      const fileName = `properties/${propertyId || "new"}/video-${Date.now()}-${i}.${ext}`;
 
-    if (error) {
-      toast.error("Failed to upload video");
-    } else {
+      const { error } = await supabase.storage
+        .from("property-media")
+        .upload(fileName, file, { contentType: file.type });
+
+      if (error) {
+        toast.error(`Failed to upload ${file.name}`);
+        continue;
+      }
+
       const { data: urlData } = supabase.storage
         .from("property-media")
         .getPublicUrl(fileName);
-      onChange({ video_url: urlData.publicUrl });
-      toast.success("Video uploaded");
+
+      newMedia.push({
+        id: crypto.randomUUID(),
+        url: urlData.publicUrl,
+        type: "video",
+        category: "general",
+        caption_en: file.name.replace(/\.[^.]+$/, "").replace(/_/g, " "),
+        order_index: data.media.length + i,
+      });
+    }
+
+    if (newMedia.length > 0) {
+      onChange({ media: [...data.media, ...newMedia] });
+      toast.success(`${newMedia.length} video(s) uploaded`);
     }
 
     setIsVideoUploading(false);
@@ -668,64 +688,115 @@ export default function MediaStep({ data, onChange, propertyId }: MediaStepProps
         </CardContent>
       </Card>
 
-      {/* Video */}
+      {/* Videos */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Video className="h-5 w-5" />
-            Property Video
+            Property Videos
           </CardTitle>
           <CardDescription>
-            Upload a native video or provide a YouTube/Vimeo URL
+            Upload video files or provide a YouTube/Vimeo URL
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          {/* Upload Zone */}
+          <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+            {isVideoUploading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            ) : (
+              <>
+                <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                <span className="text-sm text-muted-foreground">
+                  Upload Videos (MP4, WebM)
+                </span>
+              </>
+            )}
+            <input
+              type="file"
+              accept="video/mp4,video/webm,video/*"
+              multiple
+              className="hidden"
+              onChange={handleVideoUpload}
+              disabled={isVideoUploading}
+            />
+          </label>
+
+          {/* Uploaded Videos List */}
+          {videoMedia.length > 0 && (
             <div className="space-y-2">
-              <Label>Upload Video (.mp4)</Label>
-              <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                {isVideoUploading ? (
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                ) : (
-                  <>
-                    <Upload className="h-6 w-6 text-muted-foreground mb-2" />
-                    <span className="text-sm text-muted-foreground">
-                      Upload MP4
-                    </span>
-                  </>
-                )}
-                <input
-                  type="file"
-                  accept="video/mp4"
-                  className="hidden"
-                  onChange={handleVideoUpload}
-                  disabled={isVideoUploading}
-                />
-              </label>
+              {videoMedia.map((item) => {
+                const vid = item.id || item.url;
+                return (
+                  <div key={vid} className="flex items-center gap-3 p-3 bg-muted rounded-lg group">
+                    <div className="flex-shrink-0 w-24 h-16 bg-black rounded-lg overflow-hidden">
+                      <video
+                        src={item.url}
+                        className="w-full h-full object-cover"
+                        muted
+                        preload="metadata"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <Input
+                        value={item.caption_en || ""}
+                        onChange={(e) => updateMediaItem(vid, { caption_en: e.target.value })}
+                        placeholder="Video caption (EN)"
+                        className="h-8 text-sm"
+                      />
+                      <Input
+                        value={item.caption_ar || ""}
+                        onChange={(e) => updateMediaItem(vid, { caption_ar: e.target.value })}
+                        placeholder="عنوان الفيديو"
+                        className="h-8 text-sm"
+                        dir="rtl"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
+                      >
+                        <Video className="h-4 w-4 text-primary" />
+                      </a>
+                      <button
+                        onClick={() => deleteMediaItem(vid)}
+                        className="p-2 bg-destructive/10 rounded-lg hover:bg-destructive/20 transition-colors"
+                      >
+                        <X className="h-4 w-4 text-destructive" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="video_url">Or Video URL</Label>
-              <Input
-                id="video_url"
-                value={data.video_url}
-                onChange={(e) => onChange({ video_url: e.target.value })}
-                placeholder="https://youtube.com/watch?v=..."
-              />
-              {data.video_url && (
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-muted-foreground truncate flex-1">
-                    {data.video_url}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onChange({ video_url: "" })}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
+          )}
+
+          {/* External Video URL */}
+          <div className="space-y-2">
+            <Label htmlFor="video_url">Or External Video URL</Label>
+            <Input
+              id="video_url"
+              value={data.video_url}
+              onChange={(e) => onChange({ video_url: e.target.value })}
+              placeholder="https://youtube.com/watch?v=..."
+            />
+            {data.video_url && (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-sm text-muted-foreground truncate flex-1">
+                  {data.video_url}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onChange({ video_url: "" })}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
