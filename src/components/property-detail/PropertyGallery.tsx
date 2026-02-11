@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,9 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [activeSection, setActiveSection] = useState<"images" | "videos">("images");
   const [imageDimensions, setImageDimensions] = useState<Record<string, ImageDimensions>>({});
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
   // Calculate aspect ratio string (e.g., "16:9", "4:3")
   const calculateAspectRatio = (width: number, height: number): string => {
@@ -96,6 +98,39 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
     m.type === "render" || m.type === "interior"
   );
 
+  // Collect videos from media table + property video_url
+  const videoMedia = property.media.filter(m => m.type === "video");
+  const allVideos: { id: string; url: string; caption?: string }[] = [
+    ...videoMedia.map(v => ({
+      id: v.id,
+      url: v.url,
+      caption: language === "ar" && v.caption_ar ? v.caption_ar : v.caption_en || undefined,
+    })),
+  ];
+  // Add property-level video_url if it exists and isn't already in media
+  if (property.video_url && !videoMedia.some(v => v.url === property.video_url)) {
+    allVideos.push({
+      id: "property-video",
+      url: property.video_url,
+      caption: language === "ar" ? "فيديو المشروع" : "Project Video",
+    });
+  }
+
+  const hasVideos = allVideos.length > 0;
+
+  // Helper to detect embed type
+  const getVideoEmbedUrl = (url: string): string | null => {
+    // YouTube
+    const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+    // Vimeo
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+    return null;
+  };
+
+  const isDirectVideo = (url: string) => /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+
   // Categorize by the category field
   const exterior = allMedia.filter(m => m.category === "exterior");
   const interior = allMedia.filter(m => m.category === "interior");
@@ -144,7 +179,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
     if (e.key === "ArrowLeft") isRTL ? nextImage() : prevImage();
   };
 
-  if (allMedia.length === 0) {
+  if (allMedia.length === 0 && !hasVideos) {
     return null;
   }
 
@@ -152,42 +187,76 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
     <div className="py-12 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
         <div className={cn(
-          "flex flex-col md:flex-row md:items-center md:justify-between mb-8",
+          "flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4",
           isRTL && "md:flex-row-reverse"
         )}>
           <h2 className={cn(
-            "heading-section text-2xl md:text-3xl text-foreground mb-4 md:mb-0",
+            "heading-section text-2xl md:text-3xl text-foreground",
             isRTL && "text-right"
           )}>
             {t("sections.gallery")}
           </h2>
 
-          {/* Tabs */}
-          {tabs.length > 1 && (
-            <div className={cn(
-              "flex gap-1 border border-border p-1",
-              isRTL && "flex-row-reverse"
-            )}>
-              {tabs.map((tab) => (
+          <div className={cn("flex items-center gap-4", isRTL && "flex-row-reverse")}>
+            {/* Images / Videos toggle */}
+            {hasVideos && (
+              <div className={cn(
+                "flex gap-1 border border-border p-1",
+                isRTL && "flex-row-reverse"
+              )}>
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => setActiveSection("images")}
                   className={cn(
                     "px-4 py-2 text-xs font-medium tracking-wider uppercase transition-all duration-300",
-                    activeTab === tab.id
+                    activeSection === "images"
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  {tab.label} ({tab.items.length})
+                  {language === "ar" ? "صور" : "Images"} ({allMedia.length})
                 </button>
-              ))}
-            </div>
-          )}
+                <button
+                  onClick={() => setActiveSection("videos")}
+                  className={cn(
+                    "px-4 py-2 text-xs font-medium tracking-wider uppercase transition-all duration-300",
+                    activeSection === "videos"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {language === "ar" ? "فيديو" : "Videos"} ({allVideos.length})
+                </button>
+              </div>
+            )}
+
+            {/* Category sub-tabs (only for images) */}
+            {activeSection === "images" && tabs.length > 1 && (
+              <div className={cn(
+                "flex gap-1 border border-border p-1",
+                isRTL && "flex-row-reverse"
+              )}>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "px-4 py-2 text-xs font-medium tracking-wider uppercase transition-all duration-300",
+                      activeTab === tab.id
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {tab.label} ({tab.items.length})
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Gallery Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {/* Images Grid */}
+        {activeSection === "images" && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {currentMedia.map((item, index) => {
             const caption = language === "ar" && item.caption_ar ? item.caption_ar : item.caption_en;
             const dims = imageDimensions[item.id];
@@ -240,7 +309,71 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
               </motion.div>
             );
           })}
-        </div>
+          </div>
+        )}
+
+        {/* Videos Grid */}
+        {activeSection === "videos" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {allVideos.map((video, index) => {
+              const embedUrl = getVideoEmbedUrl(video.url);
+              const isDirect = isDirectVideo(video.url);
+
+              return (
+                <motion.div
+                  key={video.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="border border-border overflow-hidden hover:border-accent/30 transition-colors"
+                >
+                  <div className="relative aspect-video bg-secondary">
+                    {playingVideo === video.id ? (
+                      embedUrl ? (
+                        <iframe
+                          src={embedUrl}
+                          className="w-full h-full"
+                          allow="autoplay; fullscreen; picture-in-picture"
+                          allowFullScreen
+                          title={video.caption || "Video"}
+                        />
+                      ) : isDirect ? (
+                        <video
+                          src={video.url}
+                          className="w-full h-full object-cover"
+                          controls
+                          autoPlay
+                        />
+                      ) : (
+                        <iframe
+                          src={video.url}
+                          className="w-full h-full"
+                          allow="autoplay; fullscreen"
+                          allowFullScreen
+                          title={video.caption || "Video"}
+                        />
+                      )
+                    ) : (
+                      <button
+                        onClick={() => setPlayingVideo(video.id)}
+                        className="w-full h-full flex items-center justify-center bg-secondary group cursor-pointer"
+                      >
+                        <div className="w-16 h-16 rounded-full bg-accent/90 flex items-center justify-center group-hover:bg-accent transition-colors shadow-lg">
+                          <Play className="h-7 w-7 text-accent-foreground ml-1" fill="currentColor" />
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                  {video.caption && (
+                    <div className={cn("p-3", isRTL && "text-right")}>
+                      <p className="text-sm text-muted-foreground">{video.caption}</p>
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Lightbox - rendered via portal to escape stacking context */}
         {createPortal(

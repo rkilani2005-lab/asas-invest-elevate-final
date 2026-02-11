@@ -62,7 +62,7 @@ const PropertyDetail = () => {
   // Check for content availability
   const hasFloorPlans = property?.media.some(m => m.type === "floorplan" || m.type === "floor_plate") ?? false;
   const hasBrochures = property?.media.some(m => m.type === "brochure") ?? false;
-  const hasGalleryImages = property?.media.filter(m => m.type === "render" || m.type === "interior").length > 0;
+  const hasGalleryImages = property?.media.filter(m => m.type === "render" || m.type === "interior").length > 0 || property?.media.some(m => m.type === "video") || !!property?.video_url;
 
   // Build tabs based on available content
   const tabs: TabConfig[] = property ? [
