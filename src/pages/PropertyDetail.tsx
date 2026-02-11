@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Share2, Heart } from "lucide-react";
@@ -76,10 +76,16 @@ const PropertyDetail = () => {
     { id: "inquire", label: t("sections.inquire"), show: true },
   ] : [];
 
-  // Update URL when tab changes (no page scroll)
+  const tabContentRef = useRef<HTMLDivElement>(null);
+
+  // Update URL when tab changes and scroll content into view
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setSearchParams({ tab }, { replace: true });
+    // Scroll so the tab content is visible just below the sticky tabs
+    setTimeout(() => {
+      tabContentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   // Sync with URL param changes
@@ -200,7 +206,7 @@ const PropertyDetail = () => {
         </div>
 
         {/* Tab Content - No page scroll, just component swap */}
-        <div className="min-h-[50vh]">
+        <div ref={tabContentRef} className="min-h-[50vh] scroll-mt-24">
           <PropertyTabContent activeTab={activeTab} tabId="overview">
             <PropertyOverview property={property} />
           </PropertyTabContent>
