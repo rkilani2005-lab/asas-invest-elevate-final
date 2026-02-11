@@ -42,6 +42,7 @@ import {
   RefreshCw,
   FileWarning,
   ScanSearch,
+  Video,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import {
@@ -81,7 +82,7 @@ const GALLERY_CATEGORIES = [
   { value: "lifestyle", label: "Lifestyle", labelAr: "نمط الحياة" },
 ];
 
-const MEDIA_TYPES_FOR_GALLERY = ["render", "interior"] as const;
+const MEDIA_TYPES_FOR_GALLERY = ["render", "interior", "hero"] as const;
 
 interface SortableImageProps {
   image: MediaRow & { file_size?: number | null };
@@ -258,6 +259,9 @@ export default function AdminGallery() {
   const [isRecompressing, setIsRecompressing] = useState(false);
   const [recompressProgress, setRecompressProgress] = useState({ current: 0, total: 0 });
 
+  // Video upload state
+  const [isVideoUploading, setIsVideoUploading] = useState(false);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -288,6 +292,23 @@ export default function AdminGallery() {
         .select("*")
         .eq("property_id", selectedPropertyId)
         .in("type", MEDIA_TYPES_FOR_GALLERY)
+        .order("order_index");
+      if (error) throw error;
+      return data as MediaRow[];
+    },
+    enabled: !!selectedPropertyId,
+  });
+
+  // Fetch video media for selected property
+  const { data: videoMedia, isLoading: videoLoading } = useQuery({
+    queryKey: ["admin-gallery-videos", selectedPropertyId],
+    queryFn: async () => {
+      if (!selectedPropertyId) return [];
+      const { data, error } = await supabase
+        .from("media")
+        .select("*")
+        .eq("property_id", selectedPropertyId)
+        .eq("type", "video")
         .order("order_index");
       if (error) throw error;
       return data as MediaRow[];
@@ -1258,6 +1279,117 @@ export default function AdminGallery() {
                 )}
               </TabsContent>
             </Tabs>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Videos Section */}
+      {selectedPropertyId && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Video className="h-5 w-5" />
+              Property Videos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+              {isVideoUploading ? (
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              ) : (
+                <>
+                  <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                  <span className="text-sm text-muted-foreground">Upload Videos (MP4, WebM)</span>
+                  <span className="text-xs text-muted-foreground">Multiple files supported</span>
+                </>
+              )}
+              <input
+                type="file"
+                accept="video/mp4,video/webm,video/*"
+                multiple
+                className="hidden"
+                onChange={async (e) => {
+                  const files = e.target.files;
+                  if (!files || files.length === 0) return;
+                  setIsVideoUploading(true);
+                  let uploadedCount = 0;
+                  const currentMaxOrder =
+                    (videoMedia?.reduce((max, m) => Math.max(max, m.order_index || 0), 0) || 0) +
+                    (galleryMedia?.reduce((max, m) => Math.max(max, m.order_index || 0), 0) || 0);
+                  for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const ext = file.name.split(".").pop() || "mp4";
+                    const fileName = `${selectedPropertyId}/video-${Date.now()}-${i}.${ext}`;
+                    const { error: uploadError } = await supabase.storage
+                      .from("property-media")
+                      .upload(fileName, file, { contentType: file.type });
+                    if (uploadError) { toast.error(`Failed to upload ${file.name}`); continue; }
+                    const { data: urlData } = supabase.storage.from("property-media").getPublicUrl(fileName);
+                    const { error: insertError } = await supabase.from("media").insert({
+                      property_id: selectedPropertyId,
+                      url: urlData.publicUrl,
+                      type: "video" as any,
+                      category: "general",
+                      caption_en: file.name.replace(/\.[^.]+$/, "").replace(/_/g, " "),
+                      order_index: currentMaxOrder + i + 1,
+                    });
+                    if (insertError) { toast.error(`Failed to save ${file.name}`); continue; }
+                    uploadedCount++;
+                  }
+                  if (uploadedCount > 0) {
+                    queryClient.invalidateQueries({ queryKey: ["admin-gallery-videos", selectedPropertyId] });
+                    toast.success(`${uploadedCount} video(s) uploaded`);
+                  }
+                  setIsVideoUploading(false);
+                  e.target.value = "";
+                }}
+                disabled={isVideoUploading}
+              />
+            </label>
+
+            {videoLoading ? (
+              <div className="space-y-2">
+                {[...Array(2)].map((_, i) => (
+                  <Skeleton key={i} className="h-20 rounded-lg" />
+                ))}
+              </div>
+            ) : videoMedia && videoMedia.length > 0 ? (
+              <div className="space-y-2">
+                {videoMedia.map((video) => (
+                  <div key={video.id} className="flex items-center gap-3 p-3 bg-muted rounded-lg group">
+                    <div className="flex-shrink-0 w-28 h-16 bg-black rounded-lg overflow-hidden">
+                      <video src={video.url} className="w-full h-full object-cover" muted preload="metadata" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{video.caption_en || "Untitled Video"}</p>
+                      <p className="text-xs text-muted-foreground">{video.category || "general"}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a href={video.url} target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
+                        <Eye className="h-4 w-4 text-primary" />
+                      </a>
+                      <button
+                        onClick={() => {
+                          if (confirm("Delete this video?")) {
+                            deleteMutation.mutate(video.id, {
+                              onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-gallery-videos", selectedPropertyId] }),
+                            });
+                          }
+                        }}
+                        className="p-2 bg-destructive/10 rounded-lg hover:bg-destructive/20 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Video className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">No videos uploaded yet</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
