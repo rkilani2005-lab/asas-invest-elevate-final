@@ -235,6 +235,10 @@
     "allDevelopers": "All Developers",
     "allBedrooms": "Any Beds",
     "priceRange": "Price Range",
-    "any": "Any"
+    "any": "Any",
+    "allCategories": "All Categories",
+    "category": "Category",
+    "residential": "Residential",
+    "commercial": "Commercial"
   }
 }

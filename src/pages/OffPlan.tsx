@@ -24,6 +24,7 @@ const OffPlan = () => {
     developer: "",
     bedrooms: "",
     priceRange: "",
+    category: "",
   });
 
   // Fetch off-plan properties
@@ -98,6 +99,11 @@ const OffPlan = () => {
         if (!hasMatchingBedroom) return false;
       }
 
+      // Category filter
+      if (filters.category && (property as any).category !== filters.category) {
+        return false;
+      }
+
       return true;
     });
   }, [properties, filters, language]);
@@ -161,6 +167,7 @@ const OffPlan = () => {
                     developer: "",
                     bedrooms: "",
                     priceRange: "",
+                    category: "",
                   })
                 }
               >

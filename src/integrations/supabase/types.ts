@@ -321,6 +321,7 @@ export type Database = {
       }
       properties: {
         Row: {
+          category: Database["public"]["Enums"]["property_category"]
           created_at: string | null
           developer_ar: string | null
           developer_en: string | null
@@ -358,6 +359,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          category?: Database["public"]["Enums"]["property_category"]
           created_at?: string | null
           developer_ar?: string | null
           developer_en?: string | null
@@ -395,6 +397,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          category?: Database["public"]["Enums"]["property_category"]
           created_at?: string | null
           developer_ar?: string | null
           developer_en?: string | null
@@ -566,6 +569,7 @@ export type Database = {
         | "interior"
         | "hero"
         | "brochure"
+      property_category: "residential" | "commercial"
       property_status: "available" | "reserved" | "sold"
       property_type: "off-plan" | "ready"
       translation_category: "ui" | "content" | "property"
@@ -708,6 +712,7 @@ export const Constants = {
         "hero",
         "brochure",
       ],
+      property_category: ["residential", "commercial"],
       property_status: ["available", "reserved", "sold"],
       property_type: ["off-plan", "ready"],
       translation_category: ["ui", "content", "property"],

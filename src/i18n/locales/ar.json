@@ -235,6 +235,10 @@
     "allDevelopers": "جميع المطورين",
     "allBedrooms": "أي غرف",
     "priceRange": "نطاق السعر",
-    "any": "الكل"
+    "any": "الكل",
+    "allCategories": "جميع الفئات",
+    "category": "الفئة",
+    "residential": "سكني",
+    "commercial": "تجاري"
   }
 }
