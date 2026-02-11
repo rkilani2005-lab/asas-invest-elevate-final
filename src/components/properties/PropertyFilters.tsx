@@ -17,6 +17,7 @@ export interface PropertyFiltersState {
   developer: string;
   bedrooms: string;
   priceRange: string;
+  category: string;
 }
 
 interface PropertyFiltersProps {
@@ -45,6 +46,7 @@ const PropertyFilters = ({
       developer: "",
       bedrooms: "",
       priceRange: "",
+      category: "",
     });
   };
 
@@ -64,7 +66,7 @@ const PropertyFilters = ({
       "bg-white/80 backdrop-blur-sm border border-accent/30 p-6 mb-8 shadow-card",
       isRTL && "font-arabic"
     )}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* Search */}
         <div className="relative lg:col-span-2">
           <Search className={cn(
@@ -121,6 +123,24 @@ const PropertyFilters = ({
                 {developer}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        {/* Category */}
+        <Select
+          value={filters.category}
+          onValueChange={(value) => updateFilter("category", value === "all" ? "" : value)}
+        >
+          <SelectTrigger className={cn(
+            "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
+            isRTL && "text-right"
+          )}>
+            <SelectValue placeholder={t("filters.allCategories")} />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-accent/30">
+            <SelectItem value="all">{t("filters.allCategories")}</SelectItem>
+            <SelectItem value="residential">{t("filters.residential")}</SelectItem>
+            <SelectItem value="commercial">{t("filters.commercial")}</SelectItem>
           </SelectContent>
         </Select>
 
