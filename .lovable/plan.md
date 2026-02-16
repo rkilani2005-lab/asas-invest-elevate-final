@@ -1,141 +1,171 @@
 
+# Asas Invest: Sales & Investment Platform Expansion
 
-# Navigation Visibility Fix
+## Overview
 
-## Problem Analysis
-
-The navigation bar uses `text-foreground/70` for link colors, which is a dark charcoal color. This works well on light backgrounds but becomes invisible when placed over:
-
-1. **Home Page Video**: The video hero has a dark charcoal gradient overlay at the top, making dark text invisible
-2. **Property Detail Hero**: The new cinematic letterbox uses `from-charcoal` gradient bars, also making dark text invisible
-
-Currently, the navigation only gets a solid background when scrolled (`isScrolled` state), leaving it transparent and unreadable at the top of both pages.
+Restructure the website around two core verticals -- **Buy** (unified Residential + Commercial sales) and **Invest** -- while removing all rental references. Add a dedicated About page, Sell page, and mega menu navigation. No design changes: all new pages reuse existing "Bright Luxury" components.
 
 ---
 
-## Solution Options
+## Phase 1: Navigation Mega Menu
 
-### Option A: Always-Visible Scrolled State (Simple)
-Add a semi-transparent dark background to the nav bar at all times, not just when scrolled.
+### What changes
+Replace the current flat nav bar (Home, Off-Plan, Ready, About, Insights, Contact) with a structured dropdown menu system.
 
-**Pros**: Simple, consistent across all pages
-**Cons**: Reduces the immersive feel of the hero sections
+**New menu structure:**
+- **BUY** (dropdown): Ready Residential, Off-Plan Projects, Commercial Sales, Buyer's Guide
+- **SELL** (dropdown): Request Valuation, List Your Property
+- **INVEST** (dropdown): Portfolio Advisory, Golden Visa, ROI Calculator, Why Dubai?
+- **INSIGHTS** (link to /insights)
+- **ABOUT ASAS** (dropdown): Our Vision, The Private Office, Careers
+- **CONTACT** (gold button)
 
-### Option B: Smart Context-Aware Navigation (Recommended)
-Detect which page/section the user is on and adjust text colors accordingly:
-- On hero sections (home video, property detail): Use white/light text with text shadows
-- After scrolling: Use the current scrolled style with background
+**Desktop**: Hover-activated dropdown panels with clean gold-accented styling.
+**Mobile**: Accordion-style collapsible groups inside the existing slide-in panel.
 
-**Pros**: Maintains immersive design, readable everywhere
-**Cons**: Slightly more complex
-
-### Option C: Persistent Dark Header Bar
-Keep the dark gradient bar from the cinematic letterbox but extend it to cover the navigation height properly, and change nav text to light colors when not scrolled.
-
-**Pros**: Elegant solution that works with existing design
-**Cons**: Requires coordinating nav and hero gradients
-
----
-
-## Recommended Implementation: Option B
-
-### Changes Required
-
-**1. Navigation Component (`src/components/Navigation.tsx`)**
-
-Add logic to detect if user is on a "dark hero" page (home or property detail):
-
-```typescript
-const isDarkHeroPage = location.pathname === "/" || location.pathname.startsWith("/property/");
-
-// When not scrolled on dark hero pages, use light text
-const navTextClass = !isScrolled && isDarkHeroPage 
-  ? "text-white/90 hover:text-white" 
-  : "text-foreground/70 hover:text-accent";
-
-const activeNavClass = !isScrolled && isDarkHeroPage
-  ? "text-white"
-  : "text-accent";
-```
-
-**2. Add Text Shadows for Legibility**
-
-When on dark hero backgrounds, add subtle text shadows to ensure readability:
-
-```typescript
-const navStyle = !isScrolled && isDarkHeroPage 
-  ? { textShadow: '0px 2px 8px rgba(0, 0, 0, 0.5)' }
-  : undefined;
-```
-
-**3. Mobile Menu Button Color**
-
-Update the hamburger icon color to be white when on dark hero pages:
-
-```typescript
-className={cn(
-  "lg:hidden p-2",
-  !isScrolled && isDarkHeroPage ? "text-white" : "text-foreground"
-)}
-```
-
-**4. Logo Border Adjustment**
-
-Make the logo border more visible on dark backgrounds:
-
-```typescript
-className={cn(
-  "h-14 w-14 rounded-full object-cover",
-  !isScrolled && isDarkHeroPage 
-    ? "border-2 border-white/50" 
-    : "border border-accent/30"
-)}
-```
-
-**5. Language Switcher & CTA Button**
-
-Pass a prop or use context to style these components appropriately on dark backgrounds.
+### Files involved
+- **Create** `src/components/navigation/MegaMenu.tsx` -- dropdown logic + desktop rendering
+- **Create** `src/components/navigation/MobileMegaMenu.tsx` -- accordion for mobile panel
+- **Modify** `src/components/Navigation.tsx` -- integrate new menu components
+- **Modify** `src/components/Footer.tsx` -- update link columns to match new sitemap
 
 ---
 
-## Technical Details
+## Phase 2: Database Schema Updates
 
-### Files to Modify
-
-| File | Change |
-|------|--------|
-| `src/components/Navigation.tsx` | Add dark hero detection, conditional text colors, text shadows |
-| `src/components/layout/LanguageSwitcher.tsx` | Accept variant prop for light/dark styling |
-
-### Conditional Logic Summary
-
+### Add commercial columns to `properties` table
 ```
-if (isScrolled) {
-  // Current scrolled behavior: solid background, dark text
-} else if (isDarkHeroPage) {
-  // NEW: Light text with shadows on transparent background
-} else {
-  // Default: Dark text on transparent background (for light hero pages)
-}
+license_type       text     (freezone, ded_mainland, difc)
+fit_out_status     text     (shell_core, fitted, furnished)
+office_type        text     (office, retail, warehouse, full_floor)
+power_load_kw      text
+pantry_available   boolean  (default false)
+washroom_type      text     (private, shared)
+parking_spaces     integer
+parking_ratio      text
+projected_roi      text     (e.g. "7.2%")
+tenancy_status     text     (vacant, tenanted)
+service_charges    text     (e.g. "AED 18/sqft")
 ```
 
-### Visual Result
+### Create `services` table (for About/Services management)
+Columns: `id, title_en, title_ar, description_en, description_ar, icon, category, sort_order, is_active, created_at`
+With standard RLS (public read, admin write).
 
-| State | Background | Text Color | Additional |
-|-------|------------|------------|------------|
-| Scrolled (all pages) | Semi-transparent with blur | Dark charcoal | Border + shadow |
-| Not scrolled (dark hero) | Transparent | White/light | Text shadow |
-| Not scrolled (light page) | Transparent | Dark charcoal | None |
+### Create `page_sections` table (for About page CMS)
+Columns: `id, page_slug, section_key, title_en, title_ar, content_en, content_ar, sort_order, updated_at`
+With standard RLS (public read, admin write).
 
 ---
 
-## Implementation Order
+## Phase 3: New Pages
 
-1. Update Navigation component with dark hero page detection
-2. Add conditional text color classes for nav links
-3. Add text shadows for legibility on dark backgrounds
-4. Update mobile menu button color
-5. Adjust logo border for better visibility
-6. Update CTA button styling for dark backgrounds
-7. Test on home page, property detail page, and other pages
+### A. Commercial Listing Page (`/commercial`)
+- Reuses the exact Ready/OffPlan page layout and `PropertyCard` component
+- Queries `properties WHERE category = 'commercial'`
+- Adds commercial-specific filters: Property Type (Office, Retail, Warehouse, Full Floor), Ownership (Freehold/Leasehold), Condition (Shell & Core, Fitted), ROI Potential
+- New component: `src/components/properties/CommercialFilters.tsx`
 
+### B. Buy Landing Page (`/buy`)
+- Simple choice page: two large cards -- "Living" (Residential) and "Business" (Commercial)
+- Links to existing `/ready`, `/off-plan`, and new `/commercial`
+
+### C. Sell Page (`/sell`)
+- "Get Your Instant Valuation" lead form (Area, Type, Size, Contact) -- submits to `inquiries` table with `inquiry_type = 'valuation'`
+- Visual timeline: Valuation -> Staging -> Marketing -> Transfer (horizontal stepper)
+- "List Your Property" section with CTA
+
+### D. Invest Page (`/invest`)
+- Hero: "Wealth Creation Through Real Estate" with cinematic background
+- Value props: Rental Yields, Capital Appreciation, Golden Visa (3-column grid)
+- ROI Calculator: inputs (Purchase Price, Expected Rent) -> outputs (Gross ROI %, Net ROI)
+- "Why Invest in Dubai?" content section
+
+### E. About Page (`/about`)
+- Hero: "Curating Wealth Through Real Estate"
+- The Asas Philosophy: 3 pillars (Precision, Access, Stewardship)
+- Founder's Note (editable via CMS)
+- "The Private Office" service highlight for HNWIs
+- Team section (reuses existing Team component)
+
+### F. Buyer's Guide (`/buy/guide`) and Careers (`/about/careers`)
+- Static content pages managed via `pages_content` table
+
+---
+
+## Phase 4: Property Detail Updates
+
+### Commercial specs in Overview tab
+- Update `PropertyOverview.tsx` to conditionally show commercial fields (Power Load, Pantry, Washroom Type, Parking Ratio, Projected ROI, Tenancy Status, Service Charges) when `property.category === 'commercial'`
+
+### Investment tab enhancements
+- Show Projected ROI, Capital Appreciation Estimates, and Tenancy Status for commercial properties
+
+---
+
+## Phase 5: Admin CMS Updates
+
+### Property Wizard
+- Add **Category** dropdown (Residential/Commercial) to `GeneralInfoStep.tsx`
+- Conditionally show commercial fields (license_type, fit_out_status, office_type, power_load_kw, pantry, washroom, parking_spaces, projected_roi, tenancy_status, service_charges) when Commercial is selected
+- Update `PropertyData` type in `types.ts`
+
+### About Page Manager
+- New admin page `/admin/about` to edit Founder's Note and Philosophy Pillars
+- Uses `page_sections` table
+
+### Admin Sidebar
+- Add "About Page" link to `AdminSidebar.tsx`
+
+---
+
+## Phase 6: Translations (i18n)
+
+Add all new keys to both `en.json` and `ar.json`:
+- Navigation mega menu items (nav.buy, nav.sell, nav.invest, nav.aboutAsas, etc.)
+- All sub-menu labels
+- New page titles, descriptions, form labels
+- Commercial filter options
+- ROI calculator labels
+- About page section headers
+- Sell page content
+
+---
+
+## New Files Summary
+
+| File | Purpose |
+|------|---------|
+| `src/components/navigation/MegaMenu.tsx` | Desktop dropdown menu |
+| `src/components/navigation/MobileMegaMenu.tsx` | Mobile accordion menu |
+| `src/pages/Buy.tsx` | Buy landing (Living vs Business) |
+| `src/pages/Commercial.tsx` | Commercial listings with filters |
+| `src/pages/Sell.tsx` | Valuation form + vendor journey |
+| `src/pages/Invest.tsx` | Investment hub + ROI calculator |
+| `src/pages/About.tsx` | Full About page |
+| `src/pages/BuyerGuide.tsx` | Buyer's guide content |
+| `src/pages/Careers.tsx` | Careers placeholder |
+| `src/components/properties/CommercialFilters.tsx` | Commercial-specific filters |
+| `src/components/invest/ROICalculator.tsx` | Interactive calculator |
+| `src/components/sell/ValuationForm.tsx` | Lead capture form |
+| `src/components/sell/ProcessTimeline.tsx` | Visual stepper |
+| `src/pages/admin/AdminAboutPage.tsx` | About page CMS |
+
+## Modified Files Summary
+
+| File | Changes |
+|------|---------|
+| `src/components/Navigation.tsx` | Mega menu integration |
+| `src/components/Footer.tsx` | Updated link structure |
+| `src/App.tsx` | New routes |
+| `src/components/property-detail/PropertyOverview.tsx` | Commercial specs |
+| `src/components/admin/property-wizard/steps/GeneralInfoStep.tsx` | Category + commercial fields |
+| `src/components/admin/property-wizard/types.ts` | New field types |
+| `src/components/admin/AdminSidebar.tsx` | About Page link |
+| `src/i18n/locales/en.json` | New translation keys |
+| `src/i18n/locales/ar.json` | New translation keys |
+
+## Database Migrations
+1. Add commercial + investment columns to `properties`
+2. Create `services` table with RLS
+3. Create `page_sections` table with RLS
