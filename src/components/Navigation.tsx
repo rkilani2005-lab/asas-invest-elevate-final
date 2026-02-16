@@ -59,7 +59,7 @@ const Navigation = () => {
           : "bg-transparent"
       )}
     >
-      <div className="w-full px-4 lg:px-8">
+      <div className="w-full px-6 lg:px-10">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center shrink-0">
