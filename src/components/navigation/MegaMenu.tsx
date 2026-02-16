@@ -95,7 +95,7 @@ export default function MegaMenu({ navTextClass, activeNavClass, navStyle, isDar
   }
 
   return (
-    <div className={cn("hidden lg:flex items-center", isRTL ? "space-x-reverse space-x-6" : "space-x-6")}>
+    <div className="hidden lg:flex items-center space-x-6">
       {menuGroups.map((group) => (
         <div
           key={group.label}
@@ -133,10 +133,7 @@ export default function MegaMenu({ navTextClass, activeNavClass, navStyle, isDar
           {/* Dropdown Panel */}
           {group.items && openMenu === group.label && (
             <div
-              className={cn(
-                "absolute top-full pt-2 z-50",
-                isRTL ? "right-0" : "left-0"
-              )}
+              className="absolute top-full pt-2 z-50 left-0"
               onMouseEnter={() => handleMouseEnter(group.label)}
               onMouseLeave={handleMouseLeave}
             >

@@ -60,10 +60,7 @@ const Navigation = () => {
       )}
     >
       <div className="container mx-auto px-4 lg:px-8">
-        <div className={cn(
-          "flex items-center justify-between h-20",
-          isRTL && "flex-row-reverse"
-        )}>
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
@@ -74,7 +71,7 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Mega Menu */}
-          <div className={cn("hidden lg:flex items-center", isRTL ? "space-x-reverse space-x-4" : "space-x-4")}>
+          <div className="hidden lg:flex items-center space-x-4">
             <MegaMenu
               navTextClass={navTextClass}
               activeNavClass={activeNavClass}
@@ -123,19 +120,13 @@ const Navigation = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               />
               <motion.div
-                initial={{ x: isRTL ? "-100%" : "100%" }}
+                initial={{ x: "100%" }}
                 animate={{ x: 0 }}
-                exit={{ x: isRTL ? "-100%" : "100%" }}
+                exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className={cn(
-                  "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col",
-                  isRTL ? "left-0" : "right-0"
-                )}
+                className="fixed top-0 bottom-0 right-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col"
               >
-                <div className={cn(
-                  "flex items-center justify-between h-20 px-6 border-b border-border",
-                  isRTL && "flex-row-reverse"
-                )}>
+                <div className="flex items-center justify-between h-20 px-6 border-b border-border">
                   <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
                     <img 
                       src={logoWhiteBg} 
@@ -152,12 +143,12 @@ const Navigation = () => {
                   </button>
                 </div>
 
-                <div className={cn("flex-1 overflow-y-auto py-6 px-6", isRTL && "direction-rtl")}>
+                <div className="flex-1 overflow-y-auto py-6 px-6">
                   <MobileMegaMenu onLinkClick={handleMobileLinkClick} />
                 </div>
 
                 <div className="px-6 py-6 border-t border-border space-y-4">
-                  <div className={cn("flex", isRTL ? "justify-end" : "justify-start")}>
+                  <div className="flex justify-start">
                     <LanguageSwitcher />
                   </div>
                   <Button variant="luxury" className="w-full" onClick={(e) => handleMobileLinkClick(e as any, '/#contact')}>
