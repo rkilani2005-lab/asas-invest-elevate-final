@@ -67,7 +67,7 @@ const Navigation = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
-              src={!isScrolled && isDarkHeroPage ? logoBlackBg : logoWhiteBg} 
+              src={logoWhiteBg} 
               alt="Asas Invest Real Estate" 
               className="h-12 w-auto object-contain transition-all duration-300"
             />
