@@ -7,7 +7,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import MegaMenu from "@/components/navigation/MegaMenu";
 import MobileMegaMenu from "@/components/navigation/MobileMegaMenu";
-import asasLogo from "@/assets/asas-logo.jpg";
+import logoWhiteBg from "@/assets/logo-white-bg.jpeg";
+import logoBlackBg from "@/assets/logo-black-bg.jpeg";
 import { cn } from "@/lib/utils";
 
 const Navigation = () => {
@@ -66,14 +67,9 @@ const Navigation = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
-              src={asasLogo} 
+              src={!isScrolled && isDarkHeroPage ? logoBlackBg : logoWhiteBg} 
               alt="Asas Invest Real Estate" 
-              className={cn(
-                "h-14 w-14 rounded-full object-cover transition-all duration-300",
-                !isScrolled && isDarkHeroPage 
-                  ? "border-2 border-white/50" 
-                  : "border border-accent/30"
-              )}
+              className="h-12 w-auto object-contain transition-all duration-300"
             />
           </Link>
 
@@ -142,9 +138,9 @@ const Navigation = () => {
                 )}>
                   <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
                     <img 
-                      src={asasLogo} 
+                      src={logoWhiteBg} 
                       alt="Asas Invest" 
-                      className="h-11 w-11 rounded-full object-cover border border-accent/30"
+                      className="h-10 w-auto object-contain"
                     />
                   </Link>
                   <button
