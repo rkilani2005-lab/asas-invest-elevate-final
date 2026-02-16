@@ -44,16 +44,10 @@ const Footer = () => {
   return (
     <footer className="bg-background text-foreground py-16 border-t border-accent/20 grain-overlay">
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        <div className={cn(
-          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12",
-          isRTL && "text-right"
-        )}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <div className={cn(
-              "flex items-center mb-4",
-              isRTL ? "space-x-reverse space-x-3 justify-end md:justify-start" : "space-x-3"
-            )}>
+            <div className="flex items-center mb-4 space-x-3">
               <img 
                 src={logoWhiteBg} 
                 alt="Asas Invest Real Estate" 
@@ -63,10 +57,7 @@ const Footer = () => {
             <p className="text-muted-foreground mb-6 max-w-sm text-sm leading-relaxed">
               {t("footer.aboutText")}
             </p>
-            <div className={cn(
-              "flex",
-              isRTL ? "space-x-reverse space-x-3 justify-end md:justify-start" : "space-x-3"
-            )}>
+            <div className="flex space-x-3">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
@@ -104,17 +95,11 @@ const Footer = () => {
 
         <div className="divider-gold mb-8" />
 
-        <div className={cn(
-          "flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0",
-          isRTL && "md:flex-row-reverse"
-        )}>
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-muted-foreground text-xs">
             {t("footer.copyright")}
           </p>
-          <p className={cn(
-            "text-muted-foreground text-xs text-center",
-            isRTL ? "md:text-left" : "md:text-right"
-          )}>
+          <p className="text-muted-foreground text-xs text-center md:text-right">
             {t("footer.address")}
           </p>
         </div>
