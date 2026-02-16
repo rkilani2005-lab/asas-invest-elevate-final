@@ -7,7 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import MegaMenu from "@/components/navigation/MegaMenu";
 import MobileMegaMenu from "@/components/navigation/MobileMegaMenu";
-import logoWhiteBg from "@/assets/logo-white-bg.jpeg";
+import logoWhiteBg from "@/assets/logo-white-bg.png";
 import logoBlackBg from "@/assets/logo-black-bg.jpeg";
 import { cn } from "@/lib/utils";
 
