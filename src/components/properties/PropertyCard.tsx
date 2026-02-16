@@ -48,10 +48,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             className="w-full h-full object-cover brightness-105 saturate-105 group-hover:scale-105 transition-all duration-500"
           />
           {/* Badges */}
-          <div className={cn(
-            "absolute top-4 flex gap-2",
-            isRTL ? "right-4" : "left-4"
-          )}>
+          <div className="absolute top-4 flex gap-2 start-4">
             <Badge variant="secondary" className="bg-white/95 text-foreground text-xs border border-accent/30 shadow-sm">
               {typeLabel}
             </Badge>
@@ -81,36 +78,33 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           {/* Details Grid */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             {location && (
-              <div className={cn("flex items-center text-muted-foreground text-sm", isRTL && "flex-row-reverse justify-end")}>
-                <MapPin className={cn("h-4 w-4 flex-shrink-0 icon-luxury", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
+              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                <MapPin className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
                 <span className="truncate">{location}</span>
               </div>
             )}
             {property.unit_types && property.unit_types.length > 0 && (
-              <div className={cn("flex items-center text-muted-foreground text-sm", isRTL && "flex-row-reverse justify-end")}>
-                <Building2 className={cn("h-4 w-4 flex-shrink-0 icon-luxury", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
+              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                <Building2 className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
                 <span className="truncate">{property.unit_types.join(", ")}</span>
               </div>
             )}
             {property.size_range && (
-              <div className={cn("flex items-center text-muted-foreground text-sm", isRTL && "flex-row-reverse justify-end")}>
-                <Maximize2 className={cn("h-4 w-4 flex-shrink-0 icon-luxury", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
+              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                <Maximize2 className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
                 <span className="truncate">{property.size_range}</span>
               </div>
             )}
             {property.handover_date && (
-              <div className={cn("flex items-center text-muted-foreground text-sm", isRTL && "flex-row-reverse justify-end")}>
-                <Calendar className={cn("h-4 w-4 flex-shrink-0 icon-luxury", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
+              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                <Calendar className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
                 <span className="truncate">{new Date(property.handover_date).toLocaleDateString()}</span>
               </div>
             )}
           </div>
 
           {/* Price & CTA */}
-          <div className={cn(
-            "mt-auto pt-4 border-t border-border flex items-center justify-between",
-            isRTL && "flex-row-reverse"
-          )}>
+          <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
             {property.price_range && (
               <div>
                 <p className="text-xs text-muted-foreground mb-0.5">{t("property.from")}</p>
@@ -119,7 +113,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             )}
             <Button size="sm" variant="ghost" className="text-accent hover:text-accent hover:bg-accent/10">
               {t("buttons.viewDetails")}
-              <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-1.5 rotate-180" : "ml-1.5")} strokeWidth={1} />
+              <ArrowRight className="h-4 w-4 ms-1.5 rtl-flip" strokeWidth={1} />
             </Button>
           </div>
         </div>

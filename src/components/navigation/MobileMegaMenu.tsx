@@ -58,7 +58,7 @@ export default function MobileMegaMenu({ onLinkClick }: MobileMegaMenuProps) {
               </button>
 
               {openGroup === group.label && group.items && (
-                <div className="py-1 pl-4">
+                <div className="py-1 ps-4">
                   {group.items.map((item) => (
                     <a
                       key={item.href}
