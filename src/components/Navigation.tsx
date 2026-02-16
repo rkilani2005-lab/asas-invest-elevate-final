@@ -66,7 +66,7 @@ const Navigation = () => {
             <img 
               src={logoWhiteBg} 
               alt="Asas Invest Real Estate" 
-              className="h-[43px] w-auto object-contain transition-all duration-300"
+              className="h-[41px] w-auto object-contain transition-all duration-300"
             />
           </Link>
 
