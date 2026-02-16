@@ -71,7 +71,7 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Mega Menu */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center gap-x-4">
             <MegaMenu
               navTextClass={navTextClass}
               activeNavClass={activeNavClass}
