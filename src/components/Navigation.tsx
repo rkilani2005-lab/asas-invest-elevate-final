@@ -60,9 +60,9 @@ const Navigation = () => {
       )}
     >
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center shrink-0">
             <img 
               src={logoWhiteBg} 
               alt="Asas Invest Real Estate" 
@@ -70,8 +70,8 @@ const Navigation = () => {
             />
           </Link>
 
-          {/* Desktop Mega Menu */}
-          <div className="hidden lg:flex items-center gap-x-4">
+          {/* Desktop Mega Menu - Centered */}
+          <div className="hidden lg:flex items-center justify-center flex-1">
             <MegaMenu
               navTextClass={navTextClass}
               activeNavClass={activeNavClass}
@@ -79,6 +79,10 @@ const Navigation = () => {
               isDarkHeroPage={isDarkHeroPage}
               isScrolled={isScrolled}
             />
+          </div>
+
+          {/* Right actions */}
+          <div className="hidden lg:flex items-center gap-x-4 shrink-0">
             <LanguageSwitcher isDarkBackground={!isScrolled && isDarkHeroPage} />
             <Link to="/#contact">
               <Button 
