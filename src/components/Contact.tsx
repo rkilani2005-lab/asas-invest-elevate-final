@@ -59,10 +59,7 @@ const Contact = () => {
           </h2>
         </ScrollReveal>
 
-        <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto",
-          isRTL && "lg:flex-row-reverse"
-        )}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Contact Info */}
           <StaggerContainer className="space-y-4">
             {contactInfo.map((info, index) => (
@@ -71,10 +68,7 @@ const Contact = () => {
                   href={info.link}
                   target={info.link.startsWith("http") ? "_blank" : undefined}
                   rel={info.link.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className={cn(
-                    "border border-accent/30 p-5 flex items-start group hover:border-accent transition-all duration-300 block bg-white shadow-card",
-                    isRTL ? "flex-row-reverse space-x-reverse space-x-4 text-right" : "space-x-4"
-                  )}
+                  className="border border-accent/30 p-5 flex items-start gap-4 group hover:border-accent transition-all duration-300 block bg-white shadow-card"
                 >
                   <div className="w-10 h-10 border border-accent/30 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:border-accent transition-colors duration-300">
                     <info.icon className="h-5 w-5 text-accent" strokeWidth={1} />
@@ -94,10 +88,7 @@ const Contact = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label htmlFor="name" className={cn(
-                      "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                      isRTL && "text-right"
-                    )}>
+                    <label htmlFor="name" className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
                       {t("contact.name")}
                     </label>
                     <Input
@@ -105,17 +96,11 @@ const Contact = () => {
                       type="text"
                       placeholder={t("contact.name")}
                       required
-                      className={cn(
-                        "bg-white border-accent/30 focus:border-accent transition-colors rounded-none text-foreground",
-                        isRTL && "text-right"
-                      )}
+                      className="bg-white border-accent/30 focus:border-accent transition-colors rounded-none text-foreground"
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className={cn(
-                      "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                      isRTL && "text-right"
-                    )}>
+                    <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
                       {t("contact.email")}
                     </label>
                     <Input
@@ -123,35 +108,23 @@ const Contact = () => {
                       type="email"
                       placeholder="your@email.com"
                       required
-                      className={cn(
-                        "bg-white border-accent/30 focus:border-accent transition-colors rounded-none text-foreground",
-                        isRTL && "text-right"
-                      )}
+                      className="bg-white border-accent/30 focus:border-accent transition-colors rounded-none text-foreground"
                     />
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="phone" className={cn(
-                    "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-right"
-                  )}>
+                  <label htmlFor="phone" className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
                     {t("contact.phone")}
                   </label>
                   <Input
                     id="phone"
                     type="tel"
                     placeholder="+971 XX XXX XXXX"
-                    className={cn(
-                      "bg-white border-accent/30 focus:border-accent transition-colors rounded-none text-foreground",
-                      isRTL && "text-right"
-                    )}
+                    className="bg-white border-accent/30 focus:border-accent transition-colors rounded-none text-foreground"
                   />
                 </div>
                 <div>
-                  <label htmlFor="message" className={cn(
-                    "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-right"
-                  )}>
+                  <label htmlFor="message" className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
                     {t("contact.message")}
                   </label>
                   <Textarea
@@ -159,10 +132,7 @@ const Contact = () => {
                     placeholder={t("contact.message")}
                     rows={4}
                     required
-                    className={cn(
-                      "bg-white border-accent/30 focus:border-accent transition-colors resize-none rounded-none text-foreground",
-                      isRTL && "text-right"
-                    )}
+                    className="bg-white border-accent/30 focus:border-accent transition-colors resize-none rounded-none text-foreground"
                   />
                 </div>
                 <Button

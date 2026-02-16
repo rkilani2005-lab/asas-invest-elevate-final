@@ -117,7 +117,7 @@ const FeaturedProperties = () => {
                 <Button asChild variant="luxury" size="lg" className="px-10">
                   <Link to="/off-plan">
                     {t("featuredProperties.viewAllOffPlan")}
-                    <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} strokeWidth={1} />
+                    <ArrowRight className="h-4 w-4 ms-2 rtl-flip" strokeWidth={1} />
                   </Link>
                 </Button>
               </div>
@@ -153,7 +153,7 @@ const FeaturedProperties = () => {
                 <Button asChild variant="luxury" size="lg" className="px-10">
                   <Link to="/ready">
                     {t("featuredProperties.viewAllReady")}
-                    <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} strokeWidth={1} />
+                    <ArrowRight className="h-4 w-4 ms-2 rtl-flip" strokeWidth={1} />
                   </Link>
                 </Button>
               </div>

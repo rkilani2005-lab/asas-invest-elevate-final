@@ -489,6 +489,23 @@
   scroll-snap-align: start;
 }
 
+/* RTL: Form inputs text alignment */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+/* RTL: Flip logical start/end for badges and absolute positioned elements */
+[dir="rtl"] .start-4 { inset-inline-start: 1rem; }
+[dir="rtl"] .end-4 { inset-inline-end: 1rem; }
+
+/* RTL: Flip margin-start/end utilities */
+.ms-2 { margin-inline-start: 0.5rem; }
+.me-2 { margin-inline-end: 0.5rem; }
+.ms-1\\.5 { margin-inline-start: 0.375rem; }
+.ps-4 { padding-inline-start: 1rem; }
+
 /* RTL: Prevent double-flip for elements that manually handle RTL */
 [dir="rtl"] .no-rtl-flip {
   direction: ltr;

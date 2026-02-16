@@ -130,10 +130,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className={cn(
-            "flex flex-col sm:flex-row gap-4 justify-center",
-            isRTL && "sm:flex-row-reverse"
-          )}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <Button 
             size="lg" 
@@ -143,7 +140,7 @@ const Hero = () => {
             }}
           >
             {content.exploreProperties}
-            <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} strokeWidth={1} />
+            <ArrowRight className={cn("h-4 w-4 rtl-flip", isRTL ? "me-2" : "ms-2")} strokeWidth={1} />
           </Button>
           <Button 
             size="lg" 
