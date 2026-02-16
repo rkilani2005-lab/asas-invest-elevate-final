@@ -16,6 +16,15 @@ import PropertyDetail from "./pages/PropertyDetail";
 import NotFound from "./pages/NotFound";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 
+// New pages
+import Buy from "./pages/Buy";
+import Commercial from "./pages/Commercial";
+import Sell from "./pages/Sell";
+import Invest from "./pages/Invest";
+import About from "./pages/About";
+import BuyerGuide from "./pages/BuyerGuide";
+import Careers from "./pages/Careers";
+
 // Admin imports
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -31,6 +40,7 @@ import AdminHomeContent from "./pages/admin/AdminHomeContent";
 import PropertyWizardPage from "./pages/admin/PropertyWizardPage";
 import AdminAmenityLibrary from "./pages/admin/AdminAmenityLibrary";
 import AdminBulkImport from "./pages/admin/AdminBulkImport";
+import AdminAboutPage from "./pages/admin/AdminAboutPage";
 
 const queryClient = new QueryClient();
 
@@ -45,8 +55,15 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/buy" element={<Buy />} />
+                <Route path="/buy/guide" element={<BuyerGuide />} />
                 <Route path="/off-plan" element={<OffPlan />} />
                 <Route path="/ready" element={<Ready />} />
+                <Route path="/commercial" element={<Commercial />} />
+                <Route path="/sell" element={<Sell />} />
+                <Route path="/invest" element={<Invest />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/about/careers" element={<Careers />} />
                 <Route path="/property/:slug" element={<PropertyDetail />} />
                 <Route path="/insights" element={<InsightsPage />} />
                 <Route path="/insights/:slug" element={<InsightDetail />} />
@@ -64,11 +81,11 @@ const App = () => (
                 <Route path="/admin/insights/new" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
                 <Route path="/admin/insights/:id/edit" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
                 <Route path="/admin/home-content" element={<AdminLayout><AdminHomeContent /></AdminLayout>} />
+                <Route path="/admin/about" element={<AdminLayout><AdminAboutPage /></AdminLayout>} />
                 <Route path="/admin/amenities" element={<AdminLayout><AdminAmenityLibrary /></AdminLayout>} />
                 <Route path="/admin/translations" element={<AdminLayout><AdminTranslations /></AdminLayout>} />
                 <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
                 
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <WhatsAppButton />

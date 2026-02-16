@@ -254,6 +254,42 @@ export type Database = {
           },
         ]
       }
+      page_sections: {
+        Row: {
+          content_ar: string | null
+          content_en: string | null
+          id: string
+          page_slug: string
+          section_key: string
+          sort_order: number | null
+          title_ar: string | null
+          title_en: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content_ar?: string | null
+          content_en?: string | null
+          id?: string
+          page_slug: string
+          section_key: string
+          sort_order?: number | null
+          title_ar?: string | null
+          title_en?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content_ar?: string | null
+          content_en?: string | null
+          id?: string
+          page_slug?: string
+          section_key?: string
+          sort_order?: number | null
+          title_ar?: string | null
+          title_en?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       pages_content: {
         Row: {
           content_ar: Json | null
@@ -327,6 +363,7 @@ export type Database = {
           developer_en: string | null
           enduser_text_ar: string | null
           enduser_text_en: string | null
+          fit_out_status: string | null
           handover_date: string | null
           highlights_ar: Json | null
           highlights_en: Json | null
@@ -334,6 +371,7 @@ export type Database = {
           investment_ar: string | null
           investment_en: string | null
           is_featured: boolean | null
+          license_type: string | null
           location_ar: string | null
           location_coords: unknown
           location_en: string | null
@@ -342,21 +380,30 @@ export type Database = {
           name_en: string
           nearby_ar: Json | null
           nearby_en: Json | null
+          office_type: string | null
           overview_ar: string | null
           overview_en: string | null
           ownership_type: string | null
+          pantry_available: boolean | null
           parking: string | null
+          parking_ratio: string | null
+          parking_spaces: number | null
+          power_load_kw: string | null
           price_range: string | null
+          projected_roi: string | null
+          service_charges: string | null
           size_range: string | null
           slug: string
           sort_order: number | null
           status: Database["public"]["Enums"]["property_status"]
           tagline_ar: string | null
           tagline_en: string | null
+          tenancy_status: string | null
           type: Database["public"]["Enums"]["property_type"]
           unit_types: string[] | null
           updated_at: string | null
           video_url: string | null
+          washroom_type: string | null
         }
         Insert: {
           category?: Database["public"]["Enums"]["property_category"]
@@ -365,6 +412,7 @@ export type Database = {
           developer_en?: string | null
           enduser_text_ar?: string | null
           enduser_text_en?: string | null
+          fit_out_status?: string | null
           handover_date?: string | null
           highlights_ar?: Json | null
           highlights_en?: Json | null
@@ -372,6 +420,7 @@ export type Database = {
           investment_ar?: string | null
           investment_en?: string | null
           is_featured?: boolean | null
+          license_type?: string | null
           location_ar?: string | null
           location_coords?: unknown
           location_en?: string | null
@@ -380,21 +429,30 @@ export type Database = {
           name_en: string
           nearby_ar?: Json | null
           nearby_en?: Json | null
+          office_type?: string | null
           overview_ar?: string | null
           overview_en?: string | null
           ownership_type?: string | null
+          pantry_available?: boolean | null
           parking?: string | null
+          parking_ratio?: string | null
+          parking_spaces?: number | null
+          power_load_kw?: string | null
           price_range?: string | null
+          projected_roi?: string | null
+          service_charges?: string | null
           size_range?: string | null
           slug: string
           sort_order?: number | null
           status?: Database["public"]["Enums"]["property_status"]
           tagline_ar?: string | null
           tagline_en?: string | null
+          tenancy_status?: string | null
           type?: Database["public"]["Enums"]["property_type"]
           unit_types?: string[] | null
           updated_at?: string | null
           video_url?: string | null
+          washroom_type?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["property_category"]
@@ -403,6 +461,7 @@ export type Database = {
           developer_en?: string | null
           enduser_text_ar?: string | null
           enduser_text_en?: string | null
+          fit_out_status?: string | null
           handover_date?: string | null
           highlights_ar?: Json | null
           highlights_en?: Json | null
@@ -410,6 +469,7 @@ export type Database = {
           investment_ar?: string | null
           investment_en?: string | null
           is_featured?: boolean | null
+          license_type?: string | null
           location_ar?: string | null
           location_coords?: unknown
           location_en?: string | null
@@ -418,21 +478,30 @@ export type Database = {
           name_en?: string
           nearby_ar?: Json | null
           nearby_en?: Json | null
+          office_type?: string | null
           overview_ar?: string | null
           overview_en?: string | null
           ownership_type?: string | null
+          pantry_available?: boolean | null
           parking?: string | null
+          parking_ratio?: string | null
+          parking_spaces?: number | null
+          power_load_kw?: string | null
           price_range?: string | null
+          projected_roi?: string | null
+          service_charges?: string | null
           size_range?: string | null
           slug?: string
           sort_order?: number | null
           status?: Database["public"]["Enums"]["property_status"]
           tagline_ar?: string | null
           tagline_en?: string | null
+          tenancy_status?: string | null
           type?: Database["public"]["Enums"]["property_type"]
           unit_types?: string[] | null
           updated_at?: string | null
           video_url?: string | null
+          washroom_type?: string | null
         }
         Relationships: []
       }
@@ -475,6 +544,45 @@ export type Database = {
           title_ar?: string | null
           title_en?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description_ar: string | null
+          description_en: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          sort_order: number | null
+          title_ar: string | null
+          title_en: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title_ar?: string | null
+          title_en: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title_ar?: string | null
+          title_en?: string
         }
         Relationships: []
       }

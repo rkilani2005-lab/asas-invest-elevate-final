@@ -23,6 +23,7 @@ const defaultPropertyData: PropertyData = {
   unit_types: [],
   ownership_type: "freehold",
   type: "off-plan",
+  category: "residential",
   handover_date: "",
   // Details
   overview_en: "",
@@ -44,6 +45,18 @@ const defaultPropertyData: PropertyData = {
   investment_ar: "",
   enduser_text_en: "",
   enduser_text_ar: "",
+  // Commercial
+  license_type: "",
+  fit_out_status: "",
+  office_type: "",
+  power_load_kw: "",
+  pantry_available: false,
+  washroom_type: "",
+  parking_spaces: "",
+  parking_ratio: "",
+  projected_roi: "",
+  tenancy_status: "",
+  service_charges: "",
 };
 
 export default function PropertyWizardPage() {
@@ -146,6 +159,7 @@ export default function PropertyWizardPage() {
         unit_types: data.unit_types,
         ownership_type: data.ownership_type,
         type: data.type,
+        category: data.category,
         handover_date: data.handover_date || null,
         overview_en: data.overview_en,
         overview_ar: data.overview_ar,
@@ -161,6 +175,18 @@ export default function PropertyWizardPage() {
         investment_ar: data.investment_ar,
         enduser_text_en: data.enduser_text_en,
         enduser_text_ar: data.enduser_text_ar,
+        // Commercial fields
+        license_type: data.license_type || null,
+        fit_out_status: data.fit_out_status || null,
+        office_type: data.office_type || null,
+        power_load_kw: data.power_load_kw || null,
+        pantry_available: data.pantry_available,
+        washroom_type: data.washroom_type || null,
+        parking_spaces: data.parking_spaces ? Number(data.parking_spaces) : null,
+        parking_ratio: data.parking_ratio || null,
+        projected_roi: data.projected_roi || null,
+        tenancy_status: data.tenancy_status || null,
+        service_charges: data.service_charges || null,
       };
 
       let propertyId = id;

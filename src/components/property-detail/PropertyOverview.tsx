@@ -1,4 +1,4 @@
-import { MapPin, Building2, Maximize2, Calendar, Car, Key } from "lucide-react";
+import { MapPin, Building2, Maximize2, Calendar, Car, Key, Zap, UtensilsCrossed, Bath, ParkingCircle, TrendingUp, Users, Receipt } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -16,6 +16,8 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
     ? property.highlights_ar as string[]
     : property.highlights_en as string[] || [];
 
+  const isCommercial = property.category === "commercial";
+
   const specs = [
     { icon: MapPin, label: t("property.location"), value: location },
     { icon: Building2, label: t("property.unitTypes"), value: property.unit_types?.join(", ") },
@@ -24,6 +26,19 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
     { icon: Key, label: t("property.ownership"), value: property.ownership_type },
     { icon: Car, label: t("property.parking"), value: property.parking },
   ].filter(spec => spec.value);
+
+  // Commercial-specific specs
+  const commercialSpecs = isCommercial ? [
+    { icon: Zap, label: "Power Load", value: (property as any).power_load_kw ? `${(property as any).power_load_kw} kW` : null },
+    { icon: UtensilsCrossed, label: "Pantry", value: (property as any).pantry_available ? "Available" : (property as any).pantry_available === false ? "Not Available" : null },
+    { icon: Bath, label: "Washroom", value: (property as any).washroom_type ? (property as any).washroom_type.charAt(0).toUpperCase() + (property as any).washroom_type.slice(1) : null },
+    { icon: ParkingCircle, label: "Parking Ratio", value: (property as any).parking_ratio },
+    { icon: TrendingUp, label: "Projected ROI", value: (property as any).projected_roi },
+    { icon: Users, label: "Tenancy Status", value: (property as any).tenancy_status ? (property as any).tenancy_status.charAt(0).toUpperCase() + (property as any).tenancy_status.slice(1) : null },
+    { icon: Receipt, label: "Service Charges", value: (property as any).service_charges },
+  ].filter(spec => spec.value) : [];
+
+  const allSpecs = [...specs, ...commercialSpecs];
 
   return (
     <div className="py-12 bg-background">
@@ -45,26 +60,13 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
               />
             )}
 
-            {/* Highlights */}
             {highlights.length > 0 && (
               <div className="mt-8">
                 <h3 className="text-accent text-xs font-medium tracking-widest uppercase mb-4">Key Highlights</h3>
-                <ul className={cn(
-                  "grid grid-cols-1 md:grid-cols-2 gap-3",
-                  isRTL && "text-right"
-                )}>
+                <ul className={cn("grid grid-cols-1 md:grid-cols-2 gap-3", isRTL && "text-right")}>
                   {highlights.map((highlight, index) => (
-                    <li 
-                      key={index}
-                      className={cn(
-                        "flex items-center text-muted-foreground",
-                        isRTL && "flex-row-reverse"
-                      )}
-                    >
-                      <div className={cn(
-                        "w-1.5 h-1.5 bg-accent flex-shrink-0",
-                        isRTL ? "ml-3" : "mr-3"
-                      )} />
+                    <li key={index} className={cn("flex items-center text-muted-foreground", isRTL && "flex-row-reverse")}>
+                      <div className={cn("w-1.5 h-1.5 bg-accent flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
                       {highlight}
                     </li>
                   ))}
@@ -76,40 +78,21 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
           {/* Specs Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white border border-accent/30 p-6 sticky top-40 shadow-card">
-              <h3 className={cn(
-                "text-accent text-xs font-medium tracking-widest uppercase mb-6",
-                isRTL && "text-right"
-              )}>
+              <h3 className={cn("text-accent text-xs font-medium tracking-widest uppercase mb-6", isRTL && "text-right")}>
                 Property Details
               </h3>
               
-              {/* Price */}
               {property.price_range && (
-                <div className={cn(
-                  "pb-4 mb-4 border-b border-border",
-                  isRTL && "text-right"
-                )}>
+                <div className={cn("pb-4 mb-4 border-b border-border", isRTL && "text-right")}>
                   <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">{t("property.price")}</p>
-                  <p className="heading-section text-2xl text-foreground">
-                    {property.price_range}
-                  </p>
+                  <p className="heading-section text-2xl text-foreground">{property.price_range}</p>
                 </div>
               )}
 
-              {/* Specs List */}
               <div className="space-y-4">
-                {specs.map((spec, index) => (
-                  <div 
-                    key={index}
-                    className={cn(
-                      "flex items-start",
-                      isRTL && "flex-row-reverse text-right"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0",
-                      isRTL ? "ml-3" : "mr-3"
-                    )}>
+                {allSpecs.map((spec, index) => (
+                  <div key={index} className={cn("flex items-start", isRTL && "flex-row-reverse text-right")}>
+                    <div className={cn("w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0", isRTL ? "ml-3" : "mr-3")}>
                       <spec.icon className="h-5 w-5 text-accent" strokeWidth={1} />
                     </div>
                     <div>
