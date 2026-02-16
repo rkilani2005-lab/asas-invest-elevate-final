@@ -3,6 +3,7 @@ import type { Database } from "@/integrations/supabase/types";
 export type PropertyType = Database["public"]["Enums"]["property_type"];
 export type PropertyStatus = Database["public"]["Enums"]["property_status"];
 export type MediaType = Database["public"]["Enums"]["media_type"];
+export type PropertyCategory = Database["public"]["Enums"]["property_category"];
 
 export interface MediaItem {
   id?: string;
@@ -54,6 +55,7 @@ export interface PropertyData {
   unit_types: string[];
   ownership_type: string;
   type: PropertyType;
+  category: PropertyCategory;
   handover_date: string;
   
   // Details
@@ -78,4 +80,17 @@ export interface PropertyData {
   investment_ar: string;
   enduser_text_en: string;
   enduser_text_ar: string;
+
+  // Commercial fields
+  license_type: string;
+  fit_out_status: string;
+  office_type: string;
+  power_load_kw: string;
+  pantry_available: boolean;
+  washroom_type: string;
+  parking_spaces: number | string;
+  parking_ratio: string;
+  projected_roi: string;
+  tenancy_status: string;
+  service_charges: string;
 }

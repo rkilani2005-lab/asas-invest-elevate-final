@@ -13,6 +13,7 @@ import {
   Home,
   Sparkles,
   Images,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin/inquiries", icon: Users, label: "Inquiries" },
   { href: "/admin/insights", icon: Newspaper, label: "Insights" },
   { href: "/admin/home-content", icon: Home, label: "Home Page" },
+  { href: "/admin/about", icon: FileText, label: "About Page" },
   { href: "/admin/translations", icon: Languages, label: "Translations" },
   { href: "/admin/settings", icon: Settings, label: "Settings" },
 ];

@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
+import MegaMenu from "@/components/navigation/MegaMenu";
+import MobileMegaMenu from "@/components/navigation/MobileMegaMenu";
 import asasLogo from "@/assets/asas-logo.jpg";
 import { cn } from "@/lib/utils";
 
@@ -15,10 +17,8 @@ const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Detect if we're on a page with a dark hero background
   const isDarkHeroPage = location.pathname === "/" || location.pathname.startsWith("/property/");
   
-  // Text styling based on scroll state and background
   const navTextClass = !isScrolled && isDarkHeroPage 
     ? "text-white/90 hover:text-white" 
     : "text-foreground/70 hover:text-accent";
@@ -32,30 +32,19 @@ const Navigation = () => {
     : undefined;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: t("nav.home"), href: "/", isRoute: true },
-    { name: t("nav.offPlan"), href: "/off-plan", isRoute: true },
-    { name: t("nav.ready"), href: "/ready", isRoute: true },
-    { name: t("nav.about"), href: location.pathname === "/" ? "#about" : "/#about", isRoute: false },
-    { name: t("nav.insights"), href: "/insights", isRoute: true },
-    { name: t("nav.contact"), href: location.pathname === "/" ? "#contact" : "/#contact", isRoute: false },
-  ];
-
-  const handleMobileLinkClick = (e: React.MouseEvent, href: string, isRoute: boolean) => {
+  const handleMobileLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     setIsMobileMenuOpen(false);
     setTimeout(() => {
-      if (isRoute) {
-        navigate(href);
-      } else {
+      if (href.startsWith("#") || href.includes("/#")) {
         window.location.href = href;
+      } else {
+        navigate(href);
       }
     }, 300);
   };
@@ -88,46 +77,28 @@ const Navigation = () => {
             />
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className={cn(
-            "hidden lg:flex items-center",
-            isRTL ? "space-x-reverse space-x-8" : "space-x-8"
-          )}>
-            {navLinks.map((link) => (
-              link.isRoute ? (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className={cn(
-                    "nav-link transition-colors duration-300",
-                    location.pathname === link.href ? activeNavClass : navTextClass
-                  )}
-                  style={navStyle}
-                >
-                  {link.name}
-                </Link>
-              ) : (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className={cn("nav-link transition-colors duration-300", navTextClass)}
-                  style={navStyle}
-                >
-                  {link.name}
-                </a>
-              )
-            ))}
+          {/* Desktop Mega Menu */}
+          <div className={cn("hidden lg:flex items-center", isRTL ? "space-x-reverse space-x-4" : "space-x-4")}>
+            <MegaMenu
+              navTextClass={navTextClass}
+              activeNavClass={activeNavClass}
+              navStyle={navStyle}
+              isDarkHeroPage={isDarkHeroPage}
+              isScrolled={isScrolled}
+            />
             <LanguageSwitcher isDarkBackground={!isScrolled && isDarkHeroPage} />
-            <Button 
-              variant={!isScrolled && isDarkHeroPage ? "outline" : "luxury"} 
-              size="sm" 
-              className={cn(
-                "px-6 transition-all duration-300",
-                !isScrolled && isDarkHeroPage && "border-white/50 text-white hover:bg-white/10"
-              )}
-            >
-              {t("buttons.contactUs")}
-            </Button>
+            <Link to="/#contact">
+              <Button 
+                variant={!isScrolled && isDarkHeroPage ? "outline" : "luxury"} 
+                size="sm" 
+                className={cn(
+                  "px-6 transition-all duration-300",
+                  !isScrolled && isDarkHeroPage && "border-white/50 text-white hover:bg-white/10"
+                )}
+              >
+                {t("buttons.contactUs")}
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -147,7 +118,6 @@ const Navigation = () => {
         <AnimatePresence>
           {isMobileMenuOpen && (
             <>
-              {/* Backdrop overlay */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -156,7 +126,6 @@ const Navigation = () => {
                 className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-[60] lg:hidden"
                 onClick={() => setIsMobileMenuOpen(false)}
               />
-              {/* Panel */}
               <motion.div
                 initial={{ x: isRTL ? "-100%" : "100%" }}
                 animate={{ x: 0 }}
@@ -167,12 +136,11 @@ const Navigation = () => {
                   isRTL ? "left-0" : "right-0"
                 )}
               >
-                {/* Panel header */}
                 <div className={cn(
                   "flex items-center justify-between h-20 px-6 border-b border-border",
                   isRTL && "flex-row-reverse"
                 )}>
-                  <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/', true)} className="flex items-center">
+                  <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
                     <img 
                       src={asasLogo} 
                       alt="Asas Invest" 
@@ -188,48 +156,15 @@ const Navigation = () => {
                   </button>
                 </div>
 
-                {/* Nav links */}
                 <div className={cn("flex-1 overflow-y-auto py-6 px-6", isRTL && "direction-rtl")}>
-                  <div className="flex flex-col space-y-1">
-                    {navLinks.map((link) => (
-                      link.isRoute ? (
-                        <a
-                          key={link.href}
-                          href={link.href}
-                          className={cn(
-                            "nav-link py-3 px-3 rounded-lg transition-colors duration-200 cursor-pointer",
-                            location.pathname === link.href 
-                              ? "text-accent bg-accent/5 font-medium" 
-                              : "text-foreground/70 hover:text-accent hover:bg-accent/5",
-                            isRTL && "text-right"
-                          )}
-                          onClick={(e) => handleMobileLinkClick(e, link.href, true)}
-                        >
-                          {link.name}
-                        </a>
-                      ) : (
-                        <a
-                          key={link.href}
-                          href={link.href}
-                          className={cn(
-                            "nav-link py-3 px-3 rounded-lg transition-colors duration-200 text-foreground/70 hover:text-accent hover:bg-accent/5",
-                            isRTL && "text-right"
-                          )}
-                          onClick={(e) => handleMobileLinkClick(e, link.href, false)}
-                        >
-                          {link.name}
-                        </a>
-                      )
-                    ))}
-                  </div>
+                  <MobileMegaMenu onLinkClick={handleMobileLinkClick} />
                 </div>
 
-                {/* Panel footer */}
                 <div className="px-6 py-6 border-t border-border space-y-4">
                   <div className={cn("flex", isRTL ? "justify-end" : "justify-start")}>
                     <LanguageSwitcher />
                   </div>
-                  <Button variant="luxury" className="w-full">
+                  <Button variant="luxury" className="w-full" onClick={(e) => handleMobileLinkClick(e as any, '/#contact')}>
                     {t("buttons.contactUs")}
                   </Button>
                 </div>
