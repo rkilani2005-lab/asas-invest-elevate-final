@@ -335,18 +335,7 @@
    Automatically flips layout when dir="rtl"
    ============================================ */
 
-/* RTL: Flip flex directions */
-[dir="rtl"] .flex-row {
-  flex-direction: row-reverse;
-}
-
-[dir="rtl"] .md\:flex-row {
-  flex-direction: row-reverse;
-}
-
-[dir="rtl"] .lg\:flex-row {
-  flex-direction: row-reverse;
-}
+/* RTL: flex directions handled natively by dir="rtl" — no manual flip needed */
 
 /* RTL: Text alignment */
 [dir="rtl"] {
