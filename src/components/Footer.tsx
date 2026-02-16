@@ -1,7 +1,7 @@
 import { Instagram, Linkedin, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import asasLogo from "@/assets/asas-logo.jpg";
+import logoWhiteBg from "@/assets/logo-white-bg.jpeg";
 import { cn } from "@/lib/utils";
 
 const Footer = () => {
@@ -55,9 +55,9 @@ const Footer = () => {
               isRTL ? "space-x-reverse space-x-3 justify-end md:justify-start" : "space-x-3"
             )}>
               <img 
-                src={asasLogo} 
+                src={logoWhiteBg} 
                 alt="Asas Invest Real Estate" 
-                className="h-14 w-14 rounded-full object-cover border border-accent/30"
+                className="h-12 w-auto object-contain"
               />
             </div>
             <p className="text-muted-foreground mb-6 max-w-sm text-sm leading-relaxed">
