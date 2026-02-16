@@ -95,7 +95,7 @@ export default function MegaMenu({ navTextClass, activeNavClass, navStyle, isDar
   }
 
   return (
-    <div className="hidden lg:flex items-center space-x-6">
+    <div className="hidden lg:flex items-center gap-x-6">
       {menuGroups.map((group) => (
         <div
           key={group.label}
