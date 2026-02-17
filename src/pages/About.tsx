@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Target, Unlock, Heart } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import Team from "@/components/Team";
+
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -86,9 +86,6 @@ const About = () => {
               <p className="text-muted-foreground leading-relaxed max-w-2xl mx-auto">{t("about.privateOfficeDesc")}</p>
             </ScrollReveal>
           </div>
-
-          {/* Team */}
-          <Team />
         </div>
       </main>
       <Footer />
