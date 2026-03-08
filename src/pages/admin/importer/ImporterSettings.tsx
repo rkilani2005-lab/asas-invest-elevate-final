@@ -481,6 +481,77 @@ export default function ImporterSettings() {
         {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
         Save Settings
       </Button>
+
+      {/* ── Webhook Activity Log ── */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                Webhook Activity Log
+              </CardTitle>
+              <CardDescription>Last 20 folders auto-queued via Dropbox webhook</CardDescription>
+            </div>
+            {webhookLogs && webhookLogs.length > 0 && (
+              <Badge variant="secondary">{webhookLogs.length} event{webhookLogs.length !== 1 ? "s" : ""}</Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {logsLoading ? (
+            <div className="flex items-center gap-2 py-6 text-muted-foreground text-sm justify-center">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Loading activity…
+            </div>
+          ) : !webhookLogs || webhookLogs.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
+              <Webhook className="w-8 h-8 opacity-30" />
+              <p className="text-sm">No webhook events yet</p>
+              <p className="text-xs">Events will appear here once the webhook is active and Dropbox detects new folders</p>
+            </div>
+          ) : (
+            <ScrollArea className="h-72">
+              <div className="space-y-1 pr-2">
+                {webhookLogs.map((log) => {
+                  // Extract folder name from details string like:
+                  // "Auto-queued via Dropbox webhook: Folder Name"
+                  const folderName = log.details?.replace("Auto-queued via Dropbox webhook: ", "") ?? "—";
+                  const ts = log.created_at ? new Date(log.created_at) : null;
+
+                  return (
+                    <div
+                      key={log.id}
+                      className="flex items-start gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-colors group"
+                    >
+                      <FolderPlus className="w-3.5 h-3.5 mt-0.5 text-primary flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate" title={folderName}>
+                          {folderName}
+                        </p>
+                        {ts && (
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {formatDistanceToNow(ts, { addSuffix: true })}
+                            <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              · {ts.toLocaleString()}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] bg-primary/10 text-primary flex-shrink-0"
+                      >
+                        queued
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
