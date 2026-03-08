@@ -36,6 +36,7 @@ const navItems = [
 export default function AdminSidebar() {
   const location = useLocation();
   const { signOut, user } = useAdminAuth();
+  const queueCount = useQueueCount();
 
   const isActive = (href: string) => {
     if (href === "/admin") {
