@@ -154,6 +154,35 @@ serve(async (req) => {
       });
     }
 
+    // ─── Get / save cursor for webhook delta tracking ─────────────────────────
+    if (action === "get_cursor") {
+      const rootPath = body.root_path || "/ASAS-Properties";
+      // Fetch latest cursor without listing contents
+      const res = await fetch("https://api.dropboxapi.com/2/files/list_folder/get_latest_cursor", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${dropboxToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ path: rootPath, recursive: true }),
+      });
+      if (!res.ok) {
+        return new Response(JSON.stringify({ error: "Failed to get cursor" }), { status: 400, headers: corsHeaders });
+      }
+      const data = await res.json();
+      // Persist in importer_settings so the webhook edge function can read it
+      await supabase.from("importer_settings").upsert(
+        { key: "dropbox_cursor", value: data.cursor, updated_at: new Date().toISOString() },
+        { onConflict: "key" }
+      );
+      return new Response(JSON.stringify({ cursor: data.cursor }), { headers: corsHeaders });
+    }
+
+    if (action === "clear_cursor") {
+      await supabase.from("importer_settings").upsert(
+        { key: "dropbox_cursor", value: null, updated_at: new Date().toISOString() },
+        { onConflict: "key" }
+      );
+      return new Response(JSON.stringify({ success: true }), { headers: corsHeaders });
+    }
+
     // ─── Get a temporary link for preview ─────────────────────────────────────
     if (action === "get_preview_link") {
       const { file_path } = body;

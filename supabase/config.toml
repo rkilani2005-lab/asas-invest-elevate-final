@@ -3,6 +3,9 @@ project_id = "yinswjhmcgftinrjsokv"
 [functions.dropbox-proxy]
 verify_jwt = false
 
+[functions.dropbox-webhook]
+verify_jwt = false
+
 [functions.extract-property]
 verify_jwt = false
 
