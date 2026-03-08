@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Save,
   CheckCircle2,
@@ -18,9 +19,12 @@ import {
   Webhook,
   RefreshCw,
   Info,
+  FolderPlus,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
