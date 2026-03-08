@@ -1,0 +1,295 @@
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Save,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  TestTube,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+
+async function callDropboxProxy(action: string, payload: Record<string, any> = {}) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dropbox-proxy`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session?.access_token}`,
+    },
+    body: JSON.stringify({ action, ...payload }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
+
+export default function ImporterSettings() {
+  const [dropboxToken, setDropboxToken] = useState("");
+  const [rootPath, setRootPath] = useState("/ASAS-Properties");
+  const [showToken, setShowToken] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  // Load existing settings
+  useQuery({
+    queryKey: ["importer-settings"],
+    queryFn: async () => {
+      const { data } = await supabase.from("importer_settings").select("key, value");
+      if (!data) return;
+      const settings: Record<string, string> = {};
+      data.forEach((row) => { settings[row.key] = row.value || ""; });
+      if (settings.dropbox_access_token) setDropboxToken(settings.dropbox_access_token);
+      if (settings.dropbox_root_path) setRootPath(settings.dropbox_root_path);
+      return settings;
+    },
+  });
+
+  const { data: connected } = useQuery({
+    queryKey: ["dropbox-connected"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("importer_settings")
+        .select("value")
+        .eq("key", "dropbox_access_token")
+        .maybeSingle();
+      return !!data?.value;
+    },
+  });
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const upserts = [
+        { key: "dropbox_access_token", value: dropboxToken },
+        { key: "dropbox_root_path", value: rootPath },
+      ];
+
+      // Save token via edge function (secure)
+      if (dropboxToken) {
+        await callDropboxProxy("save_token", { token: dropboxToken });
+      }
+
+      // Save root path directly
+      await supabase.from("importer_settings").upsert(
+        upserts.filter((u) => u.key !== "dropbox_access_token"),
+        { onConflict: "key" }
+      );
+
+      toast.success("Settings saved");
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleTest = async () => {
+    if (!dropboxToken) {
+      toast.error("Please enter your Dropbox access token first");
+      return;
+    }
+    setTesting(true);
+    setTestResult(null);
+    try {
+      // Save token first then test
+      await callDropboxProxy("save_token", { token: dropboxToken });
+      const result = await callDropboxProxy("list_root", { root_path: rootPath });
+      if (result.folders !== undefined) {
+        setTestResult({
+          ok: true,
+          message: result.error
+            ? `Connected, but: ${result.error}`
+            : `Connected! Found ${result.folders.length} folder(s) in ${rootPath}`,
+        });
+      } else {
+        setTestResult({ ok: false, message: result.error || "Unexpected response" });
+      }
+    } catch (e: any) {
+      setTestResult({ ok: false, message: e.message });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <div>
+        <h1 className="text-3xl font-semibold">Importer Settings</h1>
+        <p className="text-muted-foreground mt-1">Configure Dropbox connection and import preferences</p>
+      </div>
+
+      {/* Dropbox Configuration */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Dropbox Configuration</CardTitle>
+              <CardDescription>Connect your Dropbox to scan property folders</CardDescription>
+            </div>
+            {connected ? (
+              <Badge variant="secondary" className="bg-green-500/10 text-green-600">
+                <CheckCircle2 className="w-3 h-3 mr-1" />Connected
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600">
+                <AlertCircle className="w-3 h-3 mr-1" />Not connected
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <AlertDescription className="text-xs">
+              Generate a long-lived access token from your{" "}
+              <a
+                href="https://www.dropbox.com/developers/apps"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Dropbox App Console
+              </a>
+              . Create an app with "Full Dropbox" access, then generate a token under Settings → OAuth 2 → Generated access token.
+            </AlertDescription>
+          </Alert>
+
+          <div className="space-y-2">
+            <Label htmlFor="dropbox-token">Dropbox Access Token</Label>
+            <div className="relative">
+              <Input
+                id="dropbox-token"
+                type={showToken ? "text" : "password"}
+                value={dropboxToken}
+                onChange={(e) => setDropboxToken(e.target.value)}
+                placeholder="sl.XXXXXXXX..."
+                className="pr-10 font-mono text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowToken((p) => !p)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="root-path">Root Folder Path</Label>
+            <Input
+              id="root-path"
+              value={rootPath}
+              onChange={(e) => setRootPath(e.target.value)}
+              placeholder="/ASAS-Properties"
+              className="font-mono text-sm"
+            />
+            <p className="text-xs text-muted-foreground">
+              All property subfolders must be inside this Dropbox folder
+            </p>
+          </div>
+
+          {testResult && (
+            <Alert variant={testResult.ok ? "default" : "destructive"} className={testResult.ok ? "border-green-500/30 bg-green-500/5" : ""}>
+              {testResult.ok ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <AlertCircle className="h-4 w-4" />}
+              <AlertDescription className="text-xs">{testResult.message}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleTest} disabled={testing}>
+              {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <TestTube className="w-4 h-4 mr-2" />}
+              Test Connection
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Folder Structure Guide */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Required Folder Structure</CardTitle>
+          <CardDescription>Each property folder must follow this layout</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <pre className="text-xs bg-muted rounded-lg p-4 overflow-auto text-muted-foreground">
+{`${rootPath || "/ASAS-Properties"}/
+├── Property Name - Location/
+│   ├── brochures/
+│   │   └── brochure.pdf
+│   ├── images/
+│   │   ├── 01-hero.jpg
+│   │   └── 02-interior.jpg
+│   └── videos/
+│       └── walkthrough.mp4
+└── Another Property - Area/
+    └── ...`}
+          </pre>
+          <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+            <p>• Folder name format: <code className="bg-muted px-1 rounded">Property Name - Location</code></p>
+            <p>• Images: .jpg, .jpeg, .png, .webp (max 500KB after compression)</p>
+            <p>• Videos: .mp4, .mov, .avi, .webm (max 30MB, skipped if larger)</p>
+            <p>• Brochures: .pdf (processed by AI for data extraction)</p>
+            <p>• Number image filenames (01-, 02-, …) to control gallery order</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">AI Configuration</CardTitle>
+          <CardDescription>Property data extraction uses Lovable AI — no API key required</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
+            <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+            <div className="text-sm">
+              <div className="font-medium">Lovable AI (Gemini 2.5 Flash) — Active</div>
+              <div className="text-muted-foreground text-xs mt-0.5">
+                Processes PDF brochures and extracts all 26 property fields with Arabic translations
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Media Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Media Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {[
+            { label: "Max image size", value: "500 KB (auto-compressed)" },
+            { label: "Max image resolution", value: "1920px longest side" },
+            { label: "Max video size", value: "30 MB (skipped if larger)" },
+            { label: "Video compression", value: "None — uploaded as-is" },
+            { label: "Image output format", value: "JPEG (PNG/WebP converted)" },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex justify-between py-2 border-b last:border-0">
+              <span className="text-muted-foreground">{label}</span>
+              <span className="font-medium">{value}</span>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Button onClick={handleSave} disabled={saving} size="lg">
+        {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+        Save Settings
+      </Button>
+    </div>
+  );
+}
