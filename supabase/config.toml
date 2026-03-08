@@ -6,6 +6,9 @@ verify_jwt = false
 [functions.dropbox-webhook]
 verify_jwt = false
 
+[functions.dropbox-auto-scan]
+verify_jwt = false
+
 [functions.extract-property]
 verify_jwt = false
 

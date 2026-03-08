@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Save,
   CheckCircle2,
@@ -21,6 +22,9 @@ import {
   Info,
   FolderPlus,
   Clock,
+  Timer,
+  Play,
+  CalendarClock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -56,6 +60,8 @@ export default function ImporterSettings() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [initingCursor, setInitingCursor] = useState(false);
+  const [runningNow, setRunningNow] = useState(false);
+  const [autoScanInterval, setAutoScanInterval] = useState<"disabled" | "hourly" | "daily">("disabled");
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   // Load existing settings
@@ -68,6 +74,10 @@ export default function ImporterSettings() {
       data.forEach((row) => { settings[row.key] = row.value || ""; });
       if (settings.dropbox_access_token) setDropboxToken(settings.dropbox_access_token);
       if (settings.dropbox_root_path) setRootPath(settings.dropbox_root_path);
+      if (settings.auto_scan_interval) {
+        const val = settings.auto_scan_interval;
+        if (val === "hourly" || val === "daily" || val === "disabled") setAutoScanInterval(val);
+      }
       return settings;
     },
   });
@@ -107,10 +117,45 @@ export default function ImporterSettings() {
         .limit(20);
       return data ?? [];
     },
-    refetchInterval: 15_000, // refresh every 15 s so new events appear
+    refetchInterval: 15_000,
+  });
+
+  const { data: autoScanInfo } = useQuery({
+    queryKey: ["auto-scan-info"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("importer_settings")
+        .select("key, value, updated_at")
+        .in("key", ["auto_scan_last_run", "auto_scan_interval"]);
+      const map: Record<string, { value: string | null; updated_at: string | null }> = {};
+      (data ?? []).forEach((r) => { map[r.key] = { value: r.value, updated_at: r.updated_at }; });
+      return map;
+    },
+    refetchInterval: 30_000,
   });
 
   const hasCursor = !!cursorInfo?.value;
+  const lastRun = autoScanInfo?.auto_scan_last_run?.value
+    ? new Date(autoScanInfo.auto_scan_last_run.value)
+    : null;
+
+  /** Compute next scheduled run time for display */
+  function getNextRun(interval: string, last: Date | null): string {
+    if (interval === "disabled") return "—";
+    const base = last ?? new Date();
+    if (interval === "hourly") {
+      const next = new Date(base);
+      next.setMinutes(0, 0, 0);
+      next.setHours(next.getHours() + (last ? 1 : 0));
+      if (next <= new Date()) next.setHours(next.getHours() + 1);
+      return next.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    if (interval === "daily" && last) {
+      const next = new Date(last.getTime() + 24 * 60 * 60 * 1000);
+      return next.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+    return "Next hour";
+  }
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
 
@@ -121,11 +166,15 @@ export default function ImporterSettings() {
         await callDropboxProxy("save_token", { token: dropboxToken });
       }
       await supabase.from("importer_settings").upsert(
-        [{ key: "dropbox_root_path", value: rootPath }],
+        [
+          { key: "dropbox_root_path", value: rootPath },
+          { key: "auto_scan_interval", value: autoScanInterval },
+        ],
         { onConflict: "key" }
       );
       toast.success("Settings saved");
       queryClient.invalidateQueries({ queryKey: ["dropbox-connected"] });
+      queryClient.invalidateQueries({ queryKey: ["auto-scan-info"] });
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Save failed");
     } finally {
@@ -191,7 +240,36 @@ export default function ImporterSettings() {
     toast.success("Webhook URL copied");
   };
 
-  // ─── Render ────────────────────────────────────────────────────────────────
+  const handleRunNow = async () => {
+    setRunningNow(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dropbox-auto-scan`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ source: "manual" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Scan failed");
+      if (data.action === "skipped") {
+        toast.info(`Scan skipped: ${data.reason}`);
+      } else {
+        toast.success(
+          data.new_jobs > 0
+            ? `Scan complete — queued ${data.new_jobs} new folder(s)`
+            : `Scan complete — no new folders found (${data.total} total)`
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["auto-scan-info"] });
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Scan failed");
+    } finally {
+      setRunningNow(false);
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -434,6 +512,103 @@ export default function ImporterSettings() {
             <p>• Brochures: .pdf (processed by AI for data extraction)</p>
             <p>• Number image filenames (01-, 02-, …) to control gallery order</p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Auto-Scan Schedule ── */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <CalendarClock className="w-4 h-4" />
+                Auto-Scan Schedule
+              </CardTitle>
+              <CardDescription>
+                Fallback polling when the webhook is not set up — runs via a scheduled job every hour
+              </CardDescription>
+            </div>
+            {autoScanInterval !== "disabled" ? (
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <Timer className="w-3 h-3 mr-1" />{autoScanInterval === "hourly" ? "Hourly" : "Daily"}
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="text-muted-foreground">
+                Disabled
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {/* Interval picker */}
+          <RadioGroup
+            value={autoScanInterval}
+            onValueChange={(v) => setAutoScanInterval(v as "disabled" | "hourly" | "daily")}
+            className="space-y-2"
+          >
+            {[
+              { value: "disabled", label: "Disabled", description: "No automatic scanning" },
+              { value: "hourly",   label: "Hourly",   description: "Scan at the top of every hour" },
+              { value: "daily",    label: "Daily",    description: "Scan once every 24 hours" },
+            ].map(({ value, label, description }) => (
+              <Label
+                key={value}
+                htmlFor={`interval-${value}`}
+                className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+              >
+                <RadioGroupItem id={`interval-${value}`} value={value} />
+                <div>
+                  <div className="text-sm font-medium">{label}</div>
+                  <div className="text-xs text-muted-foreground">{description}</div>
+                </div>
+              </Label>
+            ))}
+          </RadioGroup>
+
+          {/* Status row */}
+          {autoScanInterval !== "disabled" && (
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="rounded-md bg-muted/50 p-3 space-y-1">
+                <p className="text-muted-foreground flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Last scan
+                </p>
+                <p className="font-medium">
+                  {lastRun
+                    ? formatDistanceToNow(lastRun, { addSuffix: true })
+                    : "Never"}
+                </p>
+                {lastRun && (
+                  <p className="text-muted-foreground">{lastRun.toLocaleString()}</p>
+                )}
+              </div>
+              <div className="rounded-md bg-muted/50 p-3 space-y-1">
+                <p className="text-muted-foreground flex items-center gap-1">
+                  <Timer className="w-3 h-3" /> Next scan
+                </p>
+                <p className="font-medium">{getNextRun(autoScanInterval, lastRun)}</p>
+              </div>
+            </div>
+          )}
+
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              The cron job fires every hour. "Daily" mode means the function skips runs until 24 h have elapsed since the last scan.
+              Click <strong>Run Now</strong> to trigger an immediate scan regardless of schedule.
+            </AlertDescription>
+          </Alert>
+
+          <Button
+            variant="outline"
+            onClick={handleRunNow}
+            disabled={runningNow || !connected}
+            title="Trigger an immediate Dropbox scan"
+          >
+            {runningNow
+              ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              : <Play className="w-4 h-4 mr-2" />}
+            Run Now
+          </Button>
         </CardContent>
       </Card>
 
