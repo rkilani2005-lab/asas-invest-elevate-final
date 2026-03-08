@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useQueueCount } from "@/hooks/useQueueCount";
+import { useQueueCount, useNewSubmissionsCount } from "@/hooks/useQueueCount";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
