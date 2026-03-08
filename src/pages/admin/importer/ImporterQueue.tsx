@@ -327,14 +327,14 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             setFileProgress((prev) =>
               prev.map((f) =>
                 f.filename === item.original_filename
-                  ? { ...f, phase: "skipped", error: "Over 30 MB — skipped" }
+                  ? { ...f, phase: "skipped", error: "Over 40 MB — skipped" }
                   : f
               )
             );
             await supabase.from("import_logs").insert({
               job_id: job.id,
               action: "media_skipped",
-              details: `"${item.original_filename}" skipped — exceeds 30 MB video limit`,
+              details: `"${item.original_filename}" skipped — exceeds 40 MB video limit`,
               level: "warning",
             });
             continue;
