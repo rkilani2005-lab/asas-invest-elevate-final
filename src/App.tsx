@@ -45,6 +45,8 @@ import ImporterDashboard from "./pages/admin/importer/ImporterDashboard";
 import ImporterScan from "./pages/admin/importer/ImporterScan";
 import ImporterQueue from "./pages/admin/importer/ImporterQueue";
 import ImporterSettings from "./pages/admin/importer/ImporterSettings";
+import AdminCommunications from "./pages/admin/AdminCommunications";
+import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
 
 const queryClient = new QueryClient();
 
