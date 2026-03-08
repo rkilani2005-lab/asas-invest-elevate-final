@@ -96,6 +96,20 @@ export default function ImporterSettings() {
     },
   });
 
+  const { data: webhookLogs, isLoading: logsLoading } = useQuery({
+    queryKey: ["webhook-activity-logs"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("import_logs")
+        .select("id, details, created_at, level")
+        .eq("action", "webhook_queued")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      return data ?? [];
+    },
+    refetchInterval: 15_000, // refresh every 15 s so new events appear
+  });
+
   const hasCursor = !!cursorInfo?.value;
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
