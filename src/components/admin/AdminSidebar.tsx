@@ -100,7 +100,7 @@ export default function AdminSidebar() {
               <NavBadge count={queueCount} active={isActive(item.href)} />
             )}
             {item.href === "/admin/communications" && newSubmissionsCount > 0 && (
-              <NavBadge count={newSubmissionsCount} active={isActive(item.href)} />
+              <NavBadge count={newSubmissionsCount} active={isActive(item.href)} variant="destructive" />
             )}
           </Link>
         ))}
