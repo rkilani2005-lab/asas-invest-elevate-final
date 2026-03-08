@@ -240,7 +240,36 @@ export default function ImporterSettings() {
     toast.success("Webhook URL copied");
   };
 
-  // ─── Render ────────────────────────────────────────────────────────────────
+  const handleRunNow = async () => {
+    setRunningNow(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dropbox-auto-scan`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ source: "manual" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Scan failed");
+      if (data.action === "skipped") {
+        toast.info(`Scan skipped: ${data.reason}`);
+      } else {
+        toast.success(
+          data.new_jobs > 0
+            ? `Scan complete — queued ${data.new_jobs} new folder(s)`
+            : `Scan complete — no new folders found (${data.total} total)`
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["auto-scan-info"] });
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Scan failed");
+    } finally {
+      setRunningNow(false);
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-2xl">
