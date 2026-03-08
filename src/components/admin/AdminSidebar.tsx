@@ -24,7 +24,7 @@ const navItems = [
   { href: "/admin/importer", icon: CloudDownload, label: "Auto Import" },
   { href: "/admin/gallery", icon: Images, label: "Gallery" },
   { href: "/admin/amenities", icon: Sparkles, label: "Amenity Library" },
-  { href: "/admin/inquiries", icon: Users, label: "Inquiries" },
+  { href: "/admin/communications", icon: Users, label: "Communications" },
   { href: "/admin/insights", icon: Newspaper, label: "Insights" },
   { href: "/admin/home-content", icon: Home, label: "Home Page" },
   { href: "/admin/about", icon: FileText, label: "About Page" },
