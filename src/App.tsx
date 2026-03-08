@@ -41,6 +41,10 @@ import PropertyWizardPage from "./pages/admin/PropertyWizardPage";
 import AdminAmenityLibrary from "./pages/admin/AdminAmenityLibrary";
 import AdminBulkImport from "./pages/admin/AdminBulkImport";
 import AdminAboutPage from "./pages/admin/AdminAboutPage";
+import ImporterDashboard from "./pages/admin/importer/ImporterDashboard";
+import ImporterScan from "./pages/admin/importer/ImporterScan";
+import ImporterQueue from "./pages/admin/importer/ImporterQueue";
+import ImporterSettings from "./pages/admin/importer/ImporterSettings";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +89,12 @@ const App = () => (
                 <Route path="/admin/amenities" element={<AdminLayout><AdminAmenityLibrary /></AdminLayout>} />
                 <Route path="/admin/translations" element={<AdminLayout><AdminTranslations /></AdminLayout>} />
                 <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+
+                {/* Auto Importer Routes */}
+                <Route path="/admin/importer" element={<AdminLayout><ImporterDashboard /></AdminLayout>} />
+                <Route path="/admin/importer/scan" element={<AdminLayout><ImporterScan /></AdminLayout>} />
+                <Route path="/admin/importer/queue" element={<AdminLayout><ImporterQueue /></AdminLayout>} />
+                <Route path="/admin/importer/settings" element={<AdminLayout><ImporterSettings /></AdminLayout>} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

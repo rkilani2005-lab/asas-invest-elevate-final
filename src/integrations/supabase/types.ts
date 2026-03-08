@@ -82,6 +82,247 @@ export type Database = {
         }
         Relationships: []
       }
+      import_jobs: {
+        Row: {
+          ai_extraction_raw: Json | null
+          cms_property_id: string | null
+          cms_url: string | null
+          created_at: string | null
+          developer_ar: string | null
+          developer_en: string | null
+          dropbox_folder_path: string
+          enduser_text_ar: string | null
+          enduser_text_en: string | null
+          error_log: string | null
+          folder_name: string
+          handover_date: string | null
+          highlights_ar: string | null
+          highlights_en: string | null
+          id: string
+          image_count: number | null
+          import_status: string | null
+          investment_ar: string | null
+          investment_en: string | null
+          is_featured: boolean | null
+          location_ar: string | null
+          location_en: string | null
+          name_ar: string | null
+          name_en: string | null
+          overview_ar: string | null
+          overview_en: string | null
+          ownership_type: string | null
+          pdf_count: number | null
+          price_range: string | null
+          size_range: string | null
+          slug: string | null
+          status: string | null
+          tagline_ar: string | null
+          tagline_en: string | null
+          total_size_bytes: number | null
+          type: string | null
+          unit_types: string | null
+          updated_at: string | null
+          video_count: number | null
+          video_url: string | null
+        }
+        Insert: {
+          ai_extraction_raw?: Json | null
+          cms_property_id?: string | null
+          cms_url?: string | null
+          created_at?: string | null
+          developer_ar?: string | null
+          developer_en?: string | null
+          dropbox_folder_path: string
+          enduser_text_ar?: string | null
+          enduser_text_en?: string | null
+          error_log?: string | null
+          folder_name: string
+          handover_date?: string | null
+          highlights_ar?: string | null
+          highlights_en?: string | null
+          id?: string
+          image_count?: number | null
+          import_status?: string | null
+          investment_ar?: string | null
+          investment_en?: string | null
+          is_featured?: boolean | null
+          location_ar?: string | null
+          location_en?: string | null
+          name_ar?: string | null
+          name_en?: string | null
+          overview_ar?: string | null
+          overview_en?: string | null
+          ownership_type?: string | null
+          pdf_count?: number | null
+          price_range?: string | null
+          size_range?: string | null
+          slug?: string | null
+          status?: string | null
+          tagline_ar?: string | null
+          tagline_en?: string | null
+          total_size_bytes?: number | null
+          type?: string | null
+          unit_types?: string | null
+          updated_at?: string | null
+          video_count?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          ai_extraction_raw?: Json | null
+          cms_property_id?: string | null
+          cms_url?: string | null
+          created_at?: string | null
+          developer_ar?: string | null
+          developer_en?: string | null
+          dropbox_folder_path?: string
+          enduser_text_ar?: string | null
+          enduser_text_en?: string | null
+          error_log?: string | null
+          folder_name?: string
+          handover_date?: string | null
+          highlights_ar?: string | null
+          highlights_en?: string | null
+          id?: string
+          image_count?: number | null
+          import_status?: string | null
+          investment_ar?: string | null
+          investment_en?: string | null
+          is_featured?: boolean | null
+          location_ar?: string | null
+          location_en?: string | null
+          name_ar?: string | null
+          name_en?: string | null
+          overview_ar?: string | null
+          overview_en?: string | null
+          ownership_type?: string | null
+          pdf_count?: number | null
+          price_range?: string | null
+          size_range?: string | null
+          slug?: string | null
+          status?: string | null
+          tagline_ar?: string | null
+          tagline_en?: string | null
+          total_size_bytes?: number | null
+          type?: string | null
+          unit_types?: string | null
+          updated_at?: string | null
+          video_count?: number | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      import_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: string | null
+          id: string
+          job_id: string | null
+          level: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          job_id?: string | null
+          level?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          job_id?: string | null
+          level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_logs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_media: {
+        Row: {
+          cms_media_id: string | null
+          compressed_size_bytes: number | null
+          compression_status: string | null
+          created_at: string | null
+          dropbox_path: string | null
+          error_message: string | null
+          id: string
+          is_hero: boolean | null
+          job_id: string | null
+          media_type: string | null
+          original_filename: string
+          original_size_bytes: number | null
+          sort_order: number | null
+          storage_url: string | null
+        }
+        Insert: {
+          cms_media_id?: string | null
+          compressed_size_bytes?: number | null
+          compression_status?: string | null
+          created_at?: string | null
+          dropbox_path?: string | null
+          error_message?: string | null
+          id?: string
+          is_hero?: boolean | null
+          job_id?: string | null
+          media_type?: string | null
+          original_filename: string
+          original_size_bytes?: number | null
+          sort_order?: number | null
+          storage_url?: string | null
+        }
+        Update: {
+          cms_media_id?: string | null
+          compressed_size_bytes?: number | null
+          compression_status?: string | null
+          created_at?: string | null
+          dropbox_path?: string | null
+          error_message?: string | null
+          id?: string
+          is_hero?: boolean | null
+          job_id?: string | null
+          media_type?: string | null
+          original_filename?: string
+          original_size_bytes?: number | null
+          sort_order?: number | null
+          storage_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_media_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      importer_settings: {
+        Row: {
+          key: string
+          updated_at: string | null
+          value: string | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string | null
+          value?: string | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string | null
+          value?: string | null
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
           created_at: string | null
