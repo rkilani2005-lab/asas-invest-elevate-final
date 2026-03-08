@@ -41,6 +41,10 @@ import PropertyWizardPage from "./pages/admin/PropertyWizardPage";
 import AdminAmenityLibrary from "./pages/admin/AdminAmenityLibrary";
 import AdminBulkImport from "./pages/admin/AdminBulkImport";
 import AdminAboutPage from "./pages/admin/AdminAboutPage";
+import ImporterDashboard from "./pages/admin/importer/ImporterDashboard";
+import ImporterScan from "./pages/admin/importer/ImporterScan";
+import ImporterQueue from "./pages/admin/importer/ImporterQueue";
+import ImporterSettings from "./pages/admin/importer/ImporterSettings";
 
 const queryClient = new QueryClient();
 
