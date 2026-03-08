@@ -33,6 +33,21 @@ const navItems = [
   { href: "/admin/settings", icon: Settings, label: "Settings" },
 ];
 
+function NavBadge({ count, active }: { count: number; active: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center justify-center min-w-[1.25rem] h-5 rounded-full px-1.5 text-xs font-semibold",
+        active
+          ? "bg-primary-foreground/20 text-primary-foreground"
+          : "bg-primary text-primary-foreground"
+      )}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
 export default function AdminSidebar() {
   const location = useLocation();
   const { signOut, user } = useAdminAuth();
