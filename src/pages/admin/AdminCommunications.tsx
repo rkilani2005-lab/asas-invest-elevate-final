@@ -243,12 +243,12 @@ export default function AdminCommunications() {
 
       {/* Realtime banner */}
       {bannerVisible && (
-        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3 px-4">
-          <span className="text-sm text-blue-700 font-medium">
+        <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-lg p-3 px-4">
+          <span className="text-sm text-primary font-medium">
             🔔 {newCount} new {newCount === 1 ? "submission" : "submissions"} received
           </span>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="h-7 text-blue-700 border-blue-300"
+            <Button size="sm" variant="outline" className="h-7"
               onClick={() => { refetch(); setBannerVisible(false); setNewCount(0); }}>
               View
             </Button>
