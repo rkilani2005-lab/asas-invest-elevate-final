@@ -72,16 +72,10 @@ export default function AdminSidebar() {
             <item.icon className="w-5 h-5 shrink-0" />
             <span className="flex-1">{item.label}</span>
             {item.href === "/admin/importer" && queueCount > 0 && (
-              <span
-                className={cn(
-                  "inline-flex items-center justify-center min-w-[1.25rem] h-5 rounded-full px-1.5 text-xs font-semibold",
-                  isActive(item.href)
-                    ? "bg-primary-foreground/20 text-primary-foreground"
-                    : "bg-primary text-primary-foreground"
-                )}
-              >
-                {queueCount > 99 ? "99+" : queueCount}
-              </span>
+              <NavBadge count={queueCount} active={isActive(item.href)} />
+            )}
+            {item.href === "/admin/communications" && newSubmissionsCount > 0 && (
+              <NavBadge count={newSubmissionsCount} active={isActive(item.href)} />
             )}
           </Link>
         ))}
