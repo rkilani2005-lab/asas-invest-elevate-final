@@ -1014,6 +1014,38 @@ export default function ImporterQueue() {
         </Button>
       </div>
 
+      {/* ── Realtime new-jobs banner ── */}
+      {bannerVisible && newJobs.length > 0 && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex items-start gap-3 animate-in slide-in-from-top-2 duration-300">
+          <Bell className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">
+              {newJobs.length} new folder{newJobs.length !== 1 ? "s" : ""} auto-queued
+            </p>
+            <ul className="mt-1 space-y-0.5">
+              {newJobs.map((j) => (
+                <li key={j.id} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <FolderPlus className="w-3 h-3 flex-shrink-0" />
+                  {j.folder_name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleRefreshAndDismiss}>
+              <RefreshCw className="w-3 h-3 mr-1" />View
+            </Button>
+            <button
+              onClick={dismissBanner}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {active.length > 0 && (
         <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 px-4 py-3 flex items-center gap-3">
           <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
