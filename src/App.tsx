@@ -83,6 +83,8 @@ const App = () => (
                 <Route path="/admin/properties/import" element={<AdminLayout><AdminBulkImport /></AdminLayout>} />
                 <Route path="/admin/gallery" element={<AdminLayout><AdminGallery /></AdminLayout>} />
                 <Route path="/admin/inquiries" element={<AdminLayout><AdminInquiries /></AdminLayout>} />
+                <Route path="/admin/communications" element={<AdminLayout><AdminCommunications /></AdminLayout>} />
+                <Route path="/admin/communications/settings" element={<AdminLayout><AdminEmailSettings /></AdminLayout>} />
                 <Route path="/admin/insights" element={<AdminLayout><AdminInsights /></AdminLayout>} />
                 <Route path="/admin/insights/new" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
                 <Route path="/admin/insights/:id/edit" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
