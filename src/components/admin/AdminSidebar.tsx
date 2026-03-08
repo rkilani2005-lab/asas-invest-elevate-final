@@ -33,13 +33,23 @@ const navItems = [
   { href: "/admin/settings", icon: Settings, label: "Settings" },
 ];
 
-function NavBadge({ count, active }: { count: number; active: boolean }) {
+function NavBadge({
+  count,
+  active,
+  variant = "primary",
+}: {
+  count: number;
+  active: boolean;
+  variant?: "primary" | "destructive";
+}) {
   return (
     <span
       className={cn(
         "inline-flex items-center justify-center min-w-[1.25rem] h-5 rounded-full px-1.5 text-xs font-semibold",
         active
           ? "bg-primary-foreground/20 text-primary-foreground"
+          : variant === "destructive"
+          ? "bg-destructive text-destructive-foreground"
           : "bg-primary text-primary-foreground"
       )}
     >
