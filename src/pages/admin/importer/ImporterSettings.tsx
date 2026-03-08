@@ -515,6 +515,103 @@ export default function ImporterSettings() {
         </CardContent>
       </Card>
 
+      {/* ── Auto-Scan Schedule ── */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <CalendarClock className="w-4 h-4" />
+                Auto-Scan Schedule
+              </CardTitle>
+              <CardDescription>
+                Fallback polling when the webhook is not set up — runs via a scheduled job every hour
+              </CardDescription>
+            </div>
+            {autoScanInterval !== "disabled" ? (
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <Timer className="w-3 h-3 mr-1" />{autoScanInterval === "hourly" ? "Hourly" : "Daily"}
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="text-muted-foreground">
+                Disabled
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {/* Interval picker */}
+          <RadioGroup
+            value={autoScanInterval}
+            onValueChange={(v) => setAutoScanInterval(v as "disabled" | "hourly" | "daily")}
+            className="space-y-2"
+          >
+            {[
+              { value: "disabled", label: "Disabled", description: "No automatic scanning" },
+              { value: "hourly",   label: "Hourly",   description: "Scan at the top of every hour" },
+              { value: "daily",    label: "Daily",    description: "Scan once every 24 hours" },
+            ].map(({ value, label, description }) => (
+              <Label
+                key={value}
+                htmlFor={`interval-${value}`}
+                className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+              >
+                <RadioGroupItem id={`interval-${value}`} value={value} />
+                <div>
+                  <div className="text-sm font-medium">{label}</div>
+                  <div className="text-xs text-muted-foreground">{description}</div>
+                </div>
+              </Label>
+            ))}
+          </RadioGroup>
+
+          {/* Status row */}
+          {autoScanInterval !== "disabled" && (
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="rounded-md bg-muted/50 p-3 space-y-1">
+                <p className="text-muted-foreground flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Last scan
+                </p>
+                <p className="font-medium">
+                  {lastRun
+                    ? formatDistanceToNow(lastRun, { addSuffix: true })
+                    : "Never"}
+                </p>
+                {lastRun && (
+                  <p className="text-muted-foreground">{lastRun.toLocaleString()}</p>
+                )}
+              </div>
+              <div className="rounded-md bg-muted/50 p-3 space-y-1">
+                <p className="text-muted-foreground flex items-center gap-1">
+                  <Timer className="w-3 h-3" /> Next scan
+                </p>
+                <p className="font-medium">{getNextRun(autoScanInterval, lastRun)}</p>
+              </div>
+            </div>
+          )}
+
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              The cron job fires every hour. "Daily" mode means the function skips runs until 24 h have elapsed since the last scan.
+              Click <strong>Run Now</strong> to trigger an immediate scan regardless of schedule.
+            </AlertDescription>
+          </Alert>
+
+          <Button
+            variant="outline"
+            onClick={handleRunNow}
+            disabled={runningNow || !connected}
+            title="Trigger an immediate Dropbox scan"
+          >
+            {runningNow
+              ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              : <Play className="w-4 h-4 mr-2" />}
+            Run Now
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* ── AI Settings ── */}
       <Card>
         <CardHeader>
