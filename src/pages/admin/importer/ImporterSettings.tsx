@@ -166,11 +166,15 @@ export default function ImporterSettings() {
         await callDropboxProxy("save_token", { token: dropboxToken });
       }
       await supabase.from("importer_settings").upsert(
-        [{ key: "dropbox_root_path", value: rootPath }],
+        [
+          { key: "dropbox_root_path", value: rootPath },
+          { key: "auto_scan_interval", value: autoScanInterval },
+        ],
         { onConflict: "key" }
       );
       toast.success("Settings saved");
       queryClient.invalidateQueries({ queryKey: ["dropbox-connected"] });
+      queryClient.invalidateQueries({ queryKey: ["auto-scan-info"] });
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Save failed");
     } finally {
