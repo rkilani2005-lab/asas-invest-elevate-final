@@ -35,7 +35,7 @@ import {
 } from "@/lib/image-compression";
 
 const MAX_IMAGE_BYTES = 600 * 1024; // 600 KB target
-const MAX_VIDEO_BYTES = 30 * 1024 * 1024; // 30 MB
+const MAX_VIDEO_BYTES = 40 * 1024 * 1024; // 40 MB
 
 // ─── Edge function helper ─────────────────────────────────────────────────────
 async function callEdgeFunction(fn: string, body: Record<string, any>) {
