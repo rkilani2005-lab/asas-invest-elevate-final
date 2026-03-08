@@ -117,10 +117,45 @@ export default function ImporterSettings() {
         .limit(20);
       return data ?? [];
     },
-    refetchInterval: 15_000, // refresh every 15 s so new events appear
+    refetchInterval: 15_000,
+  });
+
+  const { data: autoScanInfo } = useQuery({
+    queryKey: ["auto-scan-info"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("importer_settings")
+        .select("key, value, updated_at")
+        .in("key", ["auto_scan_last_run", "auto_scan_interval"]);
+      const map: Record<string, { value: string | null; updated_at: string | null }> = {};
+      (data ?? []).forEach((r) => { map[r.key] = { value: r.value, updated_at: r.updated_at }; });
+      return map;
+    },
+    refetchInterval: 30_000,
   });
 
   const hasCursor = !!cursorInfo?.value;
+  const lastRun = autoScanInfo?.auto_scan_last_run?.value
+    ? new Date(autoScanInfo.auto_scan_last_run.value)
+    : null;
+
+  /** Compute next scheduled run time for display */
+  function getNextRun(interval: string, last: Date | null): string {
+    if (interval === "disabled") return "—";
+    const base = last ?? new Date();
+    if (interval === "hourly") {
+      const next = new Date(base);
+      next.setMinutes(0, 0, 0);
+      next.setHours(next.getHours() + (last ? 1 : 0));
+      if (next <= new Date()) next.setHours(next.getHours() + 1);
+      return next.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    if (interval === "daily" && last) {
+      const next = new Date(last.getTime() + 24 * 60 * 60 * 1000);
+      return next.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+    return "Next hour";
+  }
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
 
