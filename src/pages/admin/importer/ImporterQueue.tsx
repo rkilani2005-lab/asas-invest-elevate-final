@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +24,9 @@ import {
   ChevronUp,
   RefreshCw,
   Zap,
+  Bell,
+  X,
+  FolderPlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -917,6 +920,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
 // ─── ImporterQueue page ───────────────────────────────────────────────────────
 export default function ImporterQueue() {
+  const queryClient = useQueryClient();
   const { data: jobs, refetch } = useQuery({
     queryKey: ["import-queue"],
     queryFn: async () => {
@@ -928,6 +932,65 @@ export default function ImporterQueue() {
     },
     refetchInterval: 5000,
   });
+
+  // ── New-jobs notification state ───────────────────────────────────────────
+  const [newJobs, setNewJobs] = useState<{ id: string; folder_name: string }[]>([]);
+  const [bannerVisible, setBannerVisible] = useState(false);
+  // Track IDs already known so we only alert on truly new inserts
+  const knownIds = useRef<Set<string>>(new Set());
+
+  // Seed known IDs once the initial query resolves
+  useEffect(() => {
+    if (jobs) {
+      jobs.forEach((j) => knownIds.current.add(j.id));
+    }
+  }, [jobs === null]); // only on first load (null → array)
+
+  // ── Realtime subscription on import_jobs INSERT ───────────────────────────
+  useEffect(() => {
+    const channel = supabase
+      .channel("import-jobs-inserts")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "import_jobs" },
+        (payload) => {
+          const row = payload.new as { id: string; folder_name: string; import_status: string };
+          // Skip if we already knew about this job (e.g. created by this session)
+          if (knownIds.current.has(row.id)) return;
+          knownIds.current.add(row.id);
+
+          setNewJobs((prev) => {
+            const updated = [...prev, { id: row.id, folder_name: row.folder_name }];
+            setBannerVisible(true);
+            return updated;
+          });
+
+          // Refresh the query so the job appears in the list
+          queryClient.invalidateQueries({ queryKey: ["import-queue"] });
+
+          toast(`New folder queued: ${row.folder_name}`, {
+            icon: <FolderPlus className="w-4 h-4 text-primary" />,
+            description: "Auto-detected via Dropbox webhook / auto-scan",
+            duration: 6000,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  const dismissBanner = () => {
+    setBannerVisible(false);
+    setNewJobs([]);
+  };
+
+  const handleRefreshAndDismiss = () => {
+    refetch();
+    dismissBanner();
+  };
 
   const pending   = (jobs || []).filter((j) => j.import_status === "pending");
   const reviewing = (jobs || []).filter((j) => j.import_status === "reviewing");
@@ -950,6 +1013,38 @@ export default function ImporterQueue() {
           <RefreshCw className="w-4 h-4 mr-2" />Refresh
         </Button>
       </div>
+
+      {/* ── Realtime new-jobs banner ── */}
+      {bannerVisible && newJobs.length > 0 && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex items-start gap-3 animate-in slide-in-from-top-2 duration-300">
+          <Bell className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">
+              {newJobs.length} new folder{newJobs.length !== 1 ? "s" : ""} auto-queued
+            </p>
+            <ul className="mt-1 space-y-0.5">
+              {newJobs.map((j) => (
+                <li key={j.id} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <FolderPlus className="w-3 h-3 flex-shrink-0" />
+                  {j.folder_name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleRefreshAndDismiss}>
+              <RefreshCw className="w-3 h-3 mr-1" />View
+            </Button>
+            <button
+              onClick={dismissBanner}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {active.length > 0 && (
         <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 px-4 py-3 flex items-center gap-3">
