@@ -89,6 +89,12 @@ const App = () => (
                 <Route path="/admin/amenities" element={<AdminLayout><AdminAmenityLibrary /></AdminLayout>} />
                 <Route path="/admin/translations" element={<AdminLayout><AdminTranslations /></AdminLayout>} />
                 <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+
+                {/* Auto Importer Routes */}
+                <Route path="/admin/importer" element={<AdminLayout><ImporterDashboard /></AdminLayout>} />
+                <Route path="/admin/importer/scan" element={<AdminLayout><ImporterScan /></AdminLayout>} />
+                <Route path="/admin/importer/queue" element={<AdminLayout><ImporterQueue /></AdminLayout>} />
+                <Route path="/admin/importer/settings" element={<AdminLayout><ImporterSettings /></AdminLayout>} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>
