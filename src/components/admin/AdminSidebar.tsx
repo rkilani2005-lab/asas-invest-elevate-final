@@ -37,6 +37,7 @@ export default function AdminSidebar() {
   const location = useLocation();
   const { signOut, user } = useAdminAuth();
   const queueCount = useQueueCount();
+  const newSubmissionsCount = useNewSubmissionsCount();
 
   const isActive = (href: string) => {
     if (href === "/admin") {
