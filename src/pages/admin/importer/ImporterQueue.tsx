@@ -831,7 +831,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                           </span>
                           {(vid.original_size_bytes || 0) > MAX_VIDEO_BYTES ? (
                             <Badge variant="secondary" className="text-[10px] bg-yellow-500/10 text-yellow-600">
-                              Will skip — over 30 MB
+                              Will skip — over 40 MB
                             </Badge>
                           ) : (
                             <Badge variant="secondary" className="text-[10px] bg-green-500/10 text-green-600">

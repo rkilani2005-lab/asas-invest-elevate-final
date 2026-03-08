@@ -447,7 +447,7 @@ export default function ImporterSettings() {
           {[
             { label: "Max image size", value: "600 KB (auto-compressed client-side)" },
             { label: "Max image resolution", value: "1920px longest side" },
-            { label: "Max video size", value: "30 MB (skipped if larger)" },
+            { label: "Max video size", value: "40 MB (skipped if larger)" },
             { label: "Video compression", value: "None — uploaded as-is" },
             { label: "Image output format", value: "WebP / JPEG fallback" },
           ].map(({ label, value }) => (
