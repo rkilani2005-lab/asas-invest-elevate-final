@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+          name: string
+          phone: string | null
+          photo_url: string | null
+          properties_assigned: string[] | null
+          role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          properties_assigned?: string[] | null
+          role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          properties_assigned?: string[] | null
+          role?: string | null
+        }
+        Relationships: []
+      }
       amenities: {
         Row: {
           category: string | null
@@ -79,6 +115,287 @@ export type Database = {
           is_active?: boolean | null
           name_ar?: string | null
           name_en?: string
+        }
+        Relationships: []
+      }
+      email_log: {
+        Row: {
+          body_html: string | null
+          body_text: string | null
+          created_at: string | null
+          error_message: string | null
+          gmail_message_id: string | null
+          gmail_thread_id: string | null
+          id: string
+          recipient_email: string
+          recipient_type: string | null
+          sender_email: string
+          sent_at: string | null
+          status: string | null
+          subject: string
+          submission_id: string | null
+          template_name: string
+        }
+        Insert: {
+          body_html?: string | null
+          body_text?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          recipient_email: string
+          recipient_type?: string | null
+          sender_email: string
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          submission_id?: string | null
+          template_name: string
+        }
+        Update: {
+          body_html?: string | null
+          body_text?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          recipient_email?: string
+          recipient_type?: string | null
+          sender_email?: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          submission_id?: string | null
+          template_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_log_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "form_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          body_html_ar: string | null
+          body_html_en: string
+          body_text_en: string | null
+          category: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          sender_account: string
+          slug: string
+          subject_ar: string | null
+          subject_en: string
+          updated_at: string | null
+          variables_used: string[] | null
+        }
+        Insert: {
+          body_html_ar?: string | null
+          body_html_en: string
+          body_text_en?: string | null
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sender_account?: string
+          slug: string
+          subject_ar?: string | null
+          subject_en: string
+          updated_at?: string | null
+          variables_used?: string[] | null
+        }
+        Update: {
+          body_html_ar?: string | null
+          body_html_en?: string
+          body_text_en?: string | null
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sender_account?: string
+          slug?: string
+          subject_ar?: string | null
+          subject_en?: string
+          updated_at?: string | null
+          variables_used?: string[] | null
+        }
+        Relationships: []
+      }
+      form_submissions: {
+        Row: {
+          assigned_agent_id: string | null
+          attendees: number | null
+          budget_range: string | null
+          callback_time: string | null
+          consent_given: boolean | null
+          created_at: string | null
+          email_sent: boolean | null
+          email_sent_at: string | null
+          follow_up_date: string | null
+          form_type: string
+          id: string
+          newsletter_interests: string | null
+          notes: string | null
+          preferred_contact: string | null
+          preferred_language: string | null
+          property_id: string | null
+          property_name: string | null
+          purpose: string | null
+          source_page: string | null
+          status: string | null
+          subject: string | null
+          team_notified: boolean | null
+          unit_type_interest: string | null
+          updated_at: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          viewing_alt_date: string | null
+          viewing_date: string | null
+          viewing_time: string | null
+          visitor_email: string
+          visitor_message: string | null
+          visitor_name: string | null
+          visitor_phone: string | null
+        }
+        Insert: {
+          assigned_agent_id?: string | null
+          attendees?: number | null
+          budget_range?: string | null
+          callback_time?: string | null
+          consent_given?: boolean | null
+          created_at?: string | null
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          follow_up_date?: string | null
+          form_type: string
+          id?: string
+          newsletter_interests?: string | null
+          notes?: string | null
+          preferred_contact?: string | null
+          preferred_language?: string | null
+          property_id?: string | null
+          property_name?: string | null
+          purpose?: string | null
+          source_page?: string | null
+          status?: string | null
+          subject?: string | null
+          team_notified?: boolean | null
+          unit_type_interest?: string | null
+          updated_at?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          viewing_alt_date?: string | null
+          viewing_date?: string | null
+          viewing_time?: string | null
+          visitor_email: string
+          visitor_message?: string | null
+          visitor_name?: string | null
+          visitor_phone?: string | null
+        }
+        Update: {
+          assigned_agent_id?: string | null
+          attendees?: number | null
+          budget_range?: string | null
+          callback_time?: string | null
+          consent_given?: boolean | null
+          created_at?: string | null
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          follow_up_date?: string | null
+          form_type?: string
+          id?: string
+          newsletter_interests?: string | null
+          notes?: string | null
+          preferred_contact?: string | null
+          preferred_language?: string | null
+          property_id?: string | null
+          property_name?: string | null
+          purpose?: string | null
+          source_page?: string | null
+          status?: string | null
+          subject?: string | null
+          team_notified?: boolean | null
+          unit_type_interest?: string | null
+          updated_at?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          viewing_alt_date?: string | null
+          viewing_date?: string | null
+          viewing_time?: string | null
+          visitor_email?: string
+          visitor_message?: string | null
+          visitor_name?: string | null
+          visitor_phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_submissions_assigned_agent_id_fkey"
+            columns: ["assigned_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_submissions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gmail_accounts: {
+        Row: {
+          access_token: string | null
+          created_at: string | null
+          display_name: string | null
+          email: string
+          id: string
+          is_connected: boolean | null
+          last_tested_at: string | null
+          purpose: string
+          refresh_token: string | null
+          token_expiry: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          email: string
+          id?: string
+          is_connected?: boolean | null
+          last_tested_at?: string | null
+          purpose: string
+          refresh_token?: string | null
+          token_expiry?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          email?: string
+          id?: string
+          is_connected?: boolean | null
+          last_tested_at?: string | null
+          purpose?: string
+          refresh_token?: string | null
+          token_expiry?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -495,6 +812,39 @@ export type Database = {
           },
         ]
       }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          interests: string[] | null
+          is_active: boolean | null
+          name: string | null
+          preferred_language: string | null
+          unsubscribe_token: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          interests?: string[] | null
+          is_active?: boolean | null
+          name?: string | null
+          preferred_language?: string | null
+          unsubscribe_token?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          interests?: string[] | null
+          is_active?: boolean | null
+          name?: string | null
+          preferred_language?: string | null
+          unsubscribe_token?: string | null
+        }
+        Relationships: []
+      }
       page_sections: {
         Row: {
           content_ar: string | null
@@ -745,6 +1095,50 @@ export type Database = {
           washroom_type?: string | null
         }
         Relationships: []
+      }
+      scheduled_emails: {
+        Row: {
+          created_at: string | null
+          id: string
+          recipient_email: string
+          scheduled_for: string
+          sent_at: string | null
+          status: string | null
+          submission_id: string | null
+          template_name: string
+          variables: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          recipient_email: string
+          scheduled_for: string
+          sent_at?: string | null
+          status?: string | null
+          submission_id?: string | null
+          template_name: string
+          variables?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          recipient_email?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string | null
+          submission_id?: string | null
+          template_name?: string
+          variables?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_emails_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "form_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seo_meta: {
         Row: {
