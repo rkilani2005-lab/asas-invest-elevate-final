@@ -354,7 +354,7 @@ export default function AdminCommunications() {
                   </TableCell>
                   <TableCell>
                     {s.email_sent ? (
-                      <span className="text-xs text-green-600 flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Sent</span>
+                      <span className="text-xs text-primary flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Sent</span>
                     ) : (
                       <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                     )}
