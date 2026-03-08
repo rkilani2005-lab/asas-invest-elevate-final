@@ -60,6 +60,8 @@ export default function ImporterSettings() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [initingCursor, setInitingCursor] = useState(false);
+  const [runningNow, setRunningNow] = useState(false);
+  const [autoScanInterval, setAutoScanInterval] = useState<"disabled" | "hourly" | "daily">("disabled");
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   // Load existing settings
@@ -72,6 +74,10 @@ export default function ImporterSettings() {
       data.forEach((row) => { settings[row.key] = row.value || ""; });
       if (settings.dropbox_access_token) setDropboxToken(settings.dropbox_access_token);
       if (settings.dropbox_root_path) setRootPath(settings.dropbox_root_path);
+      if (settings.auto_scan_interval) {
+        const val = settings.auto_scan_interval;
+        if (val === "hourly" || val === "daily" || val === "disabled") setAutoScanInterval(val);
+      }
       return settings;
     },
   });
