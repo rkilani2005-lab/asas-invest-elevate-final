@@ -35,7 +35,7 @@ import {
 } from "@/lib/image-compression";
 
 const MAX_IMAGE_BYTES = 600 * 1024; // 600 KB target
-const MAX_VIDEO_BYTES = 30 * 1024 * 1024; // 30 MB
+const MAX_VIDEO_BYTES = 40 * 1024 * 1024; // 40 MB
 
 // ─── Edge function helper ─────────────────────────────────────────────────────
 async function callEdgeFunction(fn: string, body: Record<string, any>) {
@@ -327,14 +327,14 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             setFileProgress((prev) =>
               prev.map((f) =>
                 f.filename === item.original_filename
-                  ? { ...f, phase: "skipped", error: "Over 30 MB — skipped" }
+                  ? { ...f, phase: "skipped", error: "Over 40 MB — skipped" }
                   : f
               )
             );
             await supabase.from("import_logs").insert({
               job_id: job.id,
               action: "media_skipped",
-              details: `"${item.original_filename}" skipped — exceeds 30 MB video limit`,
+              details: `"${item.original_filename}" skipped — exceeds 40 MB video limit`,
               level: "warning",
             });
             continue;
@@ -831,7 +831,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                           </span>
                           {(vid.original_size_bytes || 0) > MAX_VIDEO_BYTES ? (
                             <Badge variant="secondary" className="text-[10px] bg-yellow-500/10 text-yellow-600">
-                              Will skip — over 30 MB
+                              Will skip — over 40 MB
                             </Badge>
                           ) : (
                             <Badge variant="secondary" className="text-[10px] bg-green-500/10 text-green-600">

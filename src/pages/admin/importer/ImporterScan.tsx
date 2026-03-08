@@ -222,7 +222,7 @@ export default function ImporterScan() {
         ...videos.map((f: any, i: number) => ({
           job_id: job.id, media_type: "video", original_filename: f.name,
           original_size_bytes: f.size || null, dropbox_path: f.path_lower, sort_order: i, is_hero: false,
-          compression_status: (f.size || 0) > 30 * 1024 * 1024 ? "skipped" : "pending",
+          compression_status: (f.size || 0) > 40 * 1024 * 1024 ? "skipped" : "pending",
         })),
       ];
 

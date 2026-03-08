@@ -412,7 +412,7 @@ export default function ImporterSettings() {
           <div className="mt-3 space-y-1 text-xs text-muted-foreground">
             <p>• Folder name format: <code className="bg-muted px-1 rounded">Property Name - Location</code></p>
             <p>• Images: .jpg, .jpeg, .png, .webp (max 600KB after compression)</p>
-            <p>• Videos: .mp4, .mov, .avi, .webm (max 30MB, skipped if larger)</p>
+            <p>• Videos: .mp4, .mov, .avi, .webm (max 40MB, skipped if larger)</p>
             <p>• Brochures: .pdf (processed by AI for data extraction)</p>
             <p>• Number image filenames (01-, 02-, …) to control gallery order</p>
           </div>
@@ -447,7 +447,7 @@ export default function ImporterSettings() {
           {[
             { label: "Max image size", value: "600 KB (auto-compressed client-side)" },
             { label: "Max image resolution", value: "1920px longest side" },
-            { label: "Max video size", value: "30 MB (skipped if larger)" },
+            { label: "Max video size", value: "40 MB (skipped if larger)" },
             { label: "Video compression", value: "None — uploaded as-is" },
             { label: "Image output format", value: "WebP / JPEG fallback" },
           ].map(({ label, value }) => (
