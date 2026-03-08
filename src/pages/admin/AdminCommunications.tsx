@@ -527,9 +527,9 @@ export default function AdminCommunications() {
                             </div>
                             <div className="text-right flex-shrink-0">
                               <span className={`text-xs px-2 py-0.5 rounded-full border ${
-                                log.status === "sent" ? "bg-green-50 text-green-700 border-green-200" :
-                                log.status === "queued" ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
-                                "bg-red-50 text-red-700 border-red-200"
+                                log.status === "sent" ? "bg-primary/10 text-primary border-primary/20" :
+                                log.status === "queued" ? "bg-muted text-muted-foreground border-muted" :
+                                "bg-destructive/10 text-destructive border-destructive/20"
                               }`}>
                                 {log.status}
                               </span>
