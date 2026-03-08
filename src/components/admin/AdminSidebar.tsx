@@ -14,6 +14,7 @@ import {
   Sparkles,
   Images,
   FileText,
+  CloudDownload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
