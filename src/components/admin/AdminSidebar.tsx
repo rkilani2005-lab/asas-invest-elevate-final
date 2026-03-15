@@ -16,6 +16,7 @@ import {
   Images,
   FileText,
   CloudDownload,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
