@@ -72,7 +72,7 @@ interface MegaMenuProps {
 
 export default function MegaMenu({ navTextClass, activeNavClass, navStyle, isDarkHeroPage, isScrolled }: MegaMenuProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menuGroups = useMegaMenuItems();
   const location = useLocation();
   const { isRTL } = useLanguage();
