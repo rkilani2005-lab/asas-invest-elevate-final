@@ -6,16 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  CloudDownload,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  Loader2,
-  ArrowRight,
-  FileText,
-  Image,
-  Video,
-  Sparkles,
+  CloudDownload, CheckCircle2, Clock, AlertCircle,
+  Loader2, ArrowRight, FileText, Image, Video, Sparkles,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -49,15 +41,27 @@ export default function ImporterDashboard() {
     refetchInterval: 5000,
   });
 
-  const { data: dropboxConnected } = useQuery({
-    queryKey: ["dropbox-status"],
+  const { data: driveConnected } = useQuery({
+    queryKey: ["gdrive-status"],
     queryFn: async () => {
       const { data } = await supabase
         .from("importer_settings")
         .select("value")
-        .eq("key", "dropbox_access_token")
+        .eq("key", "gdrive_connected")
         .maybeSingle();
-      return !!data?.value;
+      return data?.value === "true";
+    },
+  });
+
+  const { data: driveEmail } = useQuery({
+    queryKey: ["gdrive-email"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("importer_settings")
+        .select("value")
+        .eq("key", "gdrive_connected_email")
+        .maybeSingle();
+      return data?.value || null;
     },
   });
 
@@ -77,27 +81,29 @@ export default function ImporterDashboard() {
         <div>
           <h1 className="text-3xl font-semibold">Property Importer</h1>
           <p className="text-muted-foreground mt-1">
-            Automate property creation from Dropbox folders using AI
+            Automate property creation from Google Drive folders using AI
           </p>
         </div>
         <Button asChild>
           <Link to="/admin/importer/scan">
             <CloudDownload className="w-4 h-4 mr-2" />
-            Scan Dropbox
+            Scan Drive
           </Link>
         </Button>
       </div>
 
-      {/* Dropbox Status */}
-      <Card className={`border ${dropboxConnected ? "border-green-500/30 bg-green-500/5" : "border-yellow-500/30 bg-yellow-500/5"}`}>
+      {/* Drive Status */}
+      <Card className={`border ${driveConnected ? "border-green-500/30 bg-green-500/5" : "border-yellow-500/30 bg-yellow-500/5"}`}>
         <CardContent className="flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
-            <div className={`w-2.5 h-2.5 rounded-full ${dropboxConnected ? "bg-green-500" : "bg-yellow-500"} animate-pulse`} />
+            <div className={`w-2.5 h-2.5 rounded-full ${driveConnected ? "bg-green-500" : "bg-yellow-500"} animate-pulse`} />
             <span className="text-sm font-medium">
-              {dropboxConnected ? "Dropbox connected" : "Dropbox not connected — add your access token in Settings"}
+              {driveConnected
+                ? `Google Drive connected${driveEmail ? ` — ${driveEmail}` : ""}`
+                : "Google Drive not connected — configure in Settings"}
             </span>
           </div>
-          {!dropboxConnected && (
+          {!driveConnected && (
             <Button variant="outline" size="sm" asChild>
               <Link to="/admin/importer/settings">Configure</Link>
             </Button>
@@ -135,7 +141,7 @@ export default function ImporterDashboard() {
               </div>
               <div className="flex-1">
                 <div className="font-semibold">Scan & Import</div>
-                <div className="text-sm text-muted-foreground">Browse Dropbox folders</div>
+                <div className="text-sm text-muted-foreground">Browse Google Drive folders</div>
               </div>
               <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </CardContent>
@@ -165,7 +171,7 @@ export default function ImporterDashboard() {
               </div>
               <div className="flex-1">
                 <div className="font-semibold">Settings</div>
-                <div className="text-sm text-muted-foreground">API keys & configuration</div>
+                <div className="text-sm text-muted-foreground">Drive connection & config</div>
               </div>
               <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </CardContent>
@@ -182,7 +188,7 @@ export default function ImporterDashboard() {
           {!recentJobs?.length ? (
             <div className="text-center py-8 text-muted-foreground">
               <CloudDownload className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p>No imports yet. Connect Dropbox and scan for properties.</p>
+              <p>No imports yet. Connect Google Drive and scan for properties.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -196,7 +202,7 @@ export default function ImporterDashboard() {
                       <div className="font-medium text-sm truncate">{job.name_en || job.folder_name}</div>
                       <div className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
                         <span>{formatDistanceToNow(new Date(job.created_at || ""), { addSuffix: true })}</span>
-                        {job.pdf_count > 0 && <span>{job.pdf_count} PDF{job.pdf_count > 1 ? "s" : ""}</span>}
+                        {job.pdf_count > 0 && <span>{job.pdf_count} doc{job.pdf_count > 1 ? "s" : ""}</span>}
                         {job.image_count > 0 && <span>{job.image_count} images</span>}
                         {job.video_count > 0 && <span>{job.video_count} videos</span>}
                       </div>

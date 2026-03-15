@@ -1,7 +1,7 @@
 /**
- * AI Property Extraction Edge Function
- * Downloads PDFs from Dropbox and uses Lovable AI (Gemini) to extract
- * all 26 property fields. Returns structured JSON.
+ * AI Property Extraction Edge Function (Google Drive version)
+ * Downloads PDFs/Docs from Google Drive and uses Lovable AI (Gemini) to extract
+ * all property fields. Returns structured JSON.
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -60,6 +60,46 @@ Return exactly this JSON structure with no extra text:
   }
 }`;
 
+async function getValidAccessToken(supabase: ReturnType<typeof createClient>): Promise<string | null> {
+  const { data: rows } = await supabase
+    .from("importer_settings")
+    .select("key, value")
+    .in("key", ["gdrive_access_token", "gdrive_refresh_token", "gdrive_token_expiry"]);
+
+  const map: Record<string, string> = {};
+  (rows || []).forEach((r: { key: string; value: string | null }) => { if (r.value) map[r.key] = r.value; });
+  if (!map.gdrive_access_token) return null;
+
+  const expiryMs = map.gdrive_token_expiry ? new Date(map.gdrive_token_expiry).getTime() : 0;
+  const needsRefresh = Date.now() > expiryMs - 5 * 60 * 1000;
+
+  if (needsRefresh && map.gdrive_refresh_token) {
+    const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
+    const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
+    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return map.gdrive_access_token;
+    const refreshResp = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        refresh_token: map.gdrive_refresh_token,
+        grant_type: "refresh_token",
+      }),
+    });
+    if (refreshResp.ok) {
+      const tokens = await refreshResp.json();
+      const newExpiry = new Date(Date.now() + (tokens.expires_in || 3600) * 1000).toISOString();
+      await supabase.from("importer_settings").upsert([
+        { key: "gdrive_access_token", value: tokens.access_token },
+        { key: "gdrive_token_expiry", value: newExpiry },
+      ], { onConflict: "key" });
+      return tokens.access_token;
+    }
+  }
+  return map.gdrive_access_token;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -82,45 +122,34 @@ serve(async (req) => {
     }
 
     const { job_id, folder_name, pdf_files } = await req.json();
-
     if (!job_id || !folder_name) {
       return new Response(JSON.stringify({ error: "Missing job_id or folder_name" }), { status: 400, headers: corsHeaders });
     }
 
-    // Get Dropbox token
-    const { data: tokenData } = await supabase
-      .from("importer_settings")
-      .select("value")
-      .eq("key", "dropbox_access_token")
-      .maybeSingle();
-
-    const dropboxToken = tokenData?.value;
+    // Get Google Drive access token
+    const accessToken = await getValidAccessToken(supabase);
 
     // Update job status to extracting
     await supabase.from("import_jobs").update({ import_status: "extracting" }).eq("id", job_id);
 
     let combinedPdfText = `Property folder: ${folder_name}\n\n`;
 
-    // Download and extract text from PDFs (sorted by size descending, take up to 3)
-    const sortedPdfs = [...(pdf_files || [])].sort((a: any, b: any) => (b.size || 0) - (a.size || 0)).slice(0, 3);
+    // Download and extract text from PDFs/Docs (sorted by size descending, take up to 3)
+    const sortedPdfs = [...(pdf_files || [])].sort((a: { size?: number }, b: { size?: number }) => (b.size || 0) - (a.size || 0)).slice(0, 3);
 
-    if (dropboxToken && sortedPdfs.length > 0) {
+    if (accessToken && sortedPdfs.length > 0) {
       for (const pdf of sortedPdfs) {
         try {
-          const dlRes = await fetch("https://content.dropboxapi.com/2/files/download", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${dropboxToken}`,
-              "Dropbox-API-Arg": JSON.stringify({ path: pdf.path_lower }),
-            },
+          // Download file from Google Drive
+          const fileId = pdf.id || pdf.path_lower; // support both drive file id and legacy dropbox path
+          const dlRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
           });
+
           if (dlRes.ok) {
             const buffer = await dlRes.arrayBuffer();
             const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-            // For PDF extraction we pass to Gemini as base64 document
-            combinedPdfText += `[PDF: ${pdf.name}]\n(Binary content — see document attachment)\n\n`;
-            // We'll use the multimodal approach with the PDF as a document
-            // Build multimodal message with PDF
+
             const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
             if (LOVABLE_API_KEY) {
               const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -142,14 +171,9 @@ serve(async (req) => {
                         },
                         {
                           type: "image_url",
-                          image_url: {
-                            url: `data:application/pdf;base64,${base64}`,
-                          },
+                          image_url: { url: `data:application/pdf;base64,${base64}` },
                         },
-                        {
-                          type: "text",
-                          text: EXTRACTION_USER_PROMPT(folder_name, ""),
-                        },
+                        { type: "text", text: EXTRACTION_USER_PROMPT(folder_name, "") },
                       ],
                     },
                   ],
@@ -161,22 +185,14 @@ serve(async (req) => {
                 const aiData = await aiRes.json();
                 const content = aiData.choices?.[0]?.message?.content || "";
                 try {
-                  // Clean any markdown wrapper
                   const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
                   const extracted = JSON.parse(cleaned);
 
-                  // Generate slug from name_en
                   const nameForSlug = (extracted.name_en || folder_name.split(" - ")[0] || folder_name);
-                  const slug = nameForSlug
-                    .toLowerCase()
-                    .replace(/[^a-z0-9\s-]/g, "")
-                    .replace(/\s+/g, "-")
-                    .replace(/-+/g, "-")
-                    .trim();
+                  const slug = nameForSlug.toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
 
                   const finalData = { ...extracted, slug };
-
-                  // Update job with extracted data
                   await supabase.from("import_jobs").update({
                     ...finalData,
                     ai_extraction_raw: extracted,
@@ -184,9 +200,8 @@ serve(async (req) => {
                   }).eq("id", job_id);
 
                   await supabase.from("import_logs").insert({
-                    job_id,
-                    action: "ai_extraction",
-                    details: `Successfully extracted data from ${pdf.name} using Lovable AI`,
+                    job_id, action: "ai_extraction",
+                    details: `Successfully extracted data from "${pdf.name}" using Lovable AI (Google Drive)`,
                     level: "success",
                   });
 
@@ -213,10 +228,7 @@ serve(async (req) => {
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
@@ -228,12 +240,8 @@ serve(async (req) => {
     });
 
     if (!aiRes.ok) {
-      if (aiRes.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), { status: 429, headers: corsHeaders });
-      }
-      if (aiRes.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to your workspace." }), { status: 402, headers: corsHeaders });
-      }
+      if (aiRes.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), { status: 429, headers: corsHeaders });
+      if (aiRes.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to your workspace." }), { status: 402, headers: corsHeaders });
       return new Response(JSON.stringify({ error: "AI extraction failed" }), { status: 500, headers: corsHeaders });
     }
 
@@ -241,20 +249,16 @@ serve(async (req) => {
     const content = aiData.choices?.[0]?.message?.content || "{}";
     const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-    let extracted: any = {};
+    let extracted: Record<string, unknown> = {};
     try {
       extracted = JSON.parse(cleaned);
     } catch {
       extracted = { name_en: folder_name.split(" - ")[0], overview_en: content.slice(0, 500) };
     }
 
-    const nameForSlug = (extracted.name_en || folder_name.split(" - ")[0] || folder_name);
-    const slug = nameForSlug
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
+    const nameForSlug = ((extracted.name_en as string) || folder_name.split(" - ")[0] || folder_name);
+    const slug = nameForSlug.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
 
     const finalData = { ...extracted, slug };
 
@@ -265,9 +269,8 @@ serve(async (req) => {
     }).eq("id", job_id);
 
     await supabase.from("import_logs").insert({
-      job_id,
-      action: "ai_extraction",
-      details: "Extracted data using Lovable AI (text mode)",
+      job_id, action: "ai_extraction",
+      details: "Extracted data using Lovable AI (text mode, Google Drive)",
       level: sortedPdfs.length > 0 ? "warning" : "info",
     });
 

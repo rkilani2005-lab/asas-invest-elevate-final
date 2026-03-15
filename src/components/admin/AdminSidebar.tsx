@@ -16,6 +16,7 @@ import {
   Images,
   FileText,
   CloudDownload,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/admin/gallery", icon: Images, label: "Gallery" },
   { href: "/admin/amenities", icon: Sparkles, label: "Amenity Library" },
   { href: "/admin/communications", icon: Users, label: "Communications" },
+  { href: "/admin/email", icon: Mail, label: "Email" },
   { href: "/admin/insights", icon: Newspaper, label: "Insights" },
   { href: "/admin/home-content", icon: Home, label: "Home Page" },
   { href: "/admin/about", icon: FileText, label: "About Page" },
