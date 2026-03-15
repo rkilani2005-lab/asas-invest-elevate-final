@@ -26,3 +26,12 @@ verify_jwt = false
 
 [functions.gmail-oauth-callback]
 verify_jwt = false
+
+[functions.gdrive-oauth]
+verify_jwt = false
+
+[functions.gdrive-oauth-callback]
+verify_jwt = false
+
+[functions.gdrive-scan]
+verify_jwt = false
