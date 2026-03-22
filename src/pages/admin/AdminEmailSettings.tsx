@@ -293,7 +293,7 @@ export default function AdminEmailSettings() {
                   key={purpose}
                   variant="outline"
                   size="sm"
-                  disabled={connectedPurposes.has(purpose)}
+                  disabled={purpose !== "manual" && connectedPurposes.has(purpose)}
                   onClick={() => connectAccount(purpose)}
                   className="justify-start"
                 >
