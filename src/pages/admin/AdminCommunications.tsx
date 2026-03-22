@@ -408,12 +408,38 @@ export default function AdminCommunications() {
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell>
-                    {s.email_sent ? (
-                      <span className="text-xs text-primary flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Sent</span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
-                    )}
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1.5">
+                      {s.email_sent ? (
+                        <span className="text-xs text-primary flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" /> Sent
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Pending
+                          </span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6"
+                                  disabled={resendingId === s.id}
+                                  onClick={(e) => { e.stopPropagation(); resendEmailMutation.mutate(s); }}
+                                >
+                                  {resendingId === s.id
+                                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                                    : <RotateCcw className="w-3 h-3" />}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Resend email</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {s.created_at ? formatDistanceToNow(new Date(s.created_at), { addSuffix: true }) : "—"}
