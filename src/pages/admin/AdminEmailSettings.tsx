@@ -49,6 +49,7 @@ export default function AdminEmailSettings() {
   const [showSetupGuide, setShowSetupGuide] = useState(false);
   const [notificationEmail, setNotificationEmail] = useState("");
   const [savingNotif, setSavingNotif] = useState(false);
+  const [secretsConfigured, setSecretsConfigured] = useState<boolean | null>(null);
 
   // Check URL params for OAuth callback
   useEffect(() => {
