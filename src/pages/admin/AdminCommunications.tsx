@@ -182,6 +182,59 @@ export default function AdminCommunications() {
     },
   });
 
+  const resendEmailMutation = useMutation({
+    mutationFn: async (submission: Submission) => {
+      // Fetch a connected gmail account
+      const { data: gmailAccount } = await supabase
+        .from("gmail_accounts")
+        .select("*")
+        .eq("is_connected", true)
+        .limit(1)
+        .maybeSingle();
+
+      // Fetch team notification email
+      const { data: settingRow } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "notification_email")
+        .maybeSingle();
+      const teamEmail = (settingRow?.value as string) || "info@asas.ae";
+
+      const resp = await supabase.functions.invoke("send-email", {
+        body: {
+          submission_id: submission.id,
+          form_type: submission.form_type,
+          visitor_name: submission.visitor_name,
+          visitor_email: submission.visitor_email,
+          visitor_phone: submission.visitor_phone,
+          visitor_message: submission.visitor_message,
+          preferred_language: submission.preferred_language || "en",
+          property_name: submission.property_name,
+          viewing_date: submission.viewing_date,
+          viewing_time: submission.viewing_time,
+          callback_time: submission.callback_time,
+          budget_range: submission.budget_range,
+          unit_type_interest: submission.unit_type_interest,
+          team_email: teamEmail,
+          gmail_account: gmailAccount,
+        },
+      });
+      if (resp.error) throw resp.error;
+      return resp.data;
+    },
+    onMutate: (submission) => setResendingId(submission.id),
+    onSuccess: (_, submission) => {
+      setResendingId(null);
+      toast.success(`Email resent to ${submission.visitor_email}`);
+      queryClient.invalidateQueries({ queryKey: ["form_submissions"] });
+      queryClient.invalidateQueries({ queryKey: ["email_log", submission.id] });
+    },
+    onError: (err, submission) => {
+      setResendingId(null);
+      toast.error(`Failed to resend: ${String(err)}`);
+    },
+  });
+
   const [notesValue, setNotesValue] = useState("");
   useEffect(() => {
     setNotesValue(selectedSubmission?.notes || "");
