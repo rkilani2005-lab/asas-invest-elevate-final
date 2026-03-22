@@ -1,7 +1,7 @@
 import { Instagram, Linkedin, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import logoWhiteBg from "@/assets/logo-white-bg.png";
+import logoBlackBg from "@/assets/logo-black-bg.jpeg";
 import { cn } from "@/lib/utils";
 
 const Footer = () => {
@@ -42,19 +42,22 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-background text-foreground py-16 border-t border-accent/20 grain-overlay">
+    <footer
+      className={cn("py-16 grain-overlay", isRTL && "font-arabic")}
+      style={{ backgroundColor: '#111111', color: '#fff' }}
+    >
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <div className="flex items-center mb-4 space-x-3">
-              <img 
-                src={logoWhiteBg} 
-                alt="Asas Invest Real Estate" 
+            <div className="flex items-center mb-6">
+              <img
+                src={logoBlackBg}
+                alt="Asas Invest Real Estate"
                 className="h-12 w-auto object-contain"
               />
             </div>
-            <p className="text-muted-foreground mb-6 max-w-sm text-sm leading-relaxed">
+            <p className="mb-6 max-w-sm text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
               {t("footer.aboutText")}
             </p>
             <div className="flex space-x-3">
@@ -65,7 +68,19 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="w-10 h-10 border border-accent/30 rounded-lg flex items-center justify-center hover:border-accent hover:text-accent transition-all duration-300 text-foreground"
+                  className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300"
+                  style={{
+                    border: '0.5px solid rgba(197,160,89,0.3)',
+                    color: 'rgba(255,255,255,0.5)'
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = '#C5A059';
+                    (e.currentTarget as HTMLElement).style.color = '#C5A059';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(197,160,89,0.3)';
+                    (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)';
+                  }}
                 >
                   <social.icon className="h-4 w-4" strokeWidth={1} />
                 </a>
@@ -76,13 +91,21 @@ const Footer = () => {
           {/* Link Columns */}
           {footerColumns.map((col) => (
             <div key={col.title}>
-              <h3 className="nav-link text-accent mb-4 text-sm">{col.title}</h3>
-              <ul className="space-y-2">
+              <h3
+                className="nav-link mb-5 text-xs uppercase tracking-widest"
+                style={{ color: '#C5A059', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.12em' }}
+              >
+                {col.title}
+              </h3>
+              <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       to={link.href}
-                      className="text-muted-foreground hover:text-accent text-sm transition-colors duration-300"
+                      className="text-sm transition-colors duration-300"
+                      style={{ color: 'rgba(255,255,255,0.45)', fontFamily: "'DM Sans', sans-serif" }}
+                      onMouseEnter={e => ((e.target as HTMLElement).style.color = '#C5A059')}
+                      onMouseLeave={e => ((e.target as HTMLElement).style.color = 'rgba(255,255,255,0.45)')}
                     >
                       {link.name}
                     </Link>
@@ -93,13 +116,14 @@ const Footer = () => {
           ))}
         </div>
 
-        <div className="divider-gold mb-8" />
+        {/* Divider */}
+        <div className="mb-8" style={{ height: '1px', background: 'rgba(197,160,89,0.2)' }} />
 
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
             {t("footer.copyright")}
           </p>
-          <p className="text-muted-foreground text-xs text-center md:text-right">
+          <p className="text-xs text-center md:text-right" style={{ color: 'rgba(255,255,255,0.25)' }}>
             {t("footer.address")}
           </p>
         </div>
