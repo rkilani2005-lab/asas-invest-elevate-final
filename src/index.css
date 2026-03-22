@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -93,12 +93,12 @@
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   }
 
-  /* Heading Typography - Cormorant Garamond, genuine luxury serif */
+  /* Heading Typography - Playfair Display, elegant and controlled */
   h1, h2 {
-    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
+    font-family: 'Playfair Display', 'Georgia', serif;
     letter-spacing: -0.01em;
     font-weight: 600;
-    line-height: 1.1;
+    line-height: 1.15;
   }
 
   h1 {
@@ -106,7 +106,7 @@
   }
 
   h3, h4, h5, h6 {
-    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
+    font-family: 'Playfair Display', 'Georgia', serif;
     font-weight: 500;
     letter-spacing: -0.01em;
   }
@@ -140,12 +140,12 @@
     letter-spacing: 0;
   }
 
-  /* Hero Heading Style */
+  /* Hero Heading Style — Playfair Display, refined display serif */
   .heading-hero {
-    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
   }
 
   [dir="rtl"] .heading-hero {
@@ -154,9 +154,9 @@
     letter-spacing: 0;
   }
 
-  /* Section Heading Style */
+  /* Section Heading Style — Playfair Display for consistency */
   .heading-section {
-    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
+    font-family: 'Playfair Display', 'Georgia', serif;
     letter-spacing: -0.01em;
     font-weight: 600;
   }
@@ -286,7 +286,7 @@
 
   /* Font utilities */
   .font-heading {
-    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
+    font-family: 'Playfair Display', 'Georgia', serif;
   }
 
   .font-nav {

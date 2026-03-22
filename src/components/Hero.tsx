@@ -106,15 +106,17 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="heading-hero text-5xl md:text-6xl lg:text-7xl xl:text-8xl mb-6"
+          className="heading-hero mb-6 max-w-3xl mx-auto"
           style={{ 
             color: '#FFFFFF',
-            fontWeight: 300,
-            letterSpacing: '-0.02em'
+            fontWeight: 400,
+            letterSpacing: '-0.01em',
+            fontSize: 'clamp(2rem, 4.5vw, 3.25rem)',
+            lineHeight: 1.2,
           }}
         >
-          {content.headline} <br className="hidden md:block" />
-          <span style={{ color: '#C5A059', fontStyle: 'italic', fontWeight: 400 }}>{content.headlineHighlight}</span>
+          {content.headline}{' '}
+          <span style={{ color: '#C5A059', fontStyle: 'italic', fontWeight: 500 }}>{content.headlineHighlight}</span>
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 30 }}
