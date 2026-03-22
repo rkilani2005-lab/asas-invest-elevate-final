@@ -198,7 +198,7 @@ export default function AdminCommunications() {
         .select("value")
         .eq("key", "notification_email")
         .maybeSingle();
-      const teamEmail = (settingRow?.value as string) || "info@asas.ae";
+      const teamEmail = (settingRow?.value as string) || "admin@asasinvest.com";
 
       const resp = await supabase.functions.invoke("send-email", {
         body: {

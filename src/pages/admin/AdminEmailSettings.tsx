@@ -321,7 +321,7 @@ export default function AdminEmailSettings() {
               </Label>
               <Input
                 type="email"
-                placeholder="info@asas.ae"
+                placeholder="admin@asasinvest.com"
                 value={notificationEmail}
                 onChange={(e) => setNotificationEmail(e.target.value)}
               />
