@@ -426,7 +426,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const senderEmail = gmail_account?.email || "noreply@asas.ae";
+    const senderEmail = gmail_account?.email || "admin@asasinvest.com";
 
     if (accessToken) {
       gmailResult = await sendViaGmail(

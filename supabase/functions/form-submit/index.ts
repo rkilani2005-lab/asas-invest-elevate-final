@@ -140,14 +140,25 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const teamEmail: string = (settingRow?.value as string) || "info@asas.ae";
 
-    // Get Gmail account for sender purpose
+    // Get Gmail account for sender — try purpose-specific first, then any connected account
     const senderPurpose = ["contact", "newsletter"].includes(form_type) ? "info" : "sales";
-    const { data: gmailAccount } = await supabase
+    let { data: gmailAccount } = await supabase
       .from("gmail_accounts")
       .select("*")
       .eq("purpose", senderPurpose)
       .eq("is_connected", true)
       .maybeSingle();
+
+    // Fallback: use any connected Gmail account
+    if (!gmailAccount) {
+      const { data: anyAccount } = await supabase
+        .from("gmail_accounts")
+        .select("*")
+        .eq("is_connected", true)
+        .limit(1)
+        .maybeSingle();
+      gmailAccount = anyAccount;
+    }
 
     // Trigger send-email edge function (fire and forget)
     const sendEmailUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-email`;
