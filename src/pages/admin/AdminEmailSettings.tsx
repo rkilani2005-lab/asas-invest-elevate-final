@@ -51,6 +51,27 @@ export default function AdminEmailSettings() {
   const [savingNotif, setSavingNotif] = useState(false);
   const [secretsConfigured, setSecretsConfigured] = useState<boolean | null>(null);
 
+  // Probe if secrets are configured by calling the edge function
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/gmail-oauth?action=get_auth_url`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ purpose: "info" }),
+        });
+        const result = await res.json();
+        setSecretsConfigured(!!result.url);
+      } catch {
+        setSecretsConfigured(false);
+      }
+    })();
+  }, []);
+
   // Check URL params for OAuth callback
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
