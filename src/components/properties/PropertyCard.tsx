@@ -41,20 +41,22 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         isRTL && "text-right"
       )}>
         {/* Image Container */}
-        <div className="relative aspect-[4/3] overflow-hidden">
+        <div className="relative aspect-[16/10] overflow-hidden">
           <img
             src={heroImage}
             alt={name}
-            className="w-full h-full object-cover brightness-105 saturate-105 group-hover:scale-105 transition-all duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           />
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-500" />
           {/* Badges */}
-          <div className="absolute top-4 flex gap-2 start-4">
-            <Badge variant="secondary" className="bg-white/95 text-foreground text-xs border border-accent/30 shadow-sm">
+          <div className="absolute top-3 flex gap-2 start-3">
+            <Badge variant="secondary" className="bg-black/60 text-white text-xs border-0 backdrop-blur-sm" style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.05em' }}>
               {typeLabel}
             </Badge>
-            <Badge 
-              variant="outline" 
-              className={cn("text-xs bg-white/95 shadow-sm", statusColors[property.status])}
+            <Badge
+              variant="outline"
+              className={cn("text-xs backdrop-blur-sm border-0", statusColors[property.status])}
             >
               {t(`property.status.${property.status}`)}
             </Badge>
@@ -70,8 +72,8 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             </p>
           )}
 
-          {/* Title - Gold heading */}
-          <h3 className="heading-section text-lg text-accent mb-3 group-hover:text-gold-dark transition-colors line-clamp-2">
+          {/* Title - dark serif, readable */}
+          <h3 className="heading-section text-lg text-foreground mb-3 group-hover:text-accent transition-colors duration-300 line-clamp-2">
             {name}
           </h3>
 
