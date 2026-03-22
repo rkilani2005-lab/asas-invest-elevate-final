@@ -1,10 +1,8 @@
-import { Building2, LayoutGrid, TrendingUp, LucideIcon } from "lucide-react";
-import * as LucideIcons from "lucide-react";
-import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 
 interface StatsContent {
   subtitle?: string;
@@ -19,24 +17,9 @@ interface StatItem {
   suffix?: string;
 }
 
-// Map icon names to Lucide components
-const getIconComponent = (iconName: string): LucideIcon => {
-  const iconMap: Record<string, LucideIcon> = {
-    Building2, LayoutGrid, TrendingUp,
-  };
-  
-  if (iconMap[iconName]) return iconMap[iconName];
-  
-  const AllIcons = LucideIcons as unknown as Record<string, LucideIcon>;
-  if (AllIcons[iconName]) return AllIcons[iconName];
-  
-  return Building2;
-};
-
 const Stats = () => {
   const { t, isRTL, language } = useLanguage();
 
-  // Fetch Stats header content from database
   const { data: statsContent } = useQuery({
     queryKey: ['pages_content', 'home', 'stats', language],
     queryFn: async () => {
@@ -46,13 +29,11 @@ const Stats = () => {
         .eq('page_slug', 'home')
         .eq('section_key', 'stats')
         .maybeSingle();
-      
       if (error || !data) return null;
       return (language === 'ar' ? data.content_ar : data.content_en) as StatsContent;
     },
   });
 
-  // Fetch Stats items from database
   const { data: statsData } = useQuery({
     queryKey: ['pages_content', 'home', 'stats_items', language],
     queryFn: async () => {
@@ -62,7 +43,6 @@ const Stats = () => {
         .eq('page_slug', 'home')
         .eq('section_key', 'stats_items')
         .maybeSingle();
-      
       if (error || !data) return null;
       const content = language === 'ar' ? data.content_ar : data.content_en;
       if (!Array.isArray(content)) return null;
@@ -70,82 +50,94 @@ const Stats = () => {
     },
   });
 
-  // Use database content with i18n fallback
   const content = {
     subtitle: statsContent?.subtitle || t("stats.subtitle"),
     title: statsContent?.title || t("stats.title"),
     description: statsContent?.description || t("stats.description"),
   };
 
-  // Default stats from i18n
   const defaultStats = [
-    {
-      icon: Building2,
-      value: "15+",
-      label: t("stats.propertiesManaged"),
-      suffix: ""
-    },
-    {
-      icon: LayoutGrid,
-      value: "250,000",
-      label: t("stats.totalSqFt"),
-      suffix: "+"
-    },
-    {
-      icon: TrendingUp,
-      value: "AED 500M",
-      label: t("stats.portfolioValue"),
-      suffix: "+"
-    }
+    { value: "15+",      label: t("stats.propertiesManaged"), suffix: "" },
+    { value: "250,000",  label: t("stats.totalSqFt"),         suffix: "+" },
+    { value: "AED 500M", label: t("stats.portfolioValue"),    suffix: "+" },
   ];
 
-  // Use database stats or fallback to defaults
   const stats = statsData?.map(s => ({
-    icon: getIconComponent(s.icon),
     value: s.value,
     label: s.label,
-    suffix: s.suffix || ""
+    suffix: s.suffix || "",
   })) || defaultStats;
 
   return (
-    <section className="py-16 bg-background border-y border-accent/20 grain-overlay">
-      <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        <ScrollReveal className={cn("text-center mb-12", isRTL && "font-arabic")}>
-          <p className="text-eyebrow text-accent mb-4">
-            {content.subtitle}
-          </p>
-          <h2 className="heading-section text-2xl md:text-3xl text-foreground">
-            {content.title}
-          </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            {content.description}
+    <section
+      className={cn("relative overflow-hidden grain-overlay", isRTL && "font-arabic")}
+      style={{ backgroundColor: '#111111' }}
+    >
+      {/* Subtle top gold rule */}
+      <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)' }} />
+
+      <div className="container mx-auto px-4 lg:px-8 py-20">
+        {/* Section label — minimal, left-aligned */}
+        <ScrollReveal>
+          <p
+            className="text-eyebrow mb-16"
+            style={{ color: 'rgba(197,160,89,0.7)', letterSpacing: '0.15em' }}
+          >
+            {content.subtitle || t("stats.subtitle")}
           </p>
         </ScrollReveal>
-        
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          {stats.map((stat, index) => {
-            const IconComponent = stat.icon;
-            return (
-              <StaggerItem key={index}>
-                <div className={cn(
-                  "text-center p-8 bg-white border border-accent/30 hover:border-accent transition-all duration-300 shadow-card",
-                  isRTL && "font-arabic"
-                )}>
-                  <div className="inline-flex items-center justify-center w-14 h-14 border border-accent/30 rounded-lg mb-4">
-                    <IconComponent className="h-6 w-6 text-accent" strokeWidth={1} />
-                  </div>
-                  <div className="heading-section text-3xl md:text-4xl text-accent mb-2">
-                    {stat.value}{stat.suffix}
-                  </div>
-                  <div className="text-muted-foreground text-xs tracking-widest uppercase">
-                    {stat.label}
-                  </div>
+
+        {/* Numbers — full-width horizontal, divided by thin vertical lines */}
+        <StaggerContainer
+          className={cn(
+            "grid gap-0",
+            stats.length === 3
+              ? "grid-cols-1 md:grid-cols-3"
+              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+          )}
+        >
+          {stats.map((stat, index) => (
+            <StaggerItem key={index}>
+              <div
+                className={cn(
+                  "py-10 px-8 text-center md:text-left",
+                  index > 0 && "md:border-l"
+                )}
+                style={{ borderColor: 'rgba(197,160,89,0.15)' }}
+              >
+                {/* Big number */}
+                <div
+                  className="heading-hero mb-3"
+                  style={{
+                    fontSize: 'clamp(2.8rem, 5vw, 4.5rem)',
+                    fontWeight: 300,
+                    color: '#C5A059',
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1,
+                    fontStyle: 'italic',
+                  }}
+                >
+                  {stat.value}{stat.suffix}
                 </div>
-              </StaggerItem>
-            );
-          })}
+                {/* Label */}
+                <p
+                  className="text-xs uppercase tracking-widest"
+                  style={{
+                    color: 'rgba(255,255,255,0.4)',
+                    fontFamily: "'DM Sans', sans-serif",
+                    letterSpacing: '0.14em',
+                  }}
+                >
+                  {stat.label}
+                </p>
+              </div>
+            </StaggerItem>
+          ))}
         </StaggerContainer>
       </div>
+
+      {/* Subtle bottom gold rule */}
+      <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)' }} />
     </section>
   );
 };
