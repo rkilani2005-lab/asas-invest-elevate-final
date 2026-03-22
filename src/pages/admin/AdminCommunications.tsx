@@ -88,6 +88,7 @@ const FORM_TYPE_LABELS: Record<string, string> = {
 
 export default function AdminCommunications() {
   const queryClient = useQueryClient();
+  const [resendingId, setResendingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
