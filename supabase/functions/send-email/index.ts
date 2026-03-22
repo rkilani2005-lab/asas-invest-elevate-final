@@ -410,19 +410,30 @@ Deno.serve(async (req) => {
     let gmailResult: { messageId: string; threadId: string } | null = null;
     let accessToken = gmail_account?.access_token;
 
-    // Try to refresh token if expired or missing
-    if (!accessToken && gmail_account?.refresh_token && GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-      accessToken = await refreshGmailToken(
+    // Always refresh token if: missing, expired, or expiring within 5 minutes
+    const tokenExpiry = gmail_account?.token_expiry ? new Date(gmail_account.token_expiry).getTime() : 0;
+    const isExpiredOrExpiring = !accessToken || tokenExpiry < Date.now() + 5 * 60 * 1000;
+
+    if (isExpiredOrExpiring && gmail_account?.refresh_token && GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+      console.log("Refreshing Gmail access token...");
+      const newToken = await refreshGmailToken(
         gmail_account.refresh_token,
         GOOGLE_CLIENT_ID,
         GOOGLE_CLIENT_SECRET
-      ) || undefined;
+      );
 
-      if (accessToken) {
+      if (newToken) {
+        accessToken = newToken;
         await supabase
           .from("gmail_accounts")
-          .update({ access_token: accessToken, token_expiry: new Date(Date.now() + 3600000).toISOString() })
+          .update({
+            access_token: newToken,
+            token_expiry: new Date(Date.now() + 3600000).toISOString(),
+          })
           .eq("email", gmail_account.email);
+        console.log("Token refreshed successfully.");
+      } else {
+        console.error("Failed to refresh Gmail token.");
       }
     }
 
