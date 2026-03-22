@@ -49,6 +49,28 @@ export default function AdminEmailSettings() {
   const [showSetupGuide, setShowSetupGuide] = useState(false);
   const [notificationEmail, setNotificationEmail] = useState("");
   const [savingNotif, setSavingNotif] = useState(false);
+  const [secretsConfigured, setSecretsConfigured] = useState<boolean | null>(null);
+
+  // Probe if secrets are configured by calling the edge function
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/gmail-oauth?action=get_auth_url`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ purpose: "info" }),
+        });
+        const result = await res.json();
+        setSecretsConfigured(!!result.url);
+      } catch {
+        setSecretsConfigured(false);
+      }
+    })();
+  }, []);
 
   // Check URL params for OAuth callback
   useEffect(() => {
@@ -168,6 +190,7 @@ export default function AdminEmailSettings() {
       </div>
 
       {/* Setup Guide Banner */}
+      {secretsConfigured === false && (
       <Card className="border-amber-200 bg-amber-50">
         <CardContent className="pt-4">
           <div className="flex items-start gap-3">
@@ -186,6 +209,23 @@ export default function AdminEmailSettings() {
           </div>
         </CardContent>
       </Card>
+      )}
+      {secretsConfigured === true && (
+      <Card className="border-green-200 bg-green-50">
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-green-800 text-sm">Google OAuth credentials configured</p>
+              <p className="text-green-700 text-xs mt-0.5">GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are active. You can connect Gmail accounts below.</p>
+            </div>
+            <Button variant="outline" size="sm" className="text-green-800 border-green-300 shrink-0" onClick={() => setShowSetupGuide(true)}>
+              View Guide
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      )}
 
       {/* Gmail Accounts */}
       <Card>
