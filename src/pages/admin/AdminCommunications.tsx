@@ -607,7 +607,7 @@ export default function AdminCommunications() {
                                 <p className="text-xs text-destructive mt-1">{log.error_message}</p>
                               )}
                             </div>
-                            <div className="text-right flex-shrink-0">
+                            <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
                               <span className={`text-xs px-2 py-0.5 rounded-full border ${
                                 log.status === "sent" ? "bg-primary/10 text-primary border-primary/20" :
                                 log.status === "queued" ? "bg-muted text-muted-foreground border-muted" :
@@ -616,7 +616,7 @@ export default function AdminCommunications() {
                                 {log.status}
                               </span>
                               {log.created_at && (
-                                <p className="text-xs text-muted-foreground mt-1">
+                                <p className="text-xs text-muted-foreground">
                                   {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
                                 </p>
                               )}
@@ -631,6 +631,20 @@ export default function AdminCommunications() {
                 {/* Quick actions */}
                 <Separator />
                 <div className="flex gap-2 flex-wrap">
+                  {/* Resend email — shown when email not yet sent or last log was not sent */}
+                  {(!selectedSubmission.email_sent || emailLogs.some(l => l.status !== "sent")) && (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      disabled={resendingId === selectedSubmission.id}
+                      onClick={() => resendEmailMutation.mutate(selectedSubmission)}
+                    >
+                      {resendingId === selectedSubmission.id
+                        ? <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        : <RotateCcw className="w-3 h-3 mr-1" />}
+                      {selectedSubmission.email_sent ? "Resend Email" : "Send Email"}
+                    </Button>
+                  )}
                   <a href={`mailto:${selectedSubmission.visitor_email}`} target="_blank" rel="noreferrer">
                     <Button size="sm" variant="outline">
                       <Mail className="w-3 h-3 mr-1" /> Reply via Email
