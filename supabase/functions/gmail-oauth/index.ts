@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
 
   const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
   const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
-  const REDIRECT_URI = `${Deno.env.get("SUPABASE_URL")}/functions/v1/gmail-oauth/callback`;
+  const REDIRECT_URI = `${Deno.env.get("SUPABASE_URL")}/functions/v1/gmail-oauth-callback`;
 
   const url = new URL(req.url);
   const action = url.searchParams.get("action") || (await req.json().catch(() => ({}))).action;
