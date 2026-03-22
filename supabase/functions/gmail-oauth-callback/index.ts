@@ -32,8 +32,8 @@ Deno.serve(async (req) => {
     purpose = state.purpose || "info";
   } catch (_) {/* ignore */}
 
-  const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID")!;
-  const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET")!;
+  const GOOGLE_CLIENT_ID = (Deno.env.get("GMAIL_CLIENT_ID") || Deno.env.get("GOOGLE_CLIENT_ID"))!;
+  const GOOGLE_CLIENT_SECRET = (Deno.env.get("GMAIL_CLIENT_SECRET") || Deno.env.get("GOOGLE_CLIENT_SECRET"))!;
   const REDIRECT_URI = `${Deno.env.get("SUPABASE_URL")}/functions/v1/gmail-oauth-callback`;
 
   // Exchange code for tokens
