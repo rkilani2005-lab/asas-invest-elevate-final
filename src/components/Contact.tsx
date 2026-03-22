@@ -59,7 +59,7 @@ const Contact = () => {
   const contactInfo = [
     { icon: Phone, label: "Phone", details: "+971 4 XXX XXXX", link: "tel:+97140000000" },
     { icon: MessageCircle, label: "WhatsApp", details: "+971 50 XXX XXXX", link: "https://wa.me/971500000000" },
-    { icon: Mail, label: "Email", details: "info@asas.ae", link: "mailto:info@asas.ae" },
+    { icon: Mail, label: "Email", details: "admin@asasinvest.com", link: "mailto:admin@asasinvest.com" },
     { icon: MapPin, label: "Office", details: "Business Bay, Dubai, UAE", link: "#" },
   ];
 
