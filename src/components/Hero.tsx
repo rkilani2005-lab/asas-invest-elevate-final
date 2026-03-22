@@ -77,7 +77,7 @@ const Hero = () => {
         <div 
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(to bottom, rgba(18, 18, 18, 0.75) 0%, rgba(18, 18, 18, 0.4) 40%, rgba(18, 18, 18, 0) 70%)'
+            background: 'linear-gradient(to bottom, rgba(10, 10, 10, 0.82) 0%, rgba(10, 10, 10, 0.45) 50%, rgba(10, 10, 10, 0.2) 80%, rgba(10, 10, 10, 0.5) 100%)'
           }}
         />
       </motion.div>
@@ -97,7 +97,7 @@ const Hero = () => {
           className="text-eyebrow mb-4 text-sm md:text-base"
           style={{ 
             color: '#C5A059',
-            textShadow: '0px 4px 12px rgba(0, 0, 0, 0.6)'
+            letterSpacing: '0.15em'
           }}
         >
           {content.subtitle}
@@ -105,23 +105,26 @@ const Hero = () => {
         <motion.h1 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
           className="heading-hero text-5xl md:text-6xl lg:text-7xl xl:text-8xl mb-6"
           style={{ 
-            color: '#C5A059',
-            textShadow: '0px 4px 12px rgba(0, 0, 0, 0.6)'
+            color: '#FFFFFF',
+            fontWeight: 300,
+            letterSpacing: '-0.02em'
           }}
         >
           {content.headline} <br className="hidden md:block" />
-          <span style={{ color: '#C5A059' }}>{content.headlineHighlight}</span>
+          <span style={{ color: '#C5A059', fontStyle: 'italic', fontWeight: 400 }}>{content.headlineHighlight}</span>
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed text-white/90"
+          className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed text-white/75"
           style={{ 
-            textShadow: '0px 2px 8px rgba(0, 0, 0, 0.5)'
+            fontFamily: "'DM Sans', sans-serif",
+            fontWeight: 300,
+            letterSpacing: '0.01em'
           }}
         >
           {content.tagline}
@@ -134,10 +137,8 @@ const Hero = () => {
         >
           <Button 
             size="lg" 
-            className="px-10 py-6 bg-accent text-white hover:bg-accent/90 font-display uppercase tracking-widest text-xs"
-            style={{
-              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.4)'
-            }}
+            className="px-10 py-6 bg-accent text-white hover:bg-accent/90 font-sans uppercase tracking-widest text-xs border-0"
+            style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.12em' }}
           >
             {content.exploreProperties}
             <ArrowRight className={cn("h-4 w-4 rtl-flip", isRTL ? "me-2" : "ms-2")} strokeWidth={1} />
@@ -145,7 +146,8 @@ const Hero = () => {
           <Button 
             size="lg" 
             variant="outline" 
-            className="border border-white/50 text-white hover:bg-white/10 hover:text-white transition-all duration-300 px-10 py-6"
+            className="border border-white/40 text-white hover:bg-white/10 hover:text-white hover:border-white/70 transition-all duration-300 px-10 py-6"
+            style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.08em', fontSize: '0.75rem', textTransform: 'uppercase' }}
           >
             {content.contactUs}
           </Button>
