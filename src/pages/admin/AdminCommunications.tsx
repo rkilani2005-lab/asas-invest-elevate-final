@@ -5,12 +5,11 @@ import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import {
   Search, Download, Eye, Mail, Phone, User, Calendar,
-  MessageSquare, Building2, Filter, CheckCircle, X, RefreshCw,
-  Clock, AlertCircle, ChevronDown, Send, Loader2,
+  MessageSquare, Building2, CheckCircle, X, RefreshCw,
+  Clock, Send, Loader2, RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -24,6 +23,9 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Submission = {
   id: string;
@@ -86,6 +88,7 @@ const FORM_TYPE_LABELS: Record<string, string> = {
 
 export default function AdminCommunications() {
   const queryClient = useQueryClient();
+  const [resendingId, setResendingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -176,6 +179,59 @@ export default function AdminCommunications() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["form_submissions"] });
       toast.success("Notes saved");
+    },
+  });
+
+  const resendEmailMutation = useMutation({
+    mutationFn: async (submission: Submission) => {
+      // Fetch a connected gmail account
+      const { data: gmailAccount } = await supabase
+        .from("gmail_accounts")
+        .select("*")
+        .eq("is_connected", true)
+        .limit(1)
+        .maybeSingle();
+
+      // Fetch team notification email
+      const { data: settingRow } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "notification_email")
+        .maybeSingle();
+      const teamEmail = (settingRow?.value as string) || "info@asas.ae";
+
+      const resp = await supabase.functions.invoke("send-email", {
+        body: {
+          submission_id: submission.id,
+          form_type: submission.form_type,
+          visitor_name: submission.visitor_name,
+          visitor_email: submission.visitor_email,
+          visitor_phone: submission.visitor_phone,
+          visitor_message: submission.visitor_message,
+          preferred_language: submission.preferred_language || "en",
+          property_name: submission.property_name,
+          viewing_date: submission.viewing_date,
+          viewing_time: submission.viewing_time,
+          callback_time: submission.callback_time,
+          budget_range: submission.budget_range,
+          unit_type_interest: submission.unit_type_interest,
+          team_email: teamEmail,
+          gmail_account: gmailAccount,
+        },
+      });
+      if (resp.error) throw resp.error;
+      return resp.data;
+    },
+    onMutate: (submission) => setResendingId(submission.id),
+    onSuccess: (_, submission) => {
+      setResendingId(null);
+      toast.success(`Email resent to ${submission.visitor_email}`);
+      queryClient.invalidateQueries({ queryKey: ["form_submissions"] });
+      queryClient.invalidateQueries({ queryKey: ["email_log", submission.id] });
+    },
+    onError: (err, submission) => {
+      setResendingId(null);
+      toast.error(`Failed to resend: ${String(err)}`);
     },
   });
 
@@ -352,12 +408,38 @@ export default function AdminCommunications() {
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell>
-                    {s.email_sent ? (
-                      <span className="text-xs text-primary flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Sent</span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
-                    )}
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1.5">
+                      {s.email_sent ? (
+                        <span className="text-xs text-primary flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" /> Sent
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Pending
+                          </span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6"
+                                  disabled={resendingId === s.id}
+                                  onClick={(e) => { e.stopPropagation(); resendEmailMutation.mutate(s); }}
+                                >
+                                  {resendingId === s.id
+                                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                                    : <RotateCcw className="w-3 h-3" />}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Resend email</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {s.created_at ? formatDistanceToNow(new Date(s.created_at), { addSuffix: true }) : "—"}
@@ -525,7 +607,7 @@ export default function AdminCommunications() {
                                 <p className="text-xs text-destructive mt-1">{log.error_message}</p>
                               )}
                             </div>
-                            <div className="text-right flex-shrink-0">
+                            <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
                               <span className={`text-xs px-2 py-0.5 rounded-full border ${
                                 log.status === "sent" ? "bg-primary/10 text-primary border-primary/20" :
                                 log.status === "queued" ? "bg-muted text-muted-foreground border-muted" :
@@ -534,7 +616,7 @@ export default function AdminCommunications() {
                                 {log.status}
                               </span>
                               {log.created_at && (
-                                <p className="text-xs text-muted-foreground mt-1">
+                                <p className="text-xs text-muted-foreground">
                                   {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
                                 </p>
                               )}
@@ -549,6 +631,20 @@ export default function AdminCommunications() {
                 {/* Quick actions */}
                 <Separator />
                 <div className="flex gap-2 flex-wrap">
+                  {/* Resend email — shown when email not yet sent or last log was not sent */}
+                  {(!selectedSubmission.email_sent || emailLogs.some(l => l.status !== "sent")) && (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      disabled={resendingId === selectedSubmission.id}
+                      onClick={() => resendEmailMutation.mutate(selectedSubmission)}
+                    >
+                      {resendingId === selectedSubmission.id
+                        ? <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        : <RotateCcw className="w-3 h-3 mr-1" />}
+                      {selectedSubmission.email_sent ? "Resend Email" : "Send Email"}
+                    </Button>
+                  )}
                   <a href={`mailto:${selectedSubmission.visitor_email}`} target="_blank" rel="noreferrer">
                     <Button size="sm" variant="outline">
                       <Mail className="w-3 h-3 mr-1" /> Reply via Email
