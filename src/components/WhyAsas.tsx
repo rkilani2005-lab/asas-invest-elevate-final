@@ -98,7 +98,7 @@ const WhyAsas = () => {
 
           {/* Right — stacked editorial value cards, no icon boxes */}
           <div className="lg:col-span-3">
-            <StaggerContainer className="flex flex-col divide-y" style={{ borderColor: 'rgba(197,160,89,0.15)' }}>
+            <StaggerContainer className="flex flex-col divide-y">
               {values.map((value, index) => (
                 <StaggerItem key={index}>
                   <div
