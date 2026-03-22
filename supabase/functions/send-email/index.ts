@@ -401,8 +401,8 @@ Deno.serve(async (req) => {
       unit_type_interest,
     };
 
-    const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
-    const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
+    const GOOGLE_CLIENT_ID = Deno.env.get("GMAIL_CLIENT_ID") || Deno.env.get("GOOGLE_CLIENT_ID");
+    const GOOGLE_CLIENT_SECRET = Deno.env.get("GMAIL_CLIENT_SECRET") || Deno.env.get("GOOGLE_CLIENT_SECRET");
 
     // ---- VISITOR CONFIRMATION ----
     const visitorEmail = visitorConfirmationHtml(form_type, vars, preferred_language);
