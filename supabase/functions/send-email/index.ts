@@ -159,18 +159,18 @@ function visitorConfirmationHtml(
     ${vars.visitor_message ? `<div style="background:#f9f9f9;border-left:4px solid #c9a84c;padding:15px;margin:20px 0;border-radius:4px;"><p style="margin:0;color:#666;font-style:italic;">"${vars.visitor_message}"</p></div>` : ""}
     <p style="color:#555;line-height:1.7;">If you need immediate assistance, please call us at <a href="tel:+97141234567" style="color:#c9a84c;">+971 4 123 4567</a>.</p>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asas.ae/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Browse Properties →</a>
+      <a href="https://asasinvest.com/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Browse Properties →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
     <p style="color:#999;font-size:12px;text-align:center;line-height:1.8;">
       <strong>ASAS Real Estate</strong><br>
       Dubai, United Arab Emirates<br>
-      <a href="mailto:info@asas.ae" style="color:#c9a84c;">info@asas.ae</a> | <a href="https://asas.ae" style="color:#c9a84c;">asas.ae</a>
+      <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a> | <a href="https://asasinvest.com" style="color:#c9a84c;">asasinvest.com</a>
     </p>
   </td></tr>
 </table></td></tr></table>
 </body></html>`,
-      text: `Dear ${vars.visitor_name || "Valued Client"},\n\nThank you for contacting ASAS. We have received your message and will respond within 24 hours.\n\nASAS Real Estate | info@asas.ae | asas.ae`,
+      text: `Dear ${vars.visitor_name || "Valued Client"},\n\nThank you for contacting ASAS. We have received your message and will respond within 24 hours.\n\nASAS Real Estate | admin@asasinvest.com | asasinvest.com`,
     },
     property_inquiry: {
       subject: isAr
@@ -198,14 +198,14 @@ function visitorConfirmationHtml(
       </ul>
     </div>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asas.ae/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View All Properties →</a>
+      <a href="https://asasinvest.com/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View All Properties →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
-    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:sales@asas.ae" style="color:#c9a84c;">sales@asas.ae</a> | <a href="https://asas.ae" style="color:#c9a84c;">asas.ae</a></p>
+    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a> | <a href="https://asasinvest.com" style="color:#c9a84c;">asasinvest.com</a></p>
   </td></tr>
 </table></td></tr></table>
 </body></html>`,
-      text: `Dear ${vars.visitor_name || "Valued Client"},\n\nThank you for your interest in ${vars.property_name || "our property"}. Our team will contact you within 24 hours.\n\nASAS Real Estate | sales@asas.ae`,
+      text: `Dear ${vars.visitor_name || "Valued Client"},\n\nThank you for your interest in ${vars.property_name || "our property"}. Our team will contact you within 24 hours.\n\nASAS Real Estate | admin@asasinvest.com`,
     },
     schedule_viewing: {
       subject: `Viewing Confirmed — ${vars.property_name || "Property"} | تم تأكيد موعد المعاينة`,
@@ -230,11 +230,11 @@ function visitorConfirmationHtml(
     </div>
     <p style="color:#555;line-height:1.7;">Our sales team will confirm your appointment and provide location details. If you need to reach us sooner, call <a href="tel:+97141234567" style="color:#c9a84c;">+971 4 123 4567</a>.</p>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
-    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:sales@asas.ae" style="color:#c9a84c;">sales@asas.ae</a></p>
+    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a></p>
   </td></tr>
 </table></td></tr></table>
 </body></html>`,
-      text: `Dear ${vars.visitor_name},\n\nYour viewing request for ${vars.property_name || "our property"} has been received. We will confirm the appointment shortly.\n\nASAS Real Estate | sales@asas.ae`,
+      text: `Dear ${vars.visitor_name},\n\nYour viewing request for ${vars.property_name || "our property"} has been received. We will confirm the appointment shortly.\n\nASAS Real Estate | admin@asasinvest.com`,
     },
     callback: {
       subject: `We'll Call You Shortly | سنتصل بك قريباً`,
@@ -252,7 +252,7 @@ function visitorConfirmationHtml(
     ${vars.callback_time ? `<p style="color:#555;">Your preferred time: <strong>${vars.callback_time}</strong></p>` : ""}
     <p style="color:#555;">If urgent, call us directly at <a href="tel:+97141234567" style="color:#c9a84c;">+971 4 123 4567</a>.</p>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
-    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:sales@asas.ae" style="color:#c9a84c;">sales@asas.ae</a></p>
+    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a></p>
   </td></tr>
 </table></td></tr></table>
 </body></html>`,
@@ -272,14 +272,14 @@ function visitorConfirmationHtml(
     <h2 style="color:#1a1a2e;margin-top:0;">Welcome to the ASAS Community</h2>
     <p style="color:#555;line-height:1.7;">Dear ${vars.visitor_name || "Valued Client"},<br>Thank you for subscribing. You'll receive curated updates on Dubai's most exclusive properties, market insights, and early access to new launches.</p>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asas.ae/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Browse All Properties →</a>
+      <a href="https://asasinvest.com/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Browse All Properties →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
-    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="https://asas.ae" style="color:#c9a84c;">asas.ae</a></p>
+    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="https://asasinvest.com" style="color:#c9a84c;">asasinvest.com</a></p>
   </td></tr>
 </table></td></tr></table>
 </body></html>`,
-      text: `Welcome to ASAS! You're now subscribed to receive exclusive Dubai property updates.\n\nASAS Real Estate | asas.ae`,
+      text: `Welcome to ASAS! You're now subscribed to receive exclusive Dubai property updates.\n\nASAS Real Estate | asasinvest.com`,
     },
     brochure_download: {
       subject: `Your Brochure — ${vars.property_name || "ASAS Property"}`,
@@ -295,10 +295,10 @@ function visitorConfirmationHtml(
     <h2 style="color:#1a1a2e;margin-top:0;">Thank You for Your Interest</h2>
     <p style="color:#555;line-height:1.7;">Dear ${vars.visitor_name || "Valued Client"},<br>Thank you for requesting the brochure for <strong>${vars.property_name || "our property"}</strong>. Our team will send you the full brochure shortly.</p>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asas.ae/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Property Online →</a>
+      <a href="https://asasinvest.com/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Property Online →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
-    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:sales@asas.ae" style="color:#c9a84c;">sales@asas.ae</a></p>
+    <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a></p>
   </td></tr>
 </table></td></tr></table>
 </body></html>`,
@@ -325,7 +325,7 @@ function teamAlertHtml(
 
   const label = typeLabel[formType] || "New Submission";
   const priority = formType === "callback" ? "⚠️ HIGH PRIORITY — " : "";
-  const adminUrl = `https://asas.ae/admin/communications`;
+  const adminUrl = `https://asasinvest.com/admin/communications`;
 
   return {
     subject: `${priority}${label} — ${vars.visitor_name || vars.visitor_email}`,
