@@ -61,7 +61,7 @@ const FeaturedProperties = () => {
           <p className="text-eyebrow text-accent mb-4">
             {t("featuredProperties.subtitle")}
           </p>
-          <h2 className="heading-section text-3xl md:text-4xl text-accent mb-6">
+          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
             {t("featuredProperties.title")}
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">

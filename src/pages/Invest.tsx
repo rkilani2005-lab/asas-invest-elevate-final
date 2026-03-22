@@ -43,7 +43,7 @@ const Invest = () => {
                 <div className="w-14 h-14 border border-accent/30 flex items-center justify-center mx-auto mb-5">
                   <vp.icon className="h-7 w-7 text-accent" strokeWidth={1} />
                 </div>
-                <h3 className="heading-section text-lg text-accent mb-3">{vp.title}</h3>
+                <h3 className="heading-section text-lg text-foreground mb-3">{vp.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{vp.desc}</p>
               </div>
             ))}
@@ -52,7 +52,7 @@ const Invest = () => {
           {/* ROI Calculator */}
           <div id="calculator" className="max-w-2xl mx-auto mb-20">
             <ScrollReveal className="text-center mb-8">
-              <h2 className="heading-section text-2xl text-accent mb-3">{t("invest.calcTitle")}</h2>
+              <h2 className="heading-section text-2xl text-foreground mb-3">{t("invest.calcTitle")}</h2>
               <p className="text-muted-foreground">{t("invest.calcDesc")}</p>
             </ScrollReveal>
             <div className="card-luxury p-8">
@@ -93,7 +93,7 @@ const Invest = () => {
           {/* Why Dubai */}
           <div id="why-dubai" className="max-w-3xl mx-auto mb-20">
             <ScrollReveal className="text-center mb-8">
-              <h2 className="heading-section text-2xl text-accent mb-3">{t("invest.whyDubaiTitle")}</h2>
+              <h2 className="heading-section text-2xl text-foreground mb-3">{t("invest.whyDubaiTitle")}</h2>
             </ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
@@ -118,7 +118,7 @@ const Invest = () => {
           {/* Golden Visa */}
           <div id="golden-visa" className="max-w-3xl mx-auto text-center">
             <ScrollReveal>
-              <h2 className="heading-section text-2xl text-accent mb-4">{t("invest.goldenVisaTitle")}</h2>
+              <h2 className="heading-section text-2xl text-foreground mb-4">{t("invest.goldenVisaTitle")}</h2>
               <p className="text-muted-foreground leading-relaxed max-w-2xl mx-auto">{t("invest.goldenVisaDesc")}</p>
             </ScrollReveal>
           </div>

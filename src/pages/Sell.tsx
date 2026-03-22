@@ -76,7 +76,7 @@ const Sell = () => {
           {/* Valuation Form */}
           <div className="max-w-2xl mx-auto">
             <div className="card-luxury p-8">
-              <h2 className="heading-section text-xl text-accent mb-6 text-center">{t("sell.formTitle")}</h2>
+              <h2 className="heading-section text-xl text-foreground mb-6 text-center">{t("sell.formTitle")}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -131,7 +131,7 @@ const Sell = () => {
 
           {/* List Your Property */}
           <div id="list" className="max-w-3xl mx-auto text-center mt-20">
-            <h2 className="heading-section text-2xl text-accent mb-4">{t("sell.listTitle")}</h2>
+            <h2 className="heading-section text-2xl text-foreground mb-4">{t("sell.listTitle")}</h2>
             <p className="text-muted-foreground leading-relaxed mb-6">{t("sell.listDesc")}</p>
             <Button variant="luxury" size="lg" onClick={() => document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' })}>
               {t("sell.getStarted")}

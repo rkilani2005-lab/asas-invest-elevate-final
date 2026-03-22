@@ -154,7 +154,7 @@ const Contact = () => {
         {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
           <p className="text-eyebrow text-accent mb-4">{t("contact.title")}</p>
-          <h2 className="heading-section text-3xl md:text-4xl text-accent mb-6">
+          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
             {t("contact.subtitle")}
           </h2>
         </ScrollReveal>

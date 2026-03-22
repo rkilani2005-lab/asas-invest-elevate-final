@@ -114,7 +114,7 @@ const Stats = () => {
           <p className="text-eyebrow text-accent mb-4">
             {content.subtitle}
           </p>
-          <h2 className="heading-section text-2xl md:text-3xl text-accent">
+          <h2 className="heading-section text-2xl md:text-3xl text-foreground">
             {content.title}
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">

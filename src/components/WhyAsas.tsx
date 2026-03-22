@@ -121,7 +121,7 @@ const WhyAsas = () => {
           <p className="text-eyebrow text-accent mb-4">
             {content.subtitle}
           </p>
-          <h2 className="heading-section text-3xl md:text-4xl text-accent mb-6">
+          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
             {content.title}
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
@@ -139,7 +139,7 @@ const WhyAsas = () => {
                   <div className="inline-flex items-center justify-center w-14 h-14 border border-accent/30 rounded-lg mb-6 group-hover:border-accent transition-colors duration-300">
                     <IconComponent className="h-6 w-6 text-accent" strokeWidth={1} />
                   </div>
-                  <h3 className="heading-section text-xl text-accent mb-3">
+                  <h3 className="heading-section text-xl text-foreground mb-3">
                     {value.title}
                   </h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">

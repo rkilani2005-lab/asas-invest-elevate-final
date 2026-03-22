@@ -50,7 +50,7 @@ const Buy = () => {
                 <div className="w-16 h-16 border border-accent/30 flex items-center justify-center mb-6">
                   <cat.icon className="h-8 w-8 text-accent" strokeWidth={1} />
                 </div>
-                <h2 className="heading-section text-xl text-accent mb-3">{cat.title}</h2>
+                <h2 className="heading-section text-xl text-foreground mb-3">{cat.title}</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-6">{cat.description}</p>
                 <div className="space-y-2 w-full">
                   {cat.links.map((link) => (

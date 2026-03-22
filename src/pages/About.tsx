@@ -57,7 +57,7 @@ const About = () => {
                   <div className="w-14 h-14 border border-accent/30 flex items-center justify-center mx-auto mb-5">
                     <Icon className="h-7 w-7 text-accent" strokeWidth={1} />
                   </div>
-                  <h3 className="heading-section text-lg text-accent mb-3">{getText(pillar, "title")}</h3>
+                  <h3 className="heading-section text-lg text-foreground mb-3">{getText(pillar, "title")}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{getText(pillar, "content")}</p>
                 </div>
               );
@@ -69,7 +69,7 @@ const About = () => {
             <div className="max-w-3xl mx-auto mb-20">
               <ScrollReveal>
                 <div className={cn("card-luxury p-10", isRTL && "text-right")}>
-                  <h2 className="heading-section text-xl text-accent mb-6">{getText(foundersNote, "title")}</h2>
+                  <h2 className="heading-section text-xl text-foreground mb-6">{getText(foundersNote, "title")}</h2>
                   <p className="text-muted-foreground leading-relaxed italic text-lg">
                     "{getText(foundersNote, "content")}"
                   </p>
@@ -82,7 +82,7 @@ const About = () => {
           {/* The Private Office */}
           <div id="private-office" className="max-w-3xl mx-auto text-center mb-20">
             <ScrollReveal>
-              <h2 className="heading-section text-2xl text-accent mb-4">{t("about.privateOfficeTitle")}</h2>
+              <h2 className="heading-section text-2xl text-foreground mb-4">{t("about.privateOfficeTitle")}</h2>
               <p className="text-muted-foreground leading-relaxed max-w-2xl mx-auto">{t("about.privateOfficeDesc")}</p>
             </ScrollReveal>
           </div>
