@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
   const stateRaw = url.searchParams.get("state");
   const error = url.searchParams.get("error");
 
-  const adminOrigin = Deno.env.get("ADMIN_ORIGIN") || "https://asas.ae";
+  const adminOrigin = Deno.env.get("ADMIN_ORIGIN") || "https://asasinvest.com";
 
   if (error || !code || !stateRaw) {
     return Response.redirect(`${adminOrigin}/admin/communications/settings?gmail_error=${error || "missing_code"}`, 302);

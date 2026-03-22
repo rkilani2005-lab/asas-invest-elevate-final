@@ -138,7 +138,7 @@ Deno.serve(async (req) => {
       .select("value")
       .eq("key", "notification_email")
       .maybeSingle();
-    const teamEmail: string = (settingRow?.value as string) || "info@asas.ae";
+    const teamEmail: string = (settingRow?.value as string) || "admin@asasinvest.com";
 
     // Get Gmail account for sender — try purpose-specific first, then any connected account
     const senderPurpose = ["contact", "newsletter"].includes(form_type) ? "info" : "sales";

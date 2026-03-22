@@ -59,7 +59,7 @@ const Contact = () => {
   const contactInfo = [
     { icon: Phone, label: "Phone", details: "+971 4 XXX XXXX", link: "tel:+97140000000" },
     { icon: MessageCircle, label: "WhatsApp", details: "+971 50 XXX XXXX", link: "https://wa.me/971500000000" },
-    { icon: Mail, label: "Email", details: "info@asas.ae", link: "mailto:info@asas.ae" },
+    { icon: Mail, label: "Email", details: "admin@asasinvest.com", link: "mailto:admin@asasinvest.com" },
     { icon: MapPin, label: "Office", details: "Business Bay, Dubai, UAE", link: "#" },
   ];
 
@@ -103,7 +103,7 @@ const Contact = () => {
       const result = await submitForm({
         form_type: "callback",
         visitor_name: callbackForm.name,
-        visitor_email: "callback@asas.ae", // placeholder for callback-only
+        visitor_email: "callback@asasinvest.com", // placeholder for callback-only
         visitor_phone: callbackForm.phone,
         visitor_message: callbackForm.note,
         callback_time: callbackForm.callback_time,

@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  const adminOrigin = Deno.env.get("ADMIN_ORIGIN") || "https://asas.ae";
+  const adminOrigin = Deno.env.get("ADMIN_ORIGIN") || "https://asasinvest.com";
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
