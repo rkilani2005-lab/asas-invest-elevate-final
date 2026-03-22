@@ -1,6 +1,7 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import FeaturedProperties from "@/components/FeaturedProperties";
+import EditorialBand from "@/components/EditorialBand";
 import Stats from "@/components/Stats";
 import WhyAsas from "@/components/WhyAsas";
 import Contact from "@/components/Contact";
@@ -13,6 +14,7 @@ const Index = () => {
       <main>
         <Hero />
         <FeaturedProperties />
+        <EditorialBand />
         <Stats />
         <WhyAsas />
         <Contact />
