@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=GFS+Didot&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,15 +8,15 @@
 /* Asas Invest Real Estate - Modernist Landmark Design System
    ==========================================================
    Typography:
-   - Primary Heading: GFS Didot (Bold, tight tracking)
-   - Secondary/Nav: GFS Didot (Regular, title case)
+   - Primary Heading: Cormorant Garamond (genuine luxury serif)
+   - Nav / Subheadings: DM Sans (geometric, clean confidence)
    - Body: Inter (Regular, 1.7 line-height, spacious feel)
    - Arabic: IBM Plex Sans Arabic (all weights)
-   
+
    Colors:
    - Textured Off-White (#FAFAFA) - Global background
-   - Aureolin Gold (#C5A059) - Primary accent
-   - Deep Charcoal (#333333) - Body text
+   - Aureolin Gold (#C5A059) - Accent only (10–15% usage)
+   - Deep Charcoal (#1A1A1A) - Headings & body text
 */
 
 @layer base {
@@ -93,20 +93,20 @@
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   }
 
-  /* Heading Typography - GFS Didot with tight tracking */
+  /* Heading Typography - Cormorant Garamond, genuine luxury serif */
   h1, h2 {
-    font-family: 'GFS Didot', 'Didot', 'Georgia', serif;
+    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
     letter-spacing: -0.01em;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.1;
   }
 
   h1 {
-    font-weight: 900; /* Black weight for hero headings */
+    font-weight: 700;
   }
 
   h3, h4, h5, h6 {
-    font-family: 'GFS Didot', 'Didot', 'Georgia', serif;
+    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
     font-weight: 500;
     letter-spacing: -0.01em;
   }
@@ -121,17 +121,16 @@
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
     font-style: normal;
     letter-spacing: 0;
-  }
-}
+  }}
 
 @layer components {
-  /* Navigation & Labels - GFS Didot, Title Case */
+  /* Navigation & Labels - DM Sans, clean geometric */
   .nav-link,
   .label-luxury {
-    font-family: 'GFS Didot', 'Didot', 'Georgia', serif;
-    font-weight: 500;
-    letter-spacing: 0;
-    font-size: 1.125rem;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    font-size: 0.9rem;
   }
 
   [dir="rtl"] .nav-link,
@@ -143,8 +142,8 @@
 
   /* Hero Heading Style */
   .heading-hero {
-    font-family: 'GFS Didot', 'Didot', 'Georgia', serif;
-    font-weight: 900;
+    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
+    font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.05;
   }
@@ -157,9 +156,9 @@
 
   /* Section Heading Style */
   .heading-section {
-    font-family: 'GFS Didot', 'Didot', 'Georgia', serif;
+    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
     letter-spacing: -0.01em;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   [dir="rtl"] .heading-section {
@@ -168,12 +167,12 @@
     letter-spacing: 0;
   }
 
-  /* Eyebrow/Label Text */
+  /* Eyebrow/Label Text - DM Sans for contrast against serif headings */
   .text-eyebrow {
-    font-family: 'GFS Didot', 'Didot', 'Georgia', serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
     font-weight: 500;
   }
 
@@ -183,14 +182,15 @@
     letter-spacing: 0.02em;
   }
 
-  /* Luxury Button - Transparent with gold border */
+  /* Luxury Button */
   .btn-luxury {
     @apply relative bg-transparent text-accent border border-accent 
            px-8 py-3 transition-all duration-300 overflow-hidden;
-    font-family: 'GFS Didot', 'Didot', 'Georgia', serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     font-weight: 500;
-    letter-spacing: 0.02em;
-    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    font-size: 0.8rem;
+    text-transform: uppercase;
   }
 
   .btn-luxury::before {
@@ -286,11 +286,11 @@
 
   /* Font utilities */
   .font-heading {
-    font-family: 'GFS Didot', 'Didot', 'Georgia', serif;
+    font-family: 'Cormorant Garamond', 'Didot', 'Georgia', serif;
   }
 
   .font-nav {
-    font-family: 'GFS Didot', 'Didot', 'Georgia', serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
   }
 
   .font-body {
