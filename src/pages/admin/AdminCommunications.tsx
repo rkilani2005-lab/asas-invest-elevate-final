@@ -5,12 +5,11 @@ import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import {
   Search, Download, Eye, Mail, Phone, User, Calendar,
-  MessageSquare, Building2, Filter, CheckCircle, X, RefreshCw,
-  Clock, AlertCircle, ChevronDown, Send, Loader2,
+  MessageSquare, Building2, CheckCircle, X, RefreshCw,
+  Clock, Send, Loader2, RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -24,6 +23,9 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Submission = {
   id: string;
