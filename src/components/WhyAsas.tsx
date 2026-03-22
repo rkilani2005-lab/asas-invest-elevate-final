@@ -1,5 +1,3 @@
-import { Eye, Shield, Users, Sparkles, LucideIcon } from "lucide-react";
-import * as LucideIcons from "lucide-react";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -20,26 +18,9 @@ interface ValueItem {
   description: string;
 }
 
-// Map icon names to Lucide components
-const getIconComponent = (iconName: string): LucideIcon => {
-  const iconMap: Record<string, LucideIcon> = {
-    Eye, Shield, Users, Sparkles,
-  };
-  
-  // Try to get from our map first
-  if (iconMap[iconName]) return iconMap[iconName];
-  
-  // Try to get from all Lucide icons
-  const AllIcons = LucideIcons as unknown as Record<string, LucideIcon>;
-  if (AllIcons[iconName]) return AllIcons[iconName];
-  
-  return Eye; // Default fallback
-};
-
 const WhyAsas = () => {
   const { t, isRTL, language } = useLanguage();
 
-  // Fetch Why Asas content from database
   const { data: whyAsasContent } = useQuery({
     queryKey: ['pages_content', 'home', 'why_asas', language],
     queryFn: async () => {
@@ -49,13 +30,11 @@ const WhyAsas = () => {
         .eq('page_slug', 'home')
         .eq('section_key', 'why_asas')
         .maybeSingle();
-      
       if (error || !data) return null;
       return (language === 'ar' ? data.content_ar : data.content_en) as WhyAsasContent;
     },
   });
 
-  // Fetch Why Asas values from database
   const { data: valuesData } = useQuery({
     queryKey: ['pages_content', 'home', 'why_asas_values', language],
     queryFn: async () => {
@@ -65,7 +44,6 @@ const WhyAsas = () => {
         .eq('page_slug', 'home')
         .eq('section_key', 'why_asas_values')
         .maybeSingle();
-      
       if (error || !data) return null;
       const content = language === 'ar' ? data.content_ar : data.content_en;
       if (!Array.isArray(content)) return null;
@@ -73,7 +51,6 @@ const WhyAsas = () => {
     },
   });
 
-  // Use database content with i18n fallback
   const content = {
     subtitle: whyAsasContent?.subtitle || t("whyAsas.subtitle"),
     title: whyAsasContent?.title || t("whyAsas.title"),
@@ -82,87 +59,126 @@ const WhyAsas = () => {
     missionAuthor: whyAsasContent?.missionAuthor || t("whyAsas.missionAuthor"),
   };
 
-  // Default values from i18n
   const defaultValues = [
-    {
-      icon: Eye,
-      title: t("whyAsas.values.freshVision.title"),
-      description: t("whyAsas.values.freshVision.description")
-    },
-    {
-      icon: Shield,
-      title: t("whyAsas.values.uaeExpertise.title"),
-      description: t("whyAsas.values.uaeExpertise.description")
-    },
-    {
-      icon: Users,
-      title: t("whyAsas.values.clientFocused.title"),
-      description: t("whyAsas.values.clientFocused.description")
-    },
-    {
-      icon: Sparkles,
-      title: t("whyAsas.values.transparent.title"),
-      description: t("whyAsas.values.transparent.description")
-    }
+    { title: t("whyAsas.values.freshVision.title"),   description: t("whyAsas.values.freshVision.description") },
+    { title: t("whyAsas.values.uaeExpertise.title"),  description: t("whyAsas.values.uaeExpertise.description") },
+    { title: t("whyAsas.values.clientFocused.title"), description: t("whyAsas.values.clientFocused.description") },
+    { title: t("whyAsas.values.transparent.title"),   description: t("whyAsas.values.transparent.description") },
   ];
 
-  // Use database values or fallback to defaults
   const values = valuesData?.map(v => ({
-    icon: getIconComponent(v.icon),
     title: v.title,
-    description: v.description
+    description: v.description,
   })) || defaultValues;
 
   return (
-    <section id="about" className="py-24 bg-card grain-overlay">
-      <div className={cn("container mx-auto px-4 lg:px-8 relative z-10", isRTL && "font-arabic")}>
-        {/* Section Header */}
-        <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
-          <p className="text-eyebrow text-accent mb-4">
-            {content.subtitle}
-          </p>
-          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
-            {content.title}
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            {content.description}
-          </p>
-        </ScrollReveal>
+    <section id="about" className={cn("py-24 bg-card grain-overlay", isRTL && "font-arabic")}>
+      <div className="container mx-auto px-4 lg:px-8">
 
-        {/* Values Grid */}
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {values.map((value, index) => {
-            const IconComponent = value.icon;
-            return (
-              <StaggerItem key={index}>
-                <div className="group text-center p-8 bg-white border border-accent/30 hover:border-accent transition-all duration-300 h-full shadow-card">
-                  <div className="inline-flex items-center justify-center w-14 h-14 border border-accent/30 rounded-lg mb-6 group-hover:border-accent transition-colors duration-300">
-                    <IconComponent className="h-6 w-6 text-accent" strokeWidth={1} />
+        {/* Asymmetric two-column layout: header left, values right */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-16 lg:gap-24 items-start mb-20">
+
+          {/* Left — editorial header, sticky on desktop */}
+          <ScrollReveal className="lg:col-span-2 lg:sticky lg:top-32">
+            <p className="text-eyebrow text-accent mb-5" style={{ letterSpacing: '0.15em' }}>
+              {content.subtitle}
+            </p>
+            <h2
+              className="heading-section mb-6"
+              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', lineHeight: 1.1, color: '#1A1A1A' }}
+            >
+              {content.title}
+            </h2>
+            {/* Gold rule */}
+            <div style={{ width: '48px', height: '1px', background: '#C5A059', marginBottom: '1.5rem' }} />
+            <p className="text-muted-foreground leading-relaxed" style={{ fontSize: '0.95rem' }}>
+              {content.description}
+            </p>
+          </ScrollReveal>
+
+          {/* Right — stacked editorial value cards, no icon boxes */}
+          <div className="lg:col-span-3">
+            <StaggerContainer className="flex flex-col divide-y" style={{ borderColor: 'rgba(197,160,89,0.15)' }}>
+              {values.map((value, index) => (
+                <StaggerItem key={index}>
+                  <div
+                    className="group py-8 flex gap-6 items-start cursor-default"
+                    style={{ borderColor: 'rgba(197,160,89,0.15)' }}
+                  >
+                    {/* Thin gold left border with number */}
+                    <div className="flex-shrink-0 flex flex-col items-center pt-1">
+                      <span
+                        className="text-xs font-medium mb-2"
+                        style={{
+                          color: 'rgba(197,160,89,0.5)',
+                          fontFamily: "'DM Sans', sans-serif",
+                          letterSpacing: '0.06em',
+                        }}
+                      >
+                        0{index + 1}
+                      </span>
+                      <div
+                        className="w-px flex-1 min-h-[40px]"
+                        style={{ background: 'rgba(197,160,89,0.25)' }}
+                      />
+                    </div>
+                    {/* Text content */}
+                    <div className="flex-1 pb-2">
+                      <h3
+                        className="heading-section mb-2 transition-colors duration-300"
+                        style={{
+                          fontSize: '1.2rem',
+                          color: '#1A1A1A',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {value.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {value.description}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="heading-section text-xl text-foreground mb-3">
-                    {value.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {value.description}
-                  </p>
-                </div>
-              </StaggerItem>
-            );
-          })}
-        </StaggerContainer>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </div>
+        </div>
 
-        {/* Mission Statement */}
-        <ScrollReveal delay={0.3} className="mt-20 max-w-4xl mx-auto text-center">
-          <div className="border border-accent/30 p-10 md:p-14 bg-white shadow-card">
-            <blockquote className="font-serif text-xl md:text-2xl text-foreground leading-relaxed italic">
+        {/* Mission Statement — full-width, left-aligned, editorial */}
+        <ScrollReveal delay={0.2}>
+          <div
+            className="relative px-10 md:px-16 py-12 md:py-14 overflow-hidden"
+            style={{
+              borderLeft: '2px solid #C5A059',
+              background: 'rgba(197,160,89,0.04)',
+            }}
+          >
+            <blockquote
+              className="heading-section italic mb-6"
+              style={{
+                fontSize: 'clamp(1.3rem, 2.5vw, 1.75rem)',
+                color: '#1A1A1A',
+                fontWeight: 400,
+                lineHeight: 1.5,
+                maxWidth: '48rem',
+              }}
+            >
               "{content.mission}"
             </blockquote>
-            <div className="divider-gold my-6 max-w-24 mx-auto" />
-            <p className="text-accent text-xs tracking-widest uppercase">
+            <p
+              className="text-xs uppercase tracking-widest"
+              style={{
+                color: '#C5A059',
+                fontFamily: "'DM Sans', sans-serif",
+                letterSpacing: '0.14em',
+              }}
+            >
               {content.missionAuthor}
             </p>
           </div>
         </ScrollReveal>
+
       </div>
     </section>
   );
