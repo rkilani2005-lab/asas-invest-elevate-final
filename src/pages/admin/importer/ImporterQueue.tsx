@@ -132,15 +132,11 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
   const handleExtract = async () => {
     setExtracting(true);
     try {
-      const pdfMedia = (media || []).filter((m: any) => m.media_type === "brochure");
+      // The extract-property function now handles fetching its own media list
+      // and populating import_media if empty. We just need to pass job_id + folder_name.
       await callEdgeFunction("extract-property", {
         job_id: job.id,
         folder_name: job.folder_name,
-        pdf_files: pdfMedia.map((m: any) => ({
-          path_lower: m.dropbox_path,
-          name: m.original_filename,
-          size: m.original_size_bytes,
-        })),
       });
       toast.success("AI extraction complete");
       onRefresh();
@@ -149,6 +145,15 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     } finally {
       setExtracting(false);
     }
+  };
+
+  const handleResetStuck = async () => {
+    await supabase
+      .from("import_jobs")
+      .update({ import_status: "pending" })
+      .eq("id", job.id);
+    toast.info("Job reset to pending");
+    onRefresh();
   };
 
   // ── Edit helpers ──────────────────────────────────────────────────────────
