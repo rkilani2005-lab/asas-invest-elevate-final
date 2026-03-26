@@ -181,7 +181,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
   // ── Client-side media upload with compression ─────────────────────────────
   /**
-   * Downloads an image from Dropbox via a temporary link, compresses it
+   * Downloads a file from Google Drive (via access token), compresses images
    * client-side using the Canvas API, then uploads the result directly to
    * Supabase Storage. Returns the public URL.
    */
@@ -193,7 +193,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     const isImage = mediaItem.media_type === "image";
     const isVideo = mediaItem.media_type === "video";
 
-    // ── Videos: skip if over 30 MB ────────────────────────────────────────
+    // ── Videos: skip if over 40 MB ────────────────────────────────────────
     if (isVideo) {
       const origBytes = mediaItem.original_size_bytes || 0;
       if (origBytes > MAX_VIDEO_BYTES) {
@@ -201,15 +201,20 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
     }
 
-    // ── Step 1: get a temp Dropbox link ───────────────────────────────────
-    const { link } = await callEdgeFunction("dropbox-proxy", {
-      action: "get_preview_link",
-      file_path: mediaItem.dropbox_path,
+    // ── Step 1: get Google Drive access token ─────────────────────────────
+    // dropbox_path field stores the Google Drive file ID
+    const fileId = mediaItem.dropbox_path;
+    const { access_token } = await callEdgeFunction("gdrive-oauth", {
+      action: "get_download_link",
+      file_id: fileId,
     });
 
-    // ── Step 2: fetch the raw file in the browser ─────────────────────────
-    const fetchRes = await fetch(link);
-    if (!fetchRes.ok) throw new Error(`Failed to fetch ${mediaItem.original_filename}`);
+    // ── Step 2: fetch the raw file from Google Drive in the browser ───────
+    const driveUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+    const fetchRes = await fetch(driveUrl, {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+    if (!fetchRes.ok) throw new Error(`Failed to fetch ${mediaItem.original_filename} from Google Drive (${fetchRes.status})`);
     const rawBlob = await fetchRes.blob();
 
     let finalBlob: Blob;
