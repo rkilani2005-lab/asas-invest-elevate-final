@@ -105,20 +105,59 @@ async function getValidAccessToken(supabase: ReturnType<typeof createClient>): P
 }
 
 /** 
- * List all files inside a Google Drive folder (non-recursive).
+ * List direct non-folder files inside a Google Drive folder.
  */
-async function listDriveFiles(
+async function listDirectFiles(
   accessToken: string,
   folderId: string
 ): Promise<Array<{ id: string; name: string; mimeType: string; size?: string }>> {
-  const query = `'${folderId}' in parents and trashed=false`;
+  const query = `'${folderId}' in parents and mimeType != 'application/vnd.google-apps.folder' and trashed=false`;
   const resp = await fetch(
-    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType,size)&pageSize=200`,
+    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType,size)&pageSize=1000`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );
   if (!resp.ok) return [];
   const data = await resp.json();
   return data.files || [];
+}
+
+/** List sub-folders in a Google Drive folder. */
+async function listSubFolders(
+  accessToken: string,
+  folderId: string
+): Promise<Array<{ id: string; name: string }>> {
+  const query = `'${folderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  const resp = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)&pageSize=200`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!resp.ok) return [];
+  const data = await resp.json();
+  return data.files || [];
+}
+
+/**
+ * Recursively list ALL files inside a folder and sub-folders (up to 3 levels deep).
+ */
+async function listDriveFiles(
+  accessToken: string,
+  folderId: string,
+  depth = 0
+): Promise<Array<{ id: string; name: string; mimeType: string; size?: string }>> {
+  const allFiles: Array<{ id: string; name: string; mimeType: string; size?: string }> = [];
+
+  const directFiles = await listDirectFiles(accessToken, folderId);
+  allFiles.push(...directFiles);
+
+  if (depth < 3) {
+    const subFolders = await listSubFolders(accessToken, folderId);
+    for (const sub of subFolders) {
+      const subFiles = await listDriveFiles(accessToken, sub.id, depth + 1);
+      allFiles.push(...subFiles);
+    }
+  }
+
+  return allFiles;
 }
 
 function makeSlug(name: string): string {
