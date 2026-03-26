@@ -38,6 +38,31 @@ export function useQueueCount() {
   return count;
 }
 
+export function usePendingApprovalCount() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const fetch = () =>
+      supabase
+        .from("import_jobs")
+        .select("*", { count: "exact", head: true })
+        .eq("approval_status", "pending_review")
+        .eq("import_status", "reviewing")
+        .then(({ count: c }) => setCount(c ?? 0));
+
+    fetch();
+
+    const channel = supabase
+      .channel("approval-count")
+      .on("postgres_changes", { event: "*", schema: "public", table: "import_jobs" }, fetch)
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  return count;
+}
+
 export function useNewSubmissionsCount() {
   const [count, setCount] = useState(0);
 

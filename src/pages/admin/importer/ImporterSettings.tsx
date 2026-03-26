@@ -42,6 +42,9 @@ export default function ImporterSettings() {
   const [runningNow, setRunningNow] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [autoScanInterval, setAutoScanInterval] = useState<"disabled" | "hourly" | "daily">("disabled");
+  const [publishingMode, setPublishingMode] = useState<"auto" | "manual">("manual");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [contentTeamEmail, setContentTeamEmail] = useState("");
 
   // Check URL params for OAuth callback
   useEffect(() => {
@@ -67,6 +70,7 @@ export default function ImporterSettings() {
         .in("key", [
           "gdrive_connected", "gdrive_connected_email", "gdrive_root_folder_id",
           "gdrive_last_scan", "auto_scan_interval", "gdrive_last_tested",
+          "publishing_mode", "admin_email", "content_team_email",
         ]);
       const map: Record<string, string> = {};
       (data || []).forEach((r) => { if (r.value) map[r.key] = r.value; });
@@ -82,6 +86,11 @@ export default function ImporterSettings() {
       if (interval === "hourly" || interval === "daily" || interval === "disabled") {
         setAutoScanInterval(interval);
       }
+      if (gdriveSettings.publishing_mode === "auto" || gdriveSettings.publishing_mode === "manual") {
+        setPublishingMode(gdriveSettings.publishing_mode);
+      }
+      if (gdriveSettings.admin_email) setAdminEmail(gdriveSettings.admin_email);
+      if (gdriveSettings.content_team_email) setContentTeamEmail(gdriveSettings.content_team_email);
     }
   }, [gdriveSettings]);
 
@@ -138,6 +147,9 @@ export default function ImporterSettings() {
       await supabase.from("importer_settings").upsert([
         { key: "gdrive_root_folder_id", value: rootFolderInput },
         { key: "auto_scan_interval", value: autoScanInterval },
+        { key: "publishing_mode", value: publishingMode },
+        { key: "admin_email", value: adminEmail },
+        { key: "content_team_email", value: contentTeamEmail },
       ], { onConflict: "key" });
       toast.success("Settings saved");
       queryClient.invalidateQueries({ queryKey: ["gdrive-settings"] });
@@ -340,6 +352,87 @@ export default function ImporterSettings() {
           Scan Now
         </Button>
       </div>
+
+      <Separator />
+
+      {/* ── Publishing Mode ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Publishing Mode</CardTitle>
+          <CardDescription>
+            Control whether imported properties go live automatically or require admin approval first
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <RadioGroup
+            value={publishingMode}
+            onValueChange={(v) => setPublishingMode(v as "auto" | "manual")}
+            className="space-y-2"
+          >
+            {[
+              {
+                value: "manual",
+                label: "Requires Admin Approval",
+                desc: "Properties go to a review queue. You must approve before they go live. (Recommended)",
+              },
+              {
+                value: "auto",
+                label: "Auto-Publish",
+                desc: "Properties are published immediately after processing if validation passes.",
+              },
+            ].map((opt) => (
+              <div
+                key={opt.value}
+                className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/30 ${publishingMode === opt.value ? "border-primary bg-primary/5" : ""}`}
+              >
+                <RadioGroupItem value={opt.value} id={`mode-${opt.value}`} className="mt-0.5" />
+                <label htmlFor={`mode-${opt.value}`} className="cursor-pointer flex-1">
+                  <span className="font-medium text-sm">{opt.label}</span>
+                  <span className="text-xs text-muted-foreground block mt-0.5">{opt.desc}</span>
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
+        </CardContent>
+      </Card>
+
+      {/* ── Notification Emails ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Notification Emails</CardTitle>
+          <CardDescription>
+            Who receives emails when properties are imported, approved, or rejected
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="admin-email">Admin Email</Label>
+            <Input
+              id="admin-email"
+              type="email"
+              value={adminEmail}
+              onChange={(e) => setAdminEmail(e.target.value)}
+              placeholder="admin@asasinvest.com"
+            />
+            <p className="text-xs text-muted-foreground">
+              Receives notifications when new properties are processed and when validation errors occur
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="team-email">Content Team Email</Label>
+            <Input
+              id="team-email"
+              type="email"
+              value={contentTeamEmail}
+              onChange={(e) => setContentTeamEmail(e.target.value)}
+              placeholder="content@asasinvest.com"
+            />
+            <p className="text-xs text-muted-foreground">
+              Receives emails when properties are approved (confirmed live) or rejected with fix instructions
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Separator />
 

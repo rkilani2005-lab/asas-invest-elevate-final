@@ -45,6 +45,7 @@ import ImporterDashboard from "./pages/admin/importer/ImporterDashboard";
 import ImporterScan from "./pages/admin/importer/ImporterScan";
 import ImporterQueue from "./pages/admin/importer/ImporterQueue";
 import ImporterSettings from "./pages/admin/importer/ImporterSettings";
+import ImporterApproval from "./pages/admin/importer/ImporterApproval";
 import AdminCommunications from "./pages/admin/AdminCommunications";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
 import AdminEmailPage from "./pages/admin/AdminEmailPage";
@@ -101,6 +102,7 @@ const App = () => (
                 <Route path="/admin/importer/scan" element={<AdminLayout><ImporterScan /></AdminLayout>} />
                 <Route path="/admin/importer/queue" element={<AdminLayout><ImporterQueue /></AdminLayout>} />
                 <Route path="/admin/importer/settings" element={<AdminLayout><ImporterSettings /></AdminLayout>} />
+                <Route path="/admin/importer/approval" element={<AdminLayout><ImporterApproval /></AdminLayout>} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

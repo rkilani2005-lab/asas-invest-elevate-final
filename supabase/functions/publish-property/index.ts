@@ -61,13 +61,37 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Job not found" }), { status: 404, headers: corsHeaders });
     }
 
-    // Get Dropbox token
-    const { data: tokenData } = await supabase
+    // Get Google Drive access token (with auto-refresh)
+    const { data: driveRows } = await supabase
       .from("importer_settings")
-      .select("value")
-      .eq("key", "dropbox_access_token")
-      .maybeSingle();
-    const dropboxToken = tokenData?.value;
+      .select("key, value")
+      .in("key", ["gdrive_access_token", "gdrive_refresh_token", "gdrive_token_expiry"]);
+    const driveMap: Record<string, string> = {};
+    (driveRows || []).forEach((r: { key: string; value: string | null }) => { if (r.value) driveMap[r.key] = r.value; });
+
+    let gdriveToken = driveMap.gdrive_access_token || null;
+
+    // Refresh if expired
+    if (gdriveToken && driveMap.gdrive_refresh_token) {
+      const expiryMs = driveMap.gdrive_token_expiry ? new Date(driveMap.gdrive_token_expiry).getTime() : 0;
+      if (Date.now() > expiryMs - 5 * 60 * 1000) {
+        const GCI = Deno.env.get("GOOGLE_CLIENT_ID"), GCS = Deno.env.get("GOOGLE_CLIENT_SECRET");
+        if (GCI && GCS) {
+          const refreshResp = await fetch("https://oauth2.googleapis.com/token", {
+            method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ client_id: GCI, client_secret: GCS, refresh_token: driveMap.gdrive_refresh_token, grant_type: "refresh_token" }),
+          });
+          if (refreshResp.ok) {
+            const tokens = await refreshResp.json();
+            gdriveToken = tokens.access_token;
+            await supabase.from("importer_settings").upsert([
+              { key: "gdrive_access_token", value: tokens.access_token },
+              { key: "gdrive_token_expiry", value: new Date(Date.now() + (tokens.expires_in || 3600) * 1000).toISOString() },
+            ], { onConflict: "key" });
+          }
+        }
+      }
+    }
 
     if (action === "create_property") {
       // Create the property in the properties table
@@ -172,19 +196,23 @@ serve(async (req) => {
       const results = [];
       for (const item of media_items) {
         try {
-          // Download from Dropbox
-          if (!dropboxToken) {
-            results.push({ filename: item.filename, error: "No Dropbox token" });
+          // Download from Google Drive
+          if (!gdriveToken) {
+            results.push({ filename: item.filename, error: "No Google Drive token — reconnect Drive in Importer Settings" });
             continue;
           }
 
-          const dlRes = await fetch("https://content.dropboxapi.com/2/files/download", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${dropboxToken}`,
-              "Dropbox-API-Arg": JSON.stringify({ path: item.dropbox_path }),
-            },
+          // item.dropbox_path stores the Drive file ID (field was reused for Drive)
+          const driveFileId = item.dropbox_path;
+          let dlRes = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`, {
+            headers: { Authorization: `Bearer ${gdriveToken}` },
           });
+          // Fallback: export as PDF if it's a Google Doc
+          if (!dlRes.ok) {
+            dlRes = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}/export?mimeType=application/pdf`, {
+              headers: { Authorization: `Bearer ${gdriveToken}` },
+            });
+          }
 
           if (!dlRes.ok) {
             results.push({ filename: item.filename, error: "Download failed" });

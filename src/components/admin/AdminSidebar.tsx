@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useQueueCount, useNewSubmissionsCount } from "@/hooks/useQueueCount";
+import { useQueueCount, useNewSubmissionsCount, usePendingApprovalCount } from "@/hooks/useQueueCount";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -17,6 +17,7 @@ import {
   FileText,
   CloudDownload,
   Mail,
+  ClipboardCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/properties", icon: Building2, label: "Properties" },
   { href: "/admin/importer", icon: CloudDownload, label: "Auto Import" },
+  { href: "/admin/importer/approval", icon: ClipboardCheck, label: "Approvals" },
   { href: "/admin/gallery", icon: Images, label: "Gallery" },
   { href: "/admin/amenities", icon: Sparkles, label: "Amenity Library" },
   { href: "/admin/communications", icon: Users, label: "Communications" },
@@ -65,6 +67,7 @@ export default function AdminSidebar() {
   const { signOut, user } = useAdminAuth();
   const queueCount = useQueueCount();
   const newSubmissionsCount = useNewSubmissionsCount();
+  const pendingApprovalCount = usePendingApprovalCount();
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -100,6 +103,9 @@ export default function AdminSidebar() {
             <span className="flex-1">{item.label}</span>
             {item.href === "/admin/importer" && queueCount > 0 && (
               <NavBadge count={queueCount} active={isActive(item.href)} />
+            )}
+            {item.href === "/admin/importer/approval" && pendingApprovalCount > 0 && (
+              <NavBadge count={pendingApprovalCount} active={isActive(item.href)} variant="destructive" />
             )}
             {item.href === "/admin/communications" && newSubmissionsCount > 0 && (
               <NavBadge count={newSubmissionsCount} active={isActive(item.href)} variant="destructive" />
