@@ -641,6 +641,19 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
               </div>
             )}
 
+          {/* Allow resetting stuck jobs (extracting/processing_media/uploading) */}
+          {isProcessing && !publishing && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={(e) => { e.stopPropagation(); handleResetStuck(); }}
+              title="Reset stuck job to pending"
+            >
+              <RefreshCw className="w-3 h-3" />
+            </Button>
+          )}
+
           {job.import_status === "completed" && job.cms_url && (
             <Button
               size="sm"
