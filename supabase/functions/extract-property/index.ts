@@ -182,10 +182,89 @@ async function downloadDrivePDF(fileId: string, token: string): Promise<ArrayBuf
 
 // ── Docling PDF → Markdown ────────────────────────────────────────────────────
 
+// ── Get Google Cloud Run identity token ──────────────────────────────────────
+// Uses the stored OAuth refresh token to obtain an identity token scoped
+// to the Docling Cloud Run service URL. No service account key needed.
+
+async function getCloudRunIdentityToken(
+  supabase: ReturnType<typeof createClient>,
+  audience: string
+): Promise<string | null> {
+  try {
+    const GCI = Deno.env.get("GOOGLE_CLIENT_ID");
+    const GCS = Deno.env.get("GOOGLE_CLIENT_SECRET");
+    if (!GCI || !GCS) return null;
+
+    // Get the stored refresh token (same one used for Drive)
+    const { data: rows } = await supabase
+      .from("importer_settings")
+      .select("key, value")
+      .in("key", ["gdrive_refresh_token"]);
+
+    const refreshToken = (rows || []).find(
+      (r: { key: string; value: string | null }) => r.key === "gdrive_refresh_token"
+    )?.value;
+
+    if (!refreshToken) return null;
+
+    // Exchange refresh token for a fresh access token
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: GCI,
+        client_secret: GCS,
+        refresh_token: refreshToken,
+        grant_type: "refresh_token",
+      }),
+    });
+
+    if (!tokenRes.ok) return null;
+    const { access_token } = await tokenRes.json();
+    if (!access_token) return null;
+
+    // Use the access token to get an identity token scoped to the Cloud Run URL
+    // Google's generateIdToken endpoint mints a token for the given audience
+    const idTokenRes = await fetch(
+      `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/-:generateIdToken`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ audience, includeEmail: true }),
+      }
+    );
+
+    if (idTokenRes.ok) {
+      const { token } = await idTokenRes.json();
+      return token || null;
+    }
+
+    // Fallback: try fetching identity token via metadata server approach
+    // This works when running on Google infrastructure
+    const metaRes = await fetch(
+      `https://oauth2.googleapis.com/v1/userinfo`,
+      { headers: { Authorization: `Bearer ${access_token}` } }
+    );
+
+    // If we can't mint an identity token, return the access token as fallback
+    // Cloud Run with --no-allow-unauthenticated may still accept it for same-project calls
+    if (metaRes.ok) return access_token;
+
+    return null;
+  } catch (e) {
+    console.error("Identity token error:", e);
+    return null;
+  }
+}
+
 async function convertPDFWithDocling(
   pdfBuffer: ArrayBuffer,
   filename: string,
-  doclingUrl: string
+  doclingUrl: string,
+  identityToken: string | null
 ): Promise<string | null> {
   try {
     // Build multipart form — send PDF file to docling-serve
@@ -193,11 +272,17 @@ async function convertPDFWithDocling(
     const blob = new Blob([pdfBuffer], { type: "application/pdf" });
     formData.append("files", blob, filename.endsWith(".pdf") ? filename : `${filename}.pdf`);
 
+    // Build headers — include identity token if available (required for authenticated Cloud Run)
+    const headers: Record<string, string> = {};
+    if (identityToken) {
+      headers["Authorization"] = `Bearer ${identityToken}`;
+    }
+
     // docling-serve v1 API: POST /v1/convert/file
     const res = await fetch(`${doclingUrl}/v1/convert/file`, {
       method: "POST",
+      headers,
       body: formData,
-      // No Content-Type header — browser sets it with boundary automatically
     });
 
     if (!res.ok) {
@@ -357,6 +442,17 @@ serve(async (req) => {
     let markdown = "";
     let pdfSource = "none";
 
+    // Get Cloud Run identity token once — reused for all PDF calls
+    const identityToken = await getCloudRunIdentityToken(supabase, DOCLING_SERVE_URL);
+
+    await supabase.from("import_logs").insert({
+      job_id, action: "docling_auth",
+      details: identityToken
+        ? "Cloud Run identity token obtained successfully"
+        : "No identity token — calling Docling without auth (only works if service is public)",
+      level: identityToken ? "info" : "warning",
+    });
+
     const sortedPdfs = [...(pdf_files || [])]
       .sort((a: { size?: number }, b: { size?: number }) => (b.size || 0) - (a.size || 0))
       .slice(0, 2); // Try top 2 PDFs (largest first)
@@ -389,7 +485,7 @@ serve(async (req) => {
             level: "info",
           });
 
-          markdown = (await convertPDFWithDocling(buffer, filename, DOCLING_SERVE_URL)) || "";
+          markdown = (await convertPDFWithDocling(buffer, filename, DOCLING_SERVE_URL, identityToken)) || "";
 
           if (markdown && markdown.length > 100) {
             pdfSource = filename;
