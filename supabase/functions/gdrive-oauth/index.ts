@@ -222,6 +222,35 @@ Deno.serve(async (req) => {
     });
   }
 
+  // ---- GET DOWNLOAD LINK (for media pipeline) ----
+  if (action === "get_download_link") {
+    const fileId = (body.file_id as string);
+    if (!fileId) {
+      return new Response(JSON.stringify({ error: "Missing file_id" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: tokenRow } = await supabase
+      .from("importer_settings")
+      .select("value")
+      .eq("key", "gdrive_access_token")
+      .maybeSingle();
+
+    const accessToken = tokenRow?.value;
+    if (!accessToken) {
+      return new Response(JSON.stringify({ error: "Not connected to Google Drive" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Return the direct download URL with the access token embedded
+    // The client will use this token to fetch the file directly
+    return new Response(JSON.stringify({ access_token: accessToken, file_id: fileId }), {
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   return new Response(JSON.stringify({ error: "Unknown action" }), {
     status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
   });

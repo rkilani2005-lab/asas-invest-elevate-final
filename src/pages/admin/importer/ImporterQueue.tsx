@@ -132,15 +132,11 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
   const handleExtract = async () => {
     setExtracting(true);
     try {
-      const pdfMedia = (media || []).filter((m: any) => m.media_type === "brochure");
+      // The extract-property function now handles fetching its own media list
+      // and populating import_media if empty. We just need to pass job_id + folder_name.
       await callEdgeFunction("extract-property", {
         job_id: job.id,
         folder_name: job.folder_name,
-        pdf_files: pdfMedia.map((m: any) => ({
-          path_lower: m.dropbox_path,
-          name: m.original_filename,
-          size: m.original_size_bytes,
-        })),
       });
       toast.success("AI extraction complete");
       onRefresh();
@@ -149,6 +145,15 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     } finally {
       setExtracting(false);
     }
+  };
+
+  const handleResetStuck = async () => {
+    await supabase
+      .from("import_jobs")
+      .update({ import_status: "pending" })
+      .eq("id", job.id);
+    toast.info("Job reset to pending");
+    onRefresh();
   };
 
   // ── Edit helpers ──────────────────────────────────────────────────────────
@@ -181,7 +186,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
   // ── Client-side media upload with compression ─────────────────────────────
   /**
-   * Downloads an image from Dropbox via a temporary link, compresses it
+   * Downloads a file from Google Drive (via access token), compresses images
    * client-side using the Canvas API, then uploads the result directly to
    * Supabase Storage. Returns the public URL.
    */
@@ -193,7 +198,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     const isImage = mediaItem.media_type === "image";
     const isVideo = mediaItem.media_type === "video";
 
-    // ── Videos: skip if over 30 MB ────────────────────────────────────────
+    // ── Videos: skip if over 40 MB ────────────────────────────────────────
     if (isVideo) {
       const origBytes = mediaItem.original_size_bytes || 0;
       if (origBytes > MAX_VIDEO_BYTES) {
@@ -201,15 +206,20 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
     }
 
-    // ── Step 1: get a temp Dropbox link ───────────────────────────────────
-    const { link } = await callEdgeFunction("dropbox-proxy", {
-      action: "get_preview_link",
-      file_path: mediaItem.dropbox_path,
+    // ── Step 1: get Google Drive access token ─────────────────────────────
+    // dropbox_path field stores the Google Drive file ID
+    const fileId = mediaItem.dropbox_path;
+    const { access_token } = await callEdgeFunction("gdrive-oauth", {
+      action: "get_download_link",
+      file_id: fileId,
     });
 
-    // ── Step 2: fetch the raw file in the browser ─────────────────────────
-    const fetchRes = await fetch(link);
-    if (!fetchRes.ok) throw new Error(`Failed to fetch ${mediaItem.original_filename}`);
+    // ── Step 2: fetch the raw file from Google Drive in the browser ───────
+    const driveUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+    const fetchRes = await fetch(driveUrl, {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+    if (!fetchRes.ok) throw new Error(`Failed to fetch ${mediaItem.original_filename} from Google Drive (${fetchRes.status})`);
     const rawBlob = await fetchRes.blob();
 
     let finalBlob: Blob;
@@ -630,6 +640,19 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                 )}
               </div>
             )}
+
+          {/* Allow resetting stuck jobs (extracting/processing_media/uploading) */}
+          {isProcessing && !publishing && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={(e) => { e.stopPropagation(); handleResetStuck(); }}
+              title="Reset stuck job to pending"
+            >
+              <RefreshCw className="w-3 h-3" />
+            </Button>
+          )}
 
           {job.import_status === "completed" && job.cms_url && (
             <Button
