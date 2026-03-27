@@ -132,14 +132,40 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
   const handleExtract = async () => {
     setExtracting(true);
     try {
-      // The extract-property function now handles fetching its own media list
-      // and populating import_media if empty. We just need to pass job_id + folder_name.
-      await callEdgeFunction("extract-property", {
+      // Load PDF file IDs from import_media (stored as dropbox_path = Drive file ID)
+      const { data: mediaItems } = await supabase
+        .from("import_media")
+        .select("*")
+        .eq("job_id", job.id);
+
+      const allItems = mediaItems || [];
+      const pdfFiles = allItems
+        .filter((m: any) => m.media_type === "brochure")
+        .map((m: any) => ({
+          id: m.dropbox_path,           // Google Drive file ID
+          name: m.original_filename,
+          size: m.original_size_bytes || 0,
+        }));
+
+      const result = await callEdgeFunction("extract-property", {
         job_id: job.id,
         folder_name: job.folder_name,
+        folder_id: job.dropbox_folder_path, // Drive folder ID (stored here)
+        pdf_files: pdfFiles,
       });
-      toast.success("AI extraction complete");
-      onRefresh();
+
+      // Auto-publish: if mode is auto and extraction succeeded with no errors
+      if (
+        result?.publishing_mode === "auto" &&
+        result?.approval_status === "auto_published" &&
+        (!result?.validation?.errors || result.validation.errors.length === 0)
+      ) {
+        toast.success("Extraction complete — auto-publishing now…");
+        await handlePublish();
+      } else {
+        toast.success("Extraction complete — review and publish when ready");
+        onRefresh();
+      }
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -373,12 +399,26 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             compression_status: "done",
           }).eq("id", item.id);
 
-          // Create CMS media record
-          const mediaCategory = item.is_hero
-            ? "hero"
-            : item.media_type === "image"
-              ? "render"
-              : "video";
+          // Create CMS media record with smart category detection
+          const filename = item.original_filename.toLowerCase();
+          let mediaCategory: string;
+          if (item.media_type === "video") {
+            mediaCategory = "video";
+          } else if (item.is_hero || item.sort_order === 0) {
+            mediaCategory = "hero";
+          } else if (filename.includes("floorplan") || filename.includes("floor_plan") || filename.includes("floor-plan") || filename.includes("layout")) {
+            mediaCategory = "floorplan";
+          } else if (filename.includes("pool") || filename.includes("gym") || filename.includes("lobby") || filename.includes("amenity") || filename.includes("amenities") || filename.includes("facility") || filename.includes("common")) {
+            mediaCategory = "amenity";
+          } else if (filename.includes("view") || filename.includes("skyline") || filename.includes("aerial") || filename.includes("panorama")) {
+            mediaCategory = "view";
+          } else if (filename.includes("exterior") || filename.includes("facade") || filename.includes("building") || filename.includes("outside")) {
+            mediaCategory = "exterior";
+          } else if (filename.includes("interior") || filename.includes("living") || filename.includes("bedroom") || filename.includes("kitchen") || filename.includes("bathroom") || filename.includes("dining")) {
+            mediaCategory = "interior";
+          } else {
+            mediaCategory = "render";
+          }
 
           await supabase.from("media").insert({
             property_id,

@@ -110,8 +110,21 @@ export default function ImporterScan() {
 
         await Promise.all(batch.map(async (folder) => {
           try {
-            const sub = await callGdriveOAuth("list_files", { folder_id: folder.id });
-            const files: Array<{ id: string; name: string; mimeType: string; size?: string }> = sub.files || [];
+            // Recursively fetch ALL files flat — no subfolder structure required
+            const allFiles: Array<{ id: string; name: string; mimeType: string; size?: string }> = [];
+            const fetchFilesRecursive = async (fid: string) => {
+              const sub = await callGdriveOAuth("list_files", { folder_id: fid });
+              const items: Array<{ id: string; name: string; mimeType: string; size?: string }> = sub.files || [];
+              for (const item of items) {
+                if (item.mimeType === "application/vnd.google-apps.folder") {
+                  await fetchFilesRecursive(item.id); // recurse into subfolders
+                } else {
+                  allFiles.push(item);
+                }
+              }
+            };
+            await fetchFilesRecursive(folder.id);
+            const files = allFiles;
 
             const pdfFiles = files.filter((f) =>
               f.mimeType === "application/pdf" ||

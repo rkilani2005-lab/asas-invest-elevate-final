@@ -424,10 +424,43 @@ serve(async (req) => {
 
     const accessToken = await getValidAccessToken(supabase);
 
+    // Resolve folder_id: use passed value or fall back to dropbox_folder_path on the job
+    let resolvedFolderId = folder_id;
+    if (!resolvedFolderId) {
+      const { data: jobRow } = await supabase
+        .from("import_jobs")
+        .select("dropbox_folder_path")
+        .eq("id", job_id)
+        .maybeSingle();
+      resolvedFolderId = jobRow?.dropbox_folder_path || null;
+    }
+
+    // Resolve pdf_files: use passed value or load from import_media table
+    let resolvedPdfFiles = pdf_files || [];
+    if (!resolvedPdfFiles.length) {
+      const { data: mediaRows } = await supabase
+        .from("import_media")
+        .select("dropbox_path, original_filename, original_size_bytes")
+        .eq("job_id", job_id)
+        .eq("media_type", "brochure");
+      resolvedPdfFiles = (mediaRows || []).map((m: { dropbox_path: string; original_filename: string; original_size_bytes: number }) => ({
+        id: m.dropbox_path,
+        name: m.original_filename,
+        size: m.original_size_bytes || 0,
+      }));
+      if (resolvedPdfFiles.length) {
+        await supabase.from("import_logs").insert({
+          job_id, action: "pdf_resolve",
+          details: `Loaded ${resolvedPdfFiles.length} PDF(s) from import_media table`,
+          level: "info",
+        });
+      }
+    }
+
     // ── 1. Read metadata.json ─────────────────────────────────────────────────
     let metadata: Record<string, unknown> = {};
-    if (accessToken && folder_id) {
-      metadata = await readMetadataJson(folder_id, accessToken);
+    if (accessToken && resolvedFolderId) {
+      metadata = await readMetadataJson(resolvedFolderId, accessToken);
       if (Object.keys(metadata).length > 0) {
         await supabase.from("import_jobs").update({ metadata_json: metadata }).eq("id", job_id);
         await supabase.from("import_logs").insert({
@@ -453,7 +486,7 @@ serve(async (req) => {
       level: identityToken ? "info" : "warning",
     });
 
-    const sortedPdfs = [...(pdf_files || [])]
+    const sortedPdfs = [...(resolvedPdfFiles)]
       .sort((a: { size?: number }, b: { size?: number }) => (b.size || 0) - (a.size || 0))
       .slice(0, 2); // Try top 2 PDFs (largest first)
 
