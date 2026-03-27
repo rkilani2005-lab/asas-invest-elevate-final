@@ -69,12 +69,12 @@ serve(async (req) => {
       let hasMore = true;
 
       while (hasMore) {
-        const endpoint = cursor
+        const endpoint: string = cursor
           ? "https://api.dropboxapi.com/2/files/list_folder/continue"
           : "https://api.dropboxapi.com/2/files/list_folder";
-        const payload = cursor ? { cursor } : { path: rootPath, recursive: false };
+        const payload: Record<string, unknown> = cursor ? { cursor } : { path: rootPath, recursive: false };
 
-        const res = await fetch(endpoint, {
+        const res: Response = await fetch(endpoint, {
           method: "POST",
           headers: { Authorization: `Bearer ${dropboxToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(payload),
