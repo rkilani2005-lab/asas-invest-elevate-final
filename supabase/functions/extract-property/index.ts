@@ -348,39 +348,87 @@ serve(async (req) => {
             continue;
           }
 
-          // Skip files > 20MB to avoid gateway limits
-          if (buffer.byteLength > 20 * 1024 * 1024) {
+          const sizeMB = buffer.byteLength / 1024 / 1024;
+          const MAX_DIRECT_MB = 15; // Direct base64 to Gemini
+          const MAX_TEXT_MB = 100;  // Text extraction fallback
+
+          // Hard limit: skip files over 100MB (edge function memory)
+          if (sizeMB > MAX_TEXT_MB) {
             await supabase.from("import_logs").insert({
               job_id, action: "pdf_skip",
-              details: `"${filename}" is ${(buffer.byteLength / 1024 / 1024).toFixed(1)}MB — skipping (max 20MB)`,
+              details: `"${filename}" is ${sizeMB.toFixed(1)}MB — skipping (max ${MAX_TEXT_MB}MB)`,
               level: "warning",
             });
             continue;
           }
 
-          await supabase.from("import_logs").insert({
-            job_id, action: "gemini_extract",
-            details: `Sending "${filename}" (${(buffer.byteLength / 1024).toFixed(0)} KB) to Gemini AI for direct PDF extraction`,
-            level: "info",
-          });
+          let raw: string;
 
-          // Convert to base64 and send directly to Gemini
-          const uint8 = new Uint8Array(buffer);
-          let binary = "";
-          // Process in chunks to avoid call stack overflow
-          const chunkSize = 8192;
-          for (let i = 0; i < uint8.length; i += chunkSize) {
-            const chunk = uint8.subarray(i, Math.min(i + chunkSize, uint8.length));
-            binary += String.fromCharCode(...chunk);
+          if (sizeMB <= MAX_DIRECT_MB) {
+            // ── Small PDF: send directly as base64 to Gemini ──
+            await supabase.from("import_logs").insert({
+              job_id, action: "gemini_extract",
+              details: `Sending "${filename}" (${sizeMB.toFixed(1)}MB) directly to Gemini AI as PDF`,
+              level: "info",
+            });
+
+            const uint8 = new Uint8Array(buffer);
+            let binary = "";
+            const chunkSize = 8192;
+            for (let i = 0; i < uint8.length; i += chunkSize) {
+              const chunk = uint8.subarray(i, Math.min(i + chunkSize, uint8.length));
+              binary += String.fromCharCode(...chunk);
+            }
+            const pdfBase64 = btoa(binary);
+
+            raw = await callAIWithPDF(
+              pdfBase64,
+              EXTRACTION_SYSTEM,
+              EXTRACTION_PROMPT_PDF(folder_name),
+              "google/gemini-2.5-flash",
+            );
+          } else {
+            // ── Large PDF: extract text first, then send text to Gemini ──
+            await supabase.from("import_logs").insert({
+              job_id, action: "text_extract",
+              details: `"${filename}" is ${sizeMB.toFixed(1)}MB — extracting text first (too large for direct PDF upload)`,
+              level: "info",
+            });
+
+            let pdfText = "";
+            try {
+              const data = await pdfParse(new Uint8Array(buffer));
+              pdfText = data?.text || "";
+            } catch (parseErr) {
+              await supabase.from("import_logs").insert({
+                job_id, action: "text_extract_error",
+                details: `pdf-parse failed for "${filename}": ${String(parseErr).slice(0, 200)}`,
+                level: "warning",
+              });
+              continue;
+            }
+
+            if (!pdfText || pdfText.length < 50) {
+              await supabase.from("import_logs").insert({
+                job_id, action: "text_extract_empty",
+                details: `"${filename}" yielded only ${pdfText.length} chars of text — may be image-only PDF`,
+                level: "warning",
+              });
+              continue;
+            }
+
+            await supabase.from("import_logs").insert({
+              job_id, action: "gemini_extract",
+              details: `Sending ${pdfText.length.toLocaleString()} chars of extracted text to Gemini AI`,
+              level: "info",
+            });
+
+            raw = await callAIText(
+              EXTRACTION_SYSTEM,
+              EXTRACTION_PROMPT_TEXT(folder_name, pdfText),
+              "google/gemini-2.5-flash",
+            );
           }
-          const pdfBase64 = btoa(binary);
-
-          const raw = await callAIWithPDF(
-            pdfBase64,
-            EXTRACTION_SYSTEM,
-            EXTRACTION_PROMPT(folder_name),
-            "google/gemini-2.5-flash",
-          );
 
           extracted = parseJSON(raw);
 
