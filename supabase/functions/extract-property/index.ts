@@ -438,7 +438,7 @@ serve(async (req) => {
 
     await supabase.from("import_jobs").update({ import_status: "extracting" }).eq("id", job_id);
 
-    const accessToken = await getValidAccessToken(supabase);
+    const accessToken = await getValidAccessToken(supabase as any);
 
     // Resolve folder_id: use passed value or fall back to dropbox_folder_path on the job
     let resolvedFolderId = folder_id;
