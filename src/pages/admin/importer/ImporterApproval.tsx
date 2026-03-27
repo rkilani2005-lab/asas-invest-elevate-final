@@ -303,7 +303,8 @@ export default function ImporterApproval() {
       const { data } = await supabase
         .from("import_jobs")
         .select("*")
-        .eq("approval_status", statusMap[filter])
+        // @ts-ignore - approval_status is a valid column added via migration
+        .eq("approval_status", statusMap[filter] as string)
         .order("created_at", { ascending: false });
       return data || [];
     },
