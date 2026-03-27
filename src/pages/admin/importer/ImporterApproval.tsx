@@ -300,9 +300,10 @@ export default function ImporterApproval() {
         approved: "approved",
         rejected: "rejected",
       };
-      const { data } = await supabase
+      const query = supabase
         .from("import_jobs")
-        .select("*")
+        .select("*") as any;
+      const { data } = await query
         .eq("approval_status", statusMap[filter])
         .order("created_at", { ascending: false });
       return data || [];
@@ -314,9 +315,9 @@ export default function ImporterApproval() {
     queryKey: ["approval-counts"],
     queryFn: async () => {
       const [pending, approved, rejected] = await Promise.all([
-        supabase.from("import_jobs").select("*", { count: "exact", head: true }).eq("approval_status", "pending_review"),
-        supabase.from("import_jobs").select("*", { count: "exact", head: true }).eq("approval_status", "approved"),
-        supabase.from("import_jobs").select("*", { count: "exact", head: true }).eq("approval_status", "rejected"),
+        (supabase.from("import_jobs").select("*", { count: "exact", head: true }) as any).eq("approval_status", "pending_review"),
+        (supabase.from("import_jobs").select("*", { count: "exact", head: true }) as any).eq("approval_status", "approved"),
+        (supabase.from("import_jobs").select("*", { count: "exact", head: true }) as any).eq("approval_status", "rejected"),
       ]);
       return { pending: pending.count ?? 0, approved: approved.count ?? 0, rejected: rejected.count ?? 0 };
     },
