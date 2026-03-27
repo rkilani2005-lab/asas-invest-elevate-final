@@ -19,7 +19,7 @@ async function getValidAccessToken(supabase: ReturnType<typeof createClient>): P
     .in("key", ["gdrive_access_token", "gdrive_refresh_token", "gdrive_token_expiry"]);
 
   const map: Record<string, string> = {};
-  (rows || []).forEach((r) => { if (r.value) map[r.key] = r.value; });
+  ((rows || []) as any[]).forEach((r: any) => { if (r.value) map[r.key] = r.value; });
 
   if (!map.gdrive_access_token) return null;
 
