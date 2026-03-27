@@ -91,7 +91,7 @@ serve(async (req) => {
           return new Response(JSON.stringify({ error: `Dropbox error: ${err}` }), { status: 400, headers: corsHeaders });
         }
 
-        const data = await res.json();
+        const data: any = await res.json();
         allFolders = [...allFolders, ...data.entries.filter((e: any) => e[".tag"] === "folder")];
         hasMore = data.has_more;
         cursor = data.cursor;

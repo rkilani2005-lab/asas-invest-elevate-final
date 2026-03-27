@@ -158,7 +158,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const accessToken = await getValidAccessToken(supabase);
+    const accessToken = await getValidAccessToken(supabase as any);
     if (!accessToken) {
       return new Response(JSON.stringify({ error: "Could not obtain valid access token", action: "skipped" }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },

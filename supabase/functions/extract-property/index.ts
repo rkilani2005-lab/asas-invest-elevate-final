@@ -492,7 +492,7 @@ serve(async (req) => {
     let pdfSource = "none";
 
     // Get Cloud Run identity token once — reused for all PDF calls
-    const identityToken = await getCloudRunIdentityToken(supabase, DOCLING_SERVE_URL);
+    const identityToken = await getCloudRunIdentityToken(supabase as any, DOCLING_SERVE_URL);
 
     await supabase.from("import_logs").insert({
       job_id, action: "docling_auth",

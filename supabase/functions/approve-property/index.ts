@@ -184,7 +184,7 @@ serve(async (req): Promise<Response> => {
           <p><strong>To fix:</strong> Update the <code>metadata.json</code> file in the Google Drive folder for this property, then re-import from the ASAS admin dashboard.</p>
           <p style="font-size:13px;color:#7a7a7a">Navigate to: Admin → Auto Import → Queue → find this property → Re-extract</p>`
         );
-        await sendGmailNotification(supabase, teamEmail, `[ASAS] Property Needs Changes: ${propertyName}`, html, `Property "${propertyName}" was rejected by ${reviewed_by || "admin"}. Reason: ${review_notes || "See dashboard for details."}`).catch(() => {});
+        await sendGmailNotification(supabase as any, teamEmail, `[ASAS] Property Needs Changes: ${propertyName}`, html, `Property "${propertyName}" was rejected by ${reviewed_by || "admin"}. Reason: ${review_notes || "See dashboard for details."}`).catch(() => {});
       }
 
       return new Response(JSON.stringify({ success: true, action: "rejected", job_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });

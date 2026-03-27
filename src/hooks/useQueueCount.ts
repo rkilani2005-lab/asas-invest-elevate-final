@@ -50,11 +50,11 @@ export function usePendingApprovalCount() {
         .eq("import_status", "reviewing")
         .then(({ count: c }: any) => setCount(c ?? 0));
 
-    fetch();
+    fetchCount();
 
     const channel = supabase
       .channel("approval-count")
-      .on("postgres_changes", { event: "*", schema: "public", table: "import_jobs" }, fetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "import_jobs" }, fetchCount)
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
