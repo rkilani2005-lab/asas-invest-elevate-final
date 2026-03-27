@@ -135,7 +135,7 @@ serve(async (req): Promise<Response> => {
           <hr class="divider"/>
           <p style="font-size:13px;color:#7a7a7a">The property will appear live on the website after media processing completes.</p>`
         );
-        await sendGmailNotification(supabase, teamEmail, `[ASAS] Property Approved & Publishing: ${propertyName}`, html, `Property "${propertyName}" has been approved by ${reviewed_by || "admin"} and is being published.`).catch(() => {});
+        await sendGmailNotification(supabase as any, teamEmail, `[ASAS] Property Approved & Publishing: ${propertyName}`, html, `Property "${propertyName}" has been approved by ${reviewed_by || "admin"} and is being published.`).catch(() => {});
       }
 
       return new Response(JSON.stringify({ success: true, action: "approved", job_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
