@@ -146,7 +146,7 @@ async function getValidAccessToken(supabase: ReturnType<typeof createClient>): P
       if (r.ok) {
         const t = await r.json();
         const newExpiry = new Date(Date.now() + (t.expires_in || 3600) * 1000).toISOString();
-        await supabase.from("importer_settings").upsert(
+        await (supabase.from("importer_settings") as any).upsert(
           [
             { key: "gdrive_access_token", value: t.access_token },
             { key: "gdrive_token_expiry", value: newExpiry },
