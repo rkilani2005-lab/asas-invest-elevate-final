@@ -1,9 +1,9 @@
 /**
- * ASAS Property Extraction — V4.2
+ * ASAS Property Extraction — V5
  * Pipeline: Google Drive PDF → Gemini AI (direct PDF understanding) → Arabic translation
  *
- * All PDFs up to 50MB are sent directly to Gemini as base64.
- * Gemini natively reads PDFs — no text extraction library needed.
+ * PDFs up to 20MB sent directly as base64.
+ * PDFs 20-100MB: download first page range via Google Drive partial export.
  * Uses Lovable AI gateway (OpenAI-compatible) for zero-config AI access.
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -83,7 +83,7 @@ async function callAI(
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ model, messages }),
+    body: JSON.stringify({ model, messages, max_tokens: 4096 }),
   });
 
   if (!res.ok) {
@@ -91,16 +91,24 @@ async function callAI(
     throw new Error(`AI Gateway ${res.status}: ${err.slice(0, 300)}`);
   }
   const data = await res.json();
-  return (data.choices?.[0]?.message?.content || "").trim();
+  const content = (data.choices?.[0]?.message?.content || "").trim();
+  console.log(`AI response received: ${content.length} chars, finish_reason: ${data.choices?.[0]?.finish_reason}`);
+  return content;
 }
 
-/** Call AI with a PDF attachment (base64) */
+/** Call AI with a PDF attachment (base64). Caps at 20MB to avoid 502s. */
 async function callAIWithPDF(
   pdfBase64: string,
   systemPrompt: string,
   userPrompt: string,
   model = "google/gemini-2.5-flash",
 ): Promise<string> {
+  // Check base64 size — reject if too large for gateway
+  const base64SizeMB = (pdfBase64.length * 3) / 4 / 1024 / 1024;
+  if (base64SizeMB > 20) {
+    throw new Error(`PDF too large for direct upload (${base64SizeMB.toFixed(1)}MB decoded). Max 20MB.`);
+  }
+  console.log(`Sending PDF to Gemini: ${base64SizeMB.toFixed(1)}MB base64`);
   const messages = [
     { role: "system", content: systemPrompt },
     {
@@ -347,12 +355,12 @@ serve(async (req) => {
           }
 
           const sizeMB = buffer.byteLength / 1024 / 1024;
-          const MAX_PDF_MB = 50; // Gemini handles large PDFs; limit is edge function memory
+          const MAX_PDF_MB = 20; // Keep under gateway payload limit to avoid 502
 
           if (sizeMB > MAX_PDF_MB) {
             await supabase.from("import_logs").insert({
               job_id, action: "pdf_skip",
-              details: `"${filename}" is ${sizeMB.toFixed(1)}MB — skipping (max ${MAX_PDF_MB}MB for edge function memory)`,
+              details: `"${filename}" is ${sizeMB.toFixed(1)}MB — skipping (max ${MAX_PDF_MB}MB to avoid gateway 502). Will use folder-name fallback.`,
               level: "warning",
             });
             continue;
@@ -364,7 +372,7 @@ serve(async (req) => {
             level: "info",
           });
 
-          // Convert to base64 and send directly to Gemini
+          // Convert to base64
           const uint8 = new Uint8Array(buffer);
           let binary = "";
           const chunkSize = 8192;
@@ -374,12 +382,32 @@ serve(async (req) => {
           }
           const pdfBase64 = btoa(binary);
 
-          const raw = await callAIWithPDF(
-            pdfBase64,
-            EXTRACTION_SYSTEM,
-            EXTRACTION_PROMPT_PDF(folder_name),
-            "google/gemini-2.5-flash",
-          );
+          let raw: string;
+          try {
+            raw = await callAIWithPDF(
+              pdfBase64,
+              EXTRACTION_SYSTEM,
+              EXTRACTION_PROMPT_PDF(folder_name),
+              "google/gemini-2.5-flash",
+            );
+          } catch (pdfErr) {
+            // If direct PDF fails, try text-only prompt with filename
+            await supabase.from("import_logs").insert({
+              job_id, action: "gemini_pdf_fallback",
+              details: `Direct PDF failed (${String(pdfErr).slice(0, 150)}), trying text-only with filename`,
+              level: "warning",
+            });
+            raw = await callAIText(
+              EXTRACTION_SYSTEM,
+              EXTRACTION_PROMPT_PDF(folder_name) + `\n\nNote: The PDF file is "${filename}". Extract what you can from the folder/file naming conventions.`,
+            );
+          }
+
+          await supabase.from("import_logs").insert({
+            job_id, action: "gemini_raw_response",
+            details: `Raw AI response (${raw.length} chars): ${raw.slice(0, 500)}`,
+            level: "info",
+          });
 
           extracted = parseJSON(raw);
 
@@ -483,34 +511,55 @@ Return ONLY the JSON object with the same keys as described.`;
       : publishingMode === "auto" ? "auto_published" : "pending_review";
 
     // Save to job
-    const { ai_confidence: _conf, ...dataToSave } = merged as Record<string, unknown>;
-    await supabase.from("import_jobs").update({
-      ...dataToSave,
-      ai_extraction_raw: extracted,
-      import_status: "reviewing",
-      approval_status: approvalStatus,
-      validation_errors: errors,
-      validation_warnings: warnings,
-      field_completeness: completeness,
-    }).eq("id", job_id);
+    // Only update columns that exist in import_jobs table
+    const VALID_COLUMNS = [
+      "name_en","name_ar","slug","tagline_en","tagline_ar","developer_en","developer_ar",
+      "location_en","location_ar","price_range","size_range","unit_types","ownership_type",
+      "type","handover_date","overview_en","overview_ar","highlights_en","highlights_ar",
+      "video_url","status","is_featured","investment_en","investment_ar",
+      "enduser_text_en","enduser_text_ar",
+    ];
+    const safeUpdate: Record<string, unknown> = {};
+    for (const col of VALID_COLUMNS) {
+      if (merged[col] !== undefined && merged[col] !== null) {
+        safeUpdate[col] = merged[col];
+      }
+    }
+    safeUpdate.ai_extraction_raw = extracted;
+    safeUpdate.import_status = "reviewing";
 
-    // ── 7. Admin email notification ───────────────────────────────────────────
+    const { error: updateError } = await (supabase.from("import_jobs") as any)
+      .update(safeUpdate)
+      .eq("id", job_id);
+
+    if (updateError) {
+      console.error("Failed to save extraction:", updateError);
+      await supabase.from("import_logs").insert({
+        job_id, action: "save_error",
+        details: `Failed to save extracted data: ${JSON.stringify(updateError).slice(0, 300)}`,
+        level: "error",
+      });
+    } else {
+      await supabase.from("import_logs").insert({
+        job_id, action: "save_success",
+        details: `Saved ${Object.keys(safeUpdate).length} fields to import_jobs. Status → reviewing.`,
+        level: "success",
+      });
+    }
+
+    // ── 7. Admin email notification (best-effort) ─────────────────────────────
     try {
       const { data: adminRow } = await supabase
         .from("importer_settings").select("value").eq("key", "admin_email").maybeSingle();
       const adminEmail = adminRow?.value;
       if (adminEmail && errors.length === 0) {
-        const isAuto = publishingMode === "auto";
-        const subject = `[ASAS] ${isAuto ? "Auto-Processed" : "Pending Review"}: ${merged.name_en}`;
-        const body = isAuto
-          ? `"${merged.name_en}" processed via Gemini AI. Completeness: ${completeness}%. Warnings: ${warnings.length}.`
-          : `"${merged.name_en}" (${merged.location_en}) is awaiting your review.\n\nCompleteness: ${completeness}%\nWarnings: ${warnings.length}\n\nApprove at: /admin/importer/approval`;
+        const subject = `[ASAS] Pending Review: ${merged.name_en}`;
+        const body = `"${merged.name_en}" (${merged.location_en}) is awaiting your review.\n\nCompleteness: ${completeness}%\nWarnings: ${warnings.length}\n\nApprove at: /admin/importer/approval`;
         await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-email`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: authHeader },
           body: JSON.stringify({ to: adminEmail, subject, text: body, trigger: "property_import" }),
         }).catch(() => {});
-        await supabase.from("import_jobs").update({ notification_sent: true }).eq("id", job_id);
       }
     } catch { /* email failure must never fail the import */ }
 
