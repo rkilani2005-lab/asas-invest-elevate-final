@@ -214,8 +214,8 @@ async function getCloudRunIdentityToken(
       .select("key, value")
       .eq("key", "gdrive_refresh_token");
 
-    const refreshToken = (rows || []).find(
-      (r: { key: string; value: string | null }) => r.key === "gdrive_refresh_token"
+    const refreshToken = ((rows || []) as any[]).find(
+      (r: any) => r.key === "gdrive_refresh_token"
     )?.value;
 
     if (!refreshToken) {
