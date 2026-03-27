@@ -519,10 +519,17 @@ Return ONLY the JSON object with the same keys as described.`;
       "video_url","status","is_featured","investment_en","investment_ar",
       "enduser_text_en","enduser_text_ar",
     ];
+    // Date columns that must be null instead of empty string
+    const DATE_COLUMNS = new Set(["handover_date"]);
     const safeUpdate: Record<string, unknown> = {};
     for (const col of VALID_COLUMNS) {
       if (merged[col] !== undefined && merged[col] !== null) {
-        safeUpdate[col] = merged[col];
+        // Convert empty strings to null for date columns
+        if (DATE_COLUMNS.has(col) && merged[col] === "") {
+          safeUpdate[col] = null;
+        } else {
+          safeUpdate[col] = merged[col];
+        }
       }
     }
     safeUpdate.ai_extraction_raw = extracted;
