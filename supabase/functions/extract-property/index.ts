@@ -20,12 +20,12 @@ const corsHeaders = {
 // ── Prompts ───────────────────────────────────────────────────────────────────
 
 const EXTRACTION_SYSTEM = `You are a professional real estate data extraction specialist for the ASAS property platform in Dubai, UAE.
-You are given a property brochure PDF. Analyze all pages thoroughly.
+You are given a property brochure (either as a PDF or as extracted text). Analyze all content thoroughly.
 Return ONLY valid JSON — no markdown fences, no explanations, no extra keys.
 Never fabricate data. Use "" for missing text fields, "TBA" for unknown price_range or size_range.
 For handover_date: convert quarter notation → last day of quarter (Q1=03-31, Q2=06-30, Q3=09-30, Q4=12-31).`;
 
-const EXTRACTION_PROMPT = (folderName: string) => `
+const EXTRACTION_PROMPT_PDF = (folderName: string) => `
 Extract property listing data from this brochure PDF for: "${folderName}"
 
 Return ONLY this JSON object:
