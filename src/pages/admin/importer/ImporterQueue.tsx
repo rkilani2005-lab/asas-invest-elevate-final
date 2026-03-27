@@ -420,7 +420,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             mediaCategory = "render";
           }
 
-          await supabase.from("media").insert({
+          await (supabase.from("media") as any).insert({
             property_id,
             type: mediaCategory,
             url,

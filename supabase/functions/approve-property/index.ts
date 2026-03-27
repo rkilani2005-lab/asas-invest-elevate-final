@@ -46,7 +46,7 @@ async function sendGmailNotification(
     .order("purpose")
     .limit(1);
 
-  const gmailAccount = gmailRows?.[0];
+  const gmailAccount = gmailRows?.[0] as any;
   if (!gmailAccount?.access_token) return;
 
   const GCI = Deno.env.get("GMAIL_CLIENT_ID") || Deno.env.get("GOOGLE_CLIENT_ID");
@@ -80,7 +80,7 @@ async function sendGmailNotification(
   });
 }
 
-serve(async (req) => {
+serve(async (req): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
@@ -122,8 +122,8 @@ serve(async (req) => {
       });
 
       // Notify content team
-      const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle();
-      const teamEmail = emailRow?.value || (await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()).data?.value;
+      const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle() as any;
+      const teamEmail = emailRow?.value || ((await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()) as any).data?.value;
       if (teamEmail) {
         const html = buildEmailHtml(
           `Property Approved: ${propertyName}`,
@@ -135,7 +135,7 @@ serve(async (req) => {
           <hr class="divider"/>
           <p style="font-size:13px;color:#7a7a7a">The property will appear live on the website after media processing completes.</p>`
         );
-        await sendGmailNotification(supabase, teamEmail, `[ASAS] Property Approved & Publishing: ${propertyName}`, html, `Property "${propertyName}" has been approved by ${reviewed_by || "admin"} and is being published.`).catch(() => {});
+        await sendGmailNotification(supabase as any, teamEmail, `[ASAS] Property Approved & Publishing: ${propertyName}`, html, `Property "${propertyName}" has been approved by ${reviewed_by || "admin"} and is being published.`).catch(() => {});
       }
 
       return new Response(JSON.stringify({ success: true, action: "approved", job_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -161,8 +161,8 @@ serve(async (req) => {
       });
 
       // Notify content team with specific fix instructions
-      const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle();
-      const teamEmail = emailRow?.value || (await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()).data?.value;
+      const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle() as any;
+      const teamEmail = emailRow?.value || ((await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()) as any).data?.value;
 
       if (teamEmail) {
         const errorsHtml = errors.length > 0
@@ -184,7 +184,7 @@ serve(async (req) => {
           <p><strong>To fix:</strong> Update the <code>metadata.json</code> file in the Google Drive folder for this property, then re-import from the ASAS admin dashboard.</p>
           <p style="font-size:13px;color:#7a7a7a">Navigate to: Admin → Auto Import → Queue → find this property → Re-extract</p>`
         );
-        await sendGmailNotification(supabase, teamEmail, `[ASAS] Property Needs Changes: ${propertyName}`, html, `Property "${propertyName}" was rejected by ${reviewed_by || "admin"}. Reason: ${review_notes || "See dashboard for details."}`).catch(() => {});
+        await sendGmailNotification(supabase as any, teamEmail, `[ASAS] Property Needs Changes: ${propertyName}`, html, `Property "${propertyName}" was rejected by ${reviewed_by || "admin"}. Reason: ${review_notes || "See dashboard for details."}`).catch(() => {});
       }
 
       return new Response(JSON.stringify({ success: true, action: "rejected", job_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });

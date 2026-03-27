@@ -146,7 +146,7 @@ async function getValidAccessToken(supabase: ReturnType<typeof createClient>): P
       if (r.ok) {
         const t = await r.json();
         const newExpiry = new Date(Date.now() + (t.expires_in || 3600) * 1000).toISOString();
-        await supabase.from("importer_settings").upsert(
+        await (supabase.from("importer_settings") as any).upsert(
           [
             { key: "gdrive_access_token", value: t.access_token },
             { key: "gdrive_token_expiry", value: newExpiry },
@@ -214,8 +214,8 @@ async function getCloudRunIdentityToken(
       .select("key, value")
       .eq("key", "gdrive_refresh_token");
 
-    const refreshToken = (rows || []).find(
-      (r: { key: string; value: string | null }) => r.key === "gdrive_refresh_token"
+    const refreshToken = ((rows || []) as any[]).find(
+      (r: any) => r.key === "gdrive_refresh_token"
     )?.value;
 
     if (!refreshToken) {
@@ -438,7 +438,7 @@ serve(async (req) => {
 
     await supabase.from("import_jobs").update({ import_status: "extracting" }).eq("id", job_id);
 
-    const accessToken = await getValidAccessToken(supabase);
+    const accessToken = await getValidAccessToken(supabase as any);
 
     // Resolve folder_id: use passed value or fall back to dropbox_folder_path on the job
     let resolvedFolderId = folder_id;
@@ -492,7 +492,7 @@ serve(async (req) => {
     let pdfSource = "none";
 
     // Get Cloud Run identity token once — reused for all PDF calls
-    const identityToken = await getCloudRunIdentityToken(supabase, DOCLING_SERVE_URL);
+    const identityToken = await getCloudRunIdentityToken(supabase as any, DOCLING_SERVE_URL);
 
     await supabase.from("import_logs").insert({
       job_id, action: "docling_auth",

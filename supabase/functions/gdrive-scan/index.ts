@@ -19,7 +19,7 @@ async function getValidAccessToken(supabase: ReturnType<typeof createClient>): P
     .in("key", ["gdrive_access_token", "gdrive_refresh_token", "gdrive_token_expiry"]);
 
   const map: Record<string, string> = {};
-  (rows || []).forEach((r) => { if (r.value) map[r.key] = r.value; });
+  ((rows || []) as any[]).forEach((r: any) => { if (r.value) map[r.key] = r.value; });
 
   if (!map.gdrive_access_token) return null;
 
@@ -44,7 +44,7 @@ async function getValidAccessToken(supabase: ReturnType<typeof createClient>): P
     if (refreshResp.ok) {
       const tokens = await refreshResp.json();
       const newExpiry = new Date(Date.now() + (tokens.expires_in || 3600) * 1000).toISOString();
-      await supabase.from("importer_settings").upsert([
+      await (supabase.from("importer_settings") as any).upsert([
         { key: "gdrive_access_token", value: tokens.access_token },
         { key: "gdrive_token_expiry", value: newExpiry },
       ], { onConflict: "key" });
@@ -158,7 +158,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const accessToken = await getValidAccessToken(supabase);
+    const accessToken = await getValidAccessToken(supabase as any);
     if (!accessToken) {
       return new Response(JSON.stringify({ error: "Could not obtain valid access token", action: "skipped" }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
