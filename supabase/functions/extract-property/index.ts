@@ -186,6 +186,14 @@ async function downloadDrivePDF(fileId: string, token: string): Promise<ArrayBuf
 // Uses the stored OAuth refresh token to obtain an identity token scoped
 // to the Docling Cloud Run service URL. No service account key needed.
 
+// ── Get Google Cloud Run identity token via Service Account impersonation ─────
+// Flow: user refresh token → user access token → impersonate compute SA
+//       → generate identity token scoped to Docling URL → call Docling
+//
+// Requires these IAM bindings (set up in Cloud Shell):
+//   1. Compute SA has roles/run.invoker on the Docling Cloud Run service
+//   2. Connected Google user has roles/iam.serviceAccountTokenCreator on compute SA
+
 async function getCloudRunIdentityToken(
   supabase: ReturnType<typeof createClient>,
   audience: string
@@ -193,21 +201,28 @@ async function getCloudRunIdentityToken(
   try {
     const GCI = Deno.env.get("GOOGLE_CLIENT_ID");
     const GCS = Deno.env.get("GOOGLE_CLIENT_SECRET");
-    if (!GCI || !GCS) return null;
+    const SA_EMAIL = Deno.env.get("DOCLING_SA_EMAIL"); // e.g. 123456-compute@developer.gserviceaccount.com
 
-    // Get the stored refresh token (same one used for Drive)
+    if (!GCI || !GCS || !SA_EMAIL) {
+      console.warn("getCloudRunIdentityToken: missing GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, or DOCLING_SA_EMAIL");
+      return null;
+    }
+
+    // Step 1: Exchange stored refresh token → user access token
     const { data: rows } = await supabase
       .from("importer_settings")
       .select("key, value")
-      .in("key", ["gdrive_refresh_token"]);
+      .eq("key", "gdrive_refresh_token");
 
     const refreshToken = (rows || []).find(
       (r: { key: string; value: string | null }) => r.key === "gdrive_refresh_token"
     )?.value;
 
-    if (!refreshToken) return null;
+    if (!refreshToken) {
+      console.warn("getCloudRunIdentityToken: gdrive_refresh_token not found in importer_settings");
+      return null;
+    }
 
-    // Exchange refresh token for a fresh access token
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -219,43 +234,44 @@ async function getCloudRunIdentityToken(
       }),
     });
 
-    if (!tokenRes.ok) return null;
-    const { access_token } = await tokenRes.json();
-    if (!access_token) return null;
+    if (!tokenRes.ok) {
+      const err = await tokenRes.text();
+      console.warn("getCloudRunIdentityToken: token refresh failed:", err.slice(0, 200));
+      return null;
+    }
 
-    // Use the access token to get an identity token scoped to the Cloud Run URL
-    // Google's generateIdToken endpoint mints a token for the given audience
+    const { access_token: userAccessToken } = await tokenRes.json();
+    if (!userAccessToken) return null;
+
+    // Step 2: Impersonate the compute SA to mint a Cloud Run identity token
+    // The user account must have roles/iam.serviceAccountTokenCreator on SA_EMAIL
+    // The SA_EMAIL must have roles/run.invoker on the Docling Cloud Run service
     const idTokenRes = await fetch(
-      `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/-:generateIdToken`,
+      `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${SA_EMAIL}:generateIdToken`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${access_token}`,
+          Authorization: `Bearer ${userAccessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ audience, includeEmail: true }),
+        body: JSON.stringify({
+          audience,       // Cloud Run URL — must match exactly
+          includeEmail: true,
+        }),
       }
     );
 
-    if (idTokenRes.ok) {
-      const { token } = await idTokenRes.json();
-      return token || null;
+    if (!idTokenRes.ok) {
+      const err = await idTokenRes.text();
+      console.warn("getCloudRunIdentityToken: generateIdToken failed:", err.slice(0, 300));
+      return null;
     }
 
-    // Fallback: try fetching identity token via metadata server approach
-    // This works when running on Google infrastructure
-    const metaRes = await fetch(
-      `https://oauth2.googleapis.com/v1/userinfo`,
-      { headers: { Authorization: `Bearer ${access_token}` } }
-    );
+    const { token } = await idTokenRes.json();
+    return token || null;
 
-    // If we can't mint an identity token, return the access token as fallback
-    // Cloud Run with --no-allow-unauthenticated may still accept it for same-project calls
-    if (metaRes.ok) return access_token;
-
-    return null;
   } catch (e) {
-    console.error("Identity token error:", e);
+    console.error("getCloudRunIdentityToken error:", e);
     return null;
   }
 }
@@ -481,8 +497,8 @@ serve(async (req) => {
     await supabase.from("import_logs").insert({
       job_id, action: "docling_auth",
       details: identityToken
-        ? "Cloud Run identity token obtained successfully"
-        : "No identity token — calling Docling without auth (only works if service is public)",
+        ? `Cloud Run identity token obtained via SA impersonation (${Deno.env.get("DOCLING_SA_EMAIL") || "SA"})`
+        : "Identity token unavailable — check DOCLING_SA_EMAIL secret and IAM bindings in Cloud Shell",
       level: identityToken ? "info" : "warning",
     });
 
