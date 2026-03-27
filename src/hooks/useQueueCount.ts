@@ -42,13 +42,13 @@ export function usePendingApprovalCount() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const fetch = () =>
-      supabase
+    const fetchCount = () =>
+      (supabase
         .from("import_jobs")
-        .select("*", { count: "exact", head: true })
+        .select("*", { count: "exact", head: true }) as any)
         .eq("approval_status", "pending_review")
         .eq("import_status", "reviewing")
-        .then(({ count: c }) => setCount(c ?? 0));
+        .then(({ count: c }: any) => setCount(c ?? 0));
 
     fetch();
 
