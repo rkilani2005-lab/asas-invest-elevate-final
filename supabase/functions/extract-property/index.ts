@@ -1,15 +1,13 @@
 /**
- * ASAS Property Extraction — V4.1
- * Pipeline: Google Drive PDF → Gemini AI (direct PDF or text extraction fallback) → Arabic translation
+ * ASAS Property Extraction — V4.2
+ * Pipeline: Google Drive PDF → Gemini AI (direct PDF understanding) → Arabic translation
  *
- * - PDFs ≤ 15MB: sent directly to Gemini as base64 (full visual understanding)
- * - PDFs > 15MB: text extracted via pdf-parse first, then sent as text to Gemini
+ * All PDFs up to 50MB are sent directly to Gemini as base64.
+ * Gemini natively reads PDFs — no text extraction library needed.
  * Uses Lovable AI gateway (OpenAI-compatible) for zero-config AI access.
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-// @deno-types="https://esm.sh/pdf-parse@1.1.1"
-import pdfParse from "https://esm.sh/pdf-parse@1.1.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -349,86 +347,39 @@ serve(async (req) => {
           }
 
           const sizeMB = buffer.byteLength / 1024 / 1024;
-          const MAX_DIRECT_MB = 15; // Direct base64 to Gemini
-          const MAX_TEXT_MB = 100;  // Text extraction fallback
+          const MAX_PDF_MB = 50; // Gemini handles large PDFs; limit is edge function memory
 
-          // Hard limit: skip files over 100MB (edge function memory)
-          if (sizeMB > MAX_TEXT_MB) {
+          if (sizeMB > MAX_PDF_MB) {
             await supabase.from("import_logs").insert({
               job_id, action: "pdf_skip",
-              details: `"${filename}" is ${sizeMB.toFixed(1)}MB — skipping (max ${MAX_TEXT_MB}MB)`,
+              details: `"${filename}" is ${sizeMB.toFixed(1)}MB — skipping (max ${MAX_PDF_MB}MB for edge function memory)`,
               level: "warning",
             });
             continue;
           }
 
-          let raw: string;
+          await supabase.from("import_logs").insert({
+            job_id, action: "gemini_extract",
+            details: `Sending "${filename}" (${sizeMB.toFixed(1)}MB) to Gemini AI for direct PDF extraction`,
+            level: "info",
+          });
 
-          if (sizeMB <= MAX_DIRECT_MB) {
-            // ── Small PDF: send directly as base64 to Gemini ──
-            await supabase.from("import_logs").insert({
-              job_id, action: "gemini_extract",
-              details: `Sending "${filename}" (${sizeMB.toFixed(1)}MB) directly to Gemini AI as PDF`,
-              level: "info",
-            });
-
-            const uint8 = new Uint8Array(buffer);
-            let binary = "";
-            const chunkSize = 8192;
-            for (let i = 0; i < uint8.length; i += chunkSize) {
-              const chunk = uint8.subarray(i, Math.min(i + chunkSize, uint8.length));
-              binary += String.fromCharCode(...chunk);
-            }
-            const pdfBase64 = btoa(binary);
-
-            raw = await callAIWithPDF(
-              pdfBase64,
-              EXTRACTION_SYSTEM,
-              EXTRACTION_PROMPT_PDF(folder_name),
-              "google/gemini-2.5-flash",
-            );
-          } else {
-            // ── Large PDF: extract text first, then send text to Gemini ──
-            await supabase.from("import_logs").insert({
-              job_id, action: "text_extract",
-              details: `"${filename}" is ${sizeMB.toFixed(1)}MB — extracting text first (too large for direct PDF upload)`,
-              level: "info",
-            });
-
-            let pdfText = "";
-            try {
-              const data = await pdfParse(new Uint8Array(buffer));
-              pdfText = data?.text || "";
-            } catch (parseErr) {
-              await supabase.from("import_logs").insert({
-                job_id, action: "text_extract_error",
-                details: `pdf-parse failed for "${filename}": ${String(parseErr).slice(0, 200)}`,
-                level: "warning",
-              });
-              continue;
-            }
-
-            if (!pdfText || pdfText.length < 50) {
-              await supabase.from("import_logs").insert({
-                job_id, action: "text_extract_empty",
-                details: `"${filename}" yielded only ${pdfText.length} chars of text — may be image-only PDF`,
-                level: "warning",
-              });
-              continue;
-            }
-
-            await supabase.from("import_logs").insert({
-              job_id, action: "gemini_extract",
-              details: `Sending ${pdfText.length.toLocaleString()} chars of extracted text to Gemini AI`,
-              level: "info",
-            });
-
-            raw = await callAIText(
-              EXTRACTION_SYSTEM,
-              EXTRACTION_PROMPT_TEXT(folder_name, pdfText),
-              "google/gemini-2.5-flash",
-            );
+          // Convert to base64 and send directly to Gemini
+          const uint8 = new Uint8Array(buffer);
+          let binary = "";
+          const chunkSize = 8192;
+          for (let i = 0; i < uint8.length; i += chunkSize) {
+            const chunk = uint8.subarray(i, Math.min(i + chunkSize, uint8.length));
+            binary += String.fromCharCode(...chunk);
           }
+          const pdfBase64 = btoa(binary);
+
+          const raw = await callAIWithPDF(
+            pdfBase64,
+            EXTRACTION_SYSTEM,
+            EXTRACTION_PROMPT_PDF(folder_name),
+            "google/gemini-2.5-flash",
+          );
 
           extracted = parseJSON(raw);
 
