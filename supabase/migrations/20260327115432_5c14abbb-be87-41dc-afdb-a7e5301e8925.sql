@@ -1,0 +1,1 @@
+UPDATE public.import_jobs SET import_status = 'pending' WHERE import_status = 'extracting';
