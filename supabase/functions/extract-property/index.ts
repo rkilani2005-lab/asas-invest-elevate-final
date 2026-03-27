@@ -1,12 +1,15 @@
 /**
- * ASAS Property Extraction — V4
- * Pipeline: Google Drive PDF → Gemini AI (direct PDF understanding) → Arabic translation
+ * ASAS Property Extraction — V4.1
+ * Pipeline: Google Drive PDF → Gemini AI (direct PDF or text extraction fallback) → Arabic translation
  *
- * Gemini natively reads PDFs — no Docling intermediary needed.
+ * - PDFs ≤ 15MB: sent directly to Gemini as base64 (full visual understanding)
+ * - PDFs > 15MB: text extracted via pdf-parse first, then sent as text to Gemini
  * Uses Lovable AI gateway (OpenAI-compatible) for zero-config AI access.
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// @deno-types="https://esm.sh/pdf-parse@1.1.1"
+import pdfParse from "https://esm.sh/pdf-parse@1.1.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
