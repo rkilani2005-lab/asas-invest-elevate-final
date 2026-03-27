@@ -46,7 +46,7 @@ async function sendGmailNotification(
     .order("purpose")
     .limit(1);
 
-  const gmailAccount = gmailRows?.[0];
+  const gmailAccount = gmailRows?.[0] as any;
   if (!gmailAccount?.access_token) return;
 
   const GCI = Deno.env.get("GMAIL_CLIENT_ID") || Deno.env.get("GOOGLE_CLIENT_ID");
