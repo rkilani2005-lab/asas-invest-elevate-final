@@ -122,8 +122,8 @@ serve(async (req): Promise<Response> => {
       });
 
       // Notify content team
-      const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle();
-      const teamEmail = emailRow?.value || (await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()).data?.value;
+      const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle() as any;
+      const teamEmail = emailRow?.value || ((await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()) as any).data?.value;
       if (teamEmail) {
         const html = buildEmailHtml(
           `Property Approved: ${propertyName}`,
