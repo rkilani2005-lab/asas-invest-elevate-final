@@ -256,19 +256,18 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
             const fileSize = formatFileSize(item.file_size);
             
             return (
-              <motion.div
+              <div
                 key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
                 className="group relative aspect-[4/3] overflow-hidden border border-border cursor-pointer hover:border-accent/30 transition-colors"
                 onClick={() => openLightbox(index)}
+                onMouseEnter={() => loadImageDimensions(item.url, item.id)}
               >
                 <img
                   src={item.url}
                   alt={caption || `Gallery image ${index + 1}`}
                   className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
                   <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" strokeWidth={1} />

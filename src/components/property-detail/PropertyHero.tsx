@@ -81,6 +81,9 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
               src={images[currentIndex].url}
               alt={property.name_en}
               className="w-full h-full object-cover object-center brightness-105 saturate-110"
+              loading={currentIndex === 0 ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={currentIndex === 0 ? "high" : "auto"}
             />
           </motion.div>
         </AnimatePresence>

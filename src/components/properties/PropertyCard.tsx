@@ -46,6 +46,8 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             src={heroImage}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            loading="lazy"
+            decoding="async"
           />
           {/* Hover overlay */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-500" />
