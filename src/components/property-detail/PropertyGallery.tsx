@@ -298,7 +298,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
           </div>
