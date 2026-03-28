@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import ProgressiveImage from "@/components/ui/progressive-image";
+import { getStorageThumbnailUrl } from "@/lib/image-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyCardProps {
