@@ -4,6 +4,7 @@ import { X, ChevronLeft, ChevronRight, ZoomIn, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import ProgressiveImage from "@/components/ui/progressive-image";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ImageDimensions {
@@ -262,7 +263,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 onClick={() => openLightbox(index)}
                 onMouseEnter={() => loadImageDimensions(item.url, item.id)}
               >
-                <img
+                <ProgressiveImage
                   src={item.url}
                   alt={caption || `Gallery image ${index + 1}`}
                   className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"

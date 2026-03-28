@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import ProgressiveImage from "@/components/ui/progressive-image";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyHeroProps {
@@ -77,7 +78,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
             transition={{ duration: 0.5 }}
             className="absolute inset-0"
           >
-            <img
+            <ProgressiveImage
               src={images[currentIndex].url}
               alt={property.name_en}
               className="w-full h-full object-cover object-center brightness-105 saturate-110"
