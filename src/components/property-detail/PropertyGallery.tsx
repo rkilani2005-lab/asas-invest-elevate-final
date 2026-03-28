@@ -76,14 +76,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
     img.src = url;
   };
 
-  // Load dimensions for all visible media
-  useEffect(() => {
-    property.media.forEach(item => {
-      if (item.type === "render" || item.type === "interior") {
-        loadImageDimensions(item.url, item.id);
-      }
-    });
-  }, [property.media]);
+  // Dimensions are loaded on-demand when hovering, not eagerly
 
   // Format file size
   const formatFileSize = (bytes: number | null): string => {
