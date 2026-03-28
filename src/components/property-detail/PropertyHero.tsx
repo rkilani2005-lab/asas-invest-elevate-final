@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import ProgressiveImage from "@/components/ui/progressive-image";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyHeroProps {
