@@ -4,6 +4,7 @@ import { X, ChevronLeft, ChevronRight, ZoomIn, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import ProgressiveImage from "@/components/ui/progressive-image";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ImageDimensions {
