@@ -263,7 +263,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 onClick={() => openLightbox(index)}
                 onMouseEnter={() => loadImageDimensions(item.url, item.id)}
               >
-                <img
+                <ProgressiveImage
                   src={item.url}
                   alt={caption || `Gallery image ${index + 1}`}
                   className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"

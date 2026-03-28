@@ -78,7 +78,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
             transition={{ duration: 0.5 }}
             className="absolute inset-0"
           >
-            <img
+            <ProgressiveImage
               src={images[currentIndex].url}
               alt={property.name_en}
               className="w-full h-full object-cover object-center brightness-105 saturate-110"
