@@ -45,7 +45,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         {/* Image Container */}
         <div className="relative aspect-[16/10] overflow-hidden">
           <ProgressiveImage
-            src={heroImage}
+            src={getStorageThumbnailUrl(heroImage, 600)}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             loading="lazy"

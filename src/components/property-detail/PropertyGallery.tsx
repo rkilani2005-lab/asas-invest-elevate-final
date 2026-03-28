@@ -265,7 +265,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 onMouseEnter={() => loadImageDimensions(item.url, item.id)}
               >
                 <ProgressiveImage
-                  src={item.url}
+                  src={getStorageThumbnailUrl(item.url, 400)}
                   alt={caption || `Gallery image ${index + 1}`}
                   className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                   loading="lazy"
