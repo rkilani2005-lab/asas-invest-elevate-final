@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import ProgressiveImage from "@/components/ui/progressive-image";
+import { getStorageThumbnailUrl } from "@/lib/image-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ImageDimensions {
@@ -264,7 +265,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 onMouseEnter={() => loadImageDimensions(item.url, item.id)}
               >
                 <ProgressiveImage
-                  src={item.url}
+                  src={getStorageThumbnailUrl(item.url, 400)}
                   alt={caption || `Gallery image ${index + 1}`}
                   className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                   loading="lazy"

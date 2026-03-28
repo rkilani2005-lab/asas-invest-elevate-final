@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import ProgressiveImage from "@/components/ui/progressive-image";
+import { getStorageThumbnailUrl } from "@/lib/image-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyCardProps {
@@ -44,7 +45,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         {/* Image Container */}
         <div className="relative aspect-[16/10] overflow-hidden">
           <ProgressiveImage
-            src={heroImage}
+            src={getStorageThumbnailUrl(heroImage, 600)}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             loading="lazy"
