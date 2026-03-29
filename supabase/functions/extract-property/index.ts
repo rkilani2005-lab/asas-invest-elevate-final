@@ -144,7 +144,7 @@ async function callAI(
 
 async function callAIWithPDF(pdfBase64: string, systemPrompt: string, userPrompt: string): Promise<string> {
   const base64SizeMB = (pdfBase64.length * 3) / 4 / 1024 / 1024;
-  if (base64SizeMB > 20) throw new Error(`PDF too large (${base64SizeMB.toFixed(1)}MB). Max 20MB.`);
+  if (base64SizeMB > 50) throw new Error(`PDF too large (${base64SizeMB.toFixed(1)}MB). Max 50MB.`);
   return callAI([
     { role: "system", content: systemPrompt },
     { role: "user", content: [
