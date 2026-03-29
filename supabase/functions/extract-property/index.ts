@@ -593,7 +593,7 @@ Return ONLY the JSON object with the same keys as described.`);
     if (paymentPdfs.length > 0) {
       try {
         const buffer = await downloadDriveFile(paymentPdfs[0].id, accessToken);
-        if (buffer && buffer.byteLength / 1024 / 1024 <= 20) {
+        if (buffer && buffer.byteLength / 1024 / 1024 <= 50) {
           const b64 = arrayBufferToBase64(buffer);
           const raw = await callAIWithPDF(b64, "You are a payment plan extraction specialist.", PAYMENT_PLAN_PROMPT);
           paymentMilestones = parseJSONArray(raw);
