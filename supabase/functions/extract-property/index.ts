@@ -631,7 +631,7 @@ Return ONLY the JSON object with the same keys as described.`);
       if (amenityPdfs.length > 0) {
         try {
           const buffer = await downloadDriveFile(amenityPdfs[0].id, accessToken);
-          if (buffer && buffer.byteLength / 1024 / 1024 <= 20) {
+          if (buffer && buffer.byteLength / 1024 / 1024 <= 50) {
             const b64 = arrayBufferToBase64(buffer);
             const raw = await callAIWithPDF(b64, "You are an amenity extraction specialist.", AMENITY_PROMPT);
             amenitiesList = parseJSONArray(raw);
