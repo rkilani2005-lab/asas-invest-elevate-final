@@ -59,17 +59,11 @@ const Services = () => {
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
             <StaggerItem key={index}>
-              <div className={cn(
-                "group bg-card rounded-xl p-8 border border-border hover:border-accent/30 transition-all duration-300 hover:shadow-elegant h-full",
-                isRTL && "text-right"
-              )}>
-                <div className={cn(
-                  "inline-flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-6 group-hover:bg-accent/20 transition-colors duration-300",
-                  isRTL && "float-right ml-4"
-                )}>
+              <div className="group bg-card rounded-xl p-8 border border-border hover:border-accent/30 transition-all duration-300 hover:shadow-elegant h-full">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-6 group-hover:bg-accent/20 transition-colors duration-300">
                   <service.icon className="h-5 w-5 text-accent" />
                 </div>
-                <div className={isRTL ? "clear-both" : ""}>
+                <div>
                   <h3 className="heading-section text-xl text-foreground mb-3">
                     {t(service.titleKey)}
                   </h3>

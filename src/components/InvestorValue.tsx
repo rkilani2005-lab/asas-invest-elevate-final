@@ -68,17 +68,11 @@ const InvestorValue = () => {
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {benefits.map((benefit, index) => (
               <StaggerItem key={index}>
-                <div className={cn(
-                  "bg-primary-foreground/5 rounded-xl p-6 hover:bg-primary-foreground/10 transition-colors duration-300 h-full",
-                  isRTL && "text-right"
-                )}>
-                  <div className={cn(
-                    "inline-flex items-center justify-center w-10 h-10 bg-accent/20 rounded-lg mb-4",
-                    isRTL && "float-right ml-4"
-                  )}>
+                <div className="bg-primary-foreground/5 rounded-xl p-6 hover:bg-primary-foreground/10 transition-colors duration-300 h-full">
+                  <div className="inline-flex items-center justify-center w-10 h-10 bg-accent/20 rounded-lg mb-4">
                     <benefit.icon className="h-5 w-5 text-accent" />
                   </div>
-                  <div className={isRTL ? "clear-both" : ""}>
+                  <div>
                     <h3 className="font-medium text-lg mb-2">
                       {t(benefit.titleKey)}
                     </h3>
