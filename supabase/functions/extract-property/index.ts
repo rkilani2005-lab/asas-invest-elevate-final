@@ -758,8 +758,14 @@ Return ONLY the JSON object with the same keys as described.`);
     const safeUpdate: Record<string, unknown> = {};
     for (const col of VALID_COLUMNS) {
       if (merged[col] !== undefined && merged[col] !== null) {
-        if (DATE_COLUMNS.has(col) && merged[col] === "") {
-          safeUpdate[col] = null;
+        if (DATE_COLUMNS.has(col)) {
+          const val = String(merged[col]).trim();
+          // Only keep valid YYYY-MM-DD dates, null everything else
+          if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+            safeUpdate[col] = val;
+          } else {
+            safeUpdate[col] = null;
+          }
         } else {
           safeUpdate[col] = merged[col];
         }
