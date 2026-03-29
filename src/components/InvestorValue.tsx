@@ -37,7 +37,7 @@ const InvestorValue = () => {
         )}>
           {/* Left Column - Text */}
           <ScrollReveal direction={isRTL ? "right" : "left"}>
-            <div className={cn(isRTL && "text-right")}>
+            <div>
               <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
                 {t("investorValue.subtitle")}
               </p>
