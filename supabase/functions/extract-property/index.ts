@@ -810,6 +810,13 @@ Return ONLY the JSON object with the same keys as described.`);
         is_hero: false,
         sort_order: 100 + i,
       })),
+      ...videoFiles.map((f, i) => ({
+        job_id, dropbox_path: f.id, original_filename: f.name,
+        media_type: "video",
+        original_size_bytes: parseInt(f.size || "0", 10),
+        is_hero: false,
+        sort_order: 150 + i,
+      })),
       ...brochures.map((f, i) => ({
         job_id, dropbox_path: f.id, original_filename: f.name,
         media_type: "brochure",
@@ -828,7 +835,7 @@ Return ONLY the JSON object with the same keys as described.`);
         await supabaseAdmin.from("import_media").insert(batch);
       }
       await log(supabase, job_id, "media_registered",
-        `Registered ${mediaToRegister.length} media files (${images.length} images, ${floorplanFiles.filter(f => f.mimeType.startsWith("image/")).length} floor plans, ${brochures.length} brochures)`,
+        `Registered ${mediaToRegister.length} media files (${images.length} images, ${floorplanFiles.filter(f => f.mimeType.startsWith("image/")).length} floor plans, ${videoFiles.length} videos, ${brochures.length} brochures)`,
         "success");
     }
 
