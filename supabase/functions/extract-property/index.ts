@@ -532,9 +532,9 @@ serve(async (req) => {
         }
 
         const sizeMB = buffer.byteLength / 1024 / 1024;
-        if (sizeMB > 20) {
+        if (sizeMB > 50) {
           await log(supabase, job_id, "pdf_skip",
-            `"${filename}" is ${sizeMB.toFixed(1)}MB — exceeds 20MB limit. Using folder-name fallback.`, "warning");
+            `"${filename}" is ${sizeMB.toFixed(1)}MB — exceeds 50MB limit. Using folder-name fallback.`, "warning");
           continue;
         }
 
