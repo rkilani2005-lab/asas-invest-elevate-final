@@ -150,7 +150,7 @@ const WhyAsas = () => {
           <div
             className="relative px-10 md:px-16 py-12 md:py-14 overflow-hidden"
             style={{
-              borderLeft: '2px solid #C5A059',
+              borderInlineStart: '2px solid #C5A059',
               background: 'rgba(197,160,89,0.04)',
             }}
           >

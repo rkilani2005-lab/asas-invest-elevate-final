@@ -124,11 +124,14 @@ const Navigation = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               />
               <motion.div
-                initial={{ x: "100%" }}
+                initial={{ x: isRTL ? "-100%" : "100%" }}
                 animate={{ x: 0 }}
-                exit={{ x: "100%" }}
+                exit={{ x: isRTL ? "-100%" : "100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className="fixed top-0 bottom-0 right-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col"
+                className={cn(
+                  "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col",
+                  isRTL ? "left-0" : "right-0"
+                )}
               >
                 <div className="flex items-center justify-between h-20 px-6 border-b border-border">
                   <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">

@@ -100,8 +100,8 @@ const Stats = () => {
             <StaggerItem key={index}>
               <div
                 className={cn(
-                  "py-10 px-8 text-center md:text-left",
-                  index > 0 && "md:border-l"
+                  "py-10 px-8 text-center md:text-start",
+                  index > 0 && "md:border-s"
                 )}
                 style={{ borderColor: 'rgba(197,160,89,0.15)' }}
               >

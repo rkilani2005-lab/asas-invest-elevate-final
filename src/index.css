@@ -446,14 +446,7 @@
   direction: rtl;
 }
 
-/* RTL: Justify content adjustments */
-[dir="rtl"] .justify-start {
-  justify-content: flex-end;
-}
-
-[dir="rtl"] .justify-end {
-  justify-content: flex-start;
-}
+/* RTL: justify-content is handled automatically by flexbox direction */
 
 /* RTL: Items alignment for flex containers */
 [dir="rtl"] .items-start {
