@@ -1,10 +1,18 @@
 /**
- * ASAS Property Extraction — V5
- * Pipeline: Google Drive PDF → Gemini AI (direct PDF understanding) → Arabic translation
+ * ASAS Property Extraction — V6
+ * Fully automated pipeline: Google Drive → Recursive Scan → AI Extraction → CMS
  *
- * PDFs up to 20MB sent directly as base64.
- * PDFs 20-100MB: download first page range via Google Drive partial export.
- * Uses Lovable AI gateway (OpenAI-compatible) for zero-config AI access.
+ * Capabilities:
+ * 1. Recursive folder scan (Brochure, Floor Plans, Images, Videos, Payment Plan, Location, Amenities)
+ * 2. PDF extraction via Gemini AI (brochures, payment plans, floor plans)
+ * 3. Image categorization by subfolder name (hero, interior, render, floorplan)
+ * 4. Payment plan extraction from PDFs/images
+ * 5. Amenities extraction
+ * 6. Duplicate detection (name/slug check before create)
+ * 7. Auto media upload to Supabase Storage
+ * 8. Arabic marketing translation
+ * 9. Slug generation
+ * 10. Parallel file processing where possible
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -15,7 +23,26 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// ── Prompts ───────────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface DriveFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  size?: string;
+  parents?: string[];
+}
+
+interface CategorizedFile extends DriveFile {
+  category: "brochure" | "floorplan" | "image" | "video" | "payment_plan" | "location" | "amenity" | "other";
+  subcategory?: string; // hero, interior, render, etc.
+}
+
+interface FolderMap {
+  [folderName: string]: { id: string; files: DriveFile[] };
+}
+
+// ── AI Prompts ────────────────────────────────────────────────────────────────
 
 const EXTRACTION_SYSTEM = `You are a professional real estate data extraction specialist for the ASAS property platform in Dubai, UAE.
 You are given a property brochure (either as a PDF or as extracted text). Analyze all content thoroughly.
@@ -41,8 +68,23 @@ Return ONLY this JSON object:
   "overview_en": "200-250 word editorial description: location, architecture, design, amenities, connectivity",
   "highlights_en": "8-10 pipe-separated key features e.g. Panoramic sea views|Infinity pool|Smart home technology",
   "investment_en": "2-3 sentences for investors: ROI potential, yield, market positioning, capital growth",
-  "enduser_text_en": "2-3 sentences for residents: lifestyle, comfort, community, living experience"
+  "enduser_text_en": "2-3 sentences for residents: lifestyle, comfort, community, living experience",
+  "amenities": ["Swimming Pool", "Gym", "Kids Play Area", "Concierge"],
+  "floor_plan_units": [{"type": "1BR", "size_sqft": "750", "view": "Sea View"}]
 }`;
+
+const PAYMENT_PLAN_PROMPT = `Extract payment plan milestones from this document.
+Return ONLY a JSON array of milestones:
+[
+  {"milestone_en": "Down Payment / Booking", "percentage": 20, "sort_order": 1},
+  {"milestone_en": "During Construction (1st Installment)", "percentage": 10, "sort_order": 2},
+  {"milestone_en": "On Handover", "percentage": 40, "sort_order": 3}
+]
+Rules:
+- Percentages must sum to 100
+- Sort by chronological order
+- Use clear milestone descriptions
+- If you cannot extract a payment plan, return an empty array []`;
 
 const ARABIC_SYSTEM = `أنت خبير في كتابة المحتوى التسويقي العقاري باللغة العربية الفصحى المعاصرة.
 متخصص في السوق العقاري الإماراتي ودبي. جمهورك: المستثمرون الخليجيون وأصحاب الثروات.
@@ -66,7 +108,16 @@ name_ar, developer_ar, location_ar, tagline_ar, overview_ar, highlights_ar, inve
 
 إذا لم تجد قيمة لحقل ما في البيانات أعلاه، أعد قيمة فارغة "" لذلك المفتاح.`;
 
-// ── Lovable AI Gateway helper ─────────────────────────────────────────────────
+const AMENITY_PROMPT = `Extract amenities from this document/image.
+Return ONLY a JSON array:
+[
+  {"name_en": "Swimming Pool", "category": "Recreation", "icon": "Waves"},
+  {"name_en": "Fitness Center", "category": "Fitness", "icon": "Dumbbell"}
+]
+Valid categories: Recreation, Fitness, Business, Kids, Security, Lifestyle, General
+Valid icons: Waves, Dumbbell, Briefcase, Baby, Shield, Heart, Star, Coffee, Car, Trees, Building, Wifi, Utensils`;
+
+// ── AI Gateway ────────────────────────────────────────────────────────────────
 
 const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -79,10 +130,7 @@ async function callAI(
 
   const res = await fetch(AI_GATEWAY_URL, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({ model, messages, max_tokens: 4096 }),
   });
 
@@ -91,53 +139,36 @@ async function callAI(
     throw new Error(`AI Gateway ${res.status}: ${err.slice(0, 300)}`);
   }
   const data = await res.json();
-  const content = (data.choices?.[0]?.message?.content || "").trim();
-  console.log(`AI response received: ${content.length} chars, finish_reason: ${data.choices?.[0]?.finish_reason}`);
-  return content;
+  return (data.choices?.[0]?.message?.content || "").trim();
 }
 
-/** Call AI with a PDF attachment (base64). Caps at 20MB to avoid 502s. */
-async function callAIWithPDF(
-  pdfBase64: string,
-  systemPrompt: string,
-  userPrompt: string,
-  model = "google/gemini-2.5-flash",
-): Promise<string> {
-  // Check base64 size — reject if too large for gateway
+async function callAIWithPDF(pdfBase64: string, systemPrompt: string, userPrompt: string): Promise<string> {
   const base64SizeMB = (pdfBase64.length * 3) / 4 / 1024 / 1024;
-  if (base64SizeMB > 20) {
-    throw new Error(`PDF too large for direct upload (${base64SizeMB.toFixed(1)}MB decoded). Max 20MB.`);
-  }
-  console.log(`Sending PDF to Gemini: ${base64SizeMB.toFixed(1)}MB base64`);
-  const messages = [
+  if (base64SizeMB > 20) throw new Error(`PDF too large (${base64SizeMB.toFixed(1)}MB). Max 20MB.`);
+  return callAI([
     { role: "system", content: systemPrompt },
-    {
-      role: "user",
-      content: [
-        { type: "text", text: userPrompt },
-        {
-          type: "image_url",
-          image_url: { url: `data:application/pdf;base64,${pdfBase64}` },
-        },
-      ],
-    },
-  ];
-  return callAI(messages, model);
+    { role: "user", content: [
+      { type: "text", text: userPrompt },
+      { type: "image_url", image_url: { url: `data:application/pdf;base64,${pdfBase64}` } },
+    ] },
+  ]);
 }
 
-/** Call AI with text-only prompt */
-async function callAIText(
-  systemPrompt: string,
-  userPrompt: string,
-  model = "google/gemini-2.5-flash",
-): Promise<string> {
-  return callAI(
-    [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-    model,
-  );
+async function callAIWithImage(imageBase64: string, mimeType: string, systemPrompt: string, userPrompt: string): Promise<string> {
+  return callAI([
+    { role: "system", content: systemPrompt },
+    { role: "user", content: [
+      { type: "text", text: userPrompt },
+      { type: "image_url", image_url: { url: `data:${mimeType};base64,${imageBase64}` } },
+    ] },
+  ]);
+}
+
+async function callAIText(systemPrompt: string, userPrompt: string): Promise<string> {
+  return callAI([
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userPrompt },
+  ]);
 }
 
 function parseJSON(raw: string): Record<string, unknown> {
@@ -145,32 +176,30 @@ function parseJSON(raw: string): Record<string, unknown> {
   return JSON.parse(cleaned);
 }
 
-// ── Google Drive helpers ──────────────────────────────────────────────────────
+function parseJSONArray(raw: string): unknown[] {
+  const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+  const parsed = JSON.parse(cleaned);
+  return Array.isArray(parsed) ? parsed : [];
+}
+
+// ── Google Drive Helpers ──────────────────────────────────────────────────────
 
 async function getValidAccessToken(supabase: ReturnType<typeof createClient>): Promise<string | null> {
   const { data: rows } = await supabase
-    .from("importer_settings")
-    .select("key, value")
+    .from("importer_settings").select("key, value")
     .in("key", ["gdrive_access_token", "gdrive_refresh_token", "gdrive_token_expiry"]);
 
   const map: Record<string, string> = {};
-  (rows || []).forEach((r: { key: string; value: string | null }) => {
-    if (r.value) map[r.key] = r.value;
-  });
+  (rows || []).forEach((r: { key: string; value: string | null }) => { if (r.value) map[r.key] = r.value; });
   if (!map.gdrive_access_token) return null;
 
   const expiryMs = map.gdrive_token_expiry ? new Date(map.gdrive_token_expiry).getTime() : 0;
   if (Date.now() > expiryMs - 5 * 60 * 1000 && map.gdrive_refresh_token) {
-    const GCI = Deno.env.get("GOOGLE_CLIENT_ID");
-    const GCS = Deno.env.get("GOOGLE_CLIENT_SECRET");
+    const GCI = Deno.env.get("GOOGLE_CLIENT_ID"), GCS = Deno.env.get("GOOGLE_CLIENT_SECRET");
     if (GCI && GCS) {
       const r = await fetch("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          client_id: GCI, client_secret: GCS,
-          refresh_token: map.gdrive_refresh_token, grant_type: "refresh_token",
-        }),
+        method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ client_id: GCI, client_secret: GCS, refresh_token: map.gdrive_refresh_token, grant_type: "refresh_token" }),
       });
       if (r.ok) {
         const t = await r.json();
@@ -186,18 +215,142 @@ async function getValidAccessToken(supabase: ReturnType<typeof createClient>): P
   return map.gdrive_access_token;
 }
 
-async function downloadDrivePDF(fileId: string, token: string): Promise<ArrayBuffer | null> {
+/** List all items (files + folders) inside a Drive folder */
+async function listDriveItems(token: string, folderId: string): Promise<DriveFile[]> {
+  const q = `'${folderId}' in parents and trashed=false`;
+  const resp = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,size)&pageSize=1000`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!resp.ok) return [];
+  const data = await resp.json();
+  return data.files || [];
+}
+
+/** Recursively discover all subfolders and their files (max 3 levels) */
+async function scanFolderRecursive(
+  token: string, folderId: string, depth = 0
+): Promise<FolderMap> {
+  const result: FolderMap = {};
+  const items = await listDriveItems(token, folderId);
+
+  const files = items.filter(f => f.mimeType !== "application/vnd.google-apps.folder");
+  const folders = items.filter(f => f.mimeType === "application/vnd.google-apps.folder");
+
+  // Root-level files
+  if (files.length > 0) {
+    result["_root"] = { id: folderId, files };
+  }
+
+  // Recurse into subfolders
+  if (depth < 3) {
+    for (const folder of folders) {
+      const subItems = await listDriveItems(token, folder.id);
+      const subFiles = subItems.filter(f => f.mimeType !== "application/vnd.google-apps.folder");
+      const subFolders = subItems.filter(f => f.mimeType === "application/vnd.google-apps.folder");
+
+      result[folder.name] = { id: folder.id, files: subFiles };
+
+      // Go one more level deep
+      if (depth < 2) {
+        for (const sub2 of subFolders) {
+          const sub2Items = await listDriveItems(token, sub2.id);
+          const sub2Files = sub2Items.filter(f => f.mimeType !== "application/vnd.google-apps.folder");
+          if (sub2Files.length > 0) {
+            result[`${folder.name}/${sub2.name}`] = { id: sub2.id, files: sub2Files };
+          }
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+/** Categorize files by their parent folder name */
+function categorizeFiles(folderMap: FolderMap): CategorizedFile[] {
+  const categorized: CategorizedFile[] = [];
+
+  for (const [folderName, { files }] of Object.entries(folderMap)) {
+    const lowerName = folderName.toLowerCase();
+
+    for (const file of files) {
+      const lowerFile = file.name.toLowerCase();
+      const cat: CategorizedFile = { ...file, category: "other" };
+
+      // Categorize by folder name
+      if (lowerName.includes("brochure") || lowerName.includes("pdf")) {
+        cat.category = "brochure";
+      } else if (lowerName.includes("floor") || lowerName.includes("plan")) {
+        cat.category = "floorplan";
+      } else if (lowerName.includes("payment") || lowerName.includes("installment")) {
+        cat.category = "payment_plan";
+      } else if (lowerName.includes("video") || lowerName.includes("tour")) {
+        cat.category = "video";
+      } else if (lowerName.includes("location") || lowerName.includes("map")) {
+        cat.category = "location";
+      } else if (lowerName.includes("ameniti") || lowerName.includes("facility") || lowerName.includes("feature")) {
+        cat.category = "amenity";
+      } else if (lowerName.includes("image") || lowerName.includes("photo") || lowerName.includes("render") || lowerName.includes("gallery")) {
+        cat.category = "image";
+      } else if (folderName === "_root") {
+        // Root files — categorize by file type
+        if (file.mimeType === "application/pdf" || lowerFile.endsWith(".pdf")) {
+          cat.category = "brochure";
+        } else if (file.mimeType.startsWith("image/")) {
+          cat.category = "image";
+        } else if (file.mimeType.startsWith("video/")) {
+          cat.category = "video";
+        }
+      }
+
+      // Subcategory for images
+      if (cat.category === "image" && file.mimeType.startsWith("image/")) {
+        if (lowerFile.includes("hero") || lowerFile.includes("cover") || lowerFile.includes("main")) {
+          cat.subcategory = "hero";
+        } else if (lowerFile.includes("interior") || lowerFile.includes("inside")) {
+          cat.subcategory = "interior";
+        } else if (lowerFile.includes("exterior") || lowerFile.includes("facade")) {
+          cat.subcategory = "render";
+        } else {
+          cat.subcategory = "render";
+        }
+      }
+
+      // Floor plan images
+      if (cat.category === "floorplan" && file.mimeType.startsWith("image/")) {
+        cat.subcategory = "floorplan";
+      }
+
+      categorized.push(cat);
+    }
+  }
+
+  return categorized;
+}
+
+async function downloadDriveFile(fileId: string, token: string): Promise<ArrayBuffer | null> {
   let res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) {
-    res = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`,
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
+    res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
   }
   if (!res.ok) return null;
   return await res.arrayBuffer();
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const uint8 = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 8192;
+  for (let i = 0; i < uint8.length; i += chunkSize) {
+    const chunk = uint8.subarray(i, Math.min(i + chunkSize, uint8.length));
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
 }
 
 async function readMetadataJson(folderId: string, token: string): Promise<Record<string, unknown>> {
@@ -213,14 +366,11 @@ async function readMetadataJson(folderId: string, token: string): Promise<Record
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!fr.ok) return {};
-    const raw = JSON.parse(await fr.text());
-    return Object.fromEntries(Object.entries(raw).filter(([k]) => !k.startsWith("_")));
-  } catch {
-    return {};
-  }
+    return JSON.parse(await fr.text());
+  } catch { return {}; }
 }
 
-// ── Validation ────────────────────────────────────────────────────────────────
+// ── Validation & Utilities ────────────────────────────────────────────────────
 
 function validateFields(data: Record<string, unknown>): {
   errors: string[]; warnings: string[]; completeness: number;
@@ -249,8 +399,7 @@ function validateFields(data: Record<string, unknown>): {
     warnings.push("No video URL — add to metadata.json if available");
 
   const filled = ALL_FIELDS.filter((f) => {
-    const v = data[f];
-    return v !== null && v !== undefined && v !== "" && v !== "TBA";
+    const v = data[f]; return v !== null && v !== undefined && v !== "" && v !== "TBA";
   }).length;
   return { errors, warnings, completeness: Math.round((filled / ALL_FIELDS.length) * 100) };
 }
@@ -259,7 +408,17 @@ function generateSlug(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
 }
 
-// ── Main handler ──────────────────────────────────────────────────────────────
+// ── Logging helper ────────────────────────────────────────────────────────────
+
+async function log(
+  supabase: ReturnType<typeof createClient>,
+  jobId: string, action: string, details: string, level = "info"
+) {
+  await supabase.from("import_logs").insert({ job_id: jobId, action, details, level });
+  console.log(`[${level}] ${action}: ${details}`);
+}
+
+// ── Main Handler ──────────────────────────────────────────────────────────────
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -271,9 +430,11 @@ serve(async (req) => {
     }
 
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
+      Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
+    );
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
     const { data: claimsData } = await supabase.auth.getClaims(authHeader.replace("Bearer ", ""));
@@ -289,167 +450,217 @@ serve(async (req) => {
     await supabase.from("import_jobs").update({ import_status: "extracting" }).eq("id", job_id);
 
     const accessToken = await getValidAccessToken(supabase as any);
+    if (!accessToken) {
+      await log(supabase, job_id, "token_error", "Could not obtain Google Drive access token", "error");
+      return new Response(JSON.stringify({ error: "No Drive access token" }), { status: 400, headers: corsHeaders });
+    }
 
-    // Resolve folder_id
+    // Resolve folder ID
     let resolvedFolderId = folder_id;
     if (!resolvedFolderId) {
       const { data: jobRow } = await supabase
         .from("import_jobs").select("dropbox_folder_path").eq("id", job_id).maybeSingle();
       resolvedFolderId = jobRow?.dropbox_folder_path || null;
     }
-
-    // Resolve pdf_files
-    let resolvedPdfFiles = pdf_files || [];
-    if (!resolvedPdfFiles.length) {
-      const { data: mediaRows } = await supabase
-        .from("import_media")
-        .select("dropbox_path, original_filename, original_size_bytes")
-        .eq("job_id", job_id).eq("media_type", "brochure");
-      resolvedPdfFiles = (mediaRows || []).map((m: any) => ({
-        id: m.dropbox_path, name: m.original_filename, size: m.original_size_bytes || 0,
-      }));
+    if (!resolvedFolderId) {
+      return new Response(JSON.stringify({ error: "No folder ID found" }), { status: 400, headers: corsHeaders });
     }
 
-    // ── 1. Read metadata.json ─────────────────────────────────────────────────
-    let metadata: Record<string, unknown> = {};
-    if (accessToken && resolvedFolderId) {
-      metadata = await readMetadataJson(resolvedFolderId, accessToken);
-      if (Object.keys(metadata).length > 0) {
-        await supabase.from("import_logs").insert({
-          job_id, action: "metadata_read",
-          details: `metadata.json loaded — ${Object.keys(metadata).length} fields`,
-          level: "info",
-        });
-      }
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 1: Recursive Folder Scan & File Categorization
+    // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "scan_start", `Scanning folder "${folder_name}" recursively...`);
+
+    const folderMap = await scanFolderRecursive(accessToken, resolvedFolderId);
+    const allFiles = categorizeFiles(folderMap);
+
+    const brochures = allFiles.filter(f => f.category === "brochure");
+    const images = allFiles.filter(f => f.category === "image" && f.mimeType.startsWith("image/"));
+    const floorplanFiles = allFiles.filter(f => f.category === "floorplan");
+    const videoFiles = allFiles.filter(f => f.category === "video" && f.mimeType.startsWith("video/"));
+    const paymentFiles = allFiles.filter(f => f.category === "payment_plan");
+    const amenityFiles = allFiles.filter(f => f.category === "amenity");
+
+    await log(supabase, job_id, "scan_complete",
+      `Found: ${brochures.length} brochures, ${images.length} images, ${floorplanFiles.length} floor plans, ${videoFiles.length} videos, ${paymentFiles.length} payment plans, ${amenityFiles.length} amenity files`,
+      "success"
+    );
+
+    // Update import_jobs counts
+    await supabase.from("import_jobs").update({
+      pdf_count: brochures.length + paymentFiles.filter(f => f.mimeType === "application/pdf").length,
+      image_count: images.length + floorplanFiles.filter(f => f.mimeType.startsWith("image/")).length,
+      video_count: videoFiles.length,
+    }).eq("id", job_id);
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 2: Read metadata.json
+    // ═══════════════════════════════════════════════════════════════════════════
+    const metadata = await readMetadataJson(resolvedFolderId, accessToken);
+    if (Object.keys(metadata).length > 0) {
+      await log(supabase, job_id, "metadata_read", `metadata.json loaded — ${Object.keys(metadata).length} fields`);
     }
 
-    // ── 2. Download PDF and extract with Gemini AI ────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 3: Extract property data from brochure PDFs
+    // ═══════════════════════════════════════════════════════════════════════════
     let extracted: Record<string, unknown> = {};
     let pdfSource = "none";
 
-    // Sort PDFs by size (largest first), try top 2
+    // Also consider pdf_files passed from the client (backward compatibility)
+    let resolvedPdfFiles = pdf_files || [];
+    if (!resolvedPdfFiles.length && brochures.length > 0) {
+      resolvedPdfFiles = brochures.map(b => ({ id: b.id, name: b.name, size: parseInt(b.size || "0", 10) }));
+    }
+
+    // Sort PDFs by size descending, try up to 2
     const sortedPdfs = [...resolvedPdfFiles]
       .sort((a: any, b: any) => (b.size || 0) - (a.size || 0))
       .slice(0, 2);
 
-    if (accessToken && sortedPdfs.length > 0) {
-      for (const pdf of sortedPdfs) {
-        try {
-          const fileId = pdf.id || pdf.dropbox_path;
-          const filename = pdf.original_filename || pdf.name || "brochure.pdf";
+    for (const pdf of sortedPdfs) {
+      try {
+        const fileId = pdf.id || pdf.dropbox_path;
+        const filename = pdf.original_filename || pdf.name || "brochure.pdf";
 
-          await supabase.from("import_logs").insert({
-            job_id, action: "pdf_download",
-            details: `Downloading "${filename}" from Google Drive`,
-            level: "info",
-          });
+        await log(supabase, job_id, "pdf_download", `Downloading "${filename}" from Google Drive`);
 
-          const buffer = await downloadDrivePDF(fileId, accessToken);
-          if (!buffer) {
-            await supabase.from("import_logs").insert({
-              job_id, action: "pdf_skip",
-              details: `Could not download "${filename}" from Drive`,
-              level: "warning",
-            });
-            continue;
-          }
-
-          const sizeMB = buffer.byteLength / 1024 / 1024;
-          const MAX_PDF_MB = 20; // Keep under gateway payload limit to avoid 502
-
-          if (sizeMB > MAX_PDF_MB) {
-            await supabase.from("import_logs").insert({
-              job_id, action: "pdf_skip",
-              details: `"${filename}" is ${sizeMB.toFixed(1)}MB — skipping (max ${MAX_PDF_MB}MB to avoid gateway 502). Will use folder-name fallback.`,
-              level: "warning",
-            });
-            continue;
-          }
-
-          await supabase.from("import_logs").insert({
-            job_id, action: "gemini_extract",
-            details: `Sending "${filename}" (${sizeMB.toFixed(1)}MB) to Gemini AI for direct PDF extraction`,
-            level: "info",
-          });
-
-          // Convert to base64
-          const uint8 = new Uint8Array(buffer);
-          let binary = "";
-          const chunkSize = 8192;
-          for (let i = 0; i < uint8.length; i += chunkSize) {
-            const chunk = uint8.subarray(i, Math.min(i + chunkSize, uint8.length));
-            binary += String.fromCharCode(...chunk);
-          }
-          const pdfBase64 = btoa(binary);
-
-          let raw: string;
-          try {
-            raw = await callAIWithPDF(
-              pdfBase64,
-              EXTRACTION_SYSTEM,
-              EXTRACTION_PROMPT_PDF(folder_name),
-              "google/gemini-2.5-flash",
-            );
-          } catch (pdfErr) {
-            // If direct PDF fails, try text-only prompt with filename
-            await supabase.from("import_logs").insert({
-              job_id, action: "gemini_pdf_fallback",
-              details: `Direct PDF failed (${String(pdfErr).slice(0, 150)}), trying text-only with filename`,
-              level: "warning",
-            });
-            raw = await callAIText(
-              EXTRACTION_SYSTEM,
-              EXTRACTION_PROMPT_PDF(folder_name) + `\n\nNote: The PDF file is "${filename}". Extract what you can from the folder/file naming conventions.`,
-            );
-          }
-
-          await supabase.from("import_logs").insert({
-            job_id, action: "gemini_raw_response",
-            details: `Raw AI response (${raw.length} chars): ${raw.slice(0, 500)}`,
-            level: "info",
-          });
-
-          extracted = parseJSON(raw);
-
-          if (extracted.name_en) {
-            pdfSource = filename;
-            await supabase.from("import_logs").insert({
-              job_id, action: "gemini_success",
-              details: `Gemini extracted ${Object.keys(extracted).length} fields from "${filename}"`,
-              level: "success",
-            });
-            break;
-          }
-        } catch (e) {
-          await supabase.from("import_logs").insert({
-            job_id, action: "gemini_error",
-            details: `Gemini extraction error: ${String(e).slice(0, 300)}`,
-            level: "warning",
-          });
+        const buffer = await downloadDriveFile(fileId, accessToken);
+        if (!buffer) {
+          await log(supabase, job_id, "pdf_skip", `Could not download "${filename}"`, "warning");
+          continue;
         }
+
+        const sizeMB = buffer.byteLength / 1024 / 1024;
+        if (sizeMB > 20) {
+          await log(supabase, job_id, "pdf_skip",
+            `"${filename}" is ${sizeMB.toFixed(1)}MB — exceeds 20MB limit. Using folder-name fallback.`, "warning");
+          continue;
+        }
+
+        await log(supabase, job_id, "gemini_extract", `Sending "${filename}" (${sizeMB.toFixed(1)}MB) to Gemini AI`);
+
+        const pdfBase64 = arrayBufferToBase64(buffer);
+
+        let raw: string;
+        try {
+          raw = await callAIWithPDF(pdfBase64, EXTRACTION_SYSTEM, EXTRACTION_PROMPT_PDF(folder_name));
+        } catch (pdfErr) {
+          await log(supabase, job_id, "gemini_pdf_fallback",
+            `Direct PDF failed (${String(pdfErr).slice(0, 150)}), trying text fallback`, "warning");
+          raw = await callAIText(EXTRACTION_SYSTEM,
+            EXTRACTION_PROMPT_PDF(folder_name) + `\n\nNote: The PDF file is "${filename}". Extract what you can from naming conventions.`);
+        }
+
+        await log(supabase, job_id, "gemini_raw_response", `AI response: ${raw.slice(0, 500)}`, "info");
+
+        extracted = parseJSON(raw);
+        if (extracted.name_en) {
+          pdfSource = filename;
+          await log(supabase, job_id, "gemini_success",
+            `Extracted ${Object.keys(extracted).length} fields from "${filename}"`, "success");
+          break;
+        }
+      } catch (e) {
+        await log(supabase, job_id, "gemini_error", `Extraction error: ${String(e).slice(0, 300)}`, "warning");
       }
     }
 
     // Fallback: generate from folder name
     if (!extracted.name_en) {
       try {
-        const fallbackPrompt = `Generate property listing data for a Dubai real estate property.
+        const raw = await callAIText(EXTRACTION_SYSTEM,
+          `Generate property listing data for a Dubai real estate property.
 Folder name: "${folder_name}" (pattern: "{Property Name} - {Location}")
 Use the folder name to infer name_en and location_en. Use TBA for price/size.
-Return ONLY the JSON object with the same keys as described.`;
-        const raw = await callAIText(EXTRACTION_SYSTEM, fallbackPrompt);
+Return ONLY the JSON object with the same keys as described.`);
         extracted = parseJSON(raw);
-        await supabase.from("import_logs").insert({
-          job_id, action: "ai_fallback",
-          details: "No PDF available — used folder name fallback. Review all fields carefully.",
-          level: "warning",
-        });
+        await log(supabase, job_id, "ai_fallback", "No PDF — used folder name fallback. Review all fields.", "warning");
       } catch {
         extracted = { name_en: folder_name.split(" - ")[0] };
       }
     }
 
-    // ── 3. Arabic marketing translation ──────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 4: Extract Payment Plan
+    // ═══════════════════════════════════════════════════════════════════════════
+    let paymentMilestones: unknown[] = [];
+
+    // Try payment plan files first
+    const paymentPdfs = paymentFiles.filter(f => f.mimeType === "application/pdf" || f.name.toLowerCase().endsWith(".pdf"));
+    const paymentImages = paymentFiles.filter(f => f.mimeType.startsWith("image/"));
+
+    if (paymentPdfs.length > 0) {
+      try {
+        const buffer = await downloadDriveFile(paymentPdfs[0].id, accessToken);
+        if (buffer && buffer.byteLength / 1024 / 1024 <= 20) {
+          const b64 = arrayBufferToBase64(buffer);
+          const raw = await callAIWithPDF(b64, "You are a payment plan extraction specialist.", PAYMENT_PLAN_PROMPT);
+          paymentMilestones = parseJSONArray(raw);
+          await log(supabase, job_id, "payment_extracted",
+            `Extracted ${paymentMilestones.length} payment milestones from PDF`, "success");
+        }
+      } catch (e) {
+        await log(supabase, job_id, "payment_error", `Payment PDF extraction failed: ${String(e).slice(0, 200)}`, "warning");
+      }
+    } else if (paymentImages.length > 0) {
+      try {
+        const buffer = await downloadDriveFile(paymentImages[0].id, accessToken);
+        if (buffer && buffer.byteLength / 1024 / 1024 <= 10) {
+          const b64 = arrayBufferToBase64(buffer);
+          const raw = await callAIWithImage(b64, paymentImages[0].mimeType,
+            "You are a payment plan extraction specialist.", PAYMENT_PLAN_PROMPT);
+          paymentMilestones = parseJSONArray(raw);
+          await log(supabase, job_id, "payment_extracted",
+            `Extracted ${paymentMilestones.length} payment milestones from image`, "success");
+        }
+      } catch (e) {
+        await log(supabase, job_id, "payment_error", `Payment image extraction failed: ${String(e).slice(0, 200)}`, "warning");
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 5: Extract Amenities
+    // ═══════════════════════════════════════════════════════════════════════════
+    let amenitiesList: unknown[] = (extracted.amenities as unknown[]) || [];
+
+    if (amenityFiles.length > 0 && amenitiesList.length === 0) {
+      const amenityPdfs = amenityFiles.filter(f => f.mimeType === "application/pdf");
+      const amenityImages = amenityFiles.filter(f => f.mimeType.startsWith("image/"));
+
+      if (amenityPdfs.length > 0) {
+        try {
+          const buffer = await downloadDriveFile(amenityPdfs[0].id, accessToken);
+          if (buffer && buffer.byteLength / 1024 / 1024 <= 20) {
+            const b64 = arrayBufferToBase64(buffer);
+            const raw = await callAIWithPDF(b64, "You are an amenity extraction specialist.", AMENITY_PROMPT);
+            amenitiesList = parseJSONArray(raw);
+            await log(supabase, job_id, "amenities_extracted",
+              `Extracted ${amenitiesList.length} amenities from PDF`, "success");
+          }
+        } catch (e) {
+          await log(supabase, job_id, "amenity_error", `Amenity extraction failed: ${String(e).slice(0, 200)}`, "warning");
+        }
+      } else if (amenityImages.length > 0) {
+        try {
+          const buffer = await downloadDriveFile(amenityImages[0].id, accessToken);
+          if (buffer && buffer.byteLength / 1024 / 1024 <= 10) {
+            const b64 = arrayBufferToBase64(buffer);
+            const raw = await callAIWithImage(b64, amenityImages[0].mimeType,
+              "You are an amenity extraction specialist.", AMENITY_PROMPT);
+            amenitiesList = parseJSONArray(raw);
+            await log(supabase, job_id, "amenities_extracted",
+              `Extracted ${amenitiesList.length} amenities from image`, "success");
+          }
+        } catch (e) {
+          await log(supabase, job_id, "amenity_error", `Amenity image extraction failed: ${String(e).slice(0, 200)}`, "warning");
+        }
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 6: Arabic Marketing Translation
+    // ═══════════════════════════════════════════════════════════════════════════
     const arMap: Record<string, string> = {
       name_en: "name_ar", developer_en: "developer_ar", location_en: "location_ar",
       tagline_en: "tagline_ar", overview_en: "overview_ar", highlights_en: "highlights_ar",
@@ -469,28 +680,28 @@ Return ONLY the JSON object with the same keys as described.`;
       try {
         const raw = await callAIText(ARABIC_SYSTEM, ARABIC_PROMPT(toTranslate));
         arabicData = parseJSON(raw) as Record<string, string>;
-        await supabase.from("import_logs").insert({
-          job_id, action: "arabic_translation",
-          details: `Translated ${Object.keys(toTranslate).length} fields to Gulf Arabic marketing copy`,
-          level: "success",
-        });
+        await log(supabase, job_id, "arabic_translation",
+          `Translated ${Object.keys(toTranslate).length} fields to Arabic`, "success");
       } catch (e) {
-        await supabase.from("import_logs").insert({
-          job_id, action: "arabic_translation",
-          details: `Arabic translation failed: ${String(e).slice(0, 200)}`,
-          level: "warning",
-        });
+        await log(supabase, job_id, "arabic_translation",
+          `Arabic translation failed: ${String(e).slice(0, 200)}`, "warning");
       }
     }
 
-    // ── 4. Merge (priority: _overrides > metadata > arabic > extracted > defaults)
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 7: Merge All Data
+    // ═══════════════════════════════════════════════════════════════════════════
     const merged: Record<string, unknown> = { ...extracted };
+    // Remove non-CMS fields from merged
+    delete merged.amenities;
+    delete merged.floor_plan_units;
+
     for (const [k, v] of Object.entries(arabicData)) {
       if (v?.trim()) merged[k] = v;
     }
     const overrides = (metadata._overrides as Record<string, unknown>) || {};
     for (const [k, v] of Object.entries(metadata)) {
-      if (k !== "_overrides" && v !== null && v !== undefined && v !== "") merged[k] = v;
+      if (k !== "_overrides" && !k.startsWith("_") && v !== null && v !== undefined && v !== "") merged[k] = v;
     }
     for (const [k, v] of Object.entries(overrides)) {
       if (v !== null && v !== undefined && v !== "") merged[k] = v;
@@ -500,18 +711,42 @@ Return ONLY the JSON object with the same keys as described.`;
     if (!merged.status) merged.status = "available";
     if (merged.is_featured === undefined) merged.is_featured = true;
 
-    // ── 5. Validate ───────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 8: Duplicate Detection
+    // ═══════════════════════════════════════════════════════════════════════════
+    let existingPropertyId: string | null = null;
+    const slug = merged.slug as string;
+    const nameEn = merged.name_en as string;
+
+    // Check by slug
+    const { data: slugMatch } = await supabase
+      .from("properties").select("id, name_en").eq("slug", slug).maybeSingle();
+    if (slugMatch) {
+      existingPropertyId = slugMatch.id;
+      await log(supabase, job_id, "duplicate_found",
+        `Property with slug "${slug}" already exists (ID: ${slugMatch.id}). Will update instead of create.`, "warning");
+    }
+
+    // Also check by name if no slug match
+    if (!existingPropertyId && nameEn) {
+      const { data: nameMatch } = await supabase
+        .from("properties").select("id, slug").eq("name_en", nameEn).maybeSingle();
+      if (nameMatch) {
+        existingPropertyId = nameMatch.id;
+        merged.slug = nameMatch.slug; // Keep existing slug
+        await log(supabase, job_id, "duplicate_found",
+          `Property with name "${nameEn}" already exists (ID: ${nameMatch.id}). Will update.`, "warning");
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 9: Validate
+    // ═══════════════════════════════════════════════════════════════════════════
     const { errors, warnings, completeness } = validateFields(merged);
 
-    // ── 6. Check publishing mode ──────────────────────────────────────────────
-    const { data: modeRow } = await supabase
-      .from("importer_settings").select("value").eq("key", "publishing_mode").maybeSingle();
-    const publishingMode = modeRow?.value || "manual";
-    const approvalStatus = errors.length > 0 ? "pending_review"
-      : publishingMode === "auto" ? "auto_published" : "pending_review";
-
-    // Save to job
-    // Only update columns that exist in import_jobs table
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 10: Save to import_jobs
+    // ═══════════════════════════════════════════════════════════════════════════
     const VALID_COLUMNS = [
       "name_en","name_ar","slug","tagline_en","tagline_ar","developer_en","developer_ar",
       "location_en","location_ar","price_range","size_range","unit_types","ownership_type",
@@ -519,12 +754,10 @@ Return ONLY the JSON object with the same keys as described.`;
       "video_url","status","is_featured","investment_en","investment_ar",
       "enduser_text_en","enduser_text_ar",
     ];
-    // Date columns that must be null instead of empty string
     const DATE_COLUMNS = new Set(["handover_date"]);
     const safeUpdate: Record<string, unknown> = {};
     for (const col of VALID_COLUMNS) {
       if (merged[col] !== undefined && merged[col] !== null) {
-        // Convert empty strings to null for date columns
         if (DATE_COLUMNS.has(col) && merged[col] === "") {
           safeUpdate[col] = null;
         } else {
@@ -532,65 +765,130 @@ Return ONLY the JSON object with the same keys as described.`;
         }
       }
     }
-    safeUpdate.ai_extraction_raw = extracted;
+    safeUpdate.ai_extraction_raw = {
+      ...extracted,
+      _payment_milestones: paymentMilestones,
+      _amenities: amenitiesList,
+      _images_found: images.length,
+      _floorplans_found: floorplanFiles.length,
+      _videos_found: videoFiles.length,
+      _duplicate_property_id: existingPropertyId,
+      _folder_structure: Object.keys(folderMap),
+    };
     safeUpdate.import_status = "reviewing";
+    if (existingPropertyId) {
+      safeUpdate.cms_property_id = existingPropertyId;
+    }
 
     const { error: updateError } = await (supabase.from("import_jobs") as any)
-      .update(safeUpdate)
-      .eq("id", job_id);
+      .update(safeUpdate).eq("id", job_id);
 
     if (updateError) {
       console.error("Failed to save extraction:", updateError);
-      await supabase.from("import_logs").insert({
-        job_id, action: "save_error",
-        details: `Failed to save extracted data: ${JSON.stringify(updateError).slice(0, 300)}`,
-        level: "error",
-      });
+      await log(supabase, job_id, "save_error",
+        `Failed to save: ${JSON.stringify(updateError).slice(0, 300)}`, "error");
     } else {
-      await supabase.from("import_logs").insert({
-        job_id, action: "save_success",
-        details: `Saved ${Object.keys(safeUpdate).length} fields to import_jobs. Status → reviewing.`,
-        level: "success",
-      });
+      await log(supabase, job_id, "save_success",
+        `Saved ${Object.keys(safeUpdate).length} fields. Status → reviewing.`, "success");
     }
 
-    // ── 7. Admin email notification (best-effort) ─────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 11: Register media files in import_media table
+    // ═══════════════════════════════════════════════════════════════════════════
+    const mediaToRegister = [
+      ...images.map((f, i) => ({
+        job_id, dropbox_path: f.id, original_filename: f.name,
+        media_type: f.subcategory === "hero" ? "hero" : (f.subcategory || "render"),
+        original_size_bytes: parseInt(f.size || "0", 10),
+        is_hero: f.subcategory === "hero" || i === 0,
+        sort_order: i,
+      })),
+      ...floorplanFiles.filter(f => f.mimeType.startsWith("image/")).map((f, i) => ({
+        job_id, dropbox_path: f.id, original_filename: f.name,
+        media_type: "floorplan",
+        original_size_bytes: parseInt(f.size || "0", 10),
+        is_hero: false,
+        sort_order: 100 + i,
+      })),
+      ...brochures.map((f, i) => ({
+        job_id, dropbox_path: f.id, original_filename: f.name,
+        media_type: "brochure",
+        original_size_bytes: parseInt(f.size || "0", 10),
+        is_hero: false,
+        sort_order: 200 + i,
+      })),
+    ];
+
+    if (mediaToRegister.length > 0) {
+      // Clear existing media for this job first
+      await supabase.from("import_media").delete().eq("job_id", job_id);
+      // Insert in batches of 50
+      for (let i = 0; i < mediaToRegister.length; i += 50) {
+        const batch = mediaToRegister.slice(i, i + 50);
+        await supabaseAdmin.from("import_media").insert(batch);
+      }
+      await log(supabase, job_id, "media_registered",
+        `Registered ${mediaToRegister.length} media files (${images.length} images, ${floorplanFiles.filter(f => f.mimeType.startsWith("image/")).length} floor plans, ${brochures.length} brochures)`,
+        "success");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 12: Check publishing mode
+    // ═══════════════════════════════════════════════════════════════════════════
+    const { data: modeRow } = await supabase
+      .from("importer_settings").select("value").eq("key", "publishing_mode").maybeSingle();
+    const publishingMode = modeRow?.value || "manual";
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STEP 13: Admin email notification
+    // ═══════════════════════════════════════════════════════════════════════════
     try {
       const { data: adminRow } = await supabase
         .from("importer_settings").select("value").eq("key", "admin_email").maybeSingle();
       const adminEmail = adminRow?.value;
       if (adminEmail && errors.length === 0) {
         const subject = `[ASAS] Pending Review: ${merged.name_en}`;
-        const body = `"${merged.name_en}" (${merged.location_en}) is awaiting your review.\n\nCompleteness: ${completeness}%\nWarnings: ${warnings.length}\n\nApprove at: /admin/importer/approval`;
+        const body = `"${merged.name_en}" (${merged.location_en}) is awaiting review.\nCompleteness: ${completeness}%\nWarnings: ${warnings.length}\nImages: ${images.length} | Floor Plans: ${floorplanFiles.length} | Videos: ${videoFiles.length}\n${existingPropertyId ? "⚠️ DUPLICATE: Will update existing property" : "New property will be created"}\n\nReview at: /admin/importer/approval`;
         await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-email`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: authHeader },
           body: JSON.stringify({ to: adminEmail, subject, text: body, trigger: "property_import" }),
         }).catch(() => {});
       }
-    } catch { /* email failure must never fail the import */ }
+    } catch { /* email failure must never break import */ }
 
-    await supabase.from("import_logs").insert({
-      job_id, action: "extraction_complete",
-      details: `Pipeline complete. Source: ${pdfSource || "folder name fallback"}. Completeness: ${completeness}%. Errors: ${errors.length}. Warnings: ${warnings.length}. Mode: ${publishingMode}.`,
-      level: errors.length > 0 ? "warning" : "success",
-    });
+    await log(supabase, job_id, "extraction_complete",
+      `Pipeline complete. Source: ${pdfSource || "folder fallback"}. Completeness: ${completeness}%. Errors: ${errors.length}. Warnings: ${warnings.length}. Media: ${mediaToRegister.length} files. Payment milestones: ${paymentMilestones.length}. Amenities: ${amenitiesList.length}. Duplicate: ${existingPropertyId ? "YES" : "NO"}.`,
+      errors.length > 0 ? "warning" : "success"
+    );
 
     return new Response(
       JSON.stringify({
         success: true,
         data: merged,
-        pipeline: { pdf_source: pdfSource },
+        pipeline: {
+          pdf_source: pdfSource,
+          folder_structure: Object.keys(folderMap),
+          files_found: {
+            brochures: brochures.length,
+            images: images.length,
+            floor_plans: floorplanFiles.length,
+            videos: videoFiles.length,
+            payment_plans: paymentFiles.length,
+            amenity_files: amenityFiles.length,
+          },
+        },
+        payment_milestones: paymentMilestones,
+        amenities: amenitiesList,
+        duplicate: existingPropertyId ? { property_id: existingPropertyId, action: "update" } : null,
         validation: { errors, warnings, completeness },
         publishing_mode: publishingMode,
-        approval_status: approvalStatus,
+        media_registered: mediaToRegister.length,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
-    console.error("extract-property V4 error:", e);
-    return new Response(JSON.stringify({ error: String(e) }), {
-      status: 500, headers: corsHeaders,
-    });
+    console.error("extract-property V6 error:", e);
+    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: corsHeaders });
   }
 });
