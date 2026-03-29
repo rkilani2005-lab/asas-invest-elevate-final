@@ -144,7 +144,7 @@ async function callAI(
 
 async function callAIWithPDF(pdfBase64: string, systemPrompt: string, userPrompt: string): Promise<string> {
   const base64SizeMB = (pdfBase64.length * 3) / 4 / 1024 / 1024;
-  if (base64SizeMB > 20) throw new Error(`PDF too large (${base64SizeMB.toFixed(1)}MB). Max 20MB.`);
+  if (base64SizeMB > 50) throw new Error(`PDF too large (${base64SizeMB.toFixed(1)}MB). Max 50MB.`);
   return callAI([
     { role: "system", content: systemPrompt },
     { role: "user", content: [
@@ -532,9 +532,9 @@ serve(async (req) => {
         }
 
         const sizeMB = buffer.byteLength / 1024 / 1024;
-        if (sizeMB > 20) {
+        if (sizeMB > 50) {
           await log(supabase, job_id, "pdf_skip",
-            `"${filename}" is ${sizeMB.toFixed(1)}MB — exceeds 20MB limit. Using folder-name fallback.`, "warning");
+            `"${filename}" is ${sizeMB.toFixed(1)}MB — exceeds 50MB limit. Using folder-name fallback.`, "warning");
           continue;
         }
 
@@ -593,7 +593,7 @@ Return ONLY the JSON object with the same keys as described.`);
     if (paymentPdfs.length > 0) {
       try {
         const buffer = await downloadDriveFile(paymentPdfs[0].id, accessToken);
-        if (buffer && buffer.byteLength / 1024 / 1024 <= 20) {
+        if (buffer && buffer.byteLength / 1024 / 1024 <= 50) {
           const b64 = arrayBufferToBase64(buffer);
           const raw = await callAIWithPDF(b64, "You are a payment plan extraction specialist.", PAYMENT_PLAN_PROMPT);
           paymentMilestones = parseJSONArray(raw);
@@ -631,7 +631,7 @@ Return ONLY the JSON object with the same keys as described.`);
       if (amenityPdfs.length > 0) {
         try {
           const buffer = await downloadDriveFile(amenityPdfs[0].id, accessToken);
-          if (buffer && buffer.byteLength / 1024 / 1024 <= 20) {
+          if (buffer && buffer.byteLength / 1024 / 1024 <= 50) {
             const b64 = arrayBufferToBase64(buffer);
             const raw = await callAIWithPDF(b64, "You are an amenity extraction specialist.", AMENITY_PROMPT);
             amenitiesList = parseJSONArray(raw);
