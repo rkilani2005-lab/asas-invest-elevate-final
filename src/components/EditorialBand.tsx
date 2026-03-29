@@ -120,7 +120,7 @@ const EditorialBand = () => {
                     width: "1px",
                     height: "28px",
                     background: "rgba(197,160,89,0.25)",
-                    marginLeft: "8px",
+                    marginInlineStart: "8px",
                   }}
                 />
               )}

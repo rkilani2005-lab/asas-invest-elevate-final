@@ -60,7 +60,7 @@ const Footer = () => {
             <p className="mb-6 max-w-sm text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
               {t("footer.aboutText")}
             </p>
-            <div className="flex space-x-3">
+            <div className="flex gap-3">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}

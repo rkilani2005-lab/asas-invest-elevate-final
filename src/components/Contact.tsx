@@ -309,7 +309,7 @@ const Contact = () => {
                         className="w-full rounded-none"
                         disabled={isSubmitting}
                       >
-                        {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...</> : t("buttons.submit")}
+                        {isSubmitting ? <><Loader2 className="w-4 h-4 me-2 animate-spin" /> Sending...</> : t("buttons.submit")}
                       </Button>
                     </form>
                   )}

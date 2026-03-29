@@ -115,7 +115,7 @@ const LatestUpdates = () => {
               <Link to="/insights">
                 <Button variant="ghost" className="group text-accent hover:text-accent">
                   All Press Releases
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ms-2 h-4 w-4 group-hover:translate-x-1 transition-transform rtl-flip" />
                 </Button>
               </Link>
             </div>
