@@ -33,8 +33,7 @@ const InvestorValue = () => {
     <section className="py-24 bg-primary text-primary-foreground">
       <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-2 gap-16 items-center",
-          isRTL && "lg:flex-row-reverse"
+          "grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"
         )}>
           {/* Left Column - Text */}
           <ScrollReveal direction={isRTL ? "right" : "left"}>
