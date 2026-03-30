@@ -768,6 +768,9 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
           )}
         </div>
 
+        {/* ── Extraction step stepper (while extracting) ──────────────── */}
+        {extractionStepper}
+
         {/* ── Compression progress (while publishing) ────────────────────── */}
         {publishingProgressPanel}
 
