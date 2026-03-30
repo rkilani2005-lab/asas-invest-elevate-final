@@ -540,6 +540,7 @@ serve(async (req) => {
           continue;
         }
 
+        await log(supabase, job_id, "step", "3/7 — AI extracting property data…");
         await log(supabase, job_id, "gemini_extract", `Sending "${filename}" (${sizeMB.toFixed(1)}MB) to Gemini AI`);
 
         const pdfBase64 = arrayBufferToBase64(buffer);
