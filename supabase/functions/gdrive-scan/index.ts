@@ -209,6 +209,10 @@ Deno.serve(async (req) => {
         f.mimeType === "application/vnd.google-apps.document" ||
         f.name.toLowerCase().endsWith(".pdf")
       );
+      const textFiles = files.filter((f) =>
+        f.mimeType === "text/plain" ||
+        f.name.toLowerCase().endsWith(".txt")
+      );
       const imageFiles = files.filter((f) => f.mimeType.startsWith("image/"));
       const videoFiles = files.filter((f) => f.mimeType.startsWith("video/"));
 
