@@ -381,7 +381,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
 
       // ── Step 6: Merge all partials ────────────────────────────────────────
-      await addLog("step", `6/9 — Merging ${partials.length} partial(s) with Claude`);
+      await addLog("step", `6/9 — Merging ${partials.length} partial(s) with AI`);
       const merged = await callEdgeFunction("merge-extract", {
         partials,
         folder_name: job.folder_name,
