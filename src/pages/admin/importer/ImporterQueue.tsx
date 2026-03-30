@@ -289,6 +289,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       // ── Step 5: Send all batches to extract-chunk (Claude Vision) ─────────
       await addLog("step", `5/9 — Sending ${allBatches.length} batch(es) to Claude Vision`);
       const partials: unknown[] = [];
+      const batchErrors: string[] = [];
 
       for (let i = 0; i < allBatches.length; i += CONCURRENCY) {
         const group = allBatches.slice(i, i + CONCURRENCY);
@@ -302,12 +303,17 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             });
           } catch (fetchErr: any) {
             const msg = fetchErr.message || String(fetchErr);
+            console.error(`extract-chunk error (batch ${batch.batchIndex + 1}):`, msg);
+            batchErrors.push(msg);
             await addLog("warning",
               `extract-chunk network error (is it deployed?): ${msg}`, "warning");
             return null;
           }
           if (!res?.ok) {
-            await addLog("warning", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" failed: ${res?.error ?? "unknown"}`, "warning");
+            const errMsg = res?.error ?? "unknown";
+            console.error(`extract-chunk failed (batch ${batch.batchIndex + 1}):`, errMsg);
+            batchErrors.push(errMsg);
+            await addLog("warning", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" failed: ${errMsg}`, "warning");
             return null;
           }
           await addLog("info", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" ✓`, "success");
@@ -316,7 +322,10 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         partials.push(...results.filter(Boolean));
       }
 
-      if (!partials.length) throw new Error("Claude could not extract data from any batch.");
+      if (!partials.length) {
+        const firstErr = batchErrors[0] || "unknown error";
+        throw new Error(`Claude could not extract data from any batch. First error: ${firstErr}`);
+      }
 
       // ── Step 6: Merge all partials ────────────────────────────────────────
       await addLog("step", `6/9 — Merging ${partials.length} partial(s) with Claude`);
