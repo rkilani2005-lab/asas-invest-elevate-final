@@ -505,6 +505,7 @@ serve(async (req) => {
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 3: Extract property data from brochure PDFs
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "2/7 — Downloading & processing brochure PDFs…");
     let extracted: Record<string, unknown> = {};
     let pdfSource = "none";
 
