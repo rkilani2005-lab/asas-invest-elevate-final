@@ -132,19 +132,22 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
   // ── AI Extraction v2 — Claude chunked pipeline (fixes Gemini timeouts) ──────
   const { chunkPdfBlob } = usePdfChunker();
 
-  // ── Helper: resize an image Blob to a JPEG base64 string for Claude Vision ──
-  // Uses createImageBitmap() — not renamed by Vite minifier (unlike `new Image()`)
-  const resizeImageForClaude = useCallback(async (blob: Blob, maxPx = 1600): Promise<string> => {
-    const bitmap = await createImageBitmap(blob);
-    const scale  = Math.min(1, maxPx / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement("canvas");
-    canvas.width  = Math.round(bitmap.width  * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    const ctx = canvas.getContext("2d");
-    if (!ctx) { bitmap.close(); throw new Error("No 2D canvas context"); }
-    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    bitmap.close();
-    return canvas.toDataURL("image/jpeg", 0.82).split(",")[1];
+  // ── Helper: convert an image Blob to base64 for Claude Vision ───────────────
+  // Uses window.FileReader (accessed via window. so Vite cannot rename it).
+  // No canvas/Image APIs needed — Claude accepts raw JPEG/PNG/WEBP up to 20 MB.
+  const resizeImageForClaude = useCallback((blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      // window.FileReader: property access on window prevents minifier renaming
+      const reader = new (window as any).FileReader();
+      reader.onloadend = () => {
+        const result: string = reader.result;
+        // result is "data:image/jpeg;base64,<b64data>" — strip the prefix
+        const comma = result.indexOf(",");
+        resolve(comma >= 0 ? result.slice(comma + 1) : result);
+      };
+      reader.onerror = () => reject(new Error("FileReader failed to read image blob"));
+      reader.readAsDataURL(blob);
+    });
   }, []);
 
   const handleExtract = useCallback(async () => {
@@ -220,10 +223,25 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         const imageB64List: string[] = [];
         for (const item of sortedImages) {
           try {
-            const blob  = await downloadFromDrive(item.dropbox_path, item.original_filename);
-            const b64   = await resizeImageForClaude(blob, 1600);
+            // Download from Drive with token
+            const { access_token: imgToken } = await callEdgeFunction("gdrive-oauth", {
+              action: "get_download_link", file_id: item.dropbox_path,
+            });
+            const imgRes = await fetch(
+              `https://www.googleapis.com/drive/v3/files/${item.dropbox_path}?alt=media`,
+              { headers: { Authorization: `Bearer ${imgToken}` } }
+            );
+            if (!imgRes.ok) {
+              throw new Error(`Drive returned HTTP ${imgRes.status} for "${item.original_filename}"`);
+            }
+            const blob = await imgRes.blob();
+            // Ensure blob has an image MIME type so FileReader works correctly
+            const typedBlob = blob.type.startsWith("image/")
+              ? blob
+              : new Blob([await blob.arrayBuffer()], { type: "image/jpeg" });
+            const b64 = await resizeImageForClaude(typedBlob);
             imageB64List.push(b64);
-            await addLog("info", `Image downloaded: ${item.original_filename}`);
+            await addLog("info", `Image ready: ${item.original_filename}`);
           } catch (imgErr: any) {
             await addLog("warning", `Skipped image "${item.original_filename}": ${imgErr.message}`, "warning");
           }
@@ -265,11 +283,19 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       for (let i = 0; i < allBatches.length; i += CONCURRENCY) {
         const group = allBatches.slice(i, i + CONCURRENCY);
         const results = await Promise.all(group.map(async (batch) => {
-          const res = await callEdgeFunction("extract-chunk", {
-            pages: batch.pages, sourceFile: batch.sourceFile,
-            batchIndex: batch.batchIndex, totalBatches: batch.totalBatches,
-            folderCategory: batch.folderCategory, hints: job.folder_name,
-          });
+          let res: any;
+          try {
+            res = await callEdgeFunction("extract-chunk", {
+              pages: batch.pages, sourceFile: batch.sourceFile,
+              batchIndex: batch.batchIndex, totalBatches: batch.totalBatches,
+              folderCategory: batch.folderCategory, hints: job.folder_name,
+            });
+          } catch (fetchErr: any) {
+            const msg = fetchErr.message || String(fetchErr);
+            await addLog("warning",
+              `extract-chunk network error (is it deployed?): ${msg}`, "warning");
+            return null;
+          }
           if (!res?.ok) {
             await addLog("warning", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" failed: ${res?.error ?? "unknown"}`, "warning");
             return null;
@@ -379,13 +405,17 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
               `https://www.googleapis.com/drive/v3/files/${item.dropbox_path}?alt=media`,
               { headers: { Authorization: `Bearer ${dlToken}` } }
             );
-            if (!driveRes.ok) throw new Error(`Drive HTTP ${driveRes.status}`);
+            if (!driveRes.ok) throw new Error(`Drive HTTP ${driveRes.status} for "${item.original_filename}"`);
             const rawBlob = await driveRes.blob();
+            // Ensure MIME type is set so createImageBitmap works (Drive may return application/octet-stream)
+            const typedBlob = rawBlob.type.startsWith("image/")
+              ? rawBlob
+              : new Blob([await rawBlob.arrayBuffer()], { type: "image/jpeg" });
 
             let finalBlob: Blob;
             if (isImg) {
-              // Compress image to ≤ 600 KB using the same Canvas pipeline as publish
-              finalBlob = await compressImageToLimit(rawBlob, MAX_IMAGE_BYTES, () => {});
+              // Compress image to ≤ 600 KB using the Canvas pipeline
+              finalBlob = await compressImageToLimit(typedBlob, MAX_IMAGE_BYTES, () => {});
             } else {
               // Video: skip if over 40 MB
               if (rawBlob.size > MAX_VIDEO_BYTES) {
@@ -541,7 +571,11 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         )
       );
 
-      finalBlob = await compressImageToLimit(rawBlob, MAX_IMAGE_BYTES, ({ quality, size, pass }) => {
+      // Ensure MIME type for compressImageToLimit (Drive may return application/octet-stream)
+      const typedForCompress = rawBlob.type.startsWith("image/")
+        ? rawBlob
+        : new Blob([await rawBlob.arrayBuffer()], { type: "image/jpeg" });
+      finalBlob = await compressImageToLimit(typedForCompress, MAX_IMAGE_BYTES, ({ quality, size, pass }) => {
         setFileProgress((prev) =>
           prev.map((f) =>
             f.filename === mediaItem.original_filename
