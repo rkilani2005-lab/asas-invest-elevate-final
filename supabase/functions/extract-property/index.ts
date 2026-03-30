@@ -586,6 +586,7 @@ Return ONLY the JSON object with the same keys as described.`);
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 4: Extract Payment Plan
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "4/7 — Extracting payment plan…");
     let paymentMilestones: unknown[] = [];
 
     // Try payment plan files first
