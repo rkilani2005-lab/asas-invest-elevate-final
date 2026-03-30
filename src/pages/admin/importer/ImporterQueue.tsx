@@ -189,11 +189,12 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       const { data: mediaItems } = await supabase
         .from("import_media").select("*").eq("job_id", job.id).order("sort_order");
       const allItems    = mediaItems || [];
-      const pdfItems    = allItems.filter((m: any) => m.media_type === "brochure");
-      const imageItems  = allItems.filter((m: any) => m.media_type === "image");
+      // PDFs are now ignored — extract data from .txt files instead
+      const txtItems    = allItems.filter((m: any) => m.media_type === "other" && m.original_filename?.toLowerCase().endsWith(".txt"));
+      const imageItems  = allItems.filter((m: any) => m.media_type === "image" || m.media_type === "hero" || m.media_type === "render" || m.media_type === "floorplan" || m.media_type === "interior" || m.media_type === "exterior" || m.media_type === "amenity" || m.media_type === "location");
       const videoItems  = allItems.filter((m: any) => m.media_type === "video");
 
-      await addLog("step", `1/9 — Found ${pdfItems.length} PDF(s), ${imageItems.length} image(s), ${videoItems.length} video(s)`);
+      await addLog("step", `1/9 — Found ${txtItems.length} text file(s), ${imageItems.length} image(s), ${videoItems.length} video(s) (PDFs ignored)`);
 
       const CONCURRENCY = 3;
       const allBatches: Array<{
@@ -201,17 +202,70 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         totalBatches: number; folderCategory: string;
       }> = [];
 
-      // ── Step 2: Download + chunk PDFs ─────────────────────────────────────
-      if (pdfItems.length > 0) {
-        await addLog("step", "2/9 — Downloading & rendering PDFs");
-        for (const item of pdfItems) {
-          const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
-          const batches = await chunkPdfBlob(blob, item.original_filename, "Brochure");
-          allBatches.push(...batches);
-          await addLog("info", `PDF "${item.original_filename}": ${batches.length} batch(es)`, "success");
+      // ── Step 2: Download .txt files and prepare text batches ──────────────
+      if (txtItems.length > 0) {
+        await addLog("step", `2/9 — Downloading ${txtItems.length} text file(s)`);
+        let combinedText = "";
+        for (const item of txtItems) {
+          try {
+            const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
+            const text = await blob.text();
+            combinedText += `\n--- ${item.original_filename} ---\n${text}\n`;
+            await addLog("info", `Text file ready: ${item.original_filename} (${(blob.size / 1024).toFixed(1)} KB)`, "success");
+          } catch (txtErr: any) {
+            await addLog("warning", `Skipped text file "${item.original_filename}": ${txtErr.message}`, "warning");
+          }
+        }
+        if (combinedText.trim()) {
+          // Send the combined text as a single batch for extraction
+          allBatches.push({
+            pages:        [combinedText],
+            sourceFile:   "property-text-files",
+            batchIndex:   0,
+            totalBatches: 1,
+            folderCategory: "TextData",
+          });
         }
       } else {
-        await addLog("warning", "No PDF brochures found — continuing with images only", "warning");
+        // Try to discover .txt files directly from Google Drive folder
+        await addLog("step", "2/9 — No text files in DB, scanning Drive folder for .txt files...");
+        try {
+          const token = await getDriveToken();
+          const folderId = job.dropbox_folder_path;
+          // Search recursively for .txt files
+          const searchUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+(mimeType='text/plain'+or+name+contains+'.txt')+and+trashed=false&fields=files(id,name,mimeType,size)&pageSize=50`;
+          const searchRes = await fetch(searchUrl, { headers: { Authorization: `Bearer ${token}` } });
+          if (searchRes.ok) {
+            const { files: txtDriveFiles } = await searchRes.json();
+            if (txtDriveFiles?.length > 0) {
+              let combinedText = "";
+              for (const txtFile of txtDriveFiles) {
+                try {
+                  const blob = await downloadFromDrive(txtFile.id, txtFile.name);
+                  const text = await blob.text();
+                  combinedText += `\n--- ${txtFile.name} ---\n${text}\n`;
+                  await addLog("info", `Found and read text file: ${txtFile.name}`, "success");
+                } catch (e: any) {
+                  await addLog("warning", `Could not read "${txtFile.name}": ${e.message}`, "warning");
+                }
+              }
+              if (combinedText.trim()) {
+                allBatches.push({
+                  pages: [combinedText],
+                  sourceFile: "property-text-files",
+                  batchIndex: 0,
+                  totalBatches: 1,
+                  folderCategory: "TextData",
+                });
+              }
+            }
+          }
+        } catch (scanErr: any) {
+          await addLog("warning", `Could not scan for text files: ${scanErr.message}`, "warning");
+        }
+        if (!allBatches.length) {
+          await addLog("warning", "No text files found — continuing with images only", "warning");
+        }
       }
 
       // ── Step 3: Download images + prepare vision batches ──────────────────
