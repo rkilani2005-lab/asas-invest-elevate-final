@@ -1,0 +1,1 @@
+UPDATE import_jobs SET import_status = 'pending' WHERE id = '02e08d66-5dba-4a99-97cf-e1a242e0f741';
