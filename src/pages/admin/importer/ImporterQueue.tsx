@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePdfChunker } from "@/hooks/usePdfChunker";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -133,8 +133,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     job.import_status || ""
   );
 
-  // ── AI Extraction v2 — Claude chunked pipeline (fixes Gemini timeouts) ──────
-  const { chunkPdfBlob } = usePdfChunker();
+  // ── AI Extraction v2 — text + image pipeline ──────
 
   // ── Helper: convert an image Blob to base64 for Claude Vision ───────────────
   // Uses window.FileReader (accessed via window. so Vite cannot rename it).
@@ -337,7 +336,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
 
       if (!allBatches.length) {
-        throw new Error("No PDFs or images could be processed. Check the Google Drive folder has files.");
+        throw new Error("No text files or images could be processed. Check the Google Drive folder has files.");
       }
 
       // ── Step 5: Send all batches to extract-chunk (Claude Vision) ─────────
@@ -547,7 +546,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     } finally {
       setExtracting(false);
     }
-  }, [job, chunkPdfBlob, resizeImageForClaude, onRefresh]);
+  }, [job, resizeImageForClaude, onRefresh]);
 
   const handleResetStuck = async () => {
     await supabase
@@ -761,8 +760,8 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       toast.success("Property record created");
 
       // ── 2. Prepare media list ────────────────────────────────────────────
-      // Include images (all detected categories), videos, and brochures for upload
-      const UPLOADABLE_TYPES = ["image","hero","exterior","interior","floorplan","amenity","render","view","video","brochure"];
+      // Include images (all detected categories) and videos for upload
+      const UPLOADABLE_TYPES = ["image","hero","exterior","interior","floorplan","amenity","render","view","video"];
       const mediaToUpload = (media || []).filter(
         (m: any) => UPLOADABLE_TYPES.includes(m.media_type)
       );
@@ -993,12 +992,11 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
   const imageMedia = (media || []).filter((m: any) => m.media_type === "image");
   const videos = (media || []).filter((m: any) => m.media_type === "video");
-  const pdfs   = (media || []).filter((m: any) => m.media_type === "brochure");
 
   // ── Extraction step stepper ─────────────────────────────────────────────
   const EXTRACTION_STEPS = [
     { key: "1/9", label: "Scanning files" },
-    { key: "2/9", label: "Downloading PDFs" },
+    { key: "2/9", label: "Downloading text files" },
     { key: "3/9", label: "Loading images" },
     { key: "4/9", label: "Videos found" },
     { key: "5/9", label: "Claude Vision" },
@@ -1166,7 +1164,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
           <div className="flex-1 min-w-0">
             <div className="font-medium">{job.name_en || job.folder_name}</div>
             <div className="text-xs text-muted-foreground mt-0.5 flex gap-3">
-              {job.pdf_count > 0   && <span>{job.pdf_count} PDF</span>}
+              {job.pdf_count > 0   && <span>{job.pdf_count} text</span>}
               {job.image_count > 0 && <span>{job.image_count} images</span>}
               {job.video_count > 0 && <span>{job.video_count} videos</span>}
             </div>
@@ -1511,27 +1509,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                     </div>
                   )}
 
-                  {pdfs.length > 0 && (
-                    <div>
-                      <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                        <FileText className="w-3 h-3" /> Brochures ({pdfs.length})
-                      </h4>
-                      {pdfs.map((pdf: any) => (
-                        <div
-                          key={pdf.id}
-                          className="flex items-center gap-2 text-xs border rounded-lg p-2"
-                        >
-                          <FileText className="w-3 h-3 text-muted-foreground" />
-                          <span className="flex-1 truncate">{pdf.original_filename}</span>
-                          <span className="text-muted-foreground">
-                            {pdf.original_size_bytes
-                              ? `${(pdf.original_size_bytes / 1024).toFixed(0)} KB`
-                              : "—"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
 
                   {!(media || []).length && (
                     <p className="text-sm text-muted-foreground text-center py-4">
