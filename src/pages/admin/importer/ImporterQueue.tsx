@@ -825,7 +825,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       for (let i = 0; i < mediaToUpload.length; i++) {
         const item = mediaToUpload[i];
         // Attach cached token so compressAndUpload doesn't call gdrive-oauth per file
-        if (publishDriveToken) item._cachedToken = publishDriveToken;
+        if (publishDriveToken) (item as any)._cachedToken = publishDriveToken;
 
         try {
           // ── Fast-path: already uploaded during extraction ─────────────────
