@@ -884,7 +884,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                   {imageMedia.length > 0 && (
                     <div>
                       <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                        <Image className="w-3 h-3" /> Images ({images.length})
+                        <Image className="w-3 h-3" /> Images ({imageMedia.length})
                         <span className="ml-2 text-[10px] bg-purple-500/10 text-purple-600 px-1.5 py-0.5 rounded">
                           client-compressed → ≤600 KB
                         </span>
