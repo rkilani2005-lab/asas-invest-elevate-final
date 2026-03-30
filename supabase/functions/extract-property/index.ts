@@ -473,7 +473,6 @@ serve(async (req) => {
       ...images.map((f, i) => ({ job_id, dropbox_path: f.id, original_filename: f.name, media_type: f.subcategory === "hero" ? "hero" : (f.subcategory || "render"), original_size_bytes: parseInt(f.size || "0", 10), is_hero: f.subcategory === "hero" || i === 0, sort_order: i })),
       ...floorplanFiles.filter(f => f.mimeType.startsWith("image/")).map((f, i) => ({ job_id, dropbox_path: f.id, original_filename: f.name, media_type: "floorplan", original_size_bytes: parseInt(f.size || "0", 10), is_hero: false, sort_order: 100 + i })),
       ...videoFiles.map((f, i) => ({ job_id, dropbox_path: f.id, original_filename: f.name, media_type: "video", original_size_bytes: parseInt(f.size || "0", 10), is_hero: false, sort_order: 150 + i })),
-      ...brochures.map((f, i) => ({ job_id, dropbox_path: f.id, original_filename: f.name, media_type: "brochure", original_size_bytes: parseInt(f.size || "0", 10), is_hero: false, sort_order: 200 + i })),
     ];
     if (mediaToRegister.length > 0) {
       await supabase.from("import_media").delete().eq("job_id", job_id);
