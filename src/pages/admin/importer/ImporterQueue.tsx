@@ -1578,7 +1578,7 @@ export default function ImporterQueue() {
 
           toast(`New folder queued: ${row.folder_name}`, {
             icon: <FolderPlus className="w-4 h-4 text-primary" />,
-            description: "Auto-detected via Dropbox webhook / auto-scan",
+            description: "Auto-detected via Google Drive auto-scan",
             duration: 6000,
           });
         }
