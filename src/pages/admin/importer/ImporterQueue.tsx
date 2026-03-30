@@ -135,10 +135,10 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
   // ── AI Extraction v2 — text + image pipeline ──────
 
-  // ── Helper: convert an image Blob to base64 for Claude Vision ───────────────
+  // ── Helper: convert an image Blob to base64 for AI Vision ───────────────
   // Uses window.FileReader (accessed via window. so Vite cannot rename it).
-  // No canvas/Image APIs needed — Claude accepts raw JPEG/PNG/WEBP up to 20 MB.
-  const resizeImageForClaude = useCallback((blob: Blob): Promise<string> => {
+  // No canvas/Image APIs needed — AI accepts raw JPEG/PNG/WEBP up to 20 MB.
+  const resizeImageForAI = useCallback((blob: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
       // window.FileReader: property access on window prevents minifier renaming
       const reader = new (window as any).FileReader();
