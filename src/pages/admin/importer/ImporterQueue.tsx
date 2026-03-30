@@ -1667,9 +1667,9 @@ export default function ImporterQueue() {
         <div className="text-center py-16 text-muted-foreground">
           <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-20" />
           <p className="text-lg font-medium">Queue is empty</p>
-          <p className="text-sm mt-1">Scan Dropbox and select properties to import</p>
+          <p className="text-sm mt-1">Scan Google Drive and select properties to import</p>
           <Button className="mt-4" asChild>
-            <Link to="/admin/importer/scan">Scan Dropbox</Link>
+            <Link to="/admin/importer/scan">Scan Google Drive</Link>
           </Button>
         </div>
       )}
