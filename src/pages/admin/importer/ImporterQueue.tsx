@@ -414,15 +414,13 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         await addLog("step", `9/9 — Uploading ${uploadableMedia.length} media file(s) to storage`);
         const imageIdSet = new Set(imageItems.map((m: any) => m.id));
         let uploadedCount = 0, skippedCount = 0;
+        const uploadToken = await getDriveToken();
 
         for (let idx = 0; idx < uploadableMedia.length; idx++) {
           const item = uploadableMedia[idx];
           const isImg = imageIdSet.has(item.id);
           try {
-            // Get a short-lived Drive access token
-            const { access_token: dlToken } = await callEdgeFunction("gdrive-oauth", {
-              action: "get_download_link", file_id: item.dropbox_path,
-            });
+            const dlToken = uploadToken;
             // Download from Drive
             const driveRes = await fetch(
               `https://www.googleapis.com/drive/v3/files/${item.dropbox_path}?alt=media`,
