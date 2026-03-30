@@ -649,7 +649,9 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     propertyId: string,
     idx: number
   ): Promise<{ url: string; compressedSize: number; skipped: boolean }> => {
-    const isImage = mediaItem.media_type === "image";
+    // Check against all image-like media types, not just "image"
+    const IMAGE_TYPES = ["image","hero","exterior","interior","floorplan","amenity","render","view","location","other"];
+    const isImage = IMAGE_TYPES.includes(mediaItem.media_type) || mediaItem.media_type?.startsWith("image");
     const isVideo = mediaItem.media_type === "video";
 
     // ── Videos: skip if over 40 MB ────────────────────────────────────────
@@ -660,13 +662,18 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
     }
 
-    // ── Step 1: get Google Drive access token ─────────────────────────────
-    // dropbox_path field stores the Google Drive file ID
+    // ── Step 1: get Google Drive access token (use cached if available) ────
     const fileId = mediaItem.dropbox_path;
-    const { access_token } = await callEdgeFunction("gdrive-oauth", {
-      action: "get_download_link",
-      file_id: fileId,
-    });
+    let access_token: string;
+    if (mediaItem._cachedToken) {
+      access_token = mediaItem._cachedToken;
+    } else {
+      const result = await callEdgeFunction("gdrive-oauth", {
+        action: "get_download_link",
+        file_id: fileId,
+      });
+      access_token = result.access_token;
+    }
 
     // ── Step 2: fetch the raw file from Google Drive in the browser ───────
     const driveUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
