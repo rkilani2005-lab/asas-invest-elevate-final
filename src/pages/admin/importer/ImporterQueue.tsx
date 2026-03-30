@@ -513,9 +513,63 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     );
   };
 
-  const images = (media || []).filter((m: any) => m.media_type === "image");
+  const imageMedia = (media || []).filter((m: any) => m.media_type === "image");
   const videos = (media || []).filter((m: any) => m.media_type === "video");
   const pdfs   = (media || []).filter((m: any) => m.media_type === "brochure");
+
+  // ── Extraction step stepper ─────────────────────────────────────────────
+  const EXTRACTION_STEPS = [
+    { key: "1/7", label: "Scanning folders" },
+    { key: "2/7", label: "Downloading PDFs" },
+    { key: "3/7", label: "AI processing" },
+    { key: "4/7", label: "Payment plans" },
+    { key: "5/7", label: "Amenities" },
+    { key: "6/7", label: "Translating" },
+    { key: "7/7", label: "Saving data" },
+  ];
+
+  const currentStepLog = (logs || []).find((l: any) => l.action === "step");
+  const currentStepKey = currentStepLog ? (currentStepLog as any).details?.split(" —")[0] : null;
+  const currentStepIdx = currentStepKey
+    ? EXTRACTION_STEPS.findIndex((s) => s.key === currentStepKey)
+    : -1;
+
+  const extractionStepper = (extracting || job.import_status === "extracting") && (
+    <div className="border-t px-4 py-3 bg-blue-500/5 space-y-2">
+      <div className="flex items-center gap-2 text-xs font-medium text-blue-600">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        <span>
+          {currentStepLog
+            ? (currentStepLog as any).details
+            : "Starting extraction…"}
+        </span>
+      </div>
+      <div className="flex gap-1">
+        {EXTRACTION_STEPS.map((step, i) => (
+          <div key={step.key} className="flex-1 flex flex-col items-center gap-1">
+            <div
+              className={`h-1.5 w-full rounded-full transition-all ${
+                i < currentStepIdx
+                  ? "bg-green-500"
+                  : i === currentStepIdx
+                  ? "bg-blue-500 animate-pulse"
+                  : "bg-muted"
+              }`}
+            />
+            <span
+              className={`text-[10px] leading-tight text-center ${
+                i <= currentStepIdx
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {step.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   // ── Compression progress overlay (shown while publishing) ────────────────
   const publishingProgressPanel = publishing && fileProgress.length > 0 && (
@@ -714,6 +768,9 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
           )}
         </div>
 
+        {/* ── Extraction step stepper (while extracting) ──────────────── */}
+        {extractionStepper}
+
         {/* ── Compression progress (while publishing) ────────────────────── */}
         {publishingProgressPanel}
 
@@ -827,16 +884,16 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
               {/* ── Media tab ──────────────────────────────────────────── */}
               <TabsContent value="media" className="p-4">
                 <div className="space-y-4">
-                  {images.length > 0 && (
+                  {imageMedia.length > 0 && (
                     <div>
                       <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                        <Image className="w-3 h-3" /> Images ({images.length})
+                        <Image className="w-3 h-3" /> Images ({imageMedia.length})
                         <span className="ml-2 text-[10px] bg-purple-500/10 text-purple-600 px-1.5 py-0.5 rounded">
                           client-compressed → ≤600 KB
                         </span>
                       </h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {images.map((img: any) => {
+                        {imageMedia.map((img: any) => {
                           const fp = fileProgress.find(
                             (f) => f.filename === img.original_filename
                           );

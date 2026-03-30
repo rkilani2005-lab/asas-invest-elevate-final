@@ -469,6 +469,7 @@ serve(async (req) => {
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 1: Recursive Folder Scan & File Categorization
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "1/7 — Scanning Google Drive folders…");
     await log(supabase, job_id, "scan_start", `Scanning folder "${folder_name}" recursively...`);
 
     const folderMap = await scanFolderRecursive(accessToken, resolvedFolderId);
@@ -504,6 +505,7 @@ serve(async (req) => {
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 3: Extract property data from brochure PDFs
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "2/7 — Downloading & processing brochure PDFs…");
     let extracted: Record<string, unknown> = {};
     let pdfSource = "none";
 
@@ -538,6 +540,7 @@ serve(async (req) => {
           continue;
         }
 
+        await log(supabase, job_id, "step", "3/7 — AI extracting property data…");
         await log(supabase, job_id, "gemini_extract", `Sending "${filename}" (${sizeMB.toFixed(1)}MB) to Gemini AI`);
 
         const pdfBase64 = arrayBufferToBase64(buffer);
@@ -584,6 +587,7 @@ Return ONLY the JSON object with the same keys as described.`);
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 4: Extract Payment Plan
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "4/7 — Extracting payment plan…");
     let paymentMilestones: unknown[] = [];
 
     // Try payment plan files first
@@ -622,6 +626,7 @@ Return ONLY the JSON object with the same keys as described.`);
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 5: Extract Amenities
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "5/7 — Extracting amenities…");
     let amenitiesList: unknown[] = (extracted.amenities as unknown[]) || [];
 
     if (amenityFiles.length > 0 && amenitiesList.length === 0) {
@@ -661,6 +666,7 @@ Return ONLY the JSON object with the same keys as described.`);
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 6: Arabic Marketing Translation
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "6/7 — Translating to Arabic…");
     const arMap: Record<string, string> = {
       name_en: "name_ar", developer_en: "developer_ar", location_en: "location_ar",
       tagline_en: "tagline_ar", overview_en: "overview_ar", highlights_en: "highlights_ar",
@@ -691,6 +697,7 @@ Return ONLY the JSON object with the same keys as described.`);
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 7: Merge All Data
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "7/7 — Saving & registering media…");
     const merged: Record<string, unknown> = { ...extracted };
     // Remove non-CMS fields from merged
     delete merged.amenities;
