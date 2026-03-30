@@ -339,8 +339,8 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         throw new Error("No text files or images could be processed. Check the Google Drive folder has files.");
       }
 
-      // ── Step 5: Send all batches to extract-chunk (Claude Vision) ─────────
-      await addLog("step", `5/9 — Sending ${allBatches.length} batch(es) to Claude Vision`);
+      // ── Step 5: Send all batches to extract-chunk (AI Vision) ─────────
+      await addLog("step", `5/9 — Sending ${allBatches.length} batch(es) to AI extraction`);
       const partials: unknown[] = [];
       const batchErrors: string[] = [];
 
