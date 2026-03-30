@@ -760,8 +760,8 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       toast.success("Property record created");
 
       // ── 2. Prepare media list ────────────────────────────────────────────
-      // Include images (all detected categories), videos, and brochures for upload
-      const UPLOADABLE_TYPES = ["image","hero","exterior","interior","floorplan","amenity","render","view","video","brochure"];
+      // Include images (all detected categories) and videos for upload
+      const UPLOADABLE_TYPES = ["image","hero","exterior","interior","floorplan","amenity","render","view","video"];
       const mediaToUpload = (media || []).filter(
         (m: any) => UPLOADABLE_TYPES.includes(m.media_type)
       );
