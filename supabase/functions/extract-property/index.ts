@@ -665,6 +665,7 @@ Return ONLY the JSON object with the same keys as described.`);
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 6: Arabic Marketing Translation
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "6/7 — Translating to Arabic…");
     const arMap: Record<string, string> = {
       name_en: "name_ar", developer_en: "developer_ar", location_en: "location_ar",
       tagline_en: "tagline_ar", overview_en: "overview_ar", highlights_en: "highlights_ar",
