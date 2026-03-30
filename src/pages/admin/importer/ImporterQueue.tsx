@@ -133,22 +133,18 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
   const { chunkPdfBlob } = usePdfChunker();
 
   // ── Helper: resize an image Blob to a JPEG base64 string for Claude Vision ──
+  // Uses createImageBitmap() — not renamed by Vite minifier (unlike `new Image()`)
   const resizeImageForClaude = useCallback(async (blob: Blob, maxPx = 1600): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(blob);
-      const img = new Image();
-      img.onload = () => {
-        const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
-        const canvas = document.createElement("canvas");
-        canvas.width  = Math.round(img.width  * scale);
-        canvas.height = Math.round(img.height * scale);
-        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL("image/jpeg", 0.82).split(",")[1]);
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image decode failed")); };
-      img.src = url;
-    });
+    const bitmap = await createImageBitmap(blob);
+    const scale  = Math.min(1, maxPx / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width  = Math.round(bitmap.width  * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) { bitmap.close(); throw new Error("No 2D canvas context"); }
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    return canvas.toDataURL("image/jpeg", 0.82).split(",")[1];
   }, []);
 
   const handleExtract = useCallback(async () => {

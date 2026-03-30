@@ -1,191 +1,134 @@
 /**
- * Compresses an image file using Canvas API
- * Converts to WebP format for better compression (with JPEG fallback)
- * Maintains original resolution while reducing file size
+ * image-compression.ts
+ *
+ * All functions use createImageBitmap() instead of new Image() to avoid
+ * Vite production-build minification issues where `Image` gets renamed
+ * to a short identifier (e.g. `Ns`) that then fails as a constructor.
+ *
+ * createImageBitmap() is a global function — it cannot be renamed by
+ * minifiers — and is supported in all modern browsers and Chromium WebViews.
+ */
+
+// ── Public helpers ─────────────────────────────────────────────────────────────
+
+/**
+ * Compress a File to WebP (JPEG fallback), keeping original dimensions.
  */
 export async function compressImage(file: File, quality = 0.85): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        reject(new Error("Could not get canvas context"));
-        return;
-      }
-      
-      ctx.drawImage(img, 0, 0);
-      
-      // Try WebP first (best compression), fallback to JPEG
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            // Fallback to JPEG if WebP fails
-            canvas.toBlob(
-              (jpegBlob) => {
-                if (jpegBlob) {
-                  resolve(jpegBlob);
-                } else {
-                  reject(new Error("Failed to compress image"));
-                }
-              },
-              "image/jpeg",
-              quality
-            );
-          }
-        },
-        "image/webp",
-        quality
-      );
-      
-      // Clean up object URL
-      URL.revokeObjectURL(img.src);
-    };
-    
-    img.onerror = () => {
-      URL.revokeObjectURL(img.src);
-      reject(new Error("Failed to load image"));
-    };
-    
-    img.src = URL.createObjectURL(file);
-  });
+  return compressImageToLimit(file, Infinity, undefined, quality);
 }
 
 /**
- * Compresses an image blob (not just File) using Canvas API.
- * Accepts a Blob/ArrayBuffer fetched from a URL.
+ * Compress a Blob to WebP (JPEG fallback), keeping original dimensions.
  */
-export async function compressImageBlob(
-  blob: Blob,
-  quality = 0.85
-): Promise<Blob> {
-  const file = new File([blob], "image", { type: blob.type || "image/jpeg" });
-  return compressImage(file, quality);
+export async function compressImageBlob(blob: Blob, quality = 0.85): Promise<Blob> {
+  return compressImageToLimit(blob, Infinity, undefined, quality);
 }
 
 /**
- * Compress an image loaded from a URL to a target max size in bytes.
- * Steps:
- *   1. Resize to max 1920px on longest side
- *   2. Encode at starting quality (default 0.85), step down by 0.05 until under limit
- *   3. If still too large at quality 0.55, resize to 1440px and retry
- *   4. If still too large, resize to 1080px and retry
- * Returns the compressed Blob.
+ * Compress an image Blob/File to under maxBytes.
+ * Tries progressively lower quality and smaller resolutions until it fits.
  */
 export async function compressImageToLimit(
-  sourceBlob: Blob,
+  source: Blob | File,
   maxBytes = 600 * 1024,
-  onProgress?: (info: { quality: number; size: number; pass: string }) => void
+  onProgress?: (info: { quality: number; size: number; pass: string }) => void,
+  startQuality = 0.85,
 ): Promise<Blob> {
   const resolutions = [1920, 1440, 1080];
-  const minQuality = 0.55;
+  const minQuality  = 0.55;
 
   for (const maxDim of resolutions) {
-    let quality = 0.85;
+    let quality = startQuality;
 
-    // Load into an img element to get natural dimensions
-    const resized = await resizeBlob(sourceBlob, maxDim);
+    const resized = await resizeBlobBitmap(source, maxDim);
 
     while (quality >= minQuality) {
-      const compressed = await encodeBlob(resized, quality);
+      const compressed = await encodeBlobBitmap(resized, quality);
       onProgress?.({ quality, size: compressed.size, pass: `${maxDim}px` });
-
-      if (compressed.size <= maxBytes) return compressed;
+      if (maxBytes === Infinity || compressed.size <= maxBytes) return compressed;
       quality -= 0.05;
     }
-
-    // At minimum quality this resolution is still too large — try smaller resolution
   }
 
-  // Last-resort: return minimum quality at 1080px even if still over limit
-  const lastResort = await resizeBlob(sourceBlob, 1080);
-  return encodeBlob(lastResort, minQuality);
-}
-
-/** Resize a blob so its longest side is at most `maxDim` px */
-async function resizeBlob(blob: Blob, maxDim: number): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(blob);
-
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const { width, height } = img;
-      const longest = Math.max(width, height);
-      const scale = longest > maxDim ? maxDim / longest : 1;
-      const w = Math.round(width * scale);
-      const h = Math.round(height * scale);
-
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("No canvas context"));
-      ctx.drawImage(img, 0, 0, w, h);
-
-      canvas.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error("Resize failed"))),
-        "image/jpeg",
-        0.95 // high quality intermediate for the resize step
-      );
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image load failed")); };
-    img.src = url;
-  });
-}
-
-/** Encode a blob at the given quality, preferring WebP with JPEG fallback */
-async function encodeBlob(blob: Blob, quality: number): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(blob);
-
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("No canvas context"));
-      ctx.drawImage(img, 0, 0);
-
-      canvas.toBlob(
-        (webp) => {
-          if (webp) return resolve(webp);
-          // WebP not supported — fall back to JPEG
-          canvas.toBlob(
-            (jpeg) => (jpeg ? resolve(jpeg) : reject(new Error("Encode failed"))),
-            "image/jpeg",
-            quality
-          );
-        },
-        "image/webp",
-        quality
-      );
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image load failed")); };
-    img.src = url;
-  });
+  // Last resort: 1080 px at minimum quality
+  const lastResort = await resizeBlobBitmap(source, 1080);
+  return encodeBlobBitmap(lastResort, minQuality);
 }
 
 /**
- * Get the file extension based on blob type
+ * Resize an image blob so its longest side is ≤ maxDim pixels.
+ * Uses createImageBitmap() — immune to minification constructor renaming.
  */
+async function resizeBlobBitmap(source: Blob | File, maxDim: number): Promise<Blob> {
+  const bitmap = await createImageBitmap(source);
+  const { width, height } = bitmap;
+
+  const longest = Math.max(width, height);
+  const scale   = longest > maxDim ? maxDim / longest : 1;
+  const w = Math.round(width  * scale);
+  const h = Math.round(height * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width  = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) { bitmap.close(); throw new Error("No 2D canvas context"); }
+
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  bitmap.close();
+
+  return canvasToBlob(canvas, "image/jpeg", 0.95);
+}
+
+/**
+ * Encode a blob at the given quality. Tries WebP first, falls back to JPEG.
+ */
+async function encodeBlobBitmap(source: Blob | File, quality: number): Promise<Blob> {
+  const bitmap = await createImageBitmap(source);
+  const canvas = document.createElement("canvas");
+  canvas.width  = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) { bitmap.close(); throw new Error("No 2D canvas context"); }
+
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  // Try WebP; fall back to JPEG if the browser returns null
+  try {
+    const webp = await canvasToBlob(canvas, "image/webp", quality);
+    if (webp.size > 0) return webp;
+  } catch {}
+
+  return canvasToBlob(canvas, "image/jpeg", quality);
+}
+
+/** Promisified canvas.toBlob */
+function canvasToBlob(
+  canvas: HTMLCanvasElement,
+  type: string,
+  quality: number,
+): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error(`toBlob failed for ${type}`))),
+      type,
+      quality,
+    );
+  });
+}
+
+// ── Utility exports ────────────────────────────────────────────────────────────
+
+/** Return "webp" or "jpg" based on blob MIME type */
 export function getExtensionFromBlob(blob: Blob): string {
   return blob.type === "image/webp" ? "webp" : "jpg";
 }
 
-/**
- * Format file size for display
- */
+/** Human-readable file size */
 export function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024)           return `${bytes} B`;
+  if (bytes < 1024 * 1024)    return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
