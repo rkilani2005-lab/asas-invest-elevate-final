@@ -246,7 +246,7 @@ Deno.serve(async (req) => {
 
       await supabase.from("import_logs").insert({
         action: "gdrive_queued",
-        details: `Queued folder "${folder.name}" from Google Drive (${pdfFiles.length} PDFs, ${imageFiles.length} images, ${videoFiles.length} videos) — recursive scan`,
+        details: `Queued folder "${folder.name}" from Google Drive (${textFiles.length} TXTs, ${pdfFiles.length} PDFs, ${imageFiles.length} images, ${videoFiles.length} videos) — recursive scan`,
         level: "info",
       });
 
