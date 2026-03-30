@@ -696,6 +696,7 @@ Return ONLY the JSON object with the same keys as described.`);
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 7: Merge All Data
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "7/7 — Saving & registering media…");
     const merged: Record<string, unknown> = { ...extracted };
     // Remove non-CMS fields from merged
     delete merged.amenities;
