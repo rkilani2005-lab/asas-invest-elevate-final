@@ -649,7 +649,9 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     propertyId: string,
     idx: number
   ): Promise<{ url: string; compressedSize: number; skipped: boolean }> => {
-    const isImage = mediaItem.media_type === "image";
+    // Check against all image-like media types, not just "image"
+    const IMAGE_TYPES = ["image","hero","exterior","interior","floorplan","amenity","render","view","location","other"];
+    const isImage = IMAGE_TYPES.includes(mediaItem.media_type) || mediaItem.media_type?.startsWith("image");
     const isVideo = mediaItem.media_type === "video";
 
     // ── Videos: skip if over 40 MB ────────────────────────────────────────
@@ -660,13 +662,18 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
     }
 
-    // ── Step 1: get Google Drive access token ─────────────────────────────
-    // dropbox_path field stores the Google Drive file ID
+    // ── Step 1: get Google Drive access token (use cached if available) ────
     const fileId = mediaItem.dropbox_path;
-    const { access_token } = await callEdgeFunction("gdrive-oauth", {
-      action: "get_download_link",
-      file_id: fileId,
-    });
+    let access_token: string;
+    if (mediaItem._cachedToken) {
+      access_token = mediaItem._cachedToken;
+    } else {
+      const result = await callEdgeFunction("gdrive-oauth", {
+        action: "get_download_link",
+        file_id: fileId,
+      });
+      access_token = result.access_token;
+    }
 
     // ── Step 2: fetch the raw file from Google Drive in the browser ───────
     const driveUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
@@ -788,9 +795,37 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       let successCount = 0;
       let skippedCount = 0;
 
+      // Cache Drive token for all publish downloads
+      let publishDriveToken: string | null = null;
+      try {
+        const { access_token } = await callEdgeFunction("gdrive-oauth", {
+          action: "get_download_link", file_id: "_warmup_",
+        });
+        publishDriveToken = access_token;
+      } catch {}
+
+      // Map media_type to valid CMS media_type enum values
+      const mapToEnumType = (mediaType: string, filename: string, isHero: boolean): string => {
+        const VALID_ENUM = ["render","floorplan","floor_plate","material","video","interior","hero","brochure"];
+        if (VALID_ENUM.includes(mediaType)) return mediaType;
+        // Map non-enum types to closest valid enum value
+        if (mediaType === "exterior" || mediaType === "location" || mediaType === "view") return "render";
+        if (mediaType === "amenity") return "interior";
+        if (mediaType === "image" || mediaType === "other") {
+          if (isHero) return "hero";
+          const fn = filename.toLowerCase();
+          if (fn.includes("floor") || fn.includes("plan")) return "floorplan";
+          if (fn.includes("interior") || fn.includes("bedroom") || fn.includes("living")) return "interior";
+          return "render";
+        }
+        return "render";
+      };
+
       // ── 4. Process one at a time (Canvas API is synchronous) ─────────────
       for (let i = 0; i < mediaToUpload.length; i++) {
         const item = mediaToUpload[i];
+        // Attach cached token so compressAndUpload doesn't call gdrive-oauth per file
+        if (publishDriveToken) (item as any)._cachedToken = publishDriveToken;
 
         try {
           // ── Fast-path: already uploaded during extraction ─────────────────
@@ -808,12 +843,10 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
               )
             );
 
-            const KNOWN_CATS = ["video","hero","exterior","interior","floorplan","amenity","view","render","brochure"];
-            const cat = KNOWN_CATS.includes(item.media_type) ? item.media_type
-              : item.is_hero ? "hero" : "render";
+            const enumType = mapToEnumType(item.media_type, item.original_filename, item.is_hero || item.sort_order === 0);
 
             await (supabase.from("media") as any).insert({
-              property_id, type: cat, url,
+              property_id, type: enumType, url,
               order_index: item.sort_order, file_size: compressedSize,
             });
 
@@ -862,34 +895,12 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             compression_status: "done",
           }).eq("id", item.id);
 
-          // Create CMS media record with smart category detection
-          const filename = item.original_filename.toLowerCase();
-          // Use category set by extraction step (stored in media_type), fall back to filename detection
-          let mediaCategory: string;
-          const KNOWN_CATS = ["video","hero","exterior","interior","floorplan","amenity","view","render","brochure"];
-          if (KNOWN_CATS.includes(item.media_type)) {
-            mediaCategory = item.media_type;
-          } else if (item.is_hero || item.sort_order === 0) {
-            mediaCategory = "hero";
-          } else if (filename.includes("floor") || filename.includes("plan") || filename.includes("layout")) {
-            mediaCategory = "floorplan";
-          } else if (filename.includes("exterior") || filename.includes("facade") || filename.includes("building")) {
-            mediaCategory = "exterior";
-          } else if (filename.includes("interior") || filename.includes("living") || filename.includes("bedroom")) {
-            mediaCategory = "interior";
-          } else if (filename.includes("pool") || filename.includes("gym") || filename.includes("amenity")) {
-            mediaCategory = "amenity";
-          } else if (filename.includes("view") || filename.includes("aerial") || filename.includes("panorama")) {
-            mediaCategory = "view";
-          } else if (filename.includes(".pdf")) {
-            mediaCategory = "brochure";
-          } else {
-            mediaCategory = "render";
-          }
+          // Create CMS media record with valid enum type
+          const enumType = mapToEnumType(item.media_type, item.original_filename, item.is_hero || item.sort_order === 0);
 
           await (supabase.from("media") as any).insert({
             property_id,
-            type: mediaCategory,
+            type: enumType,
             url,
             order_index: item.sort_order,
             file_size: compressedSize,
