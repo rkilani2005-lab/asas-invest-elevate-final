@@ -2,15 +2,12 @@
  * usePdfChunker
  *
  * Renders each page of a PDF to a JPEG image entirely in the browser using
- * PDF.js (CDN-loaded in index.html). Groups pages into fixed-size batches so
- * each edge-function call stays well within Supabase's 150-second limit.
+ * PDF.js — loaded dynamically on first use, no index.html changes needed.
  *
- * WHY: Sending a raw 20–80 MB PDF to an edge function causes timeouts.
+ * WHY: Sending a raw 20–80 MB PDF to an edge function causes Supabase timeouts.
  * Sending 4-page JPEG batches (~300–800 KB each) takes ~10 s per call — safe.
  */
-import { useState, useCallback } from "react";
-
-declare const pdfjsLib: any;
+import { useState, useCallback, useRef } from "react";
 
 export interface PageBatch {
   batchIndex: number;
@@ -20,31 +17,82 @@ export interface PageBatch {
   folderCategory: string;
 }
 
+const PDFJS_CDN    = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+const WORKER_CDN   = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 const PAGES_PER_BATCH = 4;
-const RENDER_SCALE    = 1.5; // ~108 dpi — sharp text, reasonable payload size
+const RENDER_SCALE    = 1.5;   // ~108 dpi — sharp text, reasonable payload
 const JPEG_QUALITY    = 0.82;
+
+/** Loads PDF.js from CDN exactly once and resolves with the pdfjsLib global. */
+function loadPdfJs(): Promise<any> {
+  // Already loaded
+  if (typeof (window as any).pdfjsLib !== "undefined") {
+    return Promise.resolve((window as any).pdfjsLib);
+  }
+
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${PDFJS_CDN}"]`);
+    if (existing) {
+      // Script tag exists but may still be loading — poll until ready
+      const poll = setInterval(() => {
+        if (typeof (window as any).pdfjsLib !== "undefined") {
+          clearInterval(poll);
+          configureWorker((window as any).pdfjsLib);
+          resolve((window as any).pdfjsLib);
+        }
+      }, 50);
+      setTimeout(() => { clearInterval(poll); reject(new Error("PDF.js load timeout")); }, 15000);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = PDFJS_CDN;
+    script.async = true;
+    script.onload = () => {
+      const lib = (window as any).pdfjsLib;
+      if (!lib) { reject(new Error("PDF.js loaded but pdfjsLib is undefined")); return; }
+      configureWorker(lib);
+      resolve(lib);
+    };
+    script.onerror = () => reject(new Error(`Failed to load PDF.js from CDN: ${PDFJS_CDN}`));
+    document.head.appendChild(script);
+  });
+}
+
+function configureWorker(lib: any) {
+  if (!lib.GlobalWorkerOptions.workerSrc) {
+    lib.GlobalWorkerOptions.workerSrc = WORKER_CDN;
+  }
+}
 
 export function usePdfChunker() {
   const [chunkProgress, setChunkProgress] = useState(0);
   const [chunkStatus, setChunkStatus]     = useState("");
+  // Cache the loaded lib across renders
+  const pdfLibRef = useRef<any>(null);
 
   /**
-   * Takes a raw PDF Blob, renders every page to JPEG via PDF.js,
-   * and returns an array of batches (each ≤ PAGES_PER_BATCH images).
+   * Downloads a PDF Blob, renders every page to JPEG, returns batches.
+   *
+   * @param blob           Raw PDF blob (already fetched from Google Drive)
+   * @param filename       Original filename (for log messages)
+   * @param folderCategory Drive subfolder context: "Brochure", "Floor Plans", …
    */
   const chunkPdfBlob = useCallback(async (
     blob: Blob,
     filename: string,
     folderCategory: string,
   ): Promise<PageBatch[]> => {
-    if (typeof pdfjsLib === "undefined") {
-      throw new Error(
-        "PDF.js is not loaded. Ensure the CDN script tags are present in index.html."
-      );
+    setChunkStatus(`Initialising PDF renderer…`);
+    setChunkProgress(0);
+
+    // Lazy-load PDF.js on first call
+    if (!pdfLibRef.current) {
+      pdfLibRef.current = await loadPdfJs();
     }
+    const pdfjsLib = pdfLibRef.current;
 
     setChunkStatus(`Loading ${filename}…`);
-    setChunkProgress(0);
 
     const arrayBuffer = await blob.arrayBuffer();
     const pdf         = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -63,9 +111,11 @@ export function usePdfChunker() {
       const ctx      = canvas.getContext("2d")!;
 
       await page.render({ canvasContext: ctx, viewport }).promise;
+
+      // Strip the "data:image/jpeg;base64," prefix — edge function wants raw b64
       allPageB64.push(canvas.toDataURL("image/jpeg", JPEG_QUALITY).split(",")[1]);
 
-      // Free GPU memory immediately
+      // Free GPU memory immediately to avoid OOM on large brochures
       canvas.width = 0;
       canvas.height = 0;
       page.cleanup();
