@@ -795,9 +795,37 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       let successCount = 0;
       let skippedCount = 0;
 
+      // Cache Drive token for all publish downloads
+      let publishDriveToken: string | null = null;
+      try {
+        const { access_token } = await callEdgeFunction("gdrive-oauth", {
+          action: "get_download_link", file_id: "_warmup_",
+        });
+        publishDriveToken = access_token;
+      } catch {}
+
+      // Map media_type to valid CMS media_type enum values
+      const mapToEnumType = (mediaType: string, filename: string, isHero: boolean): string => {
+        const VALID_ENUM = ["render","floorplan","floor_plate","material","video","interior","hero","brochure"];
+        if (VALID_ENUM.includes(mediaType)) return mediaType;
+        // Map non-enum types to closest valid enum value
+        if (mediaType === "exterior" || mediaType === "location" || mediaType === "view") return "render";
+        if (mediaType === "amenity") return "interior";
+        if (mediaType === "image" || mediaType === "other") {
+          if (isHero) return "hero";
+          const fn = filename.toLowerCase();
+          if (fn.includes("floor") || fn.includes("plan")) return "floorplan";
+          if (fn.includes("interior") || fn.includes("bedroom") || fn.includes("living")) return "interior";
+          return "render";
+        }
+        return "render";
+      };
+
       // ── 4. Process one at a time (Canvas API is synchronous) ─────────────
       for (let i = 0; i < mediaToUpload.length; i++) {
         const item = mediaToUpload[i];
+        // Attach cached token so compressAndUpload doesn't call gdrive-oauth per file
+        if (publishDriveToken) item._cachedToken = publishDriveToken;
 
         try {
           // ── Fast-path: already uploaded during extraction ─────────────────
