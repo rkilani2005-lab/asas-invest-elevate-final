@@ -1509,27 +1509,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                     </div>
                   )}
 
-                  {pdfs.length > 0 && (
-                    <div>
-                      <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                        <FileText className="w-3 h-3" /> Brochures ({pdfs.length})
-                      </h4>
-                      {pdfs.map((pdf: any) => (
-                        <div
-                          key={pdf.id}
-                          className="flex items-center gap-2 text-xs border rounded-lg p-2"
-                        >
-                          <FileText className="w-3 h-3 text-muted-foreground" />
-                          <span className="flex-1 truncate">{pdf.original_filename}</span>
-                          <span className="text-muted-foreground">
-                            {pdf.original_size_bytes
-                              ? `${(pdf.original_size_bytes / 1024).toFixed(0)} KB`
-                              : "—"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
 
                   {!(media || []).length && (
                     <p className="text-sm text-muted-foreground text-center py-4">
