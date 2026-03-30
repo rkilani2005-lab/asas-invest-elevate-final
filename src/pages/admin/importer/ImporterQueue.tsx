@@ -24,6 +24,9 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
+  RotateCcw,
+  ScanSearch,
+  Trash2,
   Zap,
   Bell,
   X,
@@ -31,7 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   compressImageToLimit,
   getExtensionFromBlob,
@@ -84,6 +87,7 @@ interface FileProgress {
 
 // ─── JobCard ──────────────────────────────────────────────────────────────────
 function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
+  const navigate = useNavigate();
   const [expanded, setExpanded]         = useState(false);
   const [editing, setEditing]           = useState(false);
   const [form, setForm]                 = useState<Record<string, any>>({});
@@ -489,6 +493,58 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       .eq("id", job.id);
     toast.info("Job reset to pending");
     onRefresh();
+  };
+
+  // ── Redo Extraction: clear extracted data + logs, reset to pending, re-run ──
+  const handleRedoExtraction = async () => {
+    if (!window.confirm(`Re-run AI extraction for "${job.folder_name}"? This will clear all previously extracted data.`)) return;
+    setExtracting(true);
+
+    // 1. Wipe extracted text fields + reset status
+    await supabase.from("import_jobs").update({
+      import_status:   "pending",
+      name_en: null,         name_ar: null,
+      tagline_en: null,      tagline_ar: null,
+      developer_en: null,    developer_ar: null,
+      location_en: null,     location_ar: null,
+      price_range: null,     size_range: null,
+      unit_types: null,      ownership_type: null,
+      handover_date: null,
+      overview_en: null,     overview_ar: null,
+      highlights_en: null,   highlights_ar: null,
+      investment_en: null,   investment_ar: null,
+      enduser_text_en: null, enduser_text_ar: null,
+      error_log: null,
+    }).eq("id", job.id);
+
+    // 2. Clear old logs so the stepper starts fresh
+    await supabase.from("import_logs").delete().eq("job_id", job.id);
+
+    // 3. Reset media upload state so files are re-processed
+    await supabase.from("import_media").update({
+      storage_url: null,
+      compressed_size_bytes: null,
+      compression_status: "pending",
+    }).eq("job_id", job.id);
+
+    toast.info("Cleared — restarting extraction…");
+    onRefresh();
+
+    // 4. Wait a tick so the DB update propagates, then re-run extraction
+    setTimeout(() => handleExtract(), 300);
+  };
+
+  // ── Redo Scan: delete this job + its media, go back to scan to re-select ────
+  const handleRedoScan = async () => {
+    if (!window.confirm(`Delete this job and re-scan the Drive folder for "${job.folder_name}"? All extracted data will be lost.`)) return;
+
+    await supabase.from("import_logs").delete().eq("job_id", job.id);
+    await supabase.from("import_media").delete().eq("job_id", job.id);
+    await supabase.from("import_jobs").delete().eq("id", job.id);
+
+    toast.success("Job deleted — you can re-scan and re-select this folder");
+    onRefresh();
+    navigate("/admin/importer/scan");
   };
 
   // ── Edit helpers ──────────────────────────────────────────────────────────
@@ -1010,6 +1066,8 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       className={`${
         job.import_status === "completed"
           ? "border-green-500/30"
+          : job.import_status === "error"
+          ? "border-red-400/40"
           : isProcessing
           ? "border-blue-500/30"
           : ""
@@ -1044,11 +1102,10 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             {cfg.label}
           </Badge>
 
-          {!isProcessing &&
-            !publishing &&
-            job.import_status !== "completed" &&
-            job.import_status !== "error" && (
-              <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+          {!isProcessing && !publishing && (
+              <div className="flex gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+
+                {/* ── Pending: run extraction ─────────────────────────── */}
                 {job.import_status === "pending" && (
                   <Button
                     size="sm"
@@ -1064,11 +1121,28 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                     <span className="ml-1">Extract</span>
                   </Button>
                 )}
+
+                {/* ── Reviewing: edit · redo extraction · publish ────── */}
                 {job.import_status === "reviewing" && (
                   <>
                     <Button size="sm" variant="outline" onClick={startEditing}>
                       <Edit3 className="w-3 h-3" />
                       <span className="ml-1">Edit</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleRedoExtraction}
+                      disabled={extracting}
+                      className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                      title="Clear extracted data and re-run AI extraction"
+                    >
+                      {extracting ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <RotateCcw className="w-3 h-3" />
+                      )}
+                      <span className="ml-1">Redo</span>
                     </Button>
                     <Button
                       size="sm"
@@ -1083,6 +1157,48 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                       <span className="ml-1">Publish</span>
                     </Button>
                   </>
+                )}
+
+                {/* ── Error: redo extraction · redo scan ─────────────── */}
+                {job.import_status === "error" && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleRedoExtraction}
+                      disabled={extracting}
+                      className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                    >
+                      {extracting ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <RotateCcw className="w-3 h-3" />
+                      )}
+                      <span className="ml-1">Redo Extraction</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleRedoScan}
+                      className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                    >
+                      <ScanSearch className="w-3 h-3" />
+                      <span className="ml-1">Redo Scan</span>
+                    </Button>
+                  </>
+                )}
+
+                {/* ── Completed: view ─────────────────────────────────── */}
+                {job.import_status === "completed" && job.cms_url && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    asChild
+                  >
+                    <Link to={job.cms_url} target="_blank">
+                      <Eye className="w-3 h-3 mr-1" />View
+                    </Link>
+                  </Button>
                 )}
               </div>
             )}
@@ -1100,18 +1216,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             </Button>
           )}
 
-          {job.import_status === "completed" && job.cms_url && (
-            <Button
-              size="sm"
-              variant="outline"
-              asChild
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Link to={job.cms_url} target="_blank">
-                <Eye className="w-3 h-3 mr-1" />View
-              </Link>
-            </Button>
-          )}
+
 
           {expanded ? (
             <ChevronUp className="w-4 h-4 text-muted-foreground" />
@@ -1211,9 +1316,23 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                       </div>
                     )}
                     {job.import_status === "reviewing" && (
-                      <div className="flex gap-2 pt-2">
+                      <div className="flex gap-2 pt-2 flex-wrap">
                         <Button size="sm" variant="outline" onClick={startEditing}>
                           <Edit3 className="w-3 h-3 mr-1" />Edit Data
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleRedoExtraction}
+                          disabled={extracting}
+                          className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                        >
+                          {extracting ? (
+                            <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                          ) : (
+                            <RotateCcw className="w-3 h-3 mr-1" />
+                          )}
+                          Redo Extraction
                         </Button>
                         <Button
                           size="sm"
