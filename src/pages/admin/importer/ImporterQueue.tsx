@@ -992,12 +992,11 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
   const imageMedia = (media || []).filter((m: any) => m.media_type === "image");
   const videos = (media || []).filter((m: any) => m.media_type === "video");
-  const pdfs   = (media || []).filter((m: any) => m.media_type === "brochure");
 
   // ── Extraction step stepper ─────────────────────────────────────────────
   const EXTRACTION_STEPS = [
     { key: "1/9", label: "Scanning files" },
-    { key: "2/9", label: "Downloading PDFs" },
+    { key: "2/9", label: "Downloading text files" },
     { key: "3/9", label: "Loading images" },
     { key: "4/9", label: "Videos found" },
     { key: "5/9", label: "Claude Vision" },
