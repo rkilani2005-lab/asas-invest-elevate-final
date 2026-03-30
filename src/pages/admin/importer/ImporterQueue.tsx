@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePdfChunker } from "@/hooks/usePdfChunker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -128,50 +129,143 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     job.import_status || ""
   );
 
-  // ── AI Extraction ─────────────────────────────────────────────────────────
-  const handleExtract = async () => {
+  // ── AI Extraction v2 — Claude chunked pipeline (fixes Gemini timeouts) ──────
+  const { chunkPdfBlob } = usePdfChunker();
+
+  const handleExtract = useCallback(async () => {
     setExtracting(true);
+    await supabase.from("import_jobs").update({ import_status: "extracting" }).eq("id", job.id);
+
+    const addLog = async (action: string, details: string, level = "info") => {
+      await supabase.from("import_logs").insert({ job_id: job.id, action, details, level });
+    };
+
     try {
-      // Load PDF file IDs from import_media (stored as dropbox_path = Drive file ID)
+      // 1. Load PDF brochure items from DB
       const { data: mediaItems } = await supabase
-        .from("import_media")
-        .select("*")
-        .eq("job_id", job.id);
+        .from("import_media").select("*").eq("job_id", job.id);
+      const pdfItems = (mediaItems || []).filter((m: any) => m.media_type === "brochure");
+      if (!pdfItems.length) throw new Error("No PDF brochure files found. Add PDFs via the Drive folder.");
 
-      const allItems = mediaItems || [];
-      const pdfFiles = allItems
-        .filter((m: any) => m.media_type === "brochure")
-        .map((m: any) => ({
-          id: m.dropbox_path,           // Google Drive file ID
-          name: m.original_filename,
-          size: m.original_size_bytes || 0,
-        }));
+      await addLog("step", "1/7 — Downloading PDFs from Google Drive");
 
-      const result = await callEdgeFunction("extract-property", {
-        job_id: job.id,
-        folder_name: job.folder_name,
-        folder_id: job.dropbox_folder_path, // Drive folder ID (stored here)
-        pdf_files: pdfFiles,
-      });
+      // 2. Download each PDF in the browser + chunk into page-image batches
+      const CONCURRENCY = 3;
+      const allBatches: Array<{
+        pages: string[]; sourceFile: string; batchIndex: number;
+        totalBatches: number; folderCategory: string;
+      }> = [];
 
-      // Auto-publish: if mode is auto and extraction succeeded with no errors
-      if (
-        result?.publishing_mode === "auto" &&
-        result?.approval_status === "auto_published" &&
-        (!result?.validation?.errors || result.validation.errors.length === 0)
-      ) {
-        toast.success("Extraction complete — auto-publishing now…");
-        await handlePublish();
-      } else {
-        toast.success("Extraction complete — review and publish when ready");
-        onRefresh();
+      for (const item of pdfItems) {
+        const fileId = item.dropbox_path;
+        const { access_token } = await callEdgeFunction("gdrive-oauth", {
+          action: "get_download_link", file_id: fileId,
+        });
+        await addLog("step", `2/7 — Downloading ${item.original_filename}`);
+        const driveRes = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+          { headers: { Authorization: `Bearer ${access_token}` } }
+        );
+        if (!driveRes.ok) throw new Error(`Failed to download ${item.original_filename} (${driveRes.status})`);
+        const blob = await driveRes.blob();
+
+        await addLog("step", `3/7 — Rendering ${item.original_filename} to page images`);
+        const batches = await chunkPdfBlob(blob, item.original_filename, "Brochure");
+        allBatches.push(...batches);
+        await addLog("info", `${item.original_filename}: ${batches.length} batch(es) ready`, "success");
       }
+
+      // 3. Send batches to extract-chunk edge function (Claude Vision, 4 pages each)
+      await addLog("step", `4/7 — Sending ${allBatches.length} batch(es) to Claude AI`);
+      const partials: unknown[] = [];
+
+      for (let i = 0; i < allBatches.length; i += CONCURRENCY) {
+        const group = allBatches.slice(i, i + CONCURRENCY);
+        const results = await Promise.all(group.map(async (batch) => {
+          const res = await callEdgeFunction("extract-chunk", {
+            pages: batch.pages, sourceFile: batch.sourceFile,
+            batchIndex: batch.batchIndex, totalBatches: batch.totalBatches,
+            folderCategory: batch.folderCategory, hints: job.folder_name,
+          });
+          if (!res?.ok) {
+            await addLog("warning", `Batch ${batch.batchIndex + 1} failed: ${res?.error ?? "unknown"}`, "warning");
+            return null;
+          }
+          await addLog("info", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" ✓`, "success");
+          return res.data;
+        }));
+        partials.push(...results.filter(Boolean));
+      }
+
+      if (!partials.length) throw new Error("Claude could not extract data from any batch.");
+
+      // 4. Merge all partials into one final record
+      await addLog("step", `5/7 — Merging ${partials.length} partial(s) with Claude`);
+      const merged = await callEdgeFunction("merge-extract", {
+        partials, folder_name: job.folder_name, hints: job.folder_name,
+      });
+      if (!merged?.ok) throw new Error(merged?.error ?? "Merge failed");
+      const d = merged.data as Record<string, unknown>;
+
+      // 5. Persist to import_jobs
+      await addLog("step", "6/7 — Saving extracted data");
+      await supabase.from("import_jobs").update({
+        import_status:   "reviewing",
+        name_en:         d.name_en         || null,
+        name_ar:         d.name_ar         || null,
+        tagline_en:      d.tagline_en      || null,
+        tagline_ar:      d.tagline_ar      || null,
+        developer_en:    d.developer_en    || null,
+        developer_ar:    d.developer_ar    || null,
+        location_en:     d.location_en     || null,
+        location_ar:     d.location_ar     || null,
+        price_range:     d.price_range     || null,
+        size_range:      d.size_range      || null,
+        unit_types:      d.unit_types      || null,
+        ownership_type:  d.ownership_type  || null,
+        type:            (d.type as string) || "off-plan",
+        handover_date:   d.handover_date   || null,
+        overview_en:     d.overview_en     || null,
+        overview_ar:     d.overview_ar     || null,
+        highlights_en:   d.highlights_en   || null,
+        highlights_ar:   d.highlights_ar   || null,
+        investment_en:   d.investment_en   || null,
+        investment_ar:   d.investment_ar   || null,
+        enduser_text_en: d.enduser_text_en || null,
+        enduser_text_ar: d.enduser_text_ar || null,
+      }).eq("id", job.id);
+
+      // 6. Save amenities + payment plan rows
+      await addLog("step", "7/7 — Saving amenities and payment plan");
+      if (Array.isArray(d.amenities) && d.amenities.length) {
+        await (supabase.from("property_amenities") as any).delete().eq("job_id", job.id);
+        await (supabase.from("property_amenities") as any).insert(
+          d.amenities.map((a: string, i: number) => ({ job_id: job.id, name_en: a, sort_order: i }))
+        );
+      }
+      if (Array.isArray(d.payment_plan) && d.payment_plan.length) {
+        await (supabase.from("payment_plan_milestones") as any).delete().eq("job_id", job.id);
+        await (supabase.from("payment_plan_milestones") as any).insert(
+          (d.payment_plan as any[]).map((p) => ({
+            job_id: job.id, milestone_en: p.milestone_en,
+            percentage: p.percentage, sort_order: p.sort_order,
+          }))
+        );
+      }
+
+      await addLog("extract_complete", `"${d.name_en || job.folder_name}" ready to review`, "success");
+      toast.success("Extraction complete — review and publish when ready");
+      onRefresh();
+
     } catch (e: any) {
+      await addLog("extract_error", e.message, "error");
+      await supabase.from("import_jobs")
+        .update({ import_status: "error", error_log: e.message }).eq("id", job.id);
       toast.error(e.message);
     } finally {
       setExtracting(false);
     }
-  };
+  }, [job, chunkPdfBlob, onRefresh]);
 
   const handleResetStuck = async () => {
     await supabase
@@ -519,13 +613,13 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
   // ── Extraction step stepper ─────────────────────────────────────────────
   const EXTRACTION_STEPS = [
-    { key: "1/7", label: "Scanning folders" },
-    { key: "2/7", label: "Downloading PDFs" },
-    { key: "3/7", label: "AI processing" },
-    { key: "4/7", label: "Payment plans" },
-    { key: "5/7", label: "Amenities" },
-    { key: "6/7", label: "Translating" },
-    { key: "7/7", label: "Saving data" },
+    { key: "1/7", label: "Loading PDFs" },
+    { key: "2/7", label: "Downloading" },
+    { key: "3/7", label: "Rendering pages" },
+    { key: "4/7", label: "Claude Vision" },
+    { key: "5/7", label: "Merging data" },
+    { key: "6/7", label: "Saving fields" },
+    { key: "7/7", label: "Amenities" },
   ];
 
   const currentStepLog = (logs || []).find((l: any) => l.action === "step");
