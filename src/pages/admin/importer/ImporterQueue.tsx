@@ -302,7 +302,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             const typedBlob = blob.type.startsWith("image/")
               ? blob
               : new Blob([await blob.arrayBuffer()], { type: "image/jpeg" });
-            const b64 = await resizeImageForClaude(typedBlob);
+            const b64 = await resizeImageForAI(typedBlob);
             imageB64List.push(b64);
             await addLog("info", `Image ready: ${item.original_filename}`);
           } catch (imgErr: any) {
