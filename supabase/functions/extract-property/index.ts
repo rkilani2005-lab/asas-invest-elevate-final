@@ -461,7 +461,7 @@ serve(async (req) => {
         else safeUpdate[col] = merged[col];
       }
     }
-    safeUpdate.ai_extraction_raw = { ...extracted, _payment_milestones: paymentMilestones, _amenities: amenitiesList, _images_found: images.length, _floorplans_found: floorplanFiles.length, _videos_found: videoFiles.length, _duplicate_property_id: existingPropertyId, _folder_structure: Object.keys(folderMap), _ai_model: CLAUDE_MODEL };
+    safeUpdate.ai_extraction_raw = { ...extracted, _payment_milestones: paymentMilestones, _amenities: amenitiesList, _images_found: images.length, _floorplans_found: floorplanFiles.length, _videos_found: videoFiles.length, _text_files_found: textFiles.length, _duplicate_property_id: existingPropertyId, _folder_structure: Object.keys(folderMap), _ai_model: CLAUDE_MODEL };
     safeUpdate.import_status = "reviewing";
     if (existingPropertyId) safeUpdate.cms_property_id = existingPropertyId;
 
