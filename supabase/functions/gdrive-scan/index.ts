@@ -225,7 +225,7 @@ Deno.serve(async (req) => {
           .from("import_jobs")
           .update({
             import_status: "pending",
-            pdf_count: pdfFiles.length,
+            pdf_count: pdfFiles.length + textFiles.length,
             image_count: imageFiles.length,
             video_count: videoFiles.length,
             total_size_bytes: totalSizeBytes,
