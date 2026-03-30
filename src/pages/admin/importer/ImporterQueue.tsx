@@ -375,19 +375,11 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       // ── Step 8: Save amenities + payment plan ─────────────────────────────
       await addLog("step", "8/9 — Saving amenities and payment plan");
       if (Array.isArray(d.amenities) && d.amenities.length) {
-        await (supabase.from("property_amenities") as any).delete().eq("job_id", job.id);
-        await (supabase.from("property_amenities") as any).insert(
-          d.amenities.map((a: string, i: number) => ({ job_id: job.id, name_en: a, sort_order: i }))
-        );
+        // Store extracted amenities as import log data (actual amenities created at publish)
+        await addLog("amenities_extracted", JSON.stringify(d.amenities), "info");
       }
       if (Array.isArray(d.payment_plan) && d.payment_plan.length) {
-        await (supabase.from("payment_plan_milestones") as any).delete().eq("job_id", job.id);
-        await (supabase.from("payment_plan_milestones") as any).insert(
-          (d.payment_plan as any[]).map((p) => ({
-            job_id: job.id, milestone_en: p.milestone_en,
-            percentage: p.percentage, sort_order: p.sort_order,
-          }))
-        );
+        await addLog("payment_plan_extracted", JSON.stringify(d.payment_plan), "info");
       }
 
       // ── Step 9: Update media sort order based on category priority ─────────
