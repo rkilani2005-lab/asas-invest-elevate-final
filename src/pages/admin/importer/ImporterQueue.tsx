@@ -546,7 +546,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     } finally {
       setExtracting(false);
     }
-  }, [job, chunkPdfBlob, resizeImageForClaude, onRefresh]);
+  }, [job, resizeImageForClaude, onRefresh]);
 
   const handleResetStuck = async () => {
     await supabase
