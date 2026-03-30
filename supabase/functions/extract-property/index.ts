@@ -469,6 +469,7 @@ serve(async (req) => {
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 1: Recursive Folder Scan & File Categorization
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "1/7 — Scanning Google Drive folders…");
     await log(supabase, job_id, "scan_start", `Scanning folder "${folder_name}" recursively...`);
 
     const folderMap = await scanFolderRecursive(accessToken, resolvedFolderId);
