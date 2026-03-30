@@ -310,7 +310,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
           }
         }
 
-        // Group images into batches of 4 for Claude
+        // Group images into batches of 4 for AI
         const IMG_BATCH = 4;
         const imgTotalBatches = Math.ceil(imageB64List.length / IMG_BATCH);
         for (let i = 0; i < imageB64List.length; i += IMG_BATCH) {
