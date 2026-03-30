@@ -625,6 +625,7 @@ Return ONLY the JSON object with the same keys as described.`);
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 5: Extract Amenities
     // ═══════════════════════════════════════════════════════════════════════════
+    await log(supabase, job_id, "step", "5/7 — Extracting amenities…");
     let amenitiesList: unknown[] = (extracted.amenities as unknown[]) || [];
 
     if (amenityFiles.length > 0 && amenitiesList.length === 0) {
