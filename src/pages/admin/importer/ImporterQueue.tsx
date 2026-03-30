@@ -881,7 +881,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
               {/* ── Media tab ──────────────────────────────────────────── */}
               <TabsContent value="media" className="p-4">
                 <div className="space-y-4">
-                  {images.length > 0 && (
+                  {imageMedia.length > 0 && (
                     <div>
                       <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                         <Image className="w-3 h-3" /> Images ({images.length})
