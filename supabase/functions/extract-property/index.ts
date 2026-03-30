@@ -492,12 +492,12 @@ serve(async (req) => {
     } catch {}
 
     await log(supabase, job_id, "extraction_complete",
-      `V7 complete. Model: ${CLAUDE_MODEL}. Source: ${pdfSource || "fallback"}. Completeness: ${completeness}%. Errors: ${errors.length}. Warnings: ${warnings.length}. Media: ${mediaToRegister.length}. Payment: ${paymentMilestones.length}. Amenities: ${amenitiesList.length}.`,
+      `V8 complete. Model: ${CLAUDE_MODEL}. Source: ${textSource || "fallback"}. Completeness: ${completeness}%. Errors: ${errors.length}. Warnings: ${warnings.length}. Media: ${mediaToRegister.length}. Payment: ${paymentMilestones.length}. Amenities: ${amenitiesList.length}.`,
       errors.length > 0 ? "warning" : "success");
 
     return new Response(JSON.stringify({
       success: true, data: merged,
-      pipeline: { ai_model: CLAUDE_MODEL, pdf_source: pdfSource, folder_structure: Object.keys(folderMap), files_found: { brochures: brochures.length, images: images.length, floor_plans: floorplanFiles.length, videos: videoFiles.length, payment_plans: paymentFiles.length, amenity_files: amenityFiles.length } },
+      pipeline: { ai_model: CLAUDE_MODEL, text_source: textSource, folder_structure: Object.keys(folderMap), files_found: { text_files: textFiles.length, images: images.length, floor_plans: floorplanFiles.length, videos: videoFiles.length, payment_plans: paymentFiles.length, amenity_files: amenityFiles.length } },
       payment_milestones: paymentMilestones, amenities: amenitiesList,
       duplicate: existingPropertyId ? { property_id: existingPropertyId, action: "update" } : null,
       validation: { errors, warnings, completeness }, publishing_mode: publishingMode, media_registered: mediaToRegister.length,
