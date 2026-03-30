@@ -229,16 +229,19 @@ function categorizeFiles(folderMap: FolderMap): CategorizedFile[] {
     for (const file of files) {
       const lowerFile = file.name.toLowerCase();
       const cat: CategorizedFile = { ...file, category: "other" };
-      if (lowerName.includes("brochure") || lowerName.includes("pdf")) cat.category = "brochure";
+      // Text files → "textfile" category (used for data extraction instead of PDFs)
+      if (lowerFile.endsWith(".txt") || file.mimeType === "text/plain") cat.category = "textfile" as any;
+      // PDFs are now IGNORED — skip categorizing them as brochures
+      else if (file.mimeType === "application/pdf" || lowerFile.endsWith(".pdf")) cat.category = "other";
       else if (lowerName.includes("floor") || lowerName.includes("plan")) cat.category = "floorplan";
       else if (lowerName.includes("payment") || lowerName.includes("installment")) cat.category = "payment_plan";
       else if (lowerName.includes("video") || lowerName.includes("tour")) cat.category = "video";
       else if (lowerName.includes("location") || lowerName.includes("map")) cat.category = "location";
       else if (lowerName.includes("ameniti") || lowerName.includes("facility") || lowerName.includes("feature")) cat.category = "amenity";
       else if (lowerName.includes("image") || lowerName.includes("photo") || lowerName.includes("render") || lowerName.includes("gallery")) cat.category = "image";
+      else if (lowerName.includes("brochure") || lowerName.includes("pdf")) cat.category = "image"; // treat brochure folder images as images
       else if (folderName === "_root") {
-        if (file.mimeType === "application/pdf" || lowerFile.endsWith(".pdf")) cat.category = "brochure";
-        else if (file.mimeType.startsWith("image/")) cat.category = "image";
+        if (file.mimeType.startsWith("image/")) cat.category = "image";
         else if (file.mimeType.startsWith("video/")) cat.category = "video";
       }
       if (cat.category === "image" && file.mimeType.startsWith("image/")) {
@@ -337,7 +340,8 @@ serve(async (req) => {
     await log(supabase, job_id, "step", "1/5 — Scanning Google Drive folders...");
     const folderMap = await scanFolderRecursive(accessToken, resolvedFolderId);
     const allFiles  = categorizeFiles(folderMap);
-    const brochures      = allFiles.filter(f => f.category === "brochure");
+    const textFiles     = allFiles.filter(f => (f as any).category === "textfile");
+    const brochures      = []; // PDFs are now ignored
     const images         = allFiles.filter(f => f.category === "image" && f.mimeType.startsWith("image/"));
     const floorplanFiles = allFiles.filter(f => f.category === "floorplan");
     const videoFiles     = allFiles.filter(f => f.category === "video" && f.mimeType.startsWith("video/"));
@@ -345,9 +349,9 @@ serve(async (req) => {
     const amenityFiles   = allFiles.filter(f => f.category === "amenity");
 
     await log(supabase, job_id, "scan_complete",
-      `Found: ${brochures.length} brochures, ${images.length} images, ${floorplanFiles.length} floor plans, ${videoFiles.length} videos, ${paymentFiles.length} payment plans`, "success");
+      `Found: ${textFiles.length} text file(s), ${images.length} images, ${floorplanFiles.length} floor plans, ${videoFiles.length} videos (PDFs ignored)`, "success");
     await supabase.from("import_jobs").update({
-      pdf_count: brochures.length + paymentFiles.filter(f => f.mimeType === "application/pdf").length,
+      pdf_count: textFiles.length,
       image_count: images.length + floorplanFiles.filter(f => f.mimeType.startsWith("image/")).length,
       video_count: videoFiles.length,
     }).eq("id", job_id);
@@ -356,62 +360,47 @@ serve(async (req) => {
     const metadata = await readMetadataJson(resolvedFolderId, accessToken);
     if (Object.keys(metadata).length > 0) await log(supabase, job_id, "metadata_read", `metadata.json loaded — ${Object.keys(metadata).length} fields`);
 
-    // STEP 3: Combined extraction (property + payment + amenities in ONE Claude call)
-    await log(supabase, job_id, "step", "2/5 — Claude AI extraction (property + payment + amenities in one pass)...");
+    // STEP 3: Read .txt files and extract with Claude (replaces PDF extraction)
+    await log(supabase, job_id, "step", "2/5 — Reading .txt file(s) for data extraction...");
     let extracted: Record<string, unknown> = {};
     let paymentMilestones: unknown[] = [];
     let amenitiesList: unknown[] = [];
-    let pdfSource = "none";
+    let textSource = "none";
 
-    let resolvedPdfFiles = pdf_files || [];
-    if (!resolvedPdfFiles.length && brochures.length > 0) {
-      resolvedPdfFiles = brochures.map((b: DriveFile) => ({ id: b.id, name: b.name, size: parseInt(b.size || "0", 10) }));
-    }
-
-    const sortedPdfs = [...resolvedPdfFiles].sort((a: any, b: any) => (a.size || 0) - (b.size || 0)).slice(0, 2);
-    const PDF_LIMIT = 40 * 1024 * 1024;
-
-    for (const pdf of sortedPdfs) {
-      try {
-        const fileId = pdf.id || pdf.dropbox_path;
-        const filename = pdf.original_filename || pdf.name || "brochure.pdf";
-        await log(supabase, job_id, "pdf_download", `Downloading "${filename}" from Google Drive`);
-        const buffer = await downloadDriveFile(fileId, accessToken);
-        if (!buffer) { await log(supabase, job_id, "pdf_skip", `Could not download "${filename}"`, "warning"); continue; }
-
-        const sizeMB = buffer.byteLength / 1024 / 1024;
-        if (buffer.byteLength > PDF_LIMIT) {
-          await log(supabase, job_id, "pdf_skip",
-            `"${filename}" is ${sizeMB.toFixed(1)} MB — exceeds 40 MB limit. Compress below 40 MB or add data to metadata.json.`, "warning");
-          continue;
-        }
-        if (sizeMB > 20) await log(supabase, job_id, "pdf_large_warning", `"${filename}" is ${sizeMB.toFixed(1)} MB — large file, may take 30-60s`, "warning");
-
-        await log(supabase, job_id, "step", "3/5 — Claude AI extracting all fields in one API call...");
-        await log(supabase, job_id, "claude_extract", `Sending "${filename}" (${sizeMB.toFixed(1)} MB) to ${CLAUDE_MODEL}`);
-
-        const pdfBase64 = arrayBufferToBase64(buffer);
-        let raw: string;
+    if (textFiles.length > 0) {
+      let combinedText = "";
+      for (const txtFile of textFiles) {
         try {
-          raw = await callClaudeWithPDF(pdfBase64, EXTRACTION_SYSTEM, COMBINED_EXTRACTION_PROMPT(folder_name));
-        } catch (pdfErr) {
-          await log(supabase, job_id, "claude_pdf_fallback", `PDF send failed: ${String(pdfErr).slice(0, 150)}, using text fallback`, "warning");
-          raw = await callClaudeText(EXTRACTION_SYSTEM,
-            COMBINED_EXTRACTION_PROMPT(folder_name) + `\n\nNote: PDF could not be sent. File: "${filename}", folder: "${folder_name}". Use folder name to infer name and location.`);
+          const fileId = txtFile.id;
+          await log(supabase, job_id, "txt_download", `Reading "${txtFile.name}" from Google Drive`);
+          const buffer = await downloadDriveFile(fileId, accessToken);
+          if (!buffer) { await log(supabase, job_id, "txt_skip", `Could not download "${txtFile.name}"`, "warning"); continue; }
+          const decoder = new TextDecoder("utf-8");
+          const text = decoder.decode(buffer);
+          combinedText += `\n--- ${txtFile.name} ---\n${text}\n`;
+          textSource = txtFile.name;
+          await log(supabase, job_id, "txt_read", `Read "${txtFile.name}" (${(buffer.byteLength / 1024).toFixed(1)} KB)`, "success");
+        } catch (e) {
+          await log(supabase, job_id, "txt_error", `Error reading "${txtFile.name}": ${String(e).slice(0, 200)}`, "warning");
         }
+      }
 
-        const parsed = parseJSON(raw);
-        if (parsed.name_en) {
-          extracted = parsed;
-          paymentMilestones = Array.isArray(parsed.payment_plan) ? parsed.payment_plan as unknown[] : [];
-          amenitiesList     = Array.isArray(parsed.amenities)    ? parsed.amenities    as unknown[] : [];
-          pdfSource = filename;
-          await log(supabase, job_id, "claude_success",
-            `Combined extraction: ${Object.keys(extracted).length} fields, ${paymentMilestones.length} payment milestones, ${amenitiesList.length} amenities`, "success");
-          break;
+      if (combinedText.trim()) {
+        await log(supabase, job_id, "step", "3/5 — Claude AI extracting all fields from text file(s)...");
+        try {
+          const raw = await callClaudeText(EXTRACTION_SYSTEM,
+            COMBINED_EXTRACTION_PROMPT(folder_name) + `\n\nHere is the property data from the text file(s):\n${combinedText}`);
+          const parsed = parseJSON(raw);
+          if (parsed.name_en) {
+            extracted = parsed;
+            paymentMilestones = Array.isArray(parsed.payment_plan) ? parsed.payment_plan as unknown[] : [];
+            amenitiesList     = Array.isArray(parsed.amenities)    ? parsed.amenities    as unknown[] : [];
+            await log(supabase, job_id, "claude_success",
+              `Text extraction: ${Object.keys(extracted).length} fields, ${paymentMilestones.length} payment milestones, ${amenitiesList.length} amenities`, "success");
+          }
+        } catch (e) {
+          await log(supabase, job_id, "claude_error", `Text extraction error: ${String(e).slice(0, 300)}`, "warning");
         }
-      } catch (e) {
-        await log(supabase, job_id, "claude_error", `Extraction error: ${String(e).slice(0, 300)}`, "warning");
       }
     }
 
@@ -472,7 +461,7 @@ serve(async (req) => {
         else safeUpdate[col] = merged[col];
       }
     }
-    safeUpdate.ai_extraction_raw = { ...extracted, _payment_milestones: paymentMilestones, _amenities: amenitiesList, _images_found: images.length, _floorplans_found: floorplanFiles.length, _videos_found: videoFiles.length, _duplicate_property_id: existingPropertyId, _folder_structure: Object.keys(folderMap), _ai_model: CLAUDE_MODEL };
+    safeUpdate.ai_extraction_raw = { ...extracted, _payment_milestones: paymentMilestones, _amenities: amenitiesList, _images_found: images.length, _floorplans_found: floorplanFiles.length, _videos_found: videoFiles.length, _text_files_found: textFiles.length, _duplicate_property_id: existingPropertyId, _folder_structure: Object.keys(folderMap), _ai_model: CLAUDE_MODEL };
     safeUpdate.import_status = "reviewing";
     if (existingPropertyId) safeUpdate.cms_property_id = existingPropertyId;
 
@@ -484,7 +473,6 @@ serve(async (req) => {
       ...images.map((f, i) => ({ job_id, dropbox_path: f.id, original_filename: f.name, media_type: f.subcategory === "hero" ? "hero" : (f.subcategory || "render"), original_size_bytes: parseInt(f.size || "0", 10), is_hero: f.subcategory === "hero" || i === 0, sort_order: i })),
       ...floorplanFiles.filter(f => f.mimeType.startsWith("image/")).map((f, i) => ({ job_id, dropbox_path: f.id, original_filename: f.name, media_type: "floorplan", original_size_bytes: parseInt(f.size || "0", 10), is_hero: false, sort_order: 100 + i })),
       ...videoFiles.map((f, i) => ({ job_id, dropbox_path: f.id, original_filename: f.name, media_type: "video", original_size_bytes: parseInt(f.size || "0", 10), is_hero: false, sort_order: 150 + i })),
-      ...brochures.map((f, i) => ({ job_id, dropbox_path: f.id, original_filename: f.name, media_type: "brochure", original_size_bytes: parseInt(f.size || "0", 10), is_hero: false, sort_order: 200 + i })),
     ];
     if (mediaToRegister.length > 0) {
       await supabase.from("import_media").delete().eq("job_id", job_id);
@@ -504,12 +492,12 @@ serve(async (req) => {
     } catch {}
 
     await log(supabase, job_id, "extraction_complete",
-      `V7 complete. Model: ${CLAUDE_MODEL}. Source: ${pdfSource || "fallback"}. Completeness: ${completeness}%. Errors: ${errors.length}. Warnings: ${warnings.length}. Media: ${mediaToRegister.length}. Payment: ${paymentMilestones.length}. Amenities: ${amenitiesList.length}.`,
+      `V8 complete. Model: ${CLAUDE_MODEL}. Source: ${textSource || "fallback"}. Completeness: ${completeness}%. Errors: ${errors.length}. Warnings: ${warnings.length}. Media: ${mediaToRegister.length}. Payment: ${paymentMilestones.length}. Amenities: ${amenitiesList.length}.`,
       errors.length > 0 ? "warning" : "success");
 
     return new Response(JSON.stringify({
       success: true, data: merged,
-      pipeline: { ai_model: CLAUDE_MODEL, pdf_source: pdfSource, folder_structure: Object.keys(folderMap), files_found: { brochures: brochures.length, images: images.length, floor_plans: floorplanFiles.length, videos: videoFiles.length, payment_plans: paymentFiles.length, amenity_files: amenityFiles.length } },
+      pipeline: { ai_model: CLAUDE_MODEL, text_source: textSource, folder_structure: Object.keys(folderMap), files_found: { text_files: textFiles.length, images: images.length, floor_plans: floorplanFiles.length, videos: videoFiles.length, payment_plans: paymentFiles.length, amenity_files: amenityFiles.length } },
       payment_milestones: paymentMilestones, amenities: amenitiesList,
       duplicate: existingPropertyId ? { property_id: existingPropertyId, action: "update" } : null,
       validation: { errors, warnings, completeness }, publishing_mode: publishingMode, media_registered: mediaToRegister.length,

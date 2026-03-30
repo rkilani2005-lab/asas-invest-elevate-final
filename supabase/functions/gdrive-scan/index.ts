@@ -209,19 +209,23 @@ Deno.serve(async (req) => {
         f.mimeType === "application/vnd.google-apps.document" ||
         f.name.toLowerCase().endsWith(".pdf")
       );
+      const textFiles = files.filter((f) =>
+        f.mimeType === "text/plain" ||
+        f.name.toLowerCase().endsWith(".txt")
+      );
       const imageFiles = files.filter((f) => f.mimeType.startsWith("image/"));
       const videoFiles = files.filter((f) => f.mimeType.startsWith("video/"));
 
       const totalSizeBytes = files.reduce((acc, f) => acc + parseInt(f.size || "0", 10), 0);
 
-      console.log(`  → Found: ${pdfFiles.length} PDFs, ${imageFiles.length} images, ${videoFiles.length} videos (total files: ${files.length})`);
+      console.log(`  → Found: ${pdfFiles.length} PDFs, ${textFiles.length} TXTs, ${imageFiles.length} images, ${videoFiles.length} videos (total files: ${files.length})`);
 
       if (existing) {
         await supabase
           .from("import_jobs")
           .update({
             import_status: "pending",
-            pdf_count: pdfFiles.length,
+            pdf_count: pdfFiles.length + textFiles.length,
             image_count: imageFiles.length,
             video_count: videoFiles.length,
             total_size_bytes: totalSizeBytes,
@@ -233,7 +237,7 @@ Deno.serve(async (req) => {
           dropbox_folder_path: folder.id,
           folder_name: folder.name,
           import_status: "pending",
-          pdf_count: pdfFiles.length,
+          pdf_count: pdfFiles.length + textFiles.length,
           image_count: imageFiles.length,
           video_count: videoFiles.length,
           total_size_bytes: totalSizeBytes,
@@ -242,7 +246,7 @@ Deno.serve(async (req) => {
 
       await supabase.from("import_logs").insert({
         action: "gdrive_queued",
-        details: `Queued folder "${folder.name}" from Google Drive (${pdfFiles.length} PDFs, ${imageFiles.length} images, ${videoFiles.length} videos) — recursive scan`,
+        details: `Queued folder "${folder.name}" from Google Drive (${textFiles.length} TXTs, ${pdfFiles.length} PDFs, ${imageFiles.length} images, ${videoFiles.length} videos) — recursive scan`,
         level: "info",
       });
 
