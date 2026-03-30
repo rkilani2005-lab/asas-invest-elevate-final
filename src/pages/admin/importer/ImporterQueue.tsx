@@ -513,9 +513,63 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     );
   };
 
-  const images = (media || []).filter((m: any) => m.media_type === "image");
+  const imageMedia = (media || []).filter((m: any) => m.media_type === "image");
   const videos = (media || []).filter((m: any) => m.media_type === "video");
   const pdfs   = (media || []).filter((m: any) => m.media_type === "brochure");
+
+  // ── Extraction step stepper ─────────────────────────────────────────────
+  const EXTRACTION_STEPS = [
+    { key: "1/7", label: "Scanning folders" },
+    { key: "2/7", label: "Downloading PDFs" },
+    { key: "3/7", label: "AI processing" },
+    { key: "4/7", label: "Payment plans" },
+    { key: "5/7", label: "Amenities" },
+    { key: "6/7", label: "Translating" },
+    { key: "7/7", label: "Saving data" },
+  ];
+
+  const currentStepLog = (logs || []).find((l: any) => l.action === "step");
+  const currentStepKey = currentStepLog ? (currentStepLog as any).details?.split(" —")[0] : null;
+  const currentStepIdx = currentStepKey
+    ? EXTRACTION_STEPS.findIndex((s) => s.key === currentStepKey)
+    : -1;
+
+  const extractionStepper = (extracting || job.import_status === "extracting") && (
+    <div className="border-t px-4 py-3 bg-blue-500/5 space-y-2">
+      <div className="flex items-center gap-2 text-xs font-medium text-blue-600">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        <span>
+          {currentStepLog
+            ? (currentStepLog as any).details
+            : "Starting extraction…"}
+        </span>
+      </div>
+      <div className="flex gap-1">
+        {EXTRACTION_STEPS.map((step, i) => (
+          <div key={step.key} className="flex-1 flex flex-col items-center gap-1">
+            <div
+              className={`h-1.5 w-full rounded-full transition-all ${
+                i < currentStepIdx
+                  ? "bg-green-500"
+                  : i === currentStepIdx
+                  ? "bg-blue-500 animate-pulse"
+                  : "bg-muted"
+              }`}
+            />
+            <span
+              className={`text-[10px] leading-tight text-center ${
+                i <= currentStepIdx
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {step.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   // ── Compression progress overlay (shown while publishing) ────────────────
   const publishingProgressPanel = publishing && fileProgress.length > 0 && (
