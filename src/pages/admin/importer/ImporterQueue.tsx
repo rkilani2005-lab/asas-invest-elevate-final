@@ -135,10 +135,10 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
   // ── AI Extraction v2 — text + image pipeline ──────
 
-  // ── Helper: convert an image Blob to base64 for Claude Vision ───────────────
+  // ── Helper: convert an image Blob to base64 for AI Vision ───────────────
   // Uses window.FileReader (accessed via window. so Vite cannot rename it).
-  // No canvas/Image APIs needed — Claude accepts raw JPEG/PNG/WEBP up to 20 MB.
-  const resizeImageForClaude = useCallback((blob: Blob): Promise<string> => {
+  // No canvas/Image APIs needed — AI accepts raw JPEG/PNG/WEBP up to 20 MB.
+  const resizeImageForAI = useCallback((blob: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
       // window.FileReader: property access on window prevents minifier renaming
       const reader = new (window as any).FileReader();
@@ -302,7 +302,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             const typedBlob = blob.type.startsWith("image/")
               ? blob
               : new Blob([await blob.arrayBuffer()], { type: "image/jpeg" });
-            const b64 = await resizeImageForClaude(typedBlob);
+            const b64 = await resizeImageForAI(typedBlob);
             imageB64List.push(b64);
             await addLog("info", `Image ready: ${item.original_filename}`);
           } catch (imgErr: any) {
@@ -310,7 +310,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
           }
         }
 
-        // Group images into batches of 4 for Claude
+        // Group images into batches of 4 for AI
         const IMG_BATCH = 4;
         const imgTotalBatches = Math.ceil(imageB64List.length / IMG_BATCH);
         for (let i = 0; i < imageB64List.length; i += IMG_BATCH) {
@@ -339,8 +339,8 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         throw new Error("No text files or images could be processed. Check the Google Drive folder has files.");
       }
 
-      // ── Step 5: Send all batches to extract-chunk (Claude Vision) ─────────
-      await addLog("step", `5/9 — Sending ${allBatches.length} batch(es) to Claude Vision`);
+      // ── Step 5: Send all batches to extract-chunk (AI Vision) ─────────
+      await addLog("step", `5/9 — Sending ${allBatches.length} batch(es) to AI extraction`);
       const partials: unknown[] = [];
       const batchErrors: string[] = [];
 
@@ -377,11 +377,11 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
       if (!partials.length) {
         const firstErr = batchErrors[0] || "unknown error";
-        throw new Error(`Claude could not extract data from any batch. First error: ${firstErr}`);
+        throw new Error(`AI could not extract data from any batch. First error: ${firstErr}`);
       }
 
       // ── Step 6: Merge all partials ────────────────────────────────────────
-      await addLog("step", `6/9 — Merging ${partials.length} partial(s) with Claude`);
+      await addLog("step", `6/9 — Merging ${partials.length} partial(s) with AI`);
       const merged = await callEdgeFunction("merge-extract", {
         partials,
         folder_name: job.folder_name,
@@ -546,7 +546,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     } finally {
       setExtracting(false);
     }
-  }, [job, resizeImageForClaude, onRefresh]);
+  }, [job, resizeImageForAI, onRefresh]);
 
   const handleResetStuck = async () => {
     await supabase
@@ -999,7 +999,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     { key: "2/9", label: "Downloading text files" },
     { key: "3/9", label: "Loading images" },
     { key: "4/9", label: "Videos found" },
-    { key: "5/9", label: "Claude Vision" },
+    { key: "5/9", label: "AI extraction" },
     { key: "6/9", label: "Merging data" },
     { key: "7/9", label: "Saving fields" },
     { key: "8/9", label: "Amenities" },

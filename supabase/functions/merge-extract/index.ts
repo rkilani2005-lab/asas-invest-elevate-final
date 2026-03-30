@@ -1,23 +1,21 @@
 /**
  * merge-extract  —  Supabase Edge Function
  *
- * Receives all partial extraction JSONs (one per PDF or image batch) and merges
- * them into one complete import_jobs-compatible record using Claude.
- * Also generates Arabic translations, handles video metadata, and produces
- * the final CMS-ready property record.
+ * Receives all partial extraction JSONs and merges them into one complete
+ * import_jobs-compatible record using Lovable AI (Gemini).
+ * Also generates Arabic translations and produces the final CMS-ready record.
  *
- * Deploy:  supabase functions deploy merge-extract
- * Secret:  ANTHROPIC_API_KEY  (same as extract-chunk)
+ * Requires secret: LOVABLE_API_KEY (auto-provisioned by Lovable Cloud)
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const CLAUDE_API = "https://api.anthropic.com/v1/messages";
-const MODEL      = "claude-sonnet-4-20250514";
+const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const AI_MODEL   = "google/gemini-2.5-flash";
 const MAX_TOKENS = 4096;
 
 const MERGE_SYSTEM = `
 You are merging multiple partial property data extractions into one final
-record for ASAS Properties CMS. Partials come from PDF pages and property
+record for ASAS Properties CMS. Partials come from text files and property
 images (exterior, interior, floor plans) of the same property in Dubai/UAE.
 
 Merging rules:
@@ -69,7 +67,7 @@ Return ONLY valid JSON — no markdown fences, no preamble:
 
 const cors = () => ({
   "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Content-Type": "application/json",
 });
 
@@ -88,8 +86,8 @@ serve(async (req) => {
 
     if (!partials.length) throw new Error("partials array is empty — nothing to merge");
 
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!apiKey) throw new Error("ANTHROPIC_API_KEY secret is not configured");
+    const apiKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
 
     const userMsg = [
       `Property folder: "${folder_name}"`,
@@ -100,32 +98,35 @@ serve(async (req) => {
         : "",
       "",
       `Merge these ${partials.length} partial extraction(s) into one complete record.`,
-      `Partials come from both PDF pages and property images (floor plans, exterior, interior).`,
+      `Partials come from text files and property images (floor plans, exterior, interior).`,
       "",
       JSON.stringify(partials, null, 2),
     ].filter(Boolean).join("\n");
 
-    const res = await fetch(CLAUDE_API, {
+    const res = await fetch(AI_GATEWAY, {
       method: "POST",
       headers: {
-        "Content-Type":      "application/json",
-        "x-api-key":         apiKey,
-        "anthropic-version": "2023-06-01",
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model:      MODEL,
+        model:      AI_MODEL,
         max_tokens: MAX_TOKENS,
-        system:     MERGE_SYSTEM,
-        messages:   [{ role: "user", content: userMsg }],
+        messages: [
+          { role: "system", content: MERGE_SYSTEM },
+          { role: "user", content: userMsg },
+        ],
       }),
     });
 
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`Claude API ${res.status}: ${body}`);
+      if (res.status === 429) throw new Error("AI rate limit exceeded — retry shortly");
+      if (res.status === 402) throw new Error("AI credits exhausted — add funds in workspace settings");
+      throw new Error(`AI Gateway ${res.status}: ${body}`);
     }
 
-    const raw  = (await res.json()).content?.[0]?.text ?? "";
+    const raw  = (await res.json()).choices?.[0]?.message?.content ?? "";
     const data = safeJson(raw);
 
     return new Response(JSON.stringify({ ok: true, data }), { headers: cors() });
@@ -141,10 +142,11 @@ serve(async (req) => {
 });
 
 function safeJson(text: string): Record<string, unknown> {
-  try { return JSON.parse(text); } catch {}
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const t = text.trim();
+  try { return JSON.parse(t); } catch {}
+  const fenced = t.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fenced) try { return JSON.parse(fenced[1].trim()); } catch {}
-  const s = text.indexOf("{"), e = text.lastIndexOf("}");
-  if (s !== -1 && e > s) try { return JSON.parse(text.slice(s, e + 1)); } catch {}
-  throw new Error("Unparseable merge response: " + text.slice(0, 300));
+  const s = t.indexOf("{"), e = t.lastIndexOf("}");
+  if (s !== -1 && e > s) try { return JSON.parse(t.slice(s, e + 1)); } catch {}
+  throw new Error("Unparseable merge response: " + t.slice(0, 300));
 }

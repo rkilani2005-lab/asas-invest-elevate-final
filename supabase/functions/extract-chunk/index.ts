@@ -1,27 +1,20 @@
 /**
  * extract-chunk  —  Supabase Edge Function
  *
- * Receives a small batch of PDF page images (JPEG base64, max 4–6 pages) and
- * extracts structured property data using Claude claude-sonnet-4-20250514 Vision.
+ * Receives a small batch of property data (text content or image base64)
+ * and extracts structured property data using Lovable AI (Gemini).
  *
- * WHY: The old extract-property function downloaded full 20–80 MB PDFs inside
- * the edge function and sent them to Gemini — causing consistent timeouts
- * (Supabase hard limit: 150 s). Each call of THIS function processes only
- * 4 pages in ~8–15 s — always within limits.
- *
- * Deploy:  supabase functions deploy extract-chunk
- * Secret:  ANTHROPIC_API_KEY  →  Supabase → Settings → Edge Functions → Secrets
+ * Requires secret: LOVABLE_API_KEY (auto-provisioned by Lovable Cloud)
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const CLAUDE_API = "https://api.anthropic.com/v1/messages";
-const MODEL      = "claude-sonnet-4-20250514";
+const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const AI_MODEL   = "google/gemini-2.5-flash";
 const MAX_TOKENS = 4096;
 
 const SYSTEM_PROMPT = `
 You are a property data extractor for ASAS Properties CMS (Dubai, UAE).
-You receive JPEG images of document pages from a real estate brochure,
-floor plan document, payment plan, or marketing material.
+You receive text content or images from a real estate property folder.
 
 Extract ALL visible data. Return ONLY valid JSON — no markdown fences,
 no explanation, no preamble, no trailing text after the closing brace.
@@ -54,12 +47,12 @@ Rules:
 - highlights_en: 6-10 pipe-separated bullet points
 - handover_date: YYYY-MM-DD; Q1=03-31, Q2=06-30, Q3=09-30, Q4=12-31
 - price_range: "AED 1.2M - 3.5M" format, or null if not shown
-- NEVER invent data — use null / [] if a field is not visible on these pages
+- NEVER invent data — use null / [] if a field is not visible
 `.trim();
 
 const cors = () => ({
   "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Content-Type": "application/json",
 });
 
@@ -72,55 +65,73 @@ serve(async (req) => {
       sourceFile     = "unknown",
       batchIndex     = 0,
       totalBatches   = 1,
-      folderCategory = "Brochure",
+      folderCategory = "TextData",
       hints          = "",
     } = await req.json();
 
     if (!Array.isArray(pages) || pages.length === 0)
       throw new Error("pages array is required and must not be empty");
-    if (pages.length > 6)
-      throw new Error(`Max 6 pages per batch, received ${pages.length}`);
 
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!apiKey) throw new Error("ANTHROPIC_API_KEY secret is not configured");
-
-    const imageBlocks = pages.map((b64: string) => ({
-      type:   "image",
-      source: { type: "base64", media_type: "image/jpeg", data: b64 },
-    }));
+    const apiKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
 
     const userText = [
       `Document: ${sourceFile}`,
       `Category: ${folderCategory}`,
       `Batch: ${batchIndex + 1} of ${totalBatches}`,
       hints ? `Context: ${hints}` : "",
-      "Extract all property data visible in these pages.",
+      "",
+      "Extract all property data from the following content.",
+      "",
+      // For text batches, pages[0] contains the full text content
+      // For image batches, pages contain base64 image data
+      folderCategory === "TextData"
+        ? pages.join("\n")
+        : `[${pages.length} image(s) provided — analyze visually for property data]`,
     ].filter(Boolean).join("\n");
 
-    const res = await fetch(CLAUDE_API, {
+    // Build messages based on content type
+    const messages: Array<{ role: string; content: unknown }> = [
+      { role: "system", content: SYSTEM_PROMPT },
+    ];
+
+    if (folderCategory === "TextData") {
+      // Text-only extraction
+      messages.push({ role: "user", content: userText });
+    } else {
+      // Image-based extraction using multimodal
+      const contentParts: unknown[] = [];
+      for (const b64 of pages) {
+        contentParts.push({
+          type: "image_url",
+          image_url: { url: `data:image/jpeg;base64,${b64}` },
+        });
+      }
+      contentParts.push({ type: "text", text: userText });
+      messages.push({ role: "user", content: contentParts });
+    }
+
+    const res = await fetch(AI_GATEWAY, {
       method: "POST",
       headers: {
-        "Content-Type":      "application/json",
-        "x-api-key":         apiKey,
-        "anthropic-version": "2023-06-01",
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model:      MODEL,
+        model:      AI_MODEL,
         max_tokens: MAX_TOKENS,
-        system:     SYSTEM_PROMPT,
-        messages: [{
-          role:    "user",
-          content: [...imageBlocks, { type: "text", text: userText }],
-        }],
+        messages,
       }),
     });
 
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`Claude API ${res.status}: ${body}`);
+      if (res.status === 429) throw new Error("AI rate limit exceeded — retry shortly");
+      if (res.status === 402) throw new Error("AI credits exhausted — add funds in workspace settings");
+      throw new Error(`AI Gateway ${res.status}: ${body}`);
     }
 
-    const raw  = (await res.json()).content?.[0]?.text ?? "";
+    const raw  = (await res.json()).choices?.[0]?.message?.content ?? "";
     const data = safeJson(raw);
     data._meta = {
       source_file:     sourceFile,
@@ -141,11 +152,12 @@ serve(async (req) => {
 });
 
 function safeJson(text: string): Record<string, unknown> {
-  try { return JSON.parse(text); } catch {}
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const t = text.trim();
+  try { return JSON.parse(t); } catch {}
+  const fenced = t.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fenced) try { return JSON.parse(fenced[1].trim()); } catch {}
-  const s = text.indexOf("{"), e = text.lastIndexOf("}");
-  if (s !== -1 && e > s) try { return JSON.parse(text.slice(s, e + 1)); } catch {}
+  const s = t.indexOf("{"), e = t.lastIndexOf("}");
+  if (s !== -1 && e > s) try { return JSON.parse(t.slice(s, e + 1)); } catch {}
   console.warn("[extract-chunk] unparseable response — returning empty scaffold");
-  return { _parse_failed: true, _raw: text.slice(0, 400) };
+  return { _parse_failed: true, _raw: t.slice(0, 400) };
 }
