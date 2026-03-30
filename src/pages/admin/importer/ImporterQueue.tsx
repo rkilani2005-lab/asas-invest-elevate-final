@@ -377,7 +377,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
       if (!partials.length) {
         const firstErr = batchErrors[0] || "unknown error";
-        throw new Error(`Claude could not extract data from any batch. First error: ${firstErr}`);
+        throw new Error(`AI could not extract data from any batch. First error: ${firstErr}`);
       }
 
       // ── Step 6: Merge all partials ────────────────────────────────────────
