@@ -229,16 +229,19 @@ function categorizeFiles(folderMap: FolderMap): CategorizedFile[] {
     for (const file of files) {
       const lowerFile = file.name.toLowerCase();
       const cat: CategorizedFile = { ...file, category: "other" };
-      if (lowerName.includes("brochure") || lowerName.includes("pdf")) cat.category = "brochure";
+      // Text files → "textfile" category (used for data extraction instead of PDFs)
+      if (lowerFile.endsWith(".txt") || file.mimeType === "text/plain") cat.category = "textfile" as any;
+      // PDFs are now IGNORED — skip categorizing them as brochures
+      else if (file.mimeType === "application/pdf" || lowerFile.endsWith(".pdf")) cat.category = "other";
       else if (lowerName.includes("floor") || lowerName.includes("plan")) cat.category = "floorplan";
       else if (lowerName.includes("payment") || lowerName.includes("installment")) cat.category = "payment_plan";
       else if (lowerName.includes("video") || lowerName.includes("tour")) cat.category = "video";
       else if (lowerName.includes("location") || lowerName.includes("map")) cat.category = "location";
       else if (lowerName.includes("ameniti") || lowerName.includes("facility") || lowerName.includes("feature")) cat.category = "amenity";
       else if (lowerName.includes("image") || lowerName.includes("photo") || lowerName.includes("render") || lowerName.includes("gallery")) cat.category = "image";
+      else if (lowerName.includes("brochure") || lowerName.includes("pdf")) cat.category = "image"; // treat brochure folder images as images
       else if (folderName === "_root") {
-        if (file.mimeType === "application/pdf" || lowerFile.endsWith(".pdf")) cat.category = "brochure";
-        else if (file.mimeType.startsWith("image/")) cat.category = "image";
+        if (file.mimeType.startsWith("image/")) cat.category = "image";
         else if (file.mimeType.startsWith("video/")) cat.category = "video";
       }
       if (cat.category === "image" && file.mimeType.startsWith("image/")) {
