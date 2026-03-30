@@ -360,11 +360,90 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         await supabase.from("import_media").update({ media_type: detectedCategory }).eq("id", item.id);
       }
 
+      // ── Step 9b: Upload images & videos to Supabase Storage ─────────────
+      // This makes media immediately available for preview and speeds up publish.
+      const uploadableMedia = [...imageItems, ...videoItems].filter(
+        (m: any) => !m.storage_url || m.compression_status !== "done"
+      );
+      if (uploadableMedia.length > 0) {
+        await addLog("step", `9/9 — Uploading ${uploadableMedia.length} media file(s) to storage`);
+        const imageIdSet = new Set(imageItems.map((m: any) => m.id));
+        let uploadedCount = 0, skippedCount = 0;
+
+        for (let idx = 0; idx < uploadableMedia.length; idx++) {
+          const item = uploadableMedia[idx];
+          const isImg = imageIdSet.has(item.id);
+          try {
+            // Get a short-lived Drive access token
+            const { access_token: dlToken } = await callEdgeFunction("gdrive-oauth", {
+              action: "get_download_link", file_id: item.dropbox_path,
+            });
+            // Download from Drive
+            const driveRes = await fetch(
+              `https://www.googleapis.com/drive/v3/files/${item.dropbox_path}?alt=media`,
+              { headers: { Authorization: `Bearer ${dlToken}` } }
+            );
+            if (!driveRes.ok) throw new Error(`Drive HTTP ${driveRes.status}`);
+            const rawBlob = await driveRes.blob();
+
+            let finalBlob: Blob;
+            if (isImg) {
+              // Compress image to ≤ 600 KB using the same Canvas pipeline as publish
+              finalBlob = await compressImageToLimit(rawBlob, MAX_IMAGE_BYTES, () => {});
+            } else {
+              // Video: skip if over 40 MB
+              if (rawBlob.size > MAX_VIDEO_BYTES) {
+                await addLog("warning", `Video "${item.original_filename}" exceeds 40 MB — skipped`, "warning");
+                skippedCount++;
+                continue;
+              }
+              finalBlob = rawBlob;
+            }
+
+            // Build storage path under jobs/ prefix
+            const ext = isImg
+              ? getExtensionFromBlob(finalBlob)
+              : item.original_filename.split(".").pop() || "mp4";
+            const safeName = item.original_filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+            const storagePath = `jobs/${job.id}/${String(idx).padStart(3, "0")}-${safeName.replace(/\.[^.]+$/, "")}.${ext}`;
+
+            const { error: upErr } = await supabase.storage
+              .from("property-media")
+              .upload(storagePath, finalBlob, {
+                contentType: isImg ? (ext === "webp" ? "image/webp" : "image/jpeg") : "video/mp4",
+                upsert: true,
+              });
+            if (upErr) throw new Error(upErr.message);
+
+            const { data: { publicUrl } } = supabase.storage
+              .from("property-media")
+              .getPublicUrl(storagePath);
+
+            // Persist the URL so publish can skip the re-download
+            await supabase.from("import_media").update({
+              storage_url: publicUrl,
+              compressed_size_bytes: finalBlob.size,
+              compression_status: "done",
+            }).eq("id", item.id);
+
+            uploadedCount++;
+            await addLog("info",
+              `✓ ${item.original_filename} → ${(finalBlob.size / 1024).toFixed(0)} KB`, "success");
+
+          } catch (upErr: any) {
+            await addLog("warning",
+              `Could not upload "${item.original_filename}": ${upErr.message}`, "warning");
+          }
+        }
+        await addLog("info",
+          `Media upload complete: ${uploadedCount} uploaded, ${skippedCount} skipped`, "success");
+      }
+
       await addLog("extract_complete",
-        `✓ "${d.name_en || job.folder_name}" — ${pdfItems.length} PDF(s), ${imageItems.length} image(s), ${videoItems.length} video(s) processed`,
+        `✓ "${d.name_en || job.folder_name}" — ${pdfItems.length} PDF(s), ${imageItems.length} image(s), ${videoItems.length} video(s) imported`,
         "success"
       );
-      toast.success(`Extraction complete — ${imageItems.length} images & ${videoItems.length} videos ready to publish`);
+      toast.success(`Extraction complete — ${imageItems.length} images & ${videoItems.length} videos imported to storage`);
       onRefresh();
 
     } catch (e: any) {
@@ -565,6 +644,35 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         const item = mediaToUpload[i];
 
         try {
+          // ── Fast-path: already uploaded during extraction ─────────────────
+          if (item.storage_url && item.compression_status === "done") {
+            const url = item.storage_url;
+            const compressedSize = item.compressed_size_bytes || item.original_size_bytes || 0;
+            const savedPct = item.original_size_bytes
+              ? Math.round((1 - compressedSize / item.original_size_bytes) * 100) : 0;
+
+            setFileProgress((prev) =>
+              prev.map((f) =>
+                f.filename === item.original_filename
+                  ? { ...f, phase: "done", compressedSize, savedPct }
+                  : f
+              )
+            );
+
+            const KNOWN_CATS = ["video","hero","exterior","interior","floorplan","amenity","view","render","brochure"];
+            const cat = KNOWN_CATS.includes(item.media_type) ? item.media_type
+              : item.is_hero ? "hero" : "render";
+
+            await (supabase.from("media") as any).insert({
+              property_id, type: cat, url,
+              order_index: item.sort_order, file_size: compressedSize,
+            });
+
+            successCount++;
+            continue;   // ← skip the full download/compress/upload below
+          }
+
+          // ── Normal path: not yet in storage — download, compress, upload ──
           const { url, compressedSize, skipped } = await compressAndUpload(item, property_id, i);
 
           if (skipped) {
@@ -737,7 +845,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     { key: "6/9", label: "Merging data" },
     { key: "7/9", label: "Saving fields" },
     { key: "8/9", label: "Amenities" },
-    { key: "9/9", label: "Media ready" },
+    { key: "9/9", label: "Uploading media" },
   ];
 
   // Find the LAST step log (most recent progress)
