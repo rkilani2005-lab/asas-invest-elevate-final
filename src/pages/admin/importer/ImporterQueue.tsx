@@ -336,7 +336,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
 
       if (!allBatches.length) {
-        throw new Error("No PDFs or images could be processed. Check the Google Drive folder has files.");
+        throw new Error("No text files or images could be processed. Check the Google Drive folder has files.");
       }
 
       // ── Step 5: Send all batches to extract-chunk (Claude Vision) ─────────
