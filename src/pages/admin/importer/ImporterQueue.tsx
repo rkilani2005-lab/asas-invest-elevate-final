@@ -133,8 +133,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     job.import_status || ""
   );
 
-  // ── AI Extraction v2 — Claude chunked pipeline (fixes Gemini timeouts) ──────
-  const { chunkPdfBlob } = usePdfChunker();
+  // ── AI Extraction v2 — text + image pipeline ──────
 
   // ── Helper: convert an image Blob to base64 for Claude Vision ───────────────
   // Uses window.FileReader (accessed via window. so Vite cannot rename it).
