@@ -218,7 +218,7 @@ Deno.serve(async (req) => {
 
       const totalSizeBytes = files.reduce((acc, f) => acc + parseInt(f.size || "0", 10), 0);
 
-      console.log(`  → Found: ${pdfFiles.length} PDFs, ${imageFiles.length} images, ${videoFiles.length} videos (total files: ${files.length})`);
+      console.log(`  → Found: ${pdfFiles.length} PDFs, ${textFiles.length} TXTs, ${imageFiles.length} images, ${videoFiles.length} videos (total files: ${files.length})`);
 
       if (existing) {
         await supabase
