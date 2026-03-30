@@ -234,12 +234,9 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         await addLog("step", `3/9 — Downloading ${sortedImages.length} image(s) for visual analysis`);
 
         const imageB64List: string[] = [];
+        const imgToken = await getDriveToken();
         for (const item of sortedImages) {
           try {
-            // Download from Drive with token
-            const { access_token: imgToken } = await callEdgeFunction("gdrive-oauth", {
-              action: "get_download_link", file_id: item.dropbox_path,
-            });
             const imgRes = await fetch(
               `https://www.googleapis.com/drive/v3/files/${item.dropbox_path}?alt=media`,
               { headers: { Authorization: `Bearer ${imgToken}` } }
