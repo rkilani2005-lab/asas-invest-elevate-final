@@ -843,12 +843,10 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
               )
             );
 
-            const KNOWN_CATS = ["video","hero","exterior","interior","floorplan","amenity","view","render","brochure"];
-            const cat = KNOWN_CATS.includes(item.media_type) ? item.media_type
-              : item.is_hero ? "hero" : "render";
+            const enumType = mapToEnumType(item.media_type, item.original_filename, item.is_hero || item.sort_order === 0);
 
             await (supabase.from("media") as any).insert({
-              property_id, type: cat, url,
+              property_id, type: enumType, url,
               order_index: item.sort_order, file_size: compressedSize,
             });
 
