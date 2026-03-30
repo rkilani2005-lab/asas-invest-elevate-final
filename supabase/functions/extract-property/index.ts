@@ -1,24 +1,11 @@
 /**
- * ASAS Property Extraction — V7 (Claude Edition)
+ * ASAS Property Extraction — V9 (Lovable AI Edition)
  *
- * Key improvements over V6 (Gemini):
+ * Uses Lovable AI Gateway (Gemini) instead of Claude/Anthropic.
+ * Extracts property data from .txt files, registers images/videos.
+ * PDFs are intentionally skipped.
  *
- *  1. TIMEOUT FIX — Combines brochure + payment plan + amenities extraction
- *     into a SINGLE Claude API call (was 3 separate Gemini calls). Cuts edge
- *     function time by ~60% for typical brochures.
- *
- *  2. RELIABLE JSON — Claude reliably returns clean JSON. Added 3-strategy
- *     fallback parser so even if markdown fences appear they are stripped.
- *
- *  3. PDF SIZE GUARD — 40 MB limit (down from 50 MB). Files 20-40 MB get
- *     a warning log but still attempt extraction. Files > 40 MB are skipped
- *     with a clear message rather than silently timing out.
- *
- *  4. SAME INTERFACE — Drop-in replacement. No changes to the calling UI,
- *     database schema, or import_jobs / import_media tables.
- *
- * Requires secret: ANTHROPIC_API_KEY (Supabase -> Settings -> Edge Functions -> Secrets)
- * LOVABLE_API_KEY is no longer used by this function.
+ * Requires secret: LOVABLE_API_KEY (auto-provisioned by Lovable Cloud)
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -31,70 +18,53 @@ const corsHeaders = {
 
 // Types
 interface DriveFile {
-  id: string;
-  name: string;
-  mimeType: string;
-  size?: string;
-  parents?: string[];
+  id: string; name: string; mimeType: string; size?: string; parents?: string[];
 }
 interface CategorizedFile extends DriveFile {
-  category: "brochure" | "floorplan" | "image" | "video" | "payment_plan" | "location" | "amenity" | "other";
+  category: "brochure" | "floorplan" | "image" | "video" | "payment_plan" | "location" | "amenity" | "other" | "textfile";
   subcategory?: string;
 }
 interface FolderMap {
   [folderName: string]: { id: string; files: DriveFile[] };
 }
 
-// Claude AI functions
-const ANTHROPIC_API = "https://api.anthropic.com/v1/messages";
-const CLAUDE_MODEL  = "claude-sonnet-4-20250514";
+// ── Lovable AI Gateway ──────────────────────────────────────────────────────
+const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const AI_MODEL = "google/gemini-2.5-flash";
 
-async function callClaude(
-  messages: Array<{ role: string; content: unknown }>,
-  system: string,
+async function callAI(
+  systemPrompt: string,
+  userContent: string,
   maxTokens = 4096,
 ): Promise<string> {
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY secret is not configured");
-  const res = await fetch(ANTHROPIC_API, {
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
+
+  const res = await fetch(AI_GATEWAY, {
     method: "POST",
     headers: {
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
     },
-    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: maxTokens, system, messages }),
+    body: JSON.stringify({
+      model: AI_MODEL,
+      max_tokens: maxTokens,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userContent },
+      ],
+    }),
   });
+
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Claude API ${res.status}: ${err.slice(0, 400)}`);
+    if (res.status === 429) throw new Error("AI rate limit exceeded — please retry shortly");
+    if (res.status === 402) throw new Error("AI credits exhausted — add funds in Lovable workspace settings");
+    throw new Error(`AI Gateway ${res.status}: ${err.slice(0, 400)}`);
   }
+
   const data = await res.json();
-  return (data.content?.[0]?.text ?? "").trim();
-}
-
-async function callClaudeWithPDF(pdfBase64: string, system: string, userPrompt: string): Promise<string> {
-  return callClaude([{
-    role: "user",
-    content: [
-      { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } },
-      { type: "text", text: userPrompt },
-    ],
-  }], system);
-}
-
-async function callClaudeWithImage(imageBase64: string, mimeType: string, system: string, userPrompt: string): Promise<string> {
-  return callClaude([{
-    role: "user",
-    content: [
-      { type: "image", source: { type: "base64", media_type: mimeType as "image/jpeg"|"image/png"|"image/webp", data: imageBase64 } },
-      { type: "text", text: userPrompt },
-    ],
-  }], system);
-}
-
-async function callClaudeText(system: string, userPrompt: string): Promise<string> {
-  return callClaude([{ role: "user", content: userPrompt }], system);
+  return (data.choices?.[0]?.message?.content ?? "").trim();
 }
 
 // Prompts
@@ -103,7 +73,7 @@ Return ONLY valid JSON - no markdown fences, no explanations, no trailing text.
 Never fabricate data. Use "" for missing text, "TBA" for unknown price/size.
 For handover_date: Q1=03-31, Q2=06-30, Q3=09-30, Q4=12-31 of the stated year.`;
 
-const COMBINED_EXTRACTION_PROMPT = (folderName: string) => `Extract ALL property data from this brochure for: "${folderName}"
+const COMBINED_EXTRACTION_PROMPT = (folderName: string) => `Extract ALL property data from this text for: "${folderName}"
 
 Return ONLY this exact JSON (no markdown, no explanation):
 {
@@ -151,17 +121,7 @@ function parseJSON(raw: string): Record<string, unknown> {
   return { _parse_failed: true, _raw_preview: text.slice(0, 300) };
 }
 
-function parseJSONArray(raw: string): unknown[] {
-  const text = raw.trim();
-  try { const r = JSON.parse(text); return Array.isArray(r) ? r : []; } catch {}
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fenced) { try { const r = JSON.parse(fenced[1].trim()); return Array.isArray(r) ? r : []; } catch {} }
-  const s = text.indexOf("["), e = text.lastIndexOf("]");
-  if (s !== -1 && e > s) { try { const r = JSON.parse(text.slice(s, e + 1)); return Array.isArray(r) ? r : []; } catch {} }
-  return [];
-}
-
-// Google Drive helpers (unchanged from V6)
+// Google Drive helpers
 async function getValidAccessToken(supabase: ReturnType<typeof createClient>): Promise<string | null> {
   const { data: rows } = await supabase.from("importer_settings").select("key, value")
     .in("key", ["gdrive_access_token", "gdrive_refresh_token", "gdrive_token_expiry"]);
@@ -229,9 +189,7 @@ function categorizeFiles(folderMap: FolderMap): CategorizedFile[] {
     for (const file of files) {
       const lowerFile = file.name.toLowerCase();
       const cat: CategorizedFile = { ...file, category: "other" };
-      // Text files → "textfile" category (used for data extraction instead of PDFs)
-      if (lowerFile.endsWith(".txt") || file.mimeType === "text/plain") cat.category = "textfile" as any;
-      // PDFs are now IGNORED — skip categorizing them as brochures
+      if (lowerFile.endsWith(".txt") || file.mimeType === "text/plain") cat.category = "textfile";
       else if (file.mimeType === "application/pdf" || lowerFile.endsWith(".pdf")) cat.category = "other";
       else if (lowerName.includes("floor") || lowerName.includes("plan")) cat.category = "floorplan";
       else if (lowerName.includes("payment") || lowerName.includes("installment")) cat.category = "payment_plan";
@@ -239,7 +197,7 @@ function categorizeFiles(folderMap: FolderMap): CategorizedFile[] {
       else if (lowerName.includes("location") || lowerName.includes("map")) cat.category = "location";
       else if (lowerName.includes("ameniti") || lowerName.includes("facility") || lowerName.includes("feature")) cat.category = "amenity";
       else if (lowerName.includes("image") || lowerName.includes("photo") || lowerName.includes("render") || lowerName.includes("gallery")) cat.category = "image";
-      else if (lowerName.includes("brochure") || lowerName.includes("pdf")) cat.category = "image"; // treat brochure folder images as images
+      else if (lowerName.includes("brochure") || lowerName.includes("pdf")) cat.category = "image";
       else if (folderName === "_root") {
         if (file.mimeType.startsWith("image/")) cat.category = "image";
         else if (file.mimeType.startsWith("video/")) cat.category = "video";
@@ -261,13 +219,6 @@ async function downloadDriveFile(fileId: string, token: string): Promise<ArrayBu
   if (!res.ok) res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) return null;
   return await res.arrayBuffer();
-}
-
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const uint8 = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < uint8.length; i += 8192) binary += String.fromCharCode(...uint8.subarray(i, Math.min(i + 8192, uint8.length)));
-  return btoa(binary);
 }
 
 async function readMetadataJson(folderId: string, token: string): Promise<Record<string, unknown>> {
@@ -318,7 +269,7 @@ serve(async (req) => {
     const { data: claimsData } = await supabase.auth.getClaims(authHeader.replace("Bearer ", ""));
     if (!claimsData?.claims) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
 
-    const { job_id, folder_name, folder_id, pdf_files } = await req.json();
+    const { job_id, folder_name, folder_id } = await req.json();
     if (!job_id || !folder_name) return new Response(JSON.stringify({ error: "Missing job_id or folder_name" }), { status: 400, headers: corsHeaders });
 
     await supabase.from("import_jobs").update({ import_status: "extracting" }).eq("id", job_id);
@@ -340,8 +291,7 @@ serve(async (req) => {
     await log(supabase, job_id, "step", "1/5 — Scanning Google Drive folders...");
     const folderMap = await scanFolderRecursive(accessToken, resolvedFolderId);
     const allFiles  = categorizeFiles(folderMap);
-    const textFiles     = allFiles.filter(f => (f as any).category === "textfile");
-    const brochures      = []; // PDFs are now ignored
+    const textFiles      = allFiles.filter(f => f.category === "textfile");
     const images         = allFiles.filter(f => f.category === "image" && f.mimeType.startsWith("image/"));
     const floorplanFiles = allFiles.filter(f => f.category === "floorplan");
     const videoFiles     = allFiles.filter(f => f.category === "video" && f.mimeType.startsWith("video/"));
@@ -360,7 +310,7 @@ serve(async (req) => {
     const metadata = await readMetadataJson(resolvedFolderId, accessToken);
     if (Object.keys(metadata).length > 0) await log(supabase, job_id, "metadata_read", `metadata.json loaded — ${Object.keys(metadata).length} fields`);
 
-    // STEP 3: Read .txt files and extract with Claude (replaces PDF extraction)
+    // STEP 3: Read .txt files and extract with Lovable AI
     await log(supabase, job_id, "step", "2/5 — Reading .txt file(s) for data extraction...");
     let extracted: Record<string, unknown> = {};
     let paymentMilestones: unknown[] = [];
@@ -386,32 +336,32 @@ serve(async (req) => {
       }
 
       if (combinedText.trim()) {
-        await log(supabase, job_id, "step", "3/5 — Claude AI extracting all fields from text file(s)...");
+        await log(supabase, job_id, "step", "3/5 — AI extracting all fields from text file(s)...");
         try {
-          const raw = await callClaudeText(EXTRACTION_SYSTEM,
+          const raw = await callAI(EXTRACTION_SYSTEM,
             COMBINED_EXTRACTION_PROMPT(folder_name) + `\n\nHere is the property data from the text file(s):\n${combinedText}`);
           const parsed = parseJSON(raw);
           if (parsed.name_en) {
             extracted = parsed;
             paymentMilestones = Array.isArray(parsed.payment_plan) ? parsed.payment_plan as unknown[] : [];
             amenitiesList     = Array.isArray(parsed.amenities)    ? parsed.amenities    as unknown[] : [];
-            await log(supabase, job_id, "claude_success",
+            await log(supabase, job_id, "ai_success",
               `Text extraction: ${Object.keys(extracted).length} fields, ${paymentMilestones.length} payment milestones, ${amenitiesList.length} amenities`, "success");
           }
         } catch (e) {
-          await log(supabase, job_id, "claude_error", `Text extraction error: ${String(e).slice(0, 300)}`, "warning");
+          await log(supabase, job_id, "ai_error", `Text extraction error: ${String(e).slice(0, 300)}`, "warning");
         }
       }
     }
 
     if (!extracted.name_en) {
       try {
-        const raw = await callClaudeText(EXTRACTION_SYSTEM,
-          COMBINED_EXTRACTION_PROMPT(folder_name) + `\n\nNo PDF available. Folder name: "${folder_name}". Use folder name to infer property name and location. Return TBA for price and size.`);
+        const raw = await callAI(EXTRACTION_SYSTEM,
+          COMBINED_EXTRACTION_PROMPT(folder_name) + `\n\nNo text file available. Folder name: "${folder_name}". Use folder name to infer property name and location. Return TBA for price and size.`);
         extracted = parseJSON(raw);
         paymentMilestones = Array.isArray(extracted.payment_plan) ? extracted.payment_plan as unknown[] : [];
         amenitiesList     = Array.isArray(extracted.amenities)    ? extracted.amenities    as unknown[] : [];
-        await log(supabase, job_id, "ai_fallback", "No PDF extracted — used folder name fallback. Review all fields.", "warning");
+        await log(supabase, job_id, "ai_fallback", "No text file extracted — used folder name fallback. Review all fields.", "warning");
       } catch { extracted = { name_en: folder_name.split(" - ")[0] }; }
     }
 
@@ -426,7 +376,7 @@ serve(async (req) => {
     let arabicData: Record<string, string> = {};
     if (Object.keys(toTranslate).length > 0) {
       try {
-        arabicData = parseJSON(await callClaudeText(ARABIC_SYSTEM, ARABIC_PROMPT(toTranslate))) as Record<string, string>;
+        arabicData = parseJSON(await callAI(ARABIC_SYSTEM, ARABIC_PROMPT(toTranslate))) as Record<string, string>;
         await log(supabase, job_id, "arabic_translation", `Translated ${Object.keys(toTranslate).length} fields to Arabic`, "success");
       } catch (e) { await log(supabase, job_id, "arabic_translation", `Arabic translation failed: ${String(e).slice(0, 200)}`, "warning"); }
     }
@@ -461,7 +411,7 @@ serve(async (req) => {
         else safeUpdate[col] = merged[col];
       }
     }
-    safeUpdate.ai_extraction_raw = { ...extracted, _payment_milestones: paymentMilestones, _amenities: amenitiesList, _images_found: images.length, _floorplans_found: floorplanFiles.length, _videos_found: videoFiles.length, _text_files_found: textFiles.length, _duplicate_property_id: existingPropertyId, _folder_structure: Object.keys(folderMap), _ai_model: CLAUDE_MODEL };
+    safeUpdate.ai_extraction_raw = { ...extracted, _payment_milestones: paymentMilestones, _amenities: amenitiesList, _images_found: images.length, _floorplans_found: floorplanFiles.length, _videos_found: videoFiles.length, _text_files_found: textFiles.length, _duplicate_property_id: existingPropertyId, _folder_structure: Object.keys(folderMap), _ai_model: AI_MODEL };
     safeUpdate.import_status = "reviewing";
     if (existingPropertyId) safeUpdate.cms_property_id = existingPropertyId;
 
@@ -492,19 +442,19 @@ serve(async (req) => {
     } catch {}
 
     await log(supabase, job_id, "extraction_complete",
-      `V8 complete. Model: ${CLAUDE_MODEL}. Source: ${textSource || "fallback"}. Completeness: ${completeness}%. Errors: ${errors.length}. Warnings: ${warnings.length}. Media: ${mediaToRegister.length}. Payment: ${paymentMilestones.length}. Amenities: ${amenitiesList.length}.`,
+      `V9 complete. Model: ${AI_MODEL}. Source: ${textSource || "fallback"}. Completeness: ${completeness}%. Errors: ${errors.length}. Warnings: ${warnings.length}. Media: ${mediaToRegister.length}. Payment: ${paymentMilestones.length}. Amenities: ${amenitiesList.length}.`,
       errors.length > 0 ? "warning" : "success");
 
     return new Response(JSON.stringify({
       success: true, data: merged,
-      pipeline: { ai_model: CLAUDE_MODEL, text_source: textSource, folder_structure: Object.keys(folderMap), files_found: { text_files: textFiles.length, images: images.length, floor_plans: floorplanFiles.length, videos: videoFiles.length, payment_plans: paymentFiles.length, amenity_files: amenityFiles.length } },
+      pipeline: { ai_model: AI_MODEL, text_source: textSource, folder_structure: Object.keys(folderMap), files_found: { text_files: textFiles.length, images: images.length, floor_plans: floorplanFiles.length, videos: videoFiles.length, payment_plans: paymentFiles.length, amenity_files: amenityFiles.length } },
       payment_milestones: paymentMilestones, amenities: amenitiesList,
       duplicate: existingPropertyId ? { property_id: existingPropertyId, action: "update" } : null,
       validation: { errors, warnings, completeness }, publishing_mode: publishingMode, media_registered: mediaToRegister.length,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (e) {
-    console.error("extract-property V7 error:", e);
+    console.error("extract-property V9 error:", e);
     return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: corsHeaders });
   }
 });
