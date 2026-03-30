@@ -162,14 +162,23 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       await supabase.from("import_logs").insert({ job_id: job.id, action, details, level });
     };
 
+    // Cache Drive access token once at start — avoids 17+ redundant edge function calls
+    let cachedDriveToken: string | null = null;
+    const getDriveToken = async (): Promise<string> => {
+      if (cachedDriveToken) return cachedDriveToken;
+      const { access_token } = await callEdgeFunction("gdrive-oauth", {
+        action: "get_download_link", file_id: "_warmup_",
+      });
+      cachedDriveToken = access_token;
+      return access_token;
+    };
+
     // Helper: download one file from Google Drive in the browser
     const downloadFromDrive = async (fileId: string, filename: string): Promise<Blob> => {
-      const { access_token } = await callEdgeFunction("gdrive-oauth", {
-        action: "get_download_link", file_id: fileId,
-      });
+      const token = await getDriveToken();
       const res = await fetch(
         `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-        { headers: { Authorization: `Bearer ${access_token}` } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error(`Failed to download "${filename}" (HTTP ${res.status})`);
       return res.blob();
