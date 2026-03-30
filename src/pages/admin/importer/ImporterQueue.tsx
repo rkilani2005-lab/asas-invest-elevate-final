@@ -999,7 +999,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     { key: "2/9", label: "Downloading text files" },
     { key: "3/9", label: "Loading images" },
     { key: "4/9", label: "Videos found" },
-    { key: "5/9", label: "Claude Vision" },
+    { key: "5/9", label: "AI extraction" },
     { key: "6/9", label: "Merging data" },
     { key: "7/9", label: "Saving fields" },
     { key: "8/9", label: "Amenities" },
