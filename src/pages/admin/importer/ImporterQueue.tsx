@@ -1164,7 +1164,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
           <div className="flex-1 min-w-0">
             <div className="font-medium">{job.name_en || job.folder_name}</div>
             <div className="text-xs text-muted-foreground mt-0.5 flex gap-3">
-              {job.pdf_count > 0   && <span>{job.pdf_count} PDF</span>}
+              {job.pdf_count > 0   && <span>{job.pdf_count} text</span>}
               {job.image_count > 0 && <span>{job.image_count} images</span>}
               {job.video_count > 0 && <span>{job.video_count} videos</span>}
             </div>
