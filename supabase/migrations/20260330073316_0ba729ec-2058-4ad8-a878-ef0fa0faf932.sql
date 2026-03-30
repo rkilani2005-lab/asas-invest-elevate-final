@@ -1,0 +1,2 @@
+ALTER TABLE public.import_media DROP CONSTRAINT IF EXISTS import_media_media_type_check;
+ALTER TABLE public.import_media ADD CONSTRAINT import_media_media_type_check CHECK (media_type IN ('hero', 'exterior', 'interior', 'render', 'floorplan', 'amenity', 'location', 'other', 'image', 'video', 'brochure', 'view'));
