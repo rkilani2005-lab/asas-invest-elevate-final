@@ -890,7 +890,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                         </span>
                       </h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {images.map((img: any) => {
+                        {imageMedia.map((img: any) => {
                           const fp = fileProgress.find(
                             (f) => f.filename === img.original_filename
                           );
