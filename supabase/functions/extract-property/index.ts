@@ -515,9 +515,9 @@ serve(async (req) => {
       resolvedPdfFiles = brochures.map(b => ({ id: b.id, name: b.name, size: parseInt(b.size || "0", 10) }));
     }
 
-    // Sort PDFs by size descending, try up to 2
+    // Sort PDFs by size ascending — try smaller/optimized files first to avoid timeouts
     const sortedPdfs = [...resolvedPdfFiles]
-      .sort((a: any, b: any) => (b.size || 0) - (a.size || 0))
+      .sort((a: any, b: any) => (a.size || 0) - (b.size || 0))
       .slice(0, 2);
 
     for (const pdf of sortedPdfs) {
