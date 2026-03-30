@@ -237,7 +237,7 @@ Deno.serve(async (req) => {
           dropbox_folder_path: folder.id,
           folder_name: folder.name,
           import_status: "pending",
-          pdf_count: pdfFiles.length,
+          pdf_count: pdfFiles.length + textFiles.length,
           image_count: imageFiles.length,
           video_count: videoFiles.length,
           total_size_bytes: totalSizeBytes,
