@@ -1,12 +1,13 @@
 /**
  * merge-extract  —  Supabase Edge Function
  *
- * Receives all partial extraction JSONs (one per 4-page batch) and merges them
- * into one complete import_jobs-compatible record using Claude.
- * Also generates Arabic translations for any missing AR fields.
+ * Receives all partial extraction JSONs (one per PDF or image batch) and merges
+ * them into one complete import_jobs-compatible record using Claude.
+ * Also generates Arabic translations, handles video metadata, and produces
+ * the final CMS-ready property record.
  *
  * Deploy:  supabase functions deploy merge-extract
- * Secret:  ANTHROPIC_API_KEY  (same key as extract-chunk)
+ * Secret:  ANTHROPIC_API_KEY  (same as extract-chunk)
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -16,8 +17,8 @@ const MAX_TOKENS = 4096;
 
 const MERGE_SYSTEM = `
 You are merging multiple partial property data extractions into one final
-record for ASAS Properties CMS. Each partial came from a different 4-page
-batch of the same property's documents (brochures, floor plans, payment plans).
+record for ASAS Properties CMS. Partials come from PDF pages and property
+images (exterior, interior, floor plans) of the same property in Dubai/UAE.
 
 Merging rules:
 1. Prefer non-null / non-empty values over null/empty.
@@ -28,10 +29,12 @@ Merging rules:
 6. For floor_plan_units: merge by type (case-insensitive dedup).
 7. Generate slug from name_en: lowercase, spaces to hyphens, remove special chars.
 8. If type not found anywhere: default to "off-plan".
-9. overview_en: write a polished 200-250 word editorial description if fragments exist.
-10. For all Arabic fields (name_ar, tagline_ar, developer_ar, location_ar, overview_ar,
-    highlights_ar, investment_ar, enduser_text_ar): translate from English if missing.
-    Use formal Gulf Arabic (Modern Standard Arabic, فصحى مبسطة).
+9. overview_en: write a polished 200-250 word editorial description combining all fragments.
+10. For Arabic fields missing from partials (name_ar, tagline_ar, developer_ar,
+    location_ar, overview_ar, highlights_ar, investment_ar, enduser_text_ar):
+    translate from the English equivalent using formal Gulf Arabic (فصحى مبسطة).
+11. For video_files: if any filename contains "youtube" or "youtu.be", extract as video_url.
+    Otherwise note video count for reference.
 
 Return ONLY valid JSON — no markdown fences, no preamble:
 {
@@ -74,7 +77,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors() });
 
   try {
-    const { partials = [], hints = "", folder_name = "" } = await req.json();
+    const {
+      partials     = [],
+      hints        = "",
+      folder_name  = "",
+      video_files  = [],
+      image_count  = 0,
+      video_count  = 0,
+    } = await req.json();
 
     if (!partials.length) throw new Error("partials array is empty — nothing to merge");
 
@@ -84,8 +94,14 @@ serve(async (req) => {
     const userMsg = [
       `Property folder: "${folder_name}"`,
       hints ? `Additional context: ${hints}` : "",
+      `Media summary: ${image_count} image(s), ${video_count} video(s) in Google Drive folder`,
+      video_files.length
+        ? `Video files: ${JSON.stringify(video_files)}`
+        : "",
       "",
-      `Merge these ${partials.length} partial extraction(s) into one complete record:`,
+      `Merge these ${partials.length} partial extraction(s) into one complete record.`,
+      `Partials come from both PDF pages and property images (floor plans, exterior, interior).`,
+      "",
       JSON.stringify(partials, null, 2),
     ].filter(Boolean).join("\n");
 
@@ -130,5 +146,5 @@ function safeJson(text: string): Record<string, unknown> {
   if (fenced) try { return JSON.parse(fenced[1].trim()); } catch {}
   const s = text.indexOf("{"), e = text.lastIndexOf("}");
   if (s !== -1 && e > s) try { return JSON.parse(text.slice(s, e + 1)); } catch {}
-  throw new Error("Claude returned an unparseable merge response: " + text.slice(0, 300));
+  throw new Error("Unparseable merge response: " + text.slice(0, 300));
 }

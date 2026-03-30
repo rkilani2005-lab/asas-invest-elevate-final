@@ -132,6 +132,25 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
   // ── AI Extraction v2 — Claude chunked pipeline (fixes Gemini timeouts) ──────
   const { chunkPdfBlob } = usePdfChunker();
 
+  // ── Helper: resize an image Blob to a JPEG base64 string for Claude Vision ──
+  const resizeImageForClaude = useCallback(async (blob: Blob, maxPx = 1600): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL("image/jpeg", 0.82).split(",")[1]);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image decode failed")); };
+      img.src = url;
+    });
+  }, []);
+
   const handleExtract = useCallback(async () => {
     setExtracting(true);
     await supabase.from("import_jobs").update({ import_status: "extracting" }).eq("id", job.id);
@@ -140,43 +159,111 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       await supabase.from("import_logs").insert({ job_id: job.id, action, details, level });
     };
 
+    // Helper: download one file from Google Drive in the browser
+    const downloadFromDrive = async (fileId: string, filename: string): Promise<Blob> => {
+      const { access_token } = await callEdgeFunction("gdrive-oauth", {
+        action: "get_download_link", file_id: fileId,
+      });
+      const res = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      );
+      if (!res.ok) throw new Error(`Failed to download "${filename}" (HTTP ${res.status})`);
+      return res.blob();
+    };
+
     try {
-      // 1. Load PDF brochure items from DB
+      // ── Step 1: Load all media items from DB ──────────────────────────────
       const { data: mediaItems } = await supabase
-        .from("import_media").select("*").eq("job_id", job.id);
-      const pdfItems = (mediaItems || []).filter((m: any) => m.media_type === "brochure");
-      if (!pdfItems.length) throw new Error("No PDF brochure files found. Add PDFs via the Drive folder.");
+        .from("import_media").select("*").eq("job_id", job.id).order("sort_order");
+      const allItems    = mediaItems || [];
+      const pdfItems    = allItems.filter((m: any) => m.media_type === "brochure");
+      const imageItems  = allItems.filter((m: any) => m.media_type === "image");
+      const videoItems  = allItems.filter((m: any) => m.media_type === "video");
 
-      await addLog("step", "1/7 — Downloading PDFs from Google Drive");
+      await addLog("step", `1/9 — Found ${pdfItems.length} PDF(s), ${imageItems.length} image(s), ${videoItems.length} video(s)`);
 
-      // 2. Download each PDF in the browser + chunk into page-image batches
       const CONCURRENCY = 3;
       const allBatches: Array<{
         pages: string[]; sourceFile: string; batchIndex: number;
         totalBatches: number; folderCategory: string;
       }> = [];
 
-      for (const item of pdfItems) {
-        const fileId = item.dropbox_path;
-        const { access_token } = await callEdgeFunction("gdrive-oauth", {
-          action: "get_download_link", file_id: fileId,
-        });
-        await addLog("step", `2/7 — Downloading ${item.original_filename}`);
-        const driveRes = await fetch(
-          `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-          { headers: { Authorization: `Bearer ${access_token}` } }
-        );
-        if (!driveRes.ok) throw new Error(`Failed to download ${item.original_filename} (${driveRes.status})`);
-        const blob = await driveRes.blob();
-
-        await addLog("step", `3/7 — Rendering ${item.original_filename} to page images`);
-        const batches = await chunkPdfBlob(blob, item.original_filename, "Brochure");
-        allBatches.push(...batches);
-        await addLog("info", `${item.original_filename}: ${batches.length} batch(es) ready`, "success");
+      // ── Step 2: Download + chunk PDFs ─────────────────────────────────────
+      if (pdfItems.length > 0) {
+        await addLog("step", "2/9 — Downloading & rendering PDFs");
+        for (const item of pdfItems) {
+          const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
+          const batches = await chunkPdfBlob(blob, item.original_filename, "Brochure");
+          allBatches.push(...batches);
+          await addLog("info", `PDF "${item.original_filename}": ${batches.length} batch(es)`, "success");
+        }
+      } else {
+        await addLog("warning", "No PDF brochures found — continuing with images only", "warning");
       }
 
-      // 3. Send batches to extract-chunk edge function (Claude Vision, 4 pages each)
-      await addLog("step", `4/7 — Sending ${allBatches.length} batch(es) to Claude AI`);
+      // ── Step 3: Download images + prepare vision batches ──────────────────
+      // Prioritise: floor plans → exterior → interior → others (max 12 images total)
+      const priorityOrder = (name: string, isHero: boolean): number => {
+        const n = name.toLowerCase();
+        if (n.includes("floor") || n.includes("plan") || n.includes("layout")) return 0;
+        if (n.includes("exterior") || n.includes("facade") || isHero)           return 1;
+        if (n.includes("amenity") || n.includes("pool") || n.includes("gym"))   return 2;
+        if (n.includes("interior") || n.includes("living") || n.includes("bedroom")) return 3;
+        return 4;
+      };
+
+      const sortedImages = [...imageItems].sort((a, b) =>
+        priorityOrder(a.original_filename, a.is_hero) -
+        priorityOrder(b.original_filename, b.is_hero)
+      ).slice(0, 12); // cap at 12 images for extraction
+
+      if (sortedImages.length > 0) {
+        await addLog("step", `3/9 — Downloading ${sortedImages.length} image(s) for visual analysis`);
+
+        const imageB64List: string[] = [];
+        for (const item of sortedImages) {
+          try {
+            const blob  = await downloadFromDrive(item.dropbox_path, item.original_filename);
+            const b64   = await resizeImageForClaude(blob, 1600);
+            imageB64List.push(b64);
+            await addLog("info", `Image downloaded: ${item.original_filename}`);
+          } catch (imgErr: any) {
+            await addLog("warning", `Skipped image "${item.original_filename}": ${imgErr.message}`, "warning");
+          }
+        }
+
+        // Group images into batches of 4 for Claude
+        const IMG_BATCH = 4;
+        const imgTotalBatches = Math.ceil(imageB64List.length / IMG_BATCH);
+        for (let i = 0; i < imageB64List.length; i += IMG_BATCH) {
+          allBatches.push({
+            pages:        imageB64List.slice(i, i + IMG_BATCH),
+            sourceFile:   "property-images",
+            batchIndex:   Math.floor(i / IMG_BATCH),
+            totalBatches: imgTotalBatches,
+            folderCategory: "Images",
+          });
+        }
+        await addLog("info", `${imageB64List.length} image(s) ready in ${imgTotalBatches} batch(es)`, "success");
+      }
+
+      // ── Step 4: Collect video metadata ────────────────────────────────────
+      const videoMeta = videoItems.map((v: any) => ({
+        filename: v.original_filename,
+        size_mb: v.original_size_bytes ? (v.original_size_bytes / 1048576).toFixed(1) : "unknown",
+        file_id: v.dropbox_path,
+      }));
+      if (videoMeta.length > 0) {
+        await addLog("step", `4/9 — Found ${videoMeta.length} video(s): ${videoItems.map((v: any) => v.original_filename).join(", ")}`);
+      }
+
+      if (!allBatches.length) {
+        throw new Error("No PDFs or images could be processed. Check the Google Drive folder has files.");
+      }
+
+      // ── Step 5: Send all batches to extract-chunk (Claude Vision) ─────────
+      await addLog("step", `5/9 — Sending ${allBatches.length} batch(es) to Claude Vision`);
       const partials: unknown[] = [];
 
       for (let i = 0; i < allBatches.length; i += CONCURRENCY) {
@@ -188,7 +275,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             folderCategory: batch.folderCategory, hints: job.folder_name,
           });
           if (!res?.ok) {
-            await addLog("warning", `Batch ${batch.batchIndex + 1} failed: ${res?.error ?? "unknown"}`, "warning");
+            await addLog("warning", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" failed: ${res?.error ?? "unknown"}`, "warning");
             return null;
           }
           await addLog("info", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" ✓`, "success");
@@ -199,16 +286,21 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
       if (!partials.length) throw new Error("Claude could not extract data from any batch.");
 
-      // 4. Merge all partials into one final record
-      await addLog("step", `5/7 — Merging ${partials.length} partial(s) with Claude`);
+      // ── Step 6: Merge all partials ────────────────────────────────────────
+      await addLog("step", `6/9 — Merging ${partials.length} partial(s) with Claude`);
       const merged = await callEdgeFunction("merge-extract", {
-        partials, folder_name: job.folder_name, hints: job.folder_name,
+        partials,
+        folder_name: job.folder_name,
+        hints: job.folder_name,
+        video_files: videoMeta,
+        image_count: imageItems.length,
+        video_count: videoItems.length,
       });
       if (!merged?.ok) throw new Error(merged?.error ?? "Merge failed");
       const d = merged.data as Record<string, unknown>;
 
-      // 5. Persist to import_jobs
-      await addLog("step", "6/7 — Saving extracted data");
+      // ── Step 7: Save text fields to import_jobs ───────────────────────────
+      await addLog("step", "7/9 — Saving extracted text data");
       await supabase.from("import_jobs").update({
         import_status:   "reviewing",
         name_en:         d.name_en         || null,
@@ -235,8 +327,8 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         enduser_text_ar: d.enduser_text_ar || null,
       }).eq("id", job.id);
 
-      // 6. Save amenities + payment plan rows
-      await addLog("step", "7/7 — Saving amenities and payment plan");
+      // ── Step 8: Save amenities + payment plan ─────────────────────────────
+      await addLog("step", "8/9 — Saving amenities and payment plan");
       if (Array.isArray(d.amenities) && d.amenities.length) {
         await (supabase.from("property_amenities") as any).delete().eq("job_id", job.id);
         await (supabase.from("property_amenities") as any).insert(
@@ -253,8 +345,26 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         );
       }
 
-      await addLog("extract_complete", `"${d.name_en || job.folder_name}" ready to review`, "success");
-      toast.success("Extraction complete — review and publish when ready");
+      // ── Step 9: Update media sort order based on category priority ─────────
+      await addLog("step", "9/9 — Updating media category order");
+      // Mark floor plan images for the publish step
+      for (const item of imageItems) {
+        const fn = item.original_filename.toLowerCase();
+        let detectedCategory = "image";
+        if (fn.includes("floor") || fn.includes("plan") || fn.includes("layout")) detectedCategory = "floorplan";
+        else if (item.is_hero || item.sort_order === 0) detectedCategory = "hero";
+        else if (fn.includes("exterior") || fn.includes("facade")) detectedCategory = "exterior";
+        else if (fn.includes("interior") || fn.includes("living") || fn.includes("bedroom")) detectedCategory = "interior";
+        else if (fn.includes("pool") || fn.includes("gym") || fn.includes("amenity")) detectedCategory = "amenity";
+        // Store detected category in media_type field for publish step to use
+        await supabase.from("import_media").update({ media_type: detectedCategory }).eq("id", item.id);
+      }
+
+      await addLog("extract_complete",
+        `✓ "${d.name_en || job.folder_name}" — ${pdfItems.length} PDF(s), ${imageItems.length} image(s), ${videoItems.length} video(s) processed`,
+        "success"
+      );
+      toast.success(`Extraction complete — ${imageItems.length} images & ${videoItems.length} videos ready to publish`);
       onRefresh();
 
     } catch (e: any) {
@@ -265,7 +375,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     } finally {
       setExtracting(false);
     }
-  }, [job, chunkPdfBlob, onRefresh]);
+  }, [job, chunkPdfBlob, resizeImageForClaude, onRefresh]);
 
   const handleResetStuck = async () => {
     await supabase
@@ -416,8 +526,10 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       toast.success("Property record created");
 
       // ── 2. Prepare media list ────────────────────────────────────────────
+      // Include images (all detected categories), videos, and brochures for upload
+      const UPLOADABLE_TYPES = ["image","hero","exterior","interior","floorplan","amenity","render","view","video","brochure"];
       const mediaToUpload = (media || []).filter(
-        (m: any) => m.media_type === "image" || m.media_type === "video"
+        (m: any) => UPLOADABLE_TYPES.includes(m.media_type)
       );
 
       if (mediaToUpload.length === 0) {
@@ -495,21 +607,25 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
           // Create CMS media record with smart category detection
           const filename = item.original_filename.toLowerCase();
+          // Use category set by extraction step (stored in media_type), fall back to filename detection
           let mediaCategory: string;
-          if (item.media_type === "video") {
-            mediaCategory = "video";
+          const KNOWN_CATS = ["video","hero","exterior","interior","floorplan","amenity","view","render","brochure"];
+          if (KNOWN_CATS.includes(item.media_type)) {
+            mediaCategory = item.media_type;
           } else if (item.is_hero || item.sort_order === 0) {
             mediaCategory = "hero";
-          } else if (filename.includes("floorplan") || filename.includes("floor_plan") || filename.includes("floor-plan") || filename.includes("layout")) {
+          } else if (filename.includes("floor") || filename.includes("plan") || filename.includes("layout")) {
             mediaCategory = "floorplan";
-          } else if (filename.includes("pool") || filename.includes("gym") || filename.includes("lobby") || filename.includes("amenity") || filename.includes("amenities") || filename.includes("facility") || filename.includes("common")) {
-            mediaCategory = "amenity";
-          } else if (filename.includes("view") || filename.includes("skyline") || filename.includes("aerial") || filename.includes("panorama")) {
-            mediaCategory = "view";
-          } else if (filename.includes("exterior") || filename.includes("facade") || filename.includes("building") || filename.includes("outside")) {
+          } else if (filename.includes("exterior") || filename.includes("facade") || filename.includes("building")) {
             mediaCategory = "exterior";
-          } else if (filename.includes("interior") || filename.includes("living") || filename.includes("bedroom") || filename.includes("kitchen") || filename.includes("bathroom") || filename.includes("dining")) {
+          } else if (filename.includes("interior") || filename.includes("living") || filename.includes("bedroom")) {
             mediaCategory = "interior";
+          } else if (filename.includes("pool") || filename.includes("gym") || filename.includes("amenity")) {
+            mediaCategory = "amenity";
+          } else if (filename.includes("view") || filename.includes("aerial") || filename.includes("panorama")) {
+            mediaCategory = "view";
+          } else if (filename.includes(".pdf")) {
+            mediaCategory = "brochure";
           } else {
             mediaCategory = "render";
           }
@@ -613,17 +729,21 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
   // ── Extraction step stepper ─────────────────────────────────────────────
   const EXTRACTION_STEPS = [
-    { key: "1/7", label: "Loading PDFs" },
-    { key: "2/7", label: "Downloading" },
-    { key: "3/7", label: "Rendering pages" },
-    { key: "4/7", label: "Claude Vision" },
-    { key: "5/7", label: "Merging data" },
-    { key: "6/7", label: "Saving fields" },
-    { key: "7/7", label: "Amenities" },
+    { key: "1/9", label: "Scanning files" },
+    { key: "2/9", label: "Downloading PDFs" },
+    { key: "3/9", label: "Loading images" },
+    { key: "4/9", label: "Videos found" },
+    { key: "5/9", label: "Claude Vision" },
+    { key: "6/9", label: "Merging data" },
+    { key: "7/9", label: "Saving fields" },
+    { key: "8/9", label: "Amenities" },
+    { key: "9/9", label: "Media ready" },
   ];
 
-  const currentStepLog = (logs || []).find((l: any) => l.action === "step");
-  const currentStepKey = currentStepLog ? (currentStepLog as any).details?.split(" —")[0] : null;
+  // Find the LAST step log (most recent progress)
+  const stepLogs = (logs || []).filter((l: any) => l.action === "step");
+  const currentStepLog = stepLogs[0] ?? null; // logs ordered desc so [0] is newest
+  const currentStepKey = currentStepLog ? (currentStepLog as any).details?.split(" —")[0].trim() : null;
   const currentStepIdx = currentStepKey
     ? EXTRACTION_STEPS.findIndex((s) => s.key === currentStepKey)
     : -1;
