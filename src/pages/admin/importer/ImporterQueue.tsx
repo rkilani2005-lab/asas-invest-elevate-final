@@ -162,14 +162,23 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       await supabase.from("import_logs").insert({ job_id: job.id, action, details, level });
     };
 
+    // Cache Drive access token once at start — avoids 17+ redundant edge function calls
+    let cachedDriveToken: string | null = null;
+    const getDriveToken = async (): Promise<string> => {
+      if (cachedDriveToken) return cachedDriveToken;
+      const { access_token } = await callEdgeFunction("gdrive-oauth", {
+        action: "get_download_link", file_id: "_warmup_",
+      });
+      cachedDriveToken = access_token;
+      return access_token;
+    };
+
     // Helper: download one file from Google Drive in the browser
     const downloadFromDrive = async (fileId: string, filename: string): Promise<Blob> => {
-      const { access_token } = await callEdgeFunction("gdrive-oauth", {
-        action: "get_download_link", file_id: fileId,
-      });
+      const token = await getDriveToken();
       const res = await fetch(
         `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-        { headers: { Authorization: `Bearer ${access_token}` } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error(`Failed to download "${filename}" (HTTP ${res.status})`);
       return res.blob();
@@ -225,12 +234,9 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         await addLog("step", `3/9 — Downloading ${sortedImages.length} image(s) for visual analysis`);
 
         const imageB64List: string[] = [];
+        const imgToken = await getDriveToken();
         for (const item of sortedImages) {
           try {
-            // Download from Drive with token
-            const { access_token: imgToken } = await callEdgeFunction("gdrive-oauth", {
-              action: "get_download_link", file_id: item.dropbox_path,
-            });
             const imgRes = await fetch(
               `https://www.googleapis.com/drive/v3/files/${item.dropbox_path}?alt=media`,
               { headers: { Authorization: `Bearer ${imgToken}` } }
@@ -283,6 +289,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       // ── Step 5: Send all batches to extract-chunk (Claude Vision) ─────────
       await addLog("step", `5/9 — Sending ${allBatches.length} batch(es) to Claude Vision`);
       const partials: unknown[] = [];
+      const batchErrors: string[] = [];
 
       for (let i = 0; i < allBatches.length; i += CONCURRENCY) {
         const group = allBatches.slice(i, i + CONCURRENCY);
@@ -296,12 +303,17 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             });
           } catch (fetchErr: any) {
             const msg = fetchErr.message || String(fetchErr);
+            console.error(`extract-chunk error (batch ${batch.batchIndex + 1}):`, msg);
+            batchErrors.push(msg);
             await addLog("warning",
               `extract-chunk network error (is it deployed?): ${msg}`, "warning");
             return null;
           }
           if (!res?.ok) {
-            await addLog("warning", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" failed: ${res?.error ?? "unknown"}`, "warning");
+            const errMsg = res?.error ?? "unknown";
+            console.error(`extract-chunk failed (batch ${batch.batchIndex + 1}):`, errMsg);
+            batchErrors.push(errMsg);
+            await addLog("warning", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" failed: ${errMsg}`, "warning");
             return null;
           }
           await addLog("info", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" ✓`, "success");
@@ -310,7 +322,10 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         partials.push(...results.filter(Boolean));
       }
 
-      if (!partials.length) throw new Error("Claude could not extract data from any batch.");
+      if (!partials.length) {
+        const firstErr = batchErrors[0] || "unknown error";
+        throw new Error(`Claude could not extract data from any batch. First error: ${firstErr}`);
+      }
 
       // ── Step 6: Merge all partials ────────────────────────────────────────
       await addLog("step", `6/9 — Merging ${partials.length} partial(s) with Claude`);
@@ -329,46 +344,42 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       await addLog("step", "7/9 — Saving extracted text data");
       await supabase.from("import_jobs").update({
         import_status:   "reviewing",
-        name_en:         d.name_en         || null,
-        name_ar:         d.name_ar         || null,
-        tagline_en:      d.tagline_en      || null,
-        tagline_ar:      d.tagline_ar      || null,
-        developer_en:    d.developer_en    || null,
-        developer_ar:    d.developer_ar    || null,
-        location_en:     d.location_en     || null,
-        location_ar:     d.location_ar     || null,
-        price_range:     d.price_range     || null,
-        size_range:      d.size_range      || null,
-        unit_types:      d.unit_types      || null,
-        ownership_type:  d.ownership_type  || null,
-        type:            (d.type as string) || "off-plan",
-        handover_date:   d.handover_date   || null,
-        overview_en:     d.overview_en     || null,
-        overview_ar:     d.overview_ar     || null,
-        highlights_en:   d.highlights_en   || null,
-        highlights_ar:   d.highlights_ar   || null,
-        investment_en:   d.investment_en   || null,
-        investment_ar:   d.investment_ar   || null,
-        enduser_text_en: d.enduser_text_en || null,
-        enduser_text_ar: d.enduser_text_ar || null,
+        name_en:         (d.name_en as string)         || null,
+        name_ar:         (d.name_ar as string)         || null,
+        slug:            (d.slug as string)             || null,
+        tagline_en:      (d.tagline_en as string)      || null,
+        tagline_ar:      (d.tagline_ar as string)      || null,
+        developer_en:    (d.developer_en as string)    || null,
+        developer_ar:    (d.developer_ar as string)    || null,
+        location_en:     (d.location_en as string)     || null,
+        location_ar:     (d.location_ar as string)     || null,
+        price_range:     (d.price_range as string)     || null,
+        size_range:      (d.size_range as string)      || null,
+        unit_types:      (d.unit_types as string)      || null,
+        ownership_type:  (d.ownership_type as string)  || null,
+        type:            (d.type as string)             || "off-plan",
+        status:          "available",
+        is_featured:     true,
+        handover_date:   (d.handover_date as string)   || null,
+        overview_en:     (d.overview_en as string)     || null,
+        overview_ar:     (d.overview_ar as string)     || null,
+        highlights_en:   (d.highlights_en as string)   || null,
+        highlights_ar:   (d.highlights_ar as string)   || null,
+        investment_en:   (d.investment_en as string)   || null,
+        investment_ar:   (d.investment_ar as string)   || null,
+        enduser_text_en: (d.enduser_text_en as string) || null,
+        enduser_text_ar: (d.enduser_text_ar as string) || null,
+        video_url:       (d.video_url as string)       || null,
       }).eq("id", job.id);
 
       // ── Step 8: Save amenities + payment plan ─────────────────────────────
       await addLog("step", "8/9 — Saving amenities and payment plan");
       if (Array.isArray(d.amenities) && d.amenities.length) {
-        await (supabase.from("property_amenities") as any).delete().eq("job_id", job.id);
-        await (supabase.from("property_amenities") as any).insert(
-          d.amenities.map((a: string, i: number) => ({ job_id: job.id, name_en: a, sort_order: i }))
-        );
+        // Store extracted amenities as import log data (actual amenities created at publish)
+        await addLog("amenities_extracted", JSON.stringify(d.amenities), "info");
       }
       if (Array.isArray(d.payment_plan) && d.payment_plan.length) {
-        await (supabase.from("payment_plan_milestones") as any).delete().eq("job_id", job.id);
-        await (supabase.from("payment_plan_milestones") as any).insert(
-          (d.payment_plan as any[]).map((p) => ({
-            job_id: job.id, milestone_en: p.milestone_en,
-            percentage: p.percentage, sort_order: p.sort_order,
-          }))
-        );
+        await addLog("payment_plan_extracted", JSON.stringify(d.payment_plan), "info");
       }
 
       // ── Step 9: Update media sort order based on category priority ─────────
@@ -395,15 +406,13 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         await addLog("step", `9/9 — Uploading ${uploadableMedia.length} media file(s) to storage`);
         const imageIdSet = new Set(imageItems.map((m: any) => m.id));
         let uploadedCount = 0, skippedCount = 0;
+        const uploadToken = await getDriveToken();
 
         for (let idx = 0; idx < uploadableMedia.length; idx++) {
           const item = uploadableMedia[idx];
           const isImg = imageIdSet.has(item.id);
           try {
-            // Get a short-lived Drive access token
-            const { access_token: dlToken } = await callEdgeFunction("gdrive-oauth", {
-              action: "get_download_link", file_id: item.dropbox_path,
-            });
+            const dlToken = uploadToken;
             // Download from Drive
             const driveRes = await fetch(
               `https://www.googleapis.com/drive/v3/files/${item.dropbox_path}?alt=media`,
@@ -1561,7 +1570,7 @@ export default function ImporterQueue() {
 
           toast(`New folder queued: ${row.folder_name}`, {
             icon: <FolderPlus className="w-4 h-4 text-primary" />,
-            description: "Auto-detected via Dropbox webhook / auto-scan",
+            description: "Auto-detected via Google Drive auto-scan",
             duration: 6000,
           });
         }
@@ -1650,9 +1659,9 @@ export default function ImporterQueue() {
         <div className="text-center py-16 text-muted-foreground">
           <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-20" />
           <p className="text-lg font-medium">Queue is empty</p>
-          <p className="text-sm mt-1">Scan Dropbox and select properties to import</p>
+          <p className="text-sm mt-1">Scan Google Drive and select properties to import</p>
           <Button className="mt-4" asChild>
-            <Link to="/admin/importer/scan">Scan Dropbox</Link>
+            <Link to="/admin/importer/scan">Scan Google Drive</Link>
           </Button>
         </div>
       )}

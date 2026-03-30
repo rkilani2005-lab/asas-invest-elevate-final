@@ -231,21 +231,48 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data: tokenRow } = await supabase
+    // Fetch access token + expiry + refresh token
+    const { data: tokenRows } = await supabase
       .from("importer_settings")
-      .select("value")
-      .eq("key", "gdrive_access_token")
-      .maybeSingle();
+      .select("key, value")
+      .in("key", ["gdrive_access_token", "gdrive_refresh_token", "gdrive_token_expiry"]);
 
-    const accessToken = tokenRow?.value;
+    const tokenMap: Record<string, string> = {};
+    ((tokenRows || []) as any[]).forEach((r: any) => { if (r.value) tokenMap[r.key] = r.value; });
+
+    let accessToken = tokenMap.gdrive_access_token;
     if (!accessToken) {
       return new Response(JSON.stringify({ error: "Not connected to Google Drive" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Return the direct download URL with the access token embedded
-    // The client will use this token to fetch the file directly
+    // Refresh if expired or within 5 minutes of expiry
+    const expiryMs = tokenMap.gdrive_token_expiry ? new Date(tokenMap.gdrive_token_expiry).getTime() : 0;
+    const needsRefresh = Date.now() > expiryMs - 5 * 60 * 1000;
+
+    if (needsRefresh && tokenMap.gdrive_refresh_token && GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+      const refreshResp = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: GOOGLE_CLIENT_ID,
+          client_secret: GOOGLE_CLIENT_SECRET,
+          refresh_token: tokenMap.gdrive_refresh_token,
+          grant_type: "refresh_token",
+        }),
+      });
+      if (refreshResp.ok) {
+        const tokens = await refreshResp.json();
+        accessToken = tokens.access_token;
+        const newExpiry = new Date(Date.now() + (tokens.expires_in || 3600) * 1000).toISOString();
+        await supabase.from("importer_settings").upsert([
+          { key: "gdrive_access_token", value: accessToken },
+          { key: "gdrive_token_expiry", value: newExpiry },
+        ], { onConflict: "key" });
+      }
+    }
+
     return new Response(JSON.stringify({ access_token: accessToken, file_id: fileId }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
