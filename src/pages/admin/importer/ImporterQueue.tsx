@@ -504,7 +504,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
 
       await addLog("extract_complete",
-        `✓ "${d.name_en || job.folder_name}" — ${txtItems.length} text file(s), ${imageItems.length} image(s), ${videoItems.length} video(s) imported`,
+        `✓ "${d.name_en || job.folder_name}" — ${imageItems.length} image(s), ${videoItems.length} video(s) imported`,
         "success"
       );
       toast.success(`Extraction complete — ${imageItems.length} images & ${videoItems.length} videos imported to storage`);
