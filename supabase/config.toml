@@ -12,6 +12,15 @@ verify_jwt = false
 [functions.extract-property]
 verify_jwt = false
 
+[functions.extract-chunk]
+verify_jwt = false
+
+[functions.merge-extract]
+verify_jwt = false
+
+[functions.approve-property]
+verify_jwt = false
+
 [functions.publish-property]
 verify_jwt = false
 
