@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePdfChunker } from "@/hooks/usePdfChunker";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -134,6 +135,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
   );
 
   // ── AI Extraction v2 — text + image pipeline ──────
+  const { extractPdfText } = usePdfChunker();
 
   // ── Helper: convert an image Blob to base64 for AI Vision ───────────────
   // Uses window.FileReader (accessed via window. so Vite cannot rename it).
@@ -161,25 +163,25 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       await supabase.from("import_logs").insert({ job_id: job.id, action, details, level });
     };
 
-    // Cache Drive access token once at start — avoids 17+ redundant edge function calls
-    let cachedDriveToken: string | null = null;
-    const getDriveToken = async (): Promise<string> => {
-      if (cachedDriveToken) return cachedDriveToken;
-      const { access_token } = await callEdgeFunction("gdrive-oauth", {
-        action: "get_download_link", file_id: "_warmup_",
-      });
-      cachedDriveToken = access_token;
-      return access_token;
-    };
-
-    // Helper: download one file from Google Drive in the browser
+    // Download files from Google Drive via server-side proxy (no CORS issues)
     const downloadFromDrive = async (fileId: string, filename: string): Promise<Blob> => {
-      const token = await getDriveToken();
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gdrive-oauth`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ action: "download_file", file_id: fileId }),
+        },
       );
-      if (!res.ok) throw new Error(`Failed to download "${filename}" (HTTP ${res.status})`);
+      if (!res.ok) {
+        let detail = `HTTP ${res.status}`;
+        try { const j = await res.json(); detail = j.error || j.details || detail; } catch {}
+        throw new Error(`Failed to download "${filename}": ${detail}`);
+      }
       return res.blob();
     };
 
@@ -188,12 +190,14 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       const { data: mediaItems } = await supabase
         .from("import_media").select("*").eq("job_id", job.id).order("sort_order");
       const allItems    = mediaItems || [];
-      // PDFs are now ignored — extract data from .txt files instead
-      const txtItems    = allItems.filter((m: any) => m.media_type === "other" && m.original_filename?.toLowerCase().endsWith(".txt"));
+      const pdfItems    = allItems.filter((m: any) =>
+        m.media_type === "brochure" ||
+        (m.media_type === "other" && m.original_filename?.toLowerCase().endsWith(".pdf"))
+      );
       const imageItems  = allItems.filter((m: any) => m.media_type === "image" || m.media_type === "hero" || m.media_type === "render" || m.media_type === "floorplan" || m.media_type === "interior" || m.media_type === "exterior" || m.media_type === "amenity" || m.media_type === "location");
       const videoItems  = allItems.filter((m: any) => m.media_type === "video");
 
-      await addLog("step", `1/9 — Found ${txtItems.length} text file(s), ${imageItems.length} image(s), ${videoItems.length} video(s) (PDFs ignored)`);
+      await addLog("step", `1/9 — Found ${pdfItems.length} PDF(s), ${imageItems.length} image(s), ${videoItems.length} video(s)`);
 
       const CONCURRENCY = 3;
       const allBatches: Array<{
@@ -201,70 +205,53 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         totalBatches: number; folderCategory: string;
       }> = [];
 
-      // ── Step 2: Download .txt files and prepare text batches ──────────────
-      if (txtItems.length > 0) {
-        await addLog("step", `2/9 — Downloading ${txtItems.length} text file(s)`);
+      // ── Step 2: Download PDFs + extract text via PDF.js ───────────────────
+      // pdftotext-equivalent extraction in the browser — fast, no vision needed
+      if (pdfItems.length > 0) {
+        await addLog("step", `2/9 — Downloading & extracting text from ${pdfItems.length} PDF(s)`);
         let combinedText = "";
-        for (const item of txtItems) {
+        for (const item of pdfItems) {
           try {
             const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
-            const text = await blob.text();
-            combinedText += `\n--- ${item.original_filename} ---\n${text}\n`;
-            await addLog("info", `Text file ready: ${item.original_filename} (${(blob.size / 1024).toFixed(1)} KB)`, "success");
-          } catch (txtErr: any) {
-            await addLog("warning", `Skipped text file "${item.original_filename}": ${txtErr.message}`, "warning");
+            const sizeMB = (blob.size / 1024 / 1024).toFixed(1);
+            await addLog("info", `Downloaded "${item.original_filename}" (${sizeMB} MB)`);
+
+            const text = await extractPdfText(blob, item.original_filename);
+            if (text.trim()) {
+              combinedText += `\n=== ${item.original_filename} ===\n${text}\n`;
+              await addLog("info", `Extracted ${text.length} chars from "${item.original_filename}"`, "success");
+            } else {
+              await addLog("warning", `No text found in "${item.original_filename}" — may be image-only PDF`, "warning");
+            }
+          } catch (pdfErr: any) {
+            await addLog("warning", `PDF error "${item.original_filename}": ${pdfErr.message}`, "warning");
           }
         }
         if (combinedText.trim()) {
-          // Send the combined text as a single batch for extraction
-          allBatches.push({
-            pages:        [combinedText],
-            sourceFile:   "property-text-files",
-            batchIndex:   0,
-            totalBatches: 1,
-            folderCategory: "TextData",
-          });
-        }
-      } else {
-        // Try to discover .txt files directly from Google Drive folder
-        await addLog("step", "2/9 — No text files in DB, scanning Drive folder for .txt files...");
-        try {
-          const token = await getDriveToken();
-          const folderId = job.dropbox_folder_path;
-          // Search recursively for .txt files
-          const searchUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+(mimeType='text/plain'+or+name+contains+'.txt')+and+trashed=false&fields=files(id,name,mimeType,size)&pageSize=50`;
-          const searchRes = await fetch(searchUrl, { headers: { Authorization: `Bearer ${token}` } });
-          if (searchRes.ok) {
-            const { files: txtDriveFiles } = await searchRes.json();
-            if (txtDriveFiles?.length > 0) {
-              let combinedText = "";
-              for (const txtFile of txtDriveFiles) {
-                try {
-                  const blob = await downloadFromDrive(txtFile.id, txtFile.name);
-                  const text = await blob.text();
-                  combinedText += `\n--- ${txtFile.name} ---\n${text}\n`;
-                  await addLog("info", `Found and read text file: ${txtFile.name}`, "success");
-                } catch (e: any) {
-                  await addLog("warning", `Could not read "${txtFile.name}": ${e.message}`, "warning");
-                }
-              }
-              if (combinedText.trim()) {
-                allBatches.push({
-                  pages: [combinedText],
-                  sourceFile: "property-text-files",
-                  batchIndex: 0,
-                  totalBatches: 1,
-                  folderCategory: "TextData",
-                });
-              }
+          // Split text into chunks if very long (>30K chars) to avoid token limits
+          const MAX_CHUNK = 30000;
+          const textChunks: string[] = [];
+          if (combinedText.length <= MAX_CHUNK) {
+            textChunks.push(combinedText);
+          } else {
+            for (let i = 0; i < combinedText.length; i += MAX_CHUNK) {
+              textChunks.push(combinedText.slice(i, i + MAX_CHUNK));
             }
           }
-        } catch (scanErr: any) {
-          await addLog("warning", `Could not scan for text files: ${scanErr.message}`, "warning");
+          const totalBatches = textChunks.length;
+          for (let i = 0; i < textChunks.length; i++) {
+            allBatches.push({
+              pages:        [textChunks[i]],
+              sourceFile:   "pdf-text-extraction",
+              batchIndex:   i,
+              totalBatches,
+              folderCategory: "TextData",
+            });
+          }
+          await addLog("info", `PDF text ready: ${combinedText.length} chars in ${totalBatches} batch(es)`, "success");
         }
-        if (!allBatches.length) {
-          await addLog("warning", "No text files found — continuing with images only", "warning");
-        }
+      } else {
+        await addLog("warning", "No PDF brochures found — continuing with images only", "warning");
       }
 
       // ── Step 3: Download images + prepare vision batches ──────────────────
@@ -287,17 +274,9 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         await addLog("step", `3/9 — Downloading ${sortedImages.length} image(s) for visual analysis`);
 
         const imageB64List: string[] = [];
-        const imgToken = await getDriveToken();
         for (const item of sortedImages) {
           try {
-            const imgRes = await fetch(
-              `https://www.googleapis.com/drive/v3/files/${item.dropbox_path}?alt=media`,
-              { headers: { Authorization: `Bearer ${imgToken}` } }
-            );
-            if (!imgRes.ok) {
-              throw new Error(`Drive returned HTTP ${imgRes.status} for "${item.original_filename}"`);
-            }
-            const blob = await imgRes.blob();
+            const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
             // Ensure blob has an image MIME type so FileReader works correctly
             const typedBlob = blob.type.startsWith("image/")
               ? blob
@@ -336,7 +315,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
 
       if (!allBatches.length) {
-        throw new Error("No text files or images could be processed. Check the Google Drive folder has files.");
+        throw new Error("No PDFs or images could be processed. Check the Google Drive folder has files.");
       }
 
       // ── Step 5: Send all batches to extract-chunk (AI Vision) ─────────
@@ -459,20 +438,13 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         await addLog("step", `9/9 — Uploading ${uploadableMedia.length} media file(s) to storage`);
         const imageIdSet = new Set(imageItems.map((m: any) => m.id));
         let uploadedCount = 0, skippedCount = 0;
-        const uploadToken = await getDriveToken();
 
         for (let idx = 0; idx < uploadableMedia.length; idx++) {
           const item = uploadableMedia[idx];
           const isImg = imageIdSet.has(item.id);
           try {
-            const dlToken = uploadToken;
-            // Download from Drive
-            const driveRes = await fetch(
-              `https://www.googleapis.com/drive/v3/files/${item.dropbox_path}?alt=media`,
-              { headers: { Authorization: `Bearer ${dlToken}` } }
-            );
-            if (!driveRes.ok) throw new Error(`Drive HTTP ${driveRes.status} for "${item.original_filename}"`);
-            const rawBlob = await driveRes.blob();
+            // Download from Drive via server-side proxy
+            const rawBlob = await downloadFromDrive(item.dropbox_path, item.original_filename);
             // Ensure MIME type is set so createImageBitmap works (Drive may return application/octet-stream)
             const typedBlob = rawBlob.type.startsWith("image/")
               ? rawBlob
@@ -661,25 +633,25 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
     }
 
-    // ── Step 1: get Google Drive access token (use cached if available) ────
+    // ── Step 1+2: Download from Google Drive via server-side proxy ──────────
     const fileId = mediaItem.dropbox_path;
-    let access_token: string;
-    if (mediaItem._cachedToken) {
-      access_token = mediaItem._cachedToken;
-    } else {
-      const result = await callEdgeFunction("gdrive-oauth", {
-        action: "get_download_link",
-        file_id: fileId,
-      });
-      access_token = result.access_token;
+    const { data: { session } } = await supabase.auth.getSession();
+    const fetchRes = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gdrive-oauth`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ action: "download_file", file_id: fileId }),
+      },
+    );
+    if (!fetchRes.ok) {
+      let detail = `HTTP ${fetchRes.status}`;
+      try { const j = await fetchRes.json(); detail = j.error || j.details || detail; } catch {}
+      throw new Error(`Failed to download ${mediaItem.original_filename}: ${detail}`);
     }
-
-    // ── Step 2: fetch the raw file from Google Drive in the browser ───────
-    const driveUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
-    const fetchRes = await fetch(driveUrl, {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
-    if (!fetchRes.ok) throw new Error(`Failed to fetch ${mediaItem.original_filename} from Google Drive (${fetchRes.status})`);
     const rawBlob = await fetchRes.blob();
 
     let finalBlob: Blob;
@@ -794,15 +766,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       let successCount = 0;
       let skippedCount = 0;
 
-      // Cache Drive token for all publish downloads
-      let publishDriveToken: string | null = null;
-      try {
-        const { access_token } = await callEdgeFunction("gdrive-oauth", {
-          action: "get_download_link", file_id: "_warmup_",
-        });
-        publishDriveToken = access_token;
-      } catch {}
-
       // Map media_type to valid CMS media_type enum values
       const mapToEnumType = (mediaType: string, filename: string, isHero: boolean): string => {
         const VALID_ENUM = ["render","floorplan","floor_plate","material","video","interior","hero","brochure"];
@@ -823,8 +786,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       // ── 4. Process one at a time (Canvas API is synchronous) ─────────────
       for (let i = 0; i < mediaToUpload.length; i++) {
         const item = mediaToUpload[i];
-        // Attach cached token so compressAndUpload doesn't call gdrive-oauth per file
-        if (publishDriveToken) (item as any)._cachedToken = publishDriveToken;
 
         try {
           // ── Fast-path: already uploaded during extraction ─────────────────

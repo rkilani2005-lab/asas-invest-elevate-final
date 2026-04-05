@@ -131,5 +131,68 @@ export function usePdfChunker() {
     }));
   }, []);
 
-  return { chunkPdfBlob, chunkProgress, chunkStatus };
+  /**
+   * Extracts plain text from a PDF Blob using PDF.js getTextContent().
+   * Much faster and cheaper than rendering to JPEG for vision — works great
+   * for InDesign/Illustrator PDFs with real text layers.
+   *
+   * @param blob     Raw PDF blob
+   * @param filename Original filename (for status display)
+   * @returns        Combined text from all pages, separated by page markers
+   */
+  const extractPdfText = useCallback(async (
+    blob: Blob,
+    filename: string,
+  ): Promise<string> => {
+    setChunkStatus(`Initialising PDF text extractor…`);
+    setChunkProgress(0);
+
+    // Lazy-load PDF.js on first call
+    if (!pdfLibRef.current) {
+      pdfLibRef.current = await loadPdfJs();
+    }
+    const pdfjsLib = pdfLibRef.current;
+
+    setChunkStatus(`Loading ${filename}…`);
+
+    const arrayBuffer = await blob.arrayBuffer();
+    const pdf         = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const totalPages  = pdf.numPages;
+    const allText: string[] = [];
+
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      setChunkStatus(`Extracting text — ${filename} page ${pageNum}/${totalPages}`);
+      setChunkProgress(Math.round((pageNum / totalPages) * 100));
+
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent();
+
+      // Join text items, preserving line breaks when Y position changes
+      let lastY: number | null = null;
+      let pageText = "";
+      for (const item of content.items) {
+        if (!("str" in item)) continue;
+        const textItem = item as { str: string; transform: number[] };
+        const y = textItem.transform[5]; // Y position
+        if (lastY !== null && Math.abs(y - lastY) > 2) {
+          pageText += "\n";
+        } else if (pageText.length > 0 && !pageText.endsWith(" ") && !pageText.endsWith("\n")) {
+          pageText += " ";
+        }
+        pageText += textItem.str;
+        lastY = y;
+      }
+
+      if (pageText.trim()) {
+        allText.push(`--- Page ${pageNum} ---\n${pageText.trim()}`);
+      }
+      page.cleanup();
+    }
+
+    setChunkProgress(100);
+    setChunkStatus(`Done — extracted ${allText.length} pages of text from ${filename}`);
+    return allText.join("\n\n");
+  }, []);
+
+  return { chunkPdfBlob, extractPdfText, chunkProgress, chunkStatus };
 }

@@ -278,6 +278,83 @@ Deno.serve(async (req) => {
     });
   }
 
+  // ---- DOWNLOAD FILE (server-side proxy — eliminates CORS) ----
+  if (action === "download_file") {
+    const fileId = body.file_id as string;
+    if (!fileId) {
+      return new Response(JSON.stringify({ error: "Missing file_id" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Fetch + refresh token (same logic as get_download_link)
+    const { data: dlTokenRows } = await supabase
+      .from("importer_settings")
+      .select("key, value")
+      .in("key", ["gdrive_access_token", "gdrive_refresh_token", "gdrive_token_expiry"]);
+
+    const dlMap: Record<string, string> = {};
+    ((dlTokenRows || []) as any[]).forEach((r: any) => { if (r.value) dlMap[r.key] = r.value; });
+
+    let dlToken = dlMap.gdrive_access_token;
+    if (!dlToken) {
+      return new Response(JSON.stringify({ error: "Not connected to Google Drive" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const dlExpiry = dlMap.gdrive_token_expiry ? new Date(dlMap.gdrive_token_expiry).getTime() : 0;
+    if (Date.now() > dlExpiry - 5 * 60 * 1000 && dlMap.gdrive_refresh_token && GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+      const rr = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: GOOGLE_CLIENT_ID, client_secret: GOOGLE_CLIENT_SECRET,
+          refresh_token: dlMap.gdrive_refresh_token, grant_type: "refresh_token",
+        }),
+      });
+      if (rr.ok) {
+        const tk = await rr.json();
+        dlToken = tk.access_token;
+        await supabase.from("importer_settings").upsert([
+          { key: "gdrive_access_token", value: dlToken },
+          { key: "gdrive_token_expiry", value: new Date(Date.now() + (tk.expires_in || 3600) * 1000).toISOString() },
+        ], { onConflict: "key" });
+      }
+    }
+
+    // Server-to-server download from Google Drive (no CORS, no redirect issues)
+    let driveResp = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      { headers: { Authorization: `Bearer ${dlToken}` } },
+    );
+    // Fallback: export as PDF (for Google Docs)
+    if (!driveResp.ok && driveResp.status !== 403) {
+      driveResp = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`,
+        { headers: { Authorization: `Bearer ${dlToken}` } },
+      );
+    }
+    if (!driveResp.ok) {
+      const errText = await driveResp.text().catch(() => "unknown");
+      return new Response(
+        JSON.stringify({ error: `Drive download failed (HTTP ${driveResp.status})`, details: errText.slice(0, 200) }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const contentType = driveResp.headers.get("content-type") || "application/octet-stream";
+    const contentLength = driveResp.headers.get("content-length");
+    return new Response(driveResp.body, {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": contentType,
+        ...(contentLength ? { "Content-Length": contentLength } : {}),
+      },
+    });
+  }
+
   return new Response(JSON.stringify({ error: "Unknown action" }), {
     status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
