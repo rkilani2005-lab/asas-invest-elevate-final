@@ -150,6 +150,7 @@ const Hero = () => {
             variant="outline" 
             className="border border-white/40 text-white hover:bg-white/10 hover:text-white hover:border-white/70 transition-all duration-300 px-10 py-6"
             style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.08em', fontSize: '0.75rem', textTransform: 'uppercase' }}
+            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
           >
             {content.contactUs}
           </Button>
