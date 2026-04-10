@@ -15,7 +15,13 @@ verify_jwt = false
 [functions.extract-chunk]
 verify_jwt = false
 
+[functions.extract-pdf-text]
+verify_jwt = false
+
 [functions.merge-extract]
+verify_jwt = false
+
+[functions.transfer-media]
 verify_jwt = false
 
 [functions.approve-property]
