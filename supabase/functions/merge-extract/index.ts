@@ -7,8 +7,6 @@
  *
  * Requires secret: LOVABLE_API_KEY (auto-provisioned by Lovable Cloud)
  */
-
-
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const AI_MODEL   = "google/gemini-2.5-flash";
 const MAX_TOKENS = 4096;
@@ -71,7 +69,7 @@ const cors = () => ({
   "Content-Type": "application/json",
 });
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors() });
 
   try {

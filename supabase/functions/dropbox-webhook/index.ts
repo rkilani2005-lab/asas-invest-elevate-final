@@ -107,7 +107,7 @@ function extractPropertyFolders(entries: Record<string, unknown>[], rootPath: st
   return folders;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

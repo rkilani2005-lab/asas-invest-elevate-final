@@ -80,7 +80,7 @@ async function sendGmailNotification(
   });
 }
 
-serve(async (req): Promise<Response> => {
+Deno.serve(async (req): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
