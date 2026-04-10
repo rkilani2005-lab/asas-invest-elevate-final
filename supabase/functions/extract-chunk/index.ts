@@ -6,7 +6,7 @@
  *
  * Requires secret: LOVABLE_API_KEY (auto-provisioned by Lovable Cloud)
  */
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const AI_MODEL   = "google/gemini-2.5-flash";
