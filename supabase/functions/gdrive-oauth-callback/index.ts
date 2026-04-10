@@ -2,7 +2,7 @@
  * Google Drive OAuth callback edge function
  * Exchanges the authorization code for tokens and stores in importer_settings.
  */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 Deno.serve(async (req) => {
   const supabase = createClient(

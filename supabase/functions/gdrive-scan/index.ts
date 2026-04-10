@@ -4,7 +4,7 @@
  * import_jobs, and queues new/updated folders for processing.
  * Performs RECURSIVE file discovery to find files in sub-subfolders.
  */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
