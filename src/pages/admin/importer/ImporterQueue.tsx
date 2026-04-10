@@ -209,12 +209,44 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       // The edge function downloads the PDF from Drive and returns only the text
       // (~20 KB instead of downloading 22+ MB PDFs to the browser)
       if (pdfItems.length > 0) {
-        await addLog("step", `2/9 — Extracting text from ${pdfItems.length} PDF(s) server-side`);
+        // ── Smart filtering: skip foreign-language duplicates ────────────────
+        // Properties often have English + Chinese + Russian copies of the same docs.
+        // We only need English for extraction (Arabic is AI-generated from English).
+        const FOREIGN_LANG_PATTERNS = [
+          /_zh_cn/i, /_zh/i, /_cn/i, /_ru/i, /_ar/i, /_fr/i, /_de/i, /_es/i, /_pt/i,
+          /_ja/i, /_ko/i, /_hi/i, /[\u4e00-\u9fff]/, /[\u0400-\u04ff]/,
+          /chinese/i, /russian/i, /arabic/i, /mandarin/i,
+        ];
+
+        const isNonEnglish = (filename: string): boolean =>
+          FOREIGN_LANG_PATTERNS.some((p) => p.test(filename));
+
+        const englishPdfs = pdfItems.filter((m: any) => !isNonEnglish(m.original_filename));
+        const skippedPdfs = pdfItems.filter((m: any) => isNonEnglish(m.original_filename));
+
+        if (skippedPdfs.length > 0) {
+          await addLog("info",
+            `Skipping ${skippedPdfs.length} non-English PDF(s): ${skippedPdfs.map((m: any) => m.original_filename).join(", ")}`,
+            "info");
+        }
+
+        const pdfsToProcess = englishPdfs.length > 0 ? englishPdfs : pdfItems.slice(0, 3); // fallback to first 3 if no English detected
+        await addLog("step",
+          `2/9 — Extracting text from ${pdfsToProcess.length} English PDF(s) server-side (${pdfItems.length - pdfsToProcess.length} foreign-language skipped)`);
+
         let combinedText = "";
 
-        // Sort by size ascending — extract smallest first (likely has same data)
-        const sortedPdfs = [...pdfItems].sort(
-          (a, b) => (a.original_size_bytes || 0) - (b.original_size_bytes || 0)
+        // Sort: payment plans & fact sheets first (small, data-rich), then floor plans, then brochures
+        const pdfPriority = (name: string): number => {
+          const n = name.toLowerCase();
+          if (n.includes("payment") || n.includes("installment")) return 0;
+          if (n.includes("fact") || n.includes("sheet")) return 1;
+          if (n.includes("floor") || n.includes("plan")) return 2;
+          return 3; // brochure and other
+        };
+        const sortedPdfs = [...pdfsToProcess].sort(
+          (a, b) => pdfPriority(a.original_filename) - pdfPriority(b.original_filename)
+              || (a.original_size_bytes || 0) - (b.original_size_bytes || 0)
         );
 
         for (const item of sortedPdfs) {
@@ -223,50 +255,46 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
               ? (item.original_size_bytes / 1024 / 1024).toFixed(1) : "?";
             await addLog("info", `Extracting text from "${item.original_filename}" (${sizeMB} MB) — server-side`);
 
-            const result = await callEdgeFunction("extract-pdf-text", {
-              file_id: item.dropbox_path,
-              filename: item.original_filename,
-            });
+            let extractedText = "";
 
-            if (result?.ok && result.text?.trim()) {
-              combinedText += `\n=== ${item.original_filename} ===\n${result.text}\n`;
-              await addLog("info",
-                `✓ "${item.original_filename}": ${result.chars} chars (quality: ${result.quality}, ${result.download_ms}ms download + ${result.extract_ms}ms extract)`,
-                "success");
-            } else if (result?.ok && result.quality === "minimal") {
-              // Server extraction got minimal text — try browser fallback
+            // Try server-side extraction first (fast, no browser download)
+            try {
+              const result = await callEdgeFunction("extract-pdf-text", {
+                file_id: item.dropbox_path,
+                filename: item.original_filename,
+              });
+              if (result?.ok && result.text?.trim() && result.quality !== "minimal") {
+                extractedText = result.text;
+                await addLog("info",
+                  `✓ "${item.original_filename}": ${result.chars} chars server-side (${result.download_ms + result.extract_ms}ms)`,
+                  "success");
+              }
+            } catch (serverErr: any) {
+              // Server extraction failed — will try browser fallback below
               await addLog("warning",
-                `Server extraction got minimal text from "${item.original_filename}" — trying browser PDF.js fallback`,
+                `Server extraction failed for "${item.original_filename}": ${serverErr.message}`,
                 "warning");
+            }
+
+            // Browser fallback if server got nothing useful
+            if (!extractedText) {
               try {
+                await addLog("info", `Trying browser PDF.js fallback for "${item.original_filename}"…`);
                 const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
                 const fallbackText = await extractPdfText(blob, item.original_filename);
                 if (fallbackText.trim()) {
-                  combinedText += `\n=== ${item.original_filename} ===\n${fallbackText}\n`;
+                  extractedText = fallbackText;
                   await addLog("info",
                     `✓ Browser fallback: ${fallbackText.length} chars from "${item.original_filename}"`,
                     "success");
                 }
               } catch (fbErr: any) {
-                await addLog("warning", `Browser fallback also failed: ${fbErr.message}`, "warning");
+                await addLog("warning", `Browser fallback also failed for "${item.original_filename}": ${fbErr.message}`, "warning");
               }
-            } else {
-              await addLog("warning",
-                `No text extracted from "${item.original_filename}": ${result?.error || "empty"}`,
-                "warning");
             }
 
-            // If we already have enough text from the first PDF, skip duplicates
-            if (combinedText.length > 2000 && sortedPdfs.indexOf(item) < sortedPdfs.length - 1) {
-              const remaining = sortedPdfs.length - sortedPdfs.indexOf(item) - 1;
-              // Still process floor plans and payment plans, skip duplicate brochures
-              const nextItem = sortedPdfs[sortedPdfs.indexOf(item) + 1];
-              const isLikelyDuplicate = nextItem?.original_filename?.toLowerCase().includes("brochure")
-                && item.original_filename?.toLowerCase().includes("brochure");
-              if (isLikelyDuplicate) {
-                await addLog("info", `Skipping ${remaining} likely duplicate brochure(s) — sufficient text extracted`, "info");
-                break;
-              }
+            if (extractedText) {
+              combinedText += `\n=== ${item.original_filename} ===\n${extractedText}\n`;
             }
           } catch (pdfErr: any) {
             await addLog("warning", `PDF error "${item.original_filename}": ${pdfErr.message}`, "warning");

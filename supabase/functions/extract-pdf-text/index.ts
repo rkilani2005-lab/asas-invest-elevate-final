@@ -77,109 +77,86 @@ async function getValidToken(
 // Falls back to empty string for image-only PDFs.
 
 function extractTextFromPdfBuffer(buffer: Uint8Array): string {
-  // Decode PDF as Latin-1 (preserves all bytes)
-  const raw = new TextDecoder("latin1").decode(buffer);
+  try {
+    // Decode PDF as Latin-1 (preserves all bytes without throwing)
+    const raw = new TextDecoder("latin1").decode(buffer);
+    const textChunks: string[] = [];
 
-  const textChunks: string[] = [];
-
-  // Strategy 1: Extract text between BT/ET (Begin Text / End Text) operators
-  const btEtRegex = /BT\s([\s\S]*?)ET/g;
-  let match;
-  while ((match = btEtRegex.exec(raw)) !== null) {
-    const block = match[1];
-
-    // Extract strings in parentheses: (Hello World) Tj
-    const parenRegex = /\(([^)]*)\)\s*T[jJ]/g;
-    let strMatch;
-    while ((strMatch = parenRegex.exec(block)) !== null) {
-      const decoded = strMatch[1]
-        .replace(/\\n/g, "\n")
-        .replace(/\\r/g, "\r")
-        .replace(/\\t/g, "\t")
-        .replace(/\\\(/g, "(")
-        .replace(/\\\)/g, ")")
-        .replace(/\\\\/g, "\\");
-      if (decoded.trim()) textChunks.push(decoded);
+    // Only process if the file looks like a PDF
+    if (!raw.startsWith("%PDF")) {
+      console.warn("[extract-pdf-text] Not a valid PDF");
+      return "";
     }
 
-    // Extract hex strings: <48656C6C6F> Tj
-    const hexRegex = /<([0-9A-Fa-f\s]+)>\s*T[jJ]/g;
-    let hexMatch;
-    while ((hexMatch = hexRegex.exec(block)) !== null) {
-      const hex = hexMatch[1].replace(/\s/g, "");
-      let decoded = "";
-      for (let i = 0; i < hex.length; i += 2) {
-        decoded += String.fromCharCode(parseInt(hex.substring(i, i + 2), 16));
-      }
-      if (decoded.trim()) textChunks.push(decoded);
-    }
+    // Strategy: Extract text between BT/ET (Begin Text / End Text) operators
+    // Use a non-greedy match with a size limit to prevent catastrophic backtracking
+    const btEtRegex = /BT\s([\s\S]{1,50000}?)ET/g;
+    let match;
+    let matchCount = 0;
+    const MAX_MATCHES = 5000; // safety limit
 
-    // Extract TJ arrays: [(Hello ) -200 (World)] TJ
-    const tjArrayRegex = /\[((?:\([^)]*\)|<[^>]*>|[^[\]])*)\]\s*TJ/gi;
-    let tjMatch;
-    while ((tjMatch = tjArrayRegex.exec(block)) !== null) {
-      const arr = tjMatch[1];
-      const parts = arr.match(/\(([^)]*)\)/g);
-      if (parts) {
-        const line = parts
-          .map((p) =>
-            p
-              .slice(1, -1)
-              .replace(/\\n/g, "\n")
-              .replace(/\\\(/g, "(")
-              .replace(/\\\)/g, ")")
-              .replace(/\\\\/g, "\\"),
-          )
-          .join("");
-        if (line.trim()) textChunks.push(line);
-      }
-    }
-  }
+    while ((match = btEtRegex.exec(raw)) !== null && matchCount++ < MAX_MATCHES) {
+      const block = match[1];
 
-  // Strategy 2: If BT/ET extraction found little, try stream decompression
-  // (for FlateDecode streams — most modern PDFs use this)
-  if (textChunks.join("").length < 100) {
-    // Try to find and decompress FlateDecode streams
-    const streamRegex = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
-    let streamMatch;
-    while ((streamMatch = streamRegex.exec(raw)) !== null) {
       try {
-        const compressed = new Uint8Array(
-          streamMatch[1].split("").map((c) => c.charCodeAt(0)),
-        );
-        const decompressed = new TextDecoder("utf-8", { fatal: false }).decode(
-          new DecompressionStream("deflate")
-            ? compressed
-            : compressed,
-        );
-        // Look for text operators in decompressed stream
-        const btEt2 = /BT\s([\s\S]*?)ET/g;
-        let m2;
-        while ((m2 = btEt2.exec(decompressed)) !== null) {
-          const parenRegex2 = /\(([^)]*)\)\s*T[jJ]/g;
-          let s2;
-          while ((s2 = parenRegex2.exec(m2[1])) !== null) {
-            if (s2[1].trim()) textChunks.push(s2[1]);
+        // Extract strings in parentheses: (Hello World) Tj
+        const parenRegex = /\(([^)]{0,500})\)\s*T[jJ]/g;
+        let strMatch;
+        while ((strMatch = parenRegex.exec(block)) !== null) {
+          const decoded = strMatch[1]
+            .replace(/\\n/g, "\n")
+            .replace(/\\r/g, "\r")
+            .replace(/\\t/g, "\t")
+            .replace(/\\\(/g, "(")
+            .replace(/\\\)/g, ")")
+            .replace(/\\\\/g, "\\");
+          // Only keep printable ASCII + common Unicode (skip binary garbage)
+          const clean = decoded.replace(/[^\x20-\x7E\u00A0-\u024F\u0400-\u04FF\u4E00-\u9FFF\u3000-\u303F\uFF00-\uFFEF]/g, "").trim();
+          if (clean.length > 0) textChunks.push(clean);
+        }
+
+        // Extract TJ arrays: [(Hello ) -200 (World)] TJ
+        const tjArrayRegex = /\[((?:\([^)]{0,500}\)|<[^>]{0,200}>|[^[\]]{0,100})*)\]\s*TJ/gi;
+        let tjMatch;
+        while ((tjMatch = tjArrayRegex.exec(block)) !== null) {
+          const arr = tjMatch[1];
+          const parts = arr.match(/\(([^)]{0,500})\)/g);
+          if (parts) {
+            const line = parts
+              .map((p) =>
+                p.slice(1, -1)
+                  .replace(/\\n/g, "\n")
+                  .replace(/\\\(/g, "(")
+                  .replace(/\\\)/g, ")")
+                  .replace(/\\\\/g, "\\"),
+              )
+              .join("");
+            const clean = line.replace(/[^\x20-\x7E\u00A0-\u024F\u0400-\u04FF\u4E00-\u9FFF\u3000-\u303F\uFF00-\uFFEF]/g, "").trim();
+            if (clean.length > 0) textChunks.push(clean);
           }
         }
       } catch {
-        // Decompression failed — skip this stream
+        // Skip this BT/ET block if regex fails (e.g., CJK binary content)
+        continue;
       }
     }
-  }
 
-  // Deduplicate consecutive identical lines and clean up
-  const lines: string[] = [];
-  let prev = "";
-  for (const chunk of textChunks) {
-    const clean = chunk.trim();
-    if (clean && clean !== prev) {
-      lines.push(clean);
-      prev = clean;
+    // Deduplicate consecutive identical lines and clean up
+    const lines: string[] = [];
+    let prev = "";
+    for (const chunk of textChunks) {
+      const clean = chunk.trim();
+      if (clean && clean !== prev && clean.length > 1) {
+        lines.push(clean);
+        prev = clean;
+      }
     }
-  }
 
-  return lines.join("\n");
+    return lines.join("\n");
+  } catch (err) {
+    console.error("[extract-pdf-text] extractTextFromPdfBuffer crashed:", err);
+    return "";
+  }
 }
 
 // ── Main handler ────────────────────────────────────────────────────────────
