@@ -205,23 +205,68 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         totalBatches: number; folderCategory: string;
       }> = [];
 
-      // ── Step 2: Download PDFs + extract text via PDF.js ───────────────────
-      // pdftotext-equivalent extraction in the browser — fast, no vision needed
+      // ── Step 2: Extract text from PDFs SERVER-SIDE (no browser download) ──
+      // The edge function downloads the PDF from Drive and returns only the text
+      // (~20 KB instead of downloading 22+ MB PDFs to the browser)
       if (pdfItems.length > 0) {
-        await addLog("step", `2/9 — Downloading & extracting text from ${pdfItems.length} PDF(s)`);
+        await addLog("step", `2/9 — Extracting text from ${pdfItems.length} PDF(s) server-side`);
         let combinedText = "";
-        for (const item of pdfItems) {
-          try {
-            const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
-            const sizeMB = (blob.size / 1024 / 1024).toFixed(1);
-            await addLog("info", `Downloaded "${item.original_filename}" (${sizeMB} MB)`);
 
-            const text = await extractPdfText(blob, item.original_filename);
-            if (text.trim()) {
-              combinedText += `\n=== ${item.original_filename} ===\n${text}\n`;
-              await addLog("info", `Extracted ${text.length} chars from "${item.original_filename}"`, "success");
+        // Sort by size ascending — extract smallest first (likely has same data)
+        const sortedPdfs = [...pdfItems].sort(
+          (a, b) => (a.original_size_bytes || 0) - (b.original_size_bytes || 0)
+        );
+
+        for (const item of sortedPdfs) {
+          try {
+            const sizeMB = item.original_size_bytes
+              ? (item.original_size_bytes / 1024 / 1024).toFixed(1) : "?";
+            await addLog("info", `Extracting text from "${item.original_filename}" (${sizeMB} MB) — server-side`);
+
+            const result = await callEdgeFunction("extract-pdf-text", {
+              file_id: item.dropbox_path,
+              filename: item.original_filename,
+            });
+
+            if (result?.ok && result.text?.trim()) {
+              combinedText += `\n=== ${item.original_filename} ===\n${result.text}\n`;
+              await addLog("info",
+                `✓ "${item.original_filename}": ${result.chars} chars (quality: ${result.quality}, ${result.download_ms}ms download + ${result.extract_ms}ms extract)`,
+                "success");
+            } else if (result?.ok && result.quality === "minimal") {
+              // Server extraction got minimal text — try browser fallback
+              await addLog("warning",
+                `Server extraction got minimal text from "${item.original_filename}" — trying browser PDF.js fallback`,
+                "warning");
+              try {
+                const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
+                const fallbackText = await extractPdfText(blob, item.original_filename);
+                if (fallbackText.trim()) {
+                  combinedText += `\n=== ${item.original_filename} ===\n${fallbackText}\n`;
+                  await addLog("info",
+                    `✓ Browser fallback: ${fallbackText.length} chars from "${item.original_filename}"`,
+                    "success");
+                }
+              } catch (fbErr: any) {
+                await addLog("warning", `Browser fallback also failed: ${fbErr.message}`, "warning");
+              }
             } else {
-              await addLog("warning", `No text found in "${item.original_filename}" — may be image-only PDF`, "warning");
+              await addLog("warning",
+                `No text extracted from "${item.original_filename}": ${result?.error || "empty"}`,
+                "warning");
+            }
+
+            // If we already have enough text from the first PDF, skip duplicates
+            if (combinedText.length > 2000 && sortedPdfs.indexOf(item) < sortedPdfs.length - 1) {
+              const remaining = sortedPdfs.length - sortedPdfs.indexOf(item) - 1;
+              // Still process floor plans and payment plans, skip duplicate brochures
+              const nextItem = sortedPdfs[sortedPdfs.indexOf(item) + 1];
+              const isLikelyDuplicate = nextItem?.original_filename?.toLowerCase().includes("brochure")
+                && item.original_filename?.toLowerCase().includes("brochure");
+              if (isLikelyDuplicate) {
+                await addLog("info", `Skipping ${remaining} likely duplicate brochure(s) — sufficient text extracted`, "info");
+                break;
+              }
             }
           } catch (pdfErr: any) {
             await addLog("warning", `PDF error "${item.original_filename}": ${pdfErr.message}`, "warning");
@@ -404,14 +449,25 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         video_url:       (d.video_url as string)       || null,
       }).eq("id", job.id);
 
-      // ── Step 8: Save amenities + payment plan ─────────────────────────────
+      // ── Step 8: Save amenities + payment plan to ai_extraction_raw ──────
+      // publish-property reads from ai_extraction_raw._payment_milestones and _amenities
       await addLog("step", "8/9 — Saving amenities and payment plan");
+      const aiExtractionRaw: Record<string, unknown> = {};
       if (Array.isArray(d.amenities) && d.amenities.length) {
-        // Store extracted amenities as import log data (actual amenities created at publish)
-        await addLog("amenities_extracted", JSON.stringify(d.amenities), "info");
+        // Store as both string names and structured objects for publish-property
+        aiExtractionRaw._amenities = d.amenities.map((a: unknown) =>
+          typeof a === "string" ? { name_en: a, category: "General", icon: "Star" } : a
+        );
+        await addLog("amenities_extracted", `${d.amenities.length} amenities`, "info");
       }
       if (Array.isArray(d.payment_plan) && d.payment_plan.length) {
-        await addLog("payment_plan_extracted", JSON.stringify(d.payment_plan), "info");
+        aiExtractionRaw._payment_milestones = d.payment_plan;
+        await addLog("payment_plan_extracted", `${d.payment_plan.length} milestones`, "info");
+      }
+      if (Object.keys(aiExtractionRaw).length > 0) {
+        await supabase.from("import_jobs").update({
+          ai_extraction_raw: aiExtractionRaw,
+        }).eq("id", job.id);
       }
 
       // ── Step 9: Update media sort order based on category priority ─────────
@@ -429,78 +485,63 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
         await supabase.from("import_media").update({ media_type: detectedCategory }).eq("id", item.id);
       }
 
-      // ── Step 9b: Upload images & videos to Supabase Storage ─────────────
-      // This makes media immediately available for preview and speeds up publish.
+      // ── Step 9b: Transfer media from Drive to Supabase Storage SERVER-SIDE ─
+      // Uses transfer-media edge function: Drive → Storage directly.
+      // Browser never downloads or uploads the media files.
       const uploadableMedia = [...imageItems, ...videoItems].filter(
         (m: any) => !m.storage_url || m.compression_status !== "done"
       );
       if (uploadableMedia.length > 0) {
-        await addLog("step", `9/9 — Uploading ${uploadableMedia.length} media file(s) to storage`);
-        const imageIdSet = new Set(imageItems.map((m: any) => m.id));
+        await addLog("step", `9/9 — Transferring ${uploadableMedia.length} media file(s) to storage (server-side)`);
         let uploadedCount = 0, skippedCount = 0;
+        const UPLOAD_CONCURRENCY = 3;
 
-        for (let idx = 0; idx < uploadableMedia.length; idx++) {
-          const item = uploadableMedia[idx];
-          const isImg = imageIdSet.has(item.id);
-          try {
-            // Download from Drive via server-side proxy
-            const rawBlob = await downloadFromDrive(item.dropbox_path, item.original_filename);
-            // Ensure MIME type is set so createImageBitmap works (Drive may return application/octet-stream)
-            const typedBlob = rawBlob.type.startsWith("image/")
-              ? rawBlob
-              : new Blob([await rawBlob.arrayBuffer()], { type: "image/jpeg" });
-
-            let finalBlob: Blob;
-            if (isImg) {
-              // Compress image to ≤ 600 KB using the Canvas pipeline
-              finalBlob = await compressImageToLimit(typedBlob, MAX_IMAGE_BYTES, () => {});
-            } else {
-              // Video: skip if over 40 MB
-              if (rawBlob.size > MAX_VIDEO_BYTES) {
-                await addLog("warning", `Video "${item.original_filename}" exceeds 40 MB — skipped`, "warning");
-                skippedCount++;
-                continue;
-              }
-              finalBlob = rawBlob;
-            }
-
-            // Build storage path under jobs/ prefix
-            const ext = isImg
-              ? getExtensionFromBlob(finalBlob)
-              : item.original_filename.split(".").pop() || "mp4";
+        for (let i = 0; i < uploadableMedia.length; i += UPLOAD_CONCURRENCY) {
+          const batch = uploadableMedia.slice(i, i + UPLOAD_CONCURRENCY);
+          const results = await Promise.allSettled(batch.map(async (item, batchIdx) => {
+            const idx = i + batchIdx;
             const safeName = item.original_filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-            const storagePath = `jobs/${job.id}/${String(idx).padStart(3, "0")}-${safeName.replace(/\.[^.]+$/, "")}.${ext}`;
+            const storagePath = `jobs/${job.id}/${String(idx).padStart(3, "0")}-${safeName}`;
 
-            const { error: upErr } = await supabase.storage
-              .from("property-media")
-              .upload(storagePath, finalBlob, {
-                contentType: isImg ? (ext === "webp" ? "image/webp" : "image/jpeg") : "video/mp4",
-                upsert: true,
+            try {
+              const result = await callEdgeFunction("transfer-media", {
+                file_id: item.dropbox_path,
+                filename: item.original_filename,
+                storage_path: storagePath,
+                job_id: job.id,
+                import_media_id: item.id,
               });
-            if (upErr) throw new Error(upErr.message);
 
-            const { data: { publicUrl } } = supabase.storage
-              .from("property-media")
-              .getPublicUrl(storagePath);
+              if (result?.ok) {
+                return { filename: item.original_filename, url: result.url, size: result.file_size };
+              } else if (result?.skipped) {
+                return { filename: item.original_filename, skipped: true, error: result.error };
+              } else {
+                throw new Error(result?.error || "Transfer failed");
+              }
+            } catch (err: any) {
+              throw new Error(`"${item.original_filename}": ${err.message}`);
+            }
+          }));
 
-            // Persist the URL so publish can skip the re-download
-            await supabase.from("import_media").update({
-              storage_url: publicUrl,
-              compressed_size_bytes: finalBlob.size,
-              compression_status: "done",
-            }).eq("id", item.id);
-
-            uploadedCount++;
-            await addLog("info",
-              `✓ ${item.original_filename} → ${(finalBlob.size / 1024).toFixed(0)} KB`, "success");
-
-          } catch (upErr: any) {
-            await addLog("warning",
-              `Could not upload "${item.original_filename}": ${upErr.message}`, "warning");
+          for (const result of results) {
+            if (result.status === "fulfilled") {
+              const val = result.value as any;
+              if (val.skipped) {
+                skippedCount++;
+                await addLog("warning", `Skipped "${val.filename}": ${val.error}`, "warning");
+              } else {
+                uploadedCount++;
+                await addLog("info",
+                  `✓ ${val.filename} → Storage (${(val.size / 1024).toFixed(0)} KB)`, "success");
+              }
+            } else {
+              await addLog("warning", `Transfer failed: ${result.reason?.message || result.reason}`, "warning");
+            }
           }
         }
         await addLog("info",
-          `Media upload complete: ${uploadedCount} uploaded, ${skippedCount} skipped`, "success");
+          `Media transfer complete: ${uploadedCount} transferred, ${skippedCount} skipped (all server-side)`, "success");
       }
 
       await addLog("extract_complete",
