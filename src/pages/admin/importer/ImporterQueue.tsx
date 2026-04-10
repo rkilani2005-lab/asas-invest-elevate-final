@@ -466,7 +466,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       }
       if (Object.keys(aiExtractionRaw).length > 0) {
         await supabase.from("import_jobs").update({
-          ai_extraction_raw: aiExtractionRaw,
+          ai_extraction_raw: aiExtractionRaw as any,
         }).eq("id", job.id);
       }
 

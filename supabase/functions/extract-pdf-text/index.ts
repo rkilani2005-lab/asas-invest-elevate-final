@@ -20,7 +20,7 @@ const corsHeaders = {
 
 // ── Token helper (shared pattern) ───────────────────────────────────────────
 async function getValidToken(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
 ): Promise<string | null> {
   const { data: rows } = await supabase
     .from("importer_settings")

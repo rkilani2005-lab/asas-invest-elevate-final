@@ -189,6 +189,8 @@ serve(async (req): Promise<Response> => {
 
       return new Response(JSON.stringify({ success: true, action: "rejected", job_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    return new Response(JSON.stringify({ error: "Unhandled action" }), { status: 400, headers: corsHeaders });
   } catch (e) {
     console.error("approve-property error:", e);
     return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: corsHeaders });
