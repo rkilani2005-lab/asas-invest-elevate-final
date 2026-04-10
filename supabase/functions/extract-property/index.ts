@@ -250,7 +250,7 @@ function generateSlug(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
 }
 
-async function log(supabase: ReturnType<typeof createClient>, jobId: string, action: string, details: string, level = "info") {
+async function log(supabase: any, jobId: string, action: string, details: string, level = "info") {
   await supabase.from("import_logs").insert({ job_id: jobId, action, details, level });
   console.log(`[${level}] ${action}: ${details}`);
 }
