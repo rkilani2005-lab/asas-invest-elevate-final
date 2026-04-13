@@ -6,7 +6,7 @@ import Stats from "@/components/Stats";
 import WhyAsas from "@/components/WhyAsas";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
-import SEOHead, { organizationJsonLd } from "@/components/SEOHead";
+import SEOHead, { organizationJsonLd, websiteJsonLd } from "@/components/SEOHead";
 
 const Index = () => {
   return (
@@ -15,7 +15,7 @@ const Index = () => {
         title="Asas Invest | Dubai Real Estate Investment & Advisory"
         description="Strategic property investment, leasing & wealth management in Dubai. Off-plan projects, ready properties, Golden Visa advisory. Building generational wealth through smart real estate."
         canonical="https://asasinvest.com/"
-        jsonLd={organizationJsonLd}
+        jsonLd={[organizationJsonLd, websiteJsonLd]}
       />
       <Navigation />
       <main>

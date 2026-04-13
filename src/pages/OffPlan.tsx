@@ -1,4 +1,4 @@
-import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
+import SEOHead, { breadcrumbJsonLd, collectionPageJsonLd } from "@/components/SEOHead";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -114,7 +114,20 @@ const OffPlan = () => {
         title="Off-Plan Properties in Dubai | Asas Invest"
         description="Explore exclusive off-plan developments in Dubai from top developers. Early-bird pricing, flexible payment plans, high ROI potential."
         canonical="https://asasinvest.com/off-plan"
-        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Off-Plan"}])}
+        jsonLd={[
+          breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Off-Plan"}]),
+          collectionPageJsonLd({
+            name: "Off-Plan Properties in Dubai",
+            description: "Explore exclusive off-plan developments in Dubai from top developers",
+            url: "https://asasinvest.com/off-plan",
+            properties: (properties || []).slice(0, 10).map((p: any) => ({
+              name: p.name_en || "",
+              slug: p.slug || "",
+              image: p.media?.find((m: any) => m.type === "hero" || m.type === "render")?.url,
+              price: p.price_range || undefined,
+            })),
+          }),
+        ]}
       />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />

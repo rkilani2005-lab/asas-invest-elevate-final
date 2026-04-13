@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Share2, Heart } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import SEOHead, { propertyJsonLd, breadcrumbJsonLd } from "@/components/SEOHead";
+import SEOHead, { propertyDetailJsonLd, breadcrumbJsonLd } from "@/components/SEOHead";
 import PropertyHero from "@/components/property-detail/PropertyHero";
 import PropertyOverview from "@/components/property-detail/PropertyOverview";
 import PropertyLocation from "@/components/property-detail/PropertyLocation";
@@ -146,8 +146,11 @@ const PropertyDetail = () => {
 
   // SEO data
   const heroImage = property.media?.find((m) => m.type === "hero" || m.type === "render")?.url;
+  const allImages = property.media?.filter((m) => m.type === "hero" || m.type === "render" || m.type === "interior").map((m) => m.url).filter(Boolean) || [];
   const seoDescription = (property.overview_en || property.tagline_en || `${property.name_en} - ${property.type === "ready" ? "Ready" : "Off-Plan"} property in ${property.location_en || "Dubai"}`)
     .replace(/<[^>]*>/g, "").slice(0, 155);
+  const amenityNames = property.amenities?.map((a) => a.name_en).filter(Boolean) || [];
+  const unitTypes = property.unit_types && Array.isArray(property.unit_types) ? property.unit_types : [];
 
   return (
     <div className="min-h-screen bg-background grain-overlay">
@@ -158,14 +161,20 @@ const PropertyDetail = () => {
         ogImage={heroImage}
         ogType="product"
         jsonLd={[
-          propertyJsonLd({
+          propertyDetailJsonLd({
             name: property.name_en || "",
             slug: slug || "",
             description: seoDescription,
             image: heroImage,
+            images: allImages as string[],
             priceRange: property.price_range || undefined,
             location: property.location_en || undefined,
             type: property.type || undefined,
+            developer: property.developer_en || undefined,
+            handoverDate: property.handover_date || undefined,
+            amenities: amenityNames as string[],
+            unitTypes: unitTypes as string[],
+            sizeRange: property.size_range || undefined,
           }),
           breadcrumbJsonLd([
             { name: "Home", url: "https://asasinvest.com" },

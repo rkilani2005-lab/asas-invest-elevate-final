@@ -1,4 +1,4 @@
-import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
+import SEOHead, { breadcrumbJsonLd, collectionPageJsonLd } from "@/components/SEOHead";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -114,7 +114,20 @@ const Ready = () => {
         title="Ready Properties for Sale in Dubai | Asas Invest"
         description="Browse move-in ready apartments, villas and penthouses across Dubai premium communities. Immediate handover, freehold ownership."
         canonical="https://asasinvest.com/ready"
-        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Ready Properties"}])}
+        jsonLd={[
+          breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Ready Properties"}]),
+          collectionPageJsonLd({
+            name: "Ready Properties for Sale in Dubai",
+            description: "Move-in ready apartments, villas and penthouses across Dubai premium communities",
+            url: "https://asasinvest.com/ready",
+            properties: (properties || []).slice(0, 10).map((p: any) => ({
+              name: p.name_en || "",
+              slug: p.slug || "",
+              image: p.media?.find((m: any) => m.type === "hero" || m.type === "render")?.url,
+              price: p.price_range || undefined,
+            })),
+          }),
+        ]}
       />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />

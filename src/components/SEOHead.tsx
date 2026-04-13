@@ -166,3 +166,143 @@ export function articleJsonLd(article: {
     },
   };
 }
+
+// ── Phase 2: Advanced Schema Builders ───────────────────────────────────────
+
+/** WebSite schema — enables Google sitelinks search box */
+export const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Asas Invest",
+  "url": "https://asasinvest.com",
+  "description": "Strategic property investment, leasing & wealth management in Dubai",
+  "publisher": { "@type": "Organization", "name": "Asas Invest" },
+  "inLanguage": ["en", "ar"],
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://asasinvest.com/off-plan?search={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
+
+/** FAQPage schema — renders FAQ rich snippets in Google */
+export function faqJsonLd(
+  faqs: Array<{ question: string; answer: string }>
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map((faq) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer,
+      },
+    })),
+  };
+}
+
+/** CollectionPage schema — for property listing pages */
+export function collectionPageJsonLd(page: {
+  name: string;
+  description: string;
+  url: string;
+  properties?: Array<{ name: string; slug: string; image?: string; price?: string }>;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": page.name,
+    "description": page.description,
+    "url": page.url,
+    "provider": { "@type": "Organization", "name": "Asas Invest" },
+    ...(page.properties?.length ? {
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": page.properties.length,
+        "itemListElement": page.properties.slice(0, 10).map((p, i) => ({
+          "@type": "ListItem",
+          "position": i + 1,
+          "url": `https://asasinvest.com/property/${p.slug}`,
+          "name": p.name,
+          ...(p.image ? { "image": p.image } : {}),
+        })),
+      },
+    } : {}),
+  };
+}
+
+/** Enhanced property schema with amenities and nearby places */
+export function propertyDetailJsonLd(property: {
+  name: string;
+  slug: string;
+  description: string;
+  image?: string;
+  images?: string[];
+  priceRange?: string;
+  location?: string;
+  type?: string;
+  developer?: string;
+  handoverDate?: string;
+  amenities?: string[];
+  unitTypes?: string[];
+  sizeRange?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    "name": property.name,
+    "url": `https://asasinvest.com/property/${property.slug}`,
+    "description": property.description,
+    ...(property.image ? { "image": property.image } : {}),
+    ...(property.images?.length ? {
+      "image": property.images.slice(0, 6),
+    } : {}),
+    ...(property.priceRange ? {
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "AED",
+        "price": property.priceRange,
+        "availability": "https://schema.org/InStock",
+      },
+    } : {}),
+    ...(property.location ? {
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": property.location,
+        "addressRegion": "Dubai",
+        "addressCountry": "AE",
+      },
+    } : {}),
+    "category": property.type === "ready" ? "Ready Property" : "Off-Plan Property",
+    ...(property.developer ? {
+      "seller": { "@type": "Organization", "name": property.developer },
+    } : {}),
+    ...(property.handoverDate ? {
+      "datePosted": property.handoverDate,
+    } : {}),
+    ...(property.amenities?.length ? {
+      "amenityFeature": property.amenities.map((a) => ({
+        "@type": "LocationFeatureSpecification",
+        "name": a,
+        "value": true,
+      })),
+    } : {}),
+    ...(property.sizeRange ? {
+      "floorSize": {
+        "@type": "QuantitativeValue",
+        "value": property.sizeRange,
+        "unitText": "sqft",
+      },
+    } : {}),
+    "broker": {
+      "@type": "RealEstateAgent",
+      "name": "Asas Invest",
+      "url": "https://asasinvest.com",
+    },
+  };
+}

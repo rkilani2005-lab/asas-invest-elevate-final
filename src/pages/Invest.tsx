@@ -1,4 +1,4 @@
-import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
+import SEOHead, { breadcrumbJsonLd, faqJsonLd } from "@/components/SEOHead";
 import { useState } from "react";
 import { TrendingUp, Shield, Award, Globe } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -30,7 +30,17 @@ const Invest = () => {
         title="Invest in Dubai Real Estate | Asas Invest"
         description="Grow your wealth through Dubai property investment. 6-9% rental yields, Golden Visa eligibility, zero income tax, expert portfolio advisory."
         canonical="https://asasinvest.com/invest"
-        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Invest"}])}
+        jsonLd={[
+          breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Invest"}]),
+          faqJsonLd([
+            { question: "What is the minimum investment for Dubai real estate?", answer: "You can invest in Dubai property from AED 500,000 (approximately USD 136,000). Off-plan projects often offer entry points with 10-20% down payment and flexible payment plans spread over construction and post-handover periods." },
+            { question: "Can foreigners buy property in Dubai?", answer: "Yes. Foreigners can purchase freehold property in designated areas across Dubai including Dubai Marina, Downtown Dubai, Palm Jumeirah, Dubai Hills Estate, and many more communities. There are no nationality restrictions for freehold purchases." },
+            { question: "What is the Golden Visa through property investment?", answer: "The UAE Golden Visa grants 10-year renewable residency to property investors who purchase real estate worth AED 2 million or more. The property can be off-plan or ready, and investors can include their family members." },
+            { question: "What rental yields can I expect in Dubai?", answer: "Dubai offers average rental yields of 6-9% annually, significantly higher than most global cities. Areas like Dubai Marina, JVC, and Dubai Sports City offer some of the highest yields, while premium communities offer strong capital appreciation." },
+            { question: "Is there property tax in Dubai?", answer: "Dubai has zero annual property tax, zero capital gains tax, and zero income tax on rental earnings. The only transaction costs are a 4% Dubai Land Department registration fee on purchase and standard service charges for building maintenance." },
+            { question: "What is the difference between off-plan and ready properties?", answer: "Off-plan properties are purchased during construction, typically at lower prices with flexible payment plans. Ready properties are completed and available for immediate occupancy or rental income. Both offer freehold ownership for foreign investors." },
+          ]),
+        ]}
       />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />

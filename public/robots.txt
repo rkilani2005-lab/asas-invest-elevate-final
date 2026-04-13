@@ -3,7 +3,11 @@ Allow: /
 Disallow: /admin/
 Disallow: /admin
 
+# Static sitemap (core pages)
 Sitemap: https://asasinvest.com/sitemap.xml
+
+# Dynamic sitemap (includes all properties + insights from database)
+Sitemap: https://yinswjhmcgftinrjsokv.supabase.co/functions/v1/sitemap
 
 User-agent: Googlebot
 Allow: /
