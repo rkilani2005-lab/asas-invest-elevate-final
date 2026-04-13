@@ -57,9 +57,9 @@ export default function SEOHead({
       <meta name="twitter:image" content={image} />
 
       {/* hreflang for bilingual */}
-      <link rel="alternate" hreflang="en" href={url} />
-      <link rel="alternate" hreflang="ar" href={url} />
-      <link rel="alternate" hreflang="x-default" href={url} />
+      <link rel="alternate" hrefLang="en" href={url} />
+      <link rel="alternate" hrefLang="ar" href={url} />
+      <link rel="alternate" hrefLang="x-default" href={url} />
 
       {/* JSON-LD Structured Data */}
       {jsonLdArray.map((ld, i) => (
