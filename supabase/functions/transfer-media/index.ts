@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const token = await getValidToken(supabaseAdmin);
+    const token = await getValidToken(supabaseAdmin as any);
     if (!token) {
       return new Response(
         JSON.stringify({ error: "No Google Drive token" }),

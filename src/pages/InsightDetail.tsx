@@ -112,7 +112,7 @@ const InsightDetail = () => {
         title={`${insight.title_en} | Asas Invest`}
         description={insight.meta_description_en || insight.excerpt_en || `${insight.title_en} — Dubai real estate insights from Asas Invest`}
         canonical={`https://asasinvest.com/insights/${slug}`}
-        ogImage={insight.cover_image || undefined}
+        ogImage={insight.featured_image || undefined}
         ogType="article"
         jsonLd={[
           articleJsonLd({
@@ -120,7 +120,7 @@ const InsightDetail = () => {
             slug: slug || "",
             excerpt: insight.excerpt_en || "",
             datePublished: insight.published_at || insight.created_at || "",
-            image: insight.cover_image || undefined,
+            image: insight.featured_image || undefined,
           }),
           breadcrumbJsonLd([
             { name: "Home", url: "https://asasinvest.com" },
