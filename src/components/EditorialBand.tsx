@@ -35,6 +35,7 @@ const EditorialBand = () => {
         <img
           src="/images/dubai-skyline.jpg"
           alt="Dubai skyline"
+          loading="lazy"
           className="w-full h-full object-cover"
         />
       </motion.div>

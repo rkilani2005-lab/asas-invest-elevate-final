@@ -199,6 +199,7 @@ const InsightDetail = () => {
               <img 
                 src={insight.featured_image} 
                 alt={content.title}
+                loading="lazy"
                 className="w-full h-auto object-cover"
               />
             </div>

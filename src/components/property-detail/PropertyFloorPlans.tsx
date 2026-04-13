@@ -173,6 +173,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                       <img
                         src={plan.url}
                         alt={caption || `Floor plan ${index + 1}`}
+                        loading="lazy"
                         className="w-full h-full object-contain"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
