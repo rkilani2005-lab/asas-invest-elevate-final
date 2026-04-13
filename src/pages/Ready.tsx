@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -108,7 +109,13 @@ const Ready = () => {
     });
   }, [properties, filters, language]);
 
-  return (
+  return (<>
+      <SEOHead
+        title="Ready Properties for Sale in Dubai | Asas Invest"
+        description="Browse move-in ready apartments, villas and penthouses across Dubai premium communities. Immediate handover, freehold ownership."
+        canonical="https://asasinvest.com/ready"
+        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Ready Properties"}])}
+      />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
 
@@ -188,7 +195,7 @@ const Ready = () => {
 
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default Ready;

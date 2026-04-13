@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Share2, Heart } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import SEOHead, { propertyJsonLd, breadcrumbJsonLd } from "@/components/SEOHead";
 import PropertyHero from "@/components/property-detail/PropertyHero";
 import PropertyOverview from "@/components/property-detail/PropertyOverview";
 import PropertyLocation from "@/components/property-detail/PropertyLocation";
@@ -143,8 +144,36 @@ const PropertyDetail = () => {
   const name = language === "ar" && property.name_ar ? property.name_ar : property.name_en;
   const tagline = language === "ar" && property.tagline_ar ? property.tagline_ar : property.tagline_en;
 
+  // SEO data
+  const heroImage = property.media?.find((m) => m.type === "hero" || m.type === "render")?.url;
+  const seoDescription = (property.overview_en || property.tagline_en || `${property.name_en} - ${property.type === "ready" ? "Ready" : "Off-Plan"} property in ${property.location_en || "Dubai"}`)
+    .replace(/<[^>]*>/g, "").slice(0, 155);
+
   return (
     <div className="min-h-screen bg-background grain-overlay">
+      <SEOHead
+        title={`${property.name_en}${property.location_en ? ` | ${property.location_en}` : ""} | Asas Invest`}
+        description={seoDescription}
+        canonical={`https://asasinvest.com/property/${slug}`}
+        ogImage={heroImage}
+        ogType="product"
+        jsonLd={[
+          propertyJsonLd({
+            name: property.name_en || "",
+            slug: slug || "",
+            description: seoDescription,
+            image: heroImage,
+            priceRange: property.price_range || undefined,
+            location: property.location_en || undefined,
+            type: property.type || undefined,
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", url: "https://asasinvest.com" },
+            { name: property.type === "ready" ? "Ready Properties" : "Off-Plan", url: `https://asasinvest.com/${property.type === "ready" ? "ready" : "off-plan"}` },
+            { name: property.name_en || "" },
+          ]),
+        ]}
+      />
       <Navigation />
 
       {/* Hero Section */}

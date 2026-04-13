@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import SEOHead, { articleJsonLd, breadcrumbJsonLd } from "@/components/SEOHead";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -107,6 +108,27 @@ const InsightDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={`${insight.title_en} | Asas Invest`}
+        description={insight.meta_description_en || insight.excerpt_en || `${insight.title_en} — Dubai real estate insights from Asas Invest`}
+        canonical={`https://asasinvest.com/insights/${slug}`}
+        ogImage={insight.cover_image || undefined}
+        ogType="article"
+        jsonLd={[
+          articleJsonLd({
+            title: insight.title_en,
+            slug: slug || "",
+            excerpt: insight.excerpt_en || "",
+            datePublished: insight.published_at || insight.created_at || "",
+            image: insight.cover_image || undefined,
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", url: "https://asasinvest.com" },
+            { name: "Insights", url: "https://asasinvest.com/insights" },
+            { name: insight.title_en },
+          ]),
+        ]}
+      />
       <Navigation />
       
       {/* Hero Section */}

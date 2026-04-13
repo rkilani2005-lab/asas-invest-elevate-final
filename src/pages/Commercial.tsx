@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -44,7 +45,13 @@ const Commercial = () => {
 
   const clearFilters = () => setFilters({ search: "", officeType: "", ownership: "", fitOut: "" });
 
-  return (
+  return (<>
+      <SEOHead
+        title="Commercial Real Estate Dubai | Asas Invest"
+        description="Offices, retail spaces and warehouses for sale and lease in Dubai business districts. RERA licensed, expert commercial advisory."
+        canonical="https://asasinvest.com/commercial"
+        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Commercial"}])}
+      />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
       <main className="pt-24 pb-16 relative z-10">
@@ -120,7 +127,7 @@ const Commercial = () => {
       </main>
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default Commercial;

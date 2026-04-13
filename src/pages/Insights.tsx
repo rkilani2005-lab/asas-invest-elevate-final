@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, ArrowRight, ArrowLeft, Search, TrendingUp, Building, MapPin, FileText } from "lucide-react";
@@ -66,7 +67,13 @@ const InsightsPage = () => {
   // Get featured article (first featured or first article)
   const featuredArticle = insights?.find(a => a.is_featured) || insights?.[0];
 
-  return (
+  return (<>
+      <SEOHead
+        title="Dubai Real Estate Market Insights | Asas Invest"
+        description="Expert analysis, market trends and investment guides for Dubai property investors. Data-driven insights to inform your investment decisions."
+        canonical="https://asasinvest.com/insights"
+        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Insights"}])}
+      />
     <div className="min-h-screen bg-background">
       <Navigation />
       
@@ -307,7 +314,7 @@ const InsightsPage = () => {
 
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default InsightsPage;

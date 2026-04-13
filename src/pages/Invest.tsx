@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState } from "react";
 import { TrendingUp, Shield, Award, Globe } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -24,7 +25,13 @@ const Invest = () => {
     { icon: Award, title: t("invest.visaTitle"), desc: t("invest.visaDesc") },
   ];
 
-  return (
+  return (<>
+      <SEOHead
+        title="Invest in Dubai Real Estate | Asas Invest"
+        description="Grow your wealth through Dubai property investment. 6-9% rental yields, Golden Visa eligibility, zero income tax, expert portfolio advisory."
+        canonical="https://asasinvest.com/invest"
+        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Invest"}])}
+      />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
       <main className="pt-24 pb-16 relative z-10">
@@ -126,7 +133,7 @@ const Invest = () => {
       </main>
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default Invest;

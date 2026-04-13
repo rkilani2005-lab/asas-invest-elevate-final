@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -53,6 +54,7 @@ import AdminEmailPage from "./pages/admin/AdminEmailPage";
 const queryClient = new QueryClient();
 
 const App = () => (
+  <HelmetProvider>
   <QueryClientProvider client={queryClient}>
     <I18nextProvider i18n={i18n}>
       <Suspense fallback={<div className="min-h-screen bg-background" />}>
@@ -113,6 +115,7 @@ const App = () => (
       </Suspense>
     </I18nextProvider>
   </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;

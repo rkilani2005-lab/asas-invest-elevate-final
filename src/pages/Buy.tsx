@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Building2, Home, ArrowRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -29,7 +30,13 @@ const Buy = () => {
     },
   ];
 
-  return (
+  return (<>
+      <SEOHead
+        title="Buy Property in Dubai | Asas Invest"
+        description="Find your ideal home or investment property in Dubai. Freehold ownership, expert advisory, curated selection from top developers."
+        canonical="https://asasinvest.com/buy"
+        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Buy"}])}
+      />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
       <main className="pt-24 pb-16 relative z-10">
@@ -71,7 +78,7 @@ const Buy = () => {
       </main>
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default Buy;

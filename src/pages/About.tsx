@@ -1,3 +1,4 @@
+import SEOHead, { organizationJsonLd, breadcrumbJsonLd } from "@/components/SEOHead";
 import { useQuery } from "@tanstack/react-query";
 import { Target, Unlock, Heart } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -35,7 +36,13 @@ const About = () => {
   const foundersNote = getSection("founders_note");
   const pillars = ["pillar_precision", "pillar_access", "pillar_stewardship"].map(key => getSection(key));
 
-  return (
+  return (<>
+      <SEOHead
+        title="About Asas Invest | Dubai Trusted Real Estate Advisors"
+        description="Meet the team behind Asas Invest. RERA licensed, strategic property investment and wealth management in Dubai and the UAE."
+        canonical="https://asasinvest.com/about"
+        jsonLd={[organizationJsonLd, breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"About"}])]}
+      />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
       <main className="pt-24 pb-16 relative z-10">
@@ -90,7 +97,7 @@ const About = () => {
       </main>
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default About;

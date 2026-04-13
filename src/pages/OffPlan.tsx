@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -108,7 +109,13 @@ const OffPlan = () => {
     });
   }, [properties, filters, language]);
 
-  return (
+  return (<>
+      <SEOHead
+        title="Off-Plan Properties in Dubai | Asas Invest"
+        description="Explore exclusive off-plan developments in Dubai from top developers. Early-bird pricing, flexible payment plans, high ROI potential."
+        canonical="https://asasinvest.com/off-plan"
+        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Off-Plan"}])}
+      />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
 
@@ -188,7 +195,7 @@ const OffPlan = () => {
 
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default OffPlan;

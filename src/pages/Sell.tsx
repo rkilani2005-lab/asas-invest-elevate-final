@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState } from "react";
 import { ClipboardCheck, Camera, Megaphone, KeyRound } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -45,7 +46,13 @@ const Sell = () => {
     }
   }
 
-  return (
+  return (<>
+      <SEOHead
+        title="Sell Your Dubai Property | Asas Invest"
+        description="List your property with Dubai trusted advisors. Free valuation, global buyer network, professional marketing."
+        canonical="https://asasinvest.com/sell"
+        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Sell"}])}
+      />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
       <main className="pt-24 pb-16 relative z-10">
@@ -141,7 +148,7 @@ const Sell = () => {
       </main>
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default Sell;

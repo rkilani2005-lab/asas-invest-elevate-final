@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -25,7 +26,13 @@ const BuyerGuide = () => {
     ? language === "ar" ? (content.content_ar as any)?.body : (content.content_en as any)?.body
     : null;
 
-  return (
+  return (<>
+      <SEOHead
+        title="Dubai Property Buyer Guide | Asas Invest"
+        description="Step-by-step guide to buying property in Dubai. Costs, legal process, financing options, RERA regulations explained for first-time buyers."
+        canonical="https://asasinvest.com/buy/guide"
+        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Buy",url:"https://asasinvest.com/buy"},{name:"Buyer Guide"}])}
+      />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
       <main className="pt-24 pb-16 relative z-10">
@@ -54,7 +61,7 @@ const BuyerGuide = () => {
       </main>
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default BuyerGuide;

@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -8,7 +9,13 @@ import { Button } from "@/components/ui/button";
 const Careers = () => {
   const { t, isRTL } = useLanguage();
 
-  return (
+  return (<>
+      <SEOHead
+        title="Careers at Asas Invest | Join Our Dubai Real Estate Team"
+        description="Join Asas Invest and build your career in Dubai luxury real estate. Current openings in sales, marketing, and property management."
+        canonical="https://asasinvest.com/about/careers"
+        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"About",url:"https://asasinvest.com/about"},{name:"Careers"}])}
+      />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
       <main className="pt-24 pb-16 relative z-10">
@@ -25,7 +32,7 @@ const Careers = () => {
       </main>
       <Footer />
     </div>
-  );
+  </>);
 };
 
 export default Careers;
