@@ -84,8 +84,14 @@ export default function AdminInquiries() {
       inquiry.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       inquiry.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || inquiry.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesSource =
+      sourceFilter === "all" || (inquiry.inquiry_type || "general") === sourceFilter;
+    return matchesSearch && matchesStatus && matchesSource;
   });
+
+  const uniqueSources = Array.from(
+    new Set(inquiries.map((i) => i.inquiry_type || "general"))
+  );
 
   const exportToCSV = () => {
     const headers = ["Name", "Email", "Phone", "Property", "Interests", "Message", "Status", "Date"];
