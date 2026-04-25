@@ -40,7 +40,7 @@ export default function AdminProperties() {
     const { data, error } = await supabase
       .from("properties")
       .select("*, media(*)")
-      .order("sort_order", { ascending: true });
+      .order("name_en", { ascending: true });
 
     if (error) {
       toast.error("Failed to load properties");
