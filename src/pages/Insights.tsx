@@ -242,44 +242,46 @@ const InsightsPage = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredArticles.map((article) => {
                 const content = getLocalizedContent(article);
                 return (
-                  <Link key={article.id} to={`/insights/${article.slug}`}>
-                    <article className={cn(
-                      "group bg-card border border-border rounded-xl p-6 hover:border-accent/30 transition-all duration-300 hover:shadow-elegant cursor-pointer h-full",
-                      isRTL && "text-right"
-                    )}>
-                      <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
-                        {getCategoryLabel(article.category)}
-                      </div>
-                      <h3 className={cn(
-                        "font-serif text-lg font-medium text-foreground mb-3 group-hover:text-accent transition-colors leading-snug",
-                        isRTL && "font-arabic"
+                  <StaggerItem key={article.id}>
+                    <Link to={`/insights/${article.slug}`}>
+                      <article className={cn(
+                        "group bg-card border border-border rounded-xl p-6 hover:border-accent/30 transition-all duration-300 hover:shadow-elegant cursor-pointer h-full",
+                        isRTL && "text-right"
                       )}>
-                        {content.title}
-                      </h3>
-                      <p className="text-muted-foreground text-sm mb-4 leading-relaxed line-clamp-3">
-                        {content.excerpt}
-                      </p>
-                      <div className={cn(
-                        "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border",
-                        isRTL && "flex-row-reverse"
-                      )}>
-                        <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                          <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ml-1.5" : "mr-1.5")} />
-                          <span>
-                            {article.published_at && format(new Date(article.published_at), 'MMM d, yyyy')}
-                          </span>
+                        <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
+                          {getCategoryLabel(article.category)}
                         </div>
-                        <span>{article.read_time_minutes} {isRTL ? "د" : "min"}</span>
-                      </div>
-                    </article>
-                  </Link>
+                        <h3 className={cn(
+                          "font-serif text-lg font-medium text-foreground mb-3 group-hover:text-accent transition-colors leading-snug",
+                          isRTL && "font-arabic"
+                        )}>
+                          {content.title}
+                        </h3>
+                        <p className="text-muted-foreground text-sm mb-4 leading-relaxed line-clamp-3">
+                          {content.excerpt}
+                        </p>
+                        <div className={cn(
+                          "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border",
+                          isRTL && "flex-row-reverse"
+                        )}>
+                          <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
+                            <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ml-1.5" : "mr-1.5")} />
+                            <span>
+                              {article.published_at && format(new Date(article.published_at), 'MMM d, yyyy')}
+                            </span>
+                          </div>
+                          <span>{article.read_time_minutes} {isRTL ? "د" : "min"}</span>
+                        </div>
+                      </article>
+                    </Link>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </StaggerContainer>
           )}
 
           {!isLoading && filteredArticles.length === 0 && (
