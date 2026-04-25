@@ -337,6 +337,11 @@ export default function AdminInquiries() {
           </DialogHeader>
           {selectedInquiry && (
             <div className="space-y-4">
+              <div>
+                <Badge variant={getSourceVariant(selectedInquiry.inquiry_type)}>
+                  {getSourceLabel(selectedInquiry.inquiry_type)}
+                </Badge>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Name</p>
