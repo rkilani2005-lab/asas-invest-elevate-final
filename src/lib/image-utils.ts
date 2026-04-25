@@ -10,7 +10,8 @@
 export function getStorageThumbnailUrl(
   url: string,
   width: number,
-  quality = 75
+  quality = 85,
+  resize: "cover" | "contain" | "fill" = "cover"
 ): string {
   // Only transform Supabase storage URLs
   if (!url.includes("supabase") || !url.includes("/storage/v1/object/public/")) {
@@ -19,5 +20,5 @@ export function getStorageThumbnailUrl(
 
   return url
     .replace("/storage/v1/object/public/", "/storage/v1/render/image/public/")
-    + `?width=${width}&quality=${quality}`;
+    + `?width=${width}&quality=${quality}&resize=${resize}`;
 }
