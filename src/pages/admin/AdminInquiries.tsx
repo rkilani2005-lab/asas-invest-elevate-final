@@ -271,7 +271,12 @@ export default function AdminInquiries() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {inquiry.properties?.name_en || "General"}
+                    <Badge variant={getSourceVariant(inquiry.inquiry_type)} className="whitespace-nowrap">
+                      {getSourceLabel(inquiry.inquiry_type)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {inquiry.properties?.name_en || "—"}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
