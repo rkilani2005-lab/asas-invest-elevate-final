@@ -87,42 +87,45 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             {name}
           </h3>
 
-          {/* Details Grid */}
+          {/* Details Grid - always 4 slots so card heights stay consistent */}
           <div className="grid grid-cols-2 gap-3 mb-4">
-            {location && (
-              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                <MapPin className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
-                <span className="truncate">{location}</span>
-              </div>
-            )}
-            {property.unit_types && property.unit_types.length > 0 && (
-              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                <Building2 className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
-                <span className="truncate">{property.unit_types.join(", ")}</span>
-              </div>
-            )}
-            {property.size_range && (
-              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                <Maximize2 className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
-                <span className="truncate">{property.size_range}</span>
-              </div>
-            )}
-            {property.handover_date && (
-              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                <Calendar className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
-                <span className="truncate">{new Date(property.handover_date).toLocaleDateString()}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-1.5 text-sm">
+              <MapPin className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
+              <span className={cn("truncate", location ? "text-muted-foreground" : "text-muted-foreground/50 italic")}>
+                {location || t("property.placeholder.location")}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-sm">
+              <Building2 className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
+              <span className={cn("truncate", property.unit_types?.length ? "text-muted-foreground" : "text-muted-foreground/50 italic")}>
+                {property.unit_types?.length ? property.unit_types.join(", ") : t("property.placeholder.unitTypes")}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-sm">
+              <Maximize2 className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
+              <span className={cn("truncate", property.size_range ? "text-muted-foreground" : "text-muted-foreground/50 italic")}>
+                {property.size_range || t("property.placeholder.size")}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-sm">
+              <Calendar className="h-4 w-4 flex-shrink-0 icon-luxury" strokeWidth={1} />
+              <span className={cn("truncate", property.handover_date ? "text-muted-foreground" : "text-muted-foreground/50 italic")}>
+                {property.handover_date ? new Date(property.handover_date).toLocaleDateString() : t("property.placeholder.handover")}
+              </span>
+            </div>
           </div>
 
           {/* Price & CTA */}
           <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-            {property.price_range && (
-              <div>
-                <p className="text-xs text-muted-foreground mb-0.5">{t("property.from")}</p>
-                <p className="heading-section text-lg text-foreground">{property.price_range}</p>
-              </div>
-            )}
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">{t("property.from")}</p>
+              <p className={cn(
+                "heading-section text-lg",
+                property.price_range ? "text-foreground" : "text-muted-foreground/50 italic"
+              )}>
+                {property.price_range || t("property.placeholder.price")}
+              </p>
+            </div>
             <Button size="sm" variant="ghost" className="text-accent hover:text-accent hover:bg-accent/10">
               {t("buttons.viewDetails")}
               <ArrowRight className="h-4 w-4 ms-1.5 rtl-flip" strokeWidth={1} />
