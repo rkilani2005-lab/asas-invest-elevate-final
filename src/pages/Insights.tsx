@@ -209,7 +209,7 @@ const InsightsPage = () => {
                   </Link>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
       )}
