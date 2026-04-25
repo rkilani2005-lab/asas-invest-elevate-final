@@ -111,6 +111,36 @@ export default function AdminInquiries() {
     a.click();
   };
 
+  const getSourceLabel = (type: string | null) => {
+    switch (type) {
+      case "valuation":
+        return "Free Valuation Request";
+      case "property":
+        return "Property Inquiry";
+      case "contact":
+        return "Contact Form";
+      case "newsletter":
+        return "Newsletter Signup";
+      case "viewing":
+        return "Viewing Request";
+      case "callback":
+        return "Callback Request";
+      default:
+        return type ? type.charAt(0).toUpperCase() + type.slice(1) : "General";
+    }
+  };
+
+  const getSourceVariant = (type: string | null): "default" | "secondary" | "outline" => {
+    switch (type) {
+      case "valuation":
+        return "default";
+      case "property":
+        return "secondary";
+      default:
+        return "outline";
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "new":
