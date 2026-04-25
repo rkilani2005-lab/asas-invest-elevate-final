@@ -80,16 +80,19 @@ const InsightsPage = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 text-primary-foreground overflow-hidden">
-        {/* Background image */}
+      <section className="relative pt-32 pb-16 md:pt-40 md:pb-20 text-primary-foreground overflow-hidden bg-primary min-h-[420px] md:min-h-[480px]">
+        {/* Background image — anchored to bottom on mobile so the skyline sits below the nav, recentered on larger screens */}
         <div className="absolute inset-0 z-0">
           <img
             src={insightsHero}
             alt="Dubai skyline at golden hour"
             width={1920}
             height={1080}
-            className="w-full h-full object-cover object-center"
+            fetchPriority="high"
+            className="w-full h-full object-cover object-bottom sm:object-[center_75%] lg:object-center"
           />
+          {/* Top fade keeps the navigation legible across breakpoints */}
+          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/80 via-primary/40 to-transparent md:hidden" />
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
