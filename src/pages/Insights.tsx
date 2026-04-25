@@ -166,7 +166,7 @@ const InsightsPage = () => {
       {activeCategory === "All" && featuredArticle && !isLoading && (
         <section className="py-12 bg-background">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="bg-secondary/50 rounded-2xl p-8 md:p-12 hover:bg-secondary/70 transition-colors duration-300 cursor-pointer group">
+            <ScrollReveal direction="up" className="bg-secondary/50 rounded-2xl p-8 md:p-12 hover:bg-secondary/70 transition-colors duration-300 cursor-pointer group">
               <div className={cn("flex flex-col lg:flex-row gap-8", isRTL && "lg:flex-row-reverse")}>
                 <div className="lg:w-2/3">
                   <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
