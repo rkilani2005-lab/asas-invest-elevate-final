@@ -39,6 +39,7 @@ export default function AdminInquiries() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
 
   const fetchInquiries = async () => {
