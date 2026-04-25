@@ -94,11 +94,12 @@ export default function AdminInquiries() {
   );
 
   const exportToCSV = () => {
-    const headers = ["Name", "Email", "Phone", "Property", "Interests", "Message", "Status", "Date"];
+    const headers = ["Name", "Email", "Phone", "Source", "Property", "Interests", "Message", "Status", "Date"];
     const rows = filteredInquiries.map((i) => [
       i.name,
       i.email,
       i.phone || "",
+      getSourceLabel(i.inquiry_type),
       i.properties?.name_en || "",
       (i.interests || []).join("; "),
       i.message || "",
