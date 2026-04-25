@@ -238,6 +238,7 @@ export default function AdminInquiries() {
                       <Skeleton className="h-3 w-24" />
                     </div>
                   </TableCell>
+                  <TableCell><Skeleton className="h-5 w-28" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-20" /></TableCell>
