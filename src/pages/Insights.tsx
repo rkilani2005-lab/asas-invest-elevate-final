@@ -89,8 +89,7 @@ const InsightsPage = () => {
             height={1080}
             className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-primary/40" />
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
