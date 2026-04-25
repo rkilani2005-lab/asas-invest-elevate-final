@@ -39,6 +39,7 @@ export default function AdminInquiries() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
 
   const fetchInquiries = async () => {
@@ -83,15 +84,22 @@ export default function AdminInquiries() {
       inquiry.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       inquiry.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || inquiry.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesSource =
+      sourceFilter === "all" || (inquiry.inquiry_type || "general") === sourceFilter;
+    return matchesSearch && matchesStatus && matchesSource;
   });
 
+  const uniqueSources = Array.from(
+    new Set(inquiries.map((i) => i.inquiry_type || "general"))
+  );
+
   const exportToCSV = () => {
-    const headers = ["Name", "Email", "Phone", "Property", "Interests", "Message", "Status", "Date"];
+    const headers = ["Name", "Email", "Phone", "Source", "Property", "Interests", "Message", "Status", "Date"];
     const rows = filteredInquiries.map((i) => [
       i.name,
       i.email,
       i.phone || "",
+      getSourceLabel(i.inquiry_type),
       i.properties?.name_en || "",
       (i.interests || []).join("; "),
       i.message || "",
@@ -109,6 +117,36 @@ export default function AdminInquiries() {
     a.href = url;
     a.download = `inquiries-${format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click();
+  };
+
+  const getSourceLabel = (type: string | null) => {
+    switch (type) {
+      case "valuation":
+        return "Free Valuation Request";
+      case "property":
+        return "Property Inquiry";
+      case "contact":
+        return "Contact Form";
+      case "newsletter":
+        return "Newsletter Signup";
+      case "viewing":
+        return "Viewing Request";
+      case "callback":
+        return "Callback Request";
+      default:
+        return type ? type.charAt(0).toUpperCase() + type.slice(1) : "General";
+    }
+  };
+
+  const getSourceVariant = (type: string | null): "default" | "secondary" | "outline" => {
+    switch (type) {
+      case "valuation":
+        return "default";
+      case "property":
+        return "secondary";
+      default:
+        return "outline";
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -149,6 +187,19 @@ export default function AdminInquiries() {
             className="pl-9"
           />
         </div>
+        <Select value={sourceFilter} onValueChange={setSourceFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by source" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sources</SelectItem>
+            {uniqueSources.map((src) => (
+              <SelectItem key={src} value={src}>
+                {getSourceLabel(src === "general" ? null : src)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by status" />
@@ -168,6 +219,7 @@ export default function AdminInquiries() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Contact</TableHead>
+              <TableHead>Source</TableHead>
               <TableHead>Property</TableHead>
               <TableHead>Interests</TableHead>
               <TableHead>Status</TableHead>
@@ -186,6 +238,7 @@ export default function AdminInquiries() {
                       <Skeleton className="h-3 w-24" />
                     </div>
                   </TableCell>
+                  <TableCell><Skeleton className="h-5 w-28" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-20" /></TableCell>
@@ -195,7 +248,7 @@ export default function AdminInquiries() {
               ))
             ) : filteredInquiries.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   No inquiries found
                 </TableCell>
               </TableRow>
@@ -218,7 +271,12 @@ export default function AdminInquiries() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {inquiry.properties?.name_en || "General"}
+                    <Badge variant={getSourceVariant(inquiry.inquiry_type)} className="whitespace-nowrap">
+                      {getSourceLabel(inquiry.inquiry_type)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {inquiry.properties?.name_en || "—"}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
@@ -279,6 +337,11 @@ export default function AdminInquiries() {
           </DialogHeader>
           {selectedInquiry && (
             <div className="space-y-4">
+              <div>
+                <Badge variant={getSourceVariant(selectedInquiry.inquiry_type)}>
+                  {getSourceLabel(selectedInquiry.inquiry_type)}
+                </Badge>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Name</p>
