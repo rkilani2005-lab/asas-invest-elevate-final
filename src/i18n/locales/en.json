@@ -195,6 +195,13 @@
     "type": {
       "offPlan": "Off-Plan",
       "ready": "Ready"
+    },
+    "placeholder": {
+      "location": "Location TBA",
+      "unitTypes": "Units TBA",
+      "size": "Size TBA",
+      "handover": "Handover TBA",
+      "price": "Price on request"
     }
   },
   "offPlanPage": {
