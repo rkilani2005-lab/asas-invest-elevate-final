@@ -21,10 +21,16 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   const location = language === "ar" && property.location_ar ? property.location_ar : property.location_en;
   const developer = language === "ar" && property.developer_ar ? property.developer_ar : property.developer_en;
 
-  // Get hero image
-  const heroImage = property.media?.find(m => m.type === "hero")?.url || 
-                   property.media?.find(m => m.type === "render")?.url ||
-                   "/placeholder.svg";
+  // Get hero image - prioritize hero, then render, then first gallery image, then any media
+  const sortedMedia = [...(property.media || [])].sort(
+    (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  );
+  const heroImage =
+    sortedMedia.find((m) => m.type === "hero")?.url ||
+    sortedMedia.find((m) => m.type === "render")?.url ||
+    sortedMedia.find((m) => m.type === "gallery")?.url ||
+    sortedMedia[0]?.url ||
+    "/placeholder.svg";
 
   const statusColors = {
     available: "bg-accent/10 text-accent border-accent/30",
@@ -45,9 +51,9 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         {/* Image Container */}
         <div className="relative aspect-[16/10] overflow-hidden">
           <ProgressiveImage
-            src={getStorageThumbnailUrl(heroImage, 600)}
+            src={getStorageThumbnailUrl(heroImage, 900, 90)}
             alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
             loading="lazy"
             decoding="async"
           />
