@@ -219,6 +219,7 @@ export default function AdminInquiries() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Contact</TableHead>
+              <TableHead>Source</TableHead>
               <TableHead>Property</TableHead>
               <TableHead>Interests</TableHead>
               <TableHead>Status</TableHead>
