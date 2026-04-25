@@ -19,7 +19,7 @@ interface GeneralInfoStepProps {
 
 const unitTypeOptions = [
   "Studio", "1 Bedroom", "2 Bedrooms", "3 Bedrooms", "4 Bedrooms",
-  "5+ Bedrooms", "Penthouse", "Townhouse", "Villa", "Duplex",
+  "5+ Bedrooms", "Penthouse", "Townhouse", "Villa", "Duplex", "Maisonettes",
 ];
 
 export default function GeneralInfoStep({ data, onChange }: GeneralInfoStepProps) {
