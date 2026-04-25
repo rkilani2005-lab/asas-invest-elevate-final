@@ -1,6 +1,7 @@
 import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState } from "react";
 import insightsHero from "@/assets/insights-hero.jpg";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, ArrowRight, ArrowLeft, Search, TrendingUp, Building, MapPin, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -165,7 +166,7 @@ const InsightsPage = () => {
       {activeCategory === "All" && featuredArticle && !isLoading && (
         <section className="py-12 bg-background">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="bg-secondary/50 rounded-2xl p-8 md:p-12 hover:bg-secondary/70 transition-colors duration-300 cursor-pointer group">
+            <ScrollReveal direction="up" className="bg-secondary/50 rounded-2xl p-8 md:p-12 hover:bg-secondary/70 transition-colors duration-300 cursor-pointer group">
               <div className={cn("flex flex-col lg:flex-row gap-8", isRTL && "lg:flex-row-reverse")}>
                 <div className="lg:w-2/3">
                   <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
@@ -208,7 +209,7 @@ const InsightsPage = () => {
                   </Link>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
       )}
@@ -241,44 +242,46 @@ const InsightsPage = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredArticles.map((article) => {
                 const content = getLocalizedContent(article);
                 return (
-                  <Link key={article.id} to={`/insights/${article.slug}`}>
-                    <article className={cn(
-                      "group bg-card border border-border rounded-xl p-6 hover:border-accent/30 transition-all duration-300 hover:shadow-elegant cursor-pointer h-full",
-                      isRTL && "text-right"
-                    )}>
-                      <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
-                        {getCategoryLabel(article.category)}
-                      </div>
-                      <h3 className={cn(
-                        "font-serif text-lg font-medium text-foreground mb-3 group-hover:text-accent transition-colors leading-snug",
-                        isRTL && "font-arabic"
+                  <StaggerItem key={article.id}>
+                    <Link to={`/insights/${article.slug}`}>
+                      <article className={cn(
+                        "group bg-card border border-border rounded-xl p-6 hover:border-accent/30 transition-all duration-300 hover:shadow-elegant cursor-pointer h-full",
+                        isRTL && "text-right"
                       )}>
-                        {content.title}
-                      </h3>
-                      <p className="text-muted-foreground text-sm mb-4 leading-relaxed line-clamp-3">
-                        {content.excerpt}
-                      </p>
-                      <div className={cn(
-                        "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border",
-                        isRTL && "flex-row-reverse"
-                      )}>
-                        <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                          <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ml-1.5" : "mr-1.5")} />
-                          <span>
-                            {article.published_at && format(new Date(article.published_at), 'MMM d, yyyy')}
-                          </span>
+                        <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
+                          {getCategoryLabel(article.category)}
                         </div>
-                        <span>{article.read_time_minutes} {isRTL ? "د" : "min"}</span>
-                      </div>
-                    </article>
-                  </Link>
+                        <h3 className={cn(
+                          "font-serif text-lg font-medium text-foreground mb-3 group-hover:text-accent transition-colors leading-snug",
+                          isRTL && "font-arabic"
+                        )}>
+                          {content.title}
+                        </h3>
+                        <p className="text-muted-foreground text-sm mb-4 leading-relaxed line-clamp-3">
+                          {content.excerpt}
+                        </p>
+                        <div className={cn(
+                          "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border",
+                          isRTL && "flex-row-reverse"
+                        )}>
+                          <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
+                            <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ml-1.5" : "mr-1.5")} />
+                            <span>
+                              {article.published_at && format(new Date(article.published_at), 'MMM d, yyyy')}
+                            </span>
+                          </div>
+                          <span>{article.read_time_minutes} {isRTL ? "د" : "min"}</span>
+                        </div>
+                      </article>
+                    </Link>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </StaggerContainer>
           )}
 
           {!isLoading && filteredArticles.length === 0 && (
