@@ -79,7 +79,7 @@ const InsightsPage = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 bg-primary text-primary-foreground overflow-hidden">
+      <section className="relative pt-32 pb-16 text-primary-foreground overflow-hidden">
         {/* Background image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -89,7 +89,6 @@ const InsightsPage = () => {
             height={1080}
             className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-primary/40" />
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
