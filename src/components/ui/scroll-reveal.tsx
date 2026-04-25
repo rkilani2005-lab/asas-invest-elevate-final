@@ -101,7 +101,7 @@ export const StaggerItem = ({
           },
         },
       }}
-      className={className}
+      className={`h-full ${className}`}
     >
       {children}
     </motion.div>
