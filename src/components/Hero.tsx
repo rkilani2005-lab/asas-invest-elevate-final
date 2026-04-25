@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -138,12 +139,15 @@ const Hero = () => {
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <Button 
+            asChild
             size="lg" 
             className="px-10 py-6 bg-accent text-white hover:bg-accent/90 font-sans uppercase tracking-widest text-xs border-0"
             style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.12em' }}
           >
-            {content.exploreProperties}
-            <ArrowRight className={cn("h-4 w-4 rtl-flip", isRTL ? "me-2" : "ms-2")} strokeWidth={1} />
+            <Link to="/buy">
+              {content.exploreProperties}
+              <ArrowRight className={cn("h-4 w-4 rtl-flip", isRTL ? "me-2" : "ms-2")} strokeWidth={1} />
+            </Link>
           </Button>
           <Button 
             size="lg" 
