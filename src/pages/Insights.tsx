@@ -1,6 +1,7 @@
 import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState } from "react";
 import insightsHero from "@/assets/insights-hero.jpg";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, ArrowRight, ArrowLeft, Search, TrendingUp, Building, MapPin, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
