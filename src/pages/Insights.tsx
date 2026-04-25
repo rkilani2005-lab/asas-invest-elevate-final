@@ -1,5 +1,6 @@
 import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState } from "react";
+import insightsHero from "@/assets/insights-hero.jpg";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, ArrowRight, ArrowLeft, Search, TrendingUp, Building, MapPin, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -78,8 +79,21 @@ const InsightsPage = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="relative pt-32 pb-16 bg-primary text-primary-foreground overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={insightsHero}
+            alt="Dubai skyline at golden hour"
+            width={1920}
+            height={1080}
+            className="w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
+        </div>
+
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <Link 
             to="/" 
             className={cn(
