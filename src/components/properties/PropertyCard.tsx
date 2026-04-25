@@ -21,15 +21,15 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   const location = language === "ar" && property.location_ar ? property.location_ar : property.location_en;
   const developer = language === "ar" && property.developer_ar ? property.developer_ar : property.developer_en;
 
-  // Get hero image - prioritize hero, then render, then first gallery image, then any media
+  // Get hero image - prioritize hero, then render/interior, then any media (sorted)
   const sortedMedia = [...(property.media || [])].sort(
-    (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+    (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
   );
   const heroImage =
     sortedMedia.find((m) => m.type === "hero")?.url ||
     sortedMedia.find((m) => m.type === "render")?.url ||
-    sortedMedia.find((m) => m.type === "gallery")?.url ||
-    sortedMedia[0]?.url ||
+    sortedMedia.find((m) => m.type === "interior")?.url ||
+    sortedMedia.find((m) => !!m.url && m.type !== "video" && m.type !== "brochure")?.url ||
     "/placeholder.svg";
 
   const statusColors = {
