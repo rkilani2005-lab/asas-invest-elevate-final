@@ -56,17 +56,29 @@ const FeaturedProperties = () => {
   return (
     <section id="properties" className="py-24 bg-card grain-overlay">
       <div className={cn("container mx-auto px-4 lg:px-8 relative z-10", isRTL && "font-arabic")}>
-        {/* Section Header */}
-        <ScrollReveal className="max-w-3xl mx-auto text-center mb-12">
-          <p className="text-eyebrow text-accent mb-4">
-            {t("featuredProperties.subtitle")}
-          </p>
-          <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
-            {t("featuredProperties.title")}
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            {t("featuredProperties.description")}
-          </p>
+        {/* Section Header — left aligned, eyebrow + title left, View all on right */}
+        <ScrollReveal className="mb-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div className="max-w-2xl">
+              <p className="text-eyebrow text-accent mb-3">
+                {t("featuredProperties.subtitle")}
+              </p>
+              <h2 className="heading-section text-3xl md:text-5xl text-foreground mb-4">
+                {t("featuredProperties.title")}
+              </h2>
+              <p className="text-muted-foreground text-base leading-snug">
+                {t("featuredProperties.description")}
+              </p>
+            </div>
+            <Link
+              to="/buy"
+              className="text-charcoal hover:text-accent text-sm font-medium inline-flex items-center gap-2 self-start md:self-end border-b border-accent pb-1 transition-colors"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              {t("buttons.viewAll") ?? "View all"}
+              <ArrowRight className="h-4 w-4 rtl-flip" strokeWidth={2} />
+            </Link>
+          </div>
         </ScrollReveal>
 
         {/* Property Tabs */}
