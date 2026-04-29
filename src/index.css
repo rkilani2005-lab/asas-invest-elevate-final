@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+/* Fonts loaded via <link> in index.html (Satoshi + Inter + IBM Plex Sans Arabic) */
 
 @tailwind base;
 @tailwind components;
@@ -93,22 +92,18 @@
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   }
 
-  /* Heading Typography - Playfair Display, elegant and controlled */
-  h1, h2 {
-    font-family: 'Playfair Display', 'Georgia', serif;
-    letter-spacing: -0.01em;
-    font-weight: 600;
-    line-height: 1.15;
+  /* Heading Typography — Satoshi, Modernist */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
   }
 
   h1 {
-    font-weight: 700;
-  }
-
-  h3, h4, h5, h6 {
-    font-family: 'Playfair Display', 'Georgia', serif;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
   }
 
   /* RTL Heading Font Swap */
@@ -121,16 +116,18 @@
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
     font-style: normal;
     letter-spacing: 0;
-  }}
+    line-height: 1.2;
+  }
+}
 
 @layer components {
-  /* Navigation & Labels - DM Sans, clean geometric */
+  /* Navigation & Labels - Inter */
   .nav-link,
   .label-luxury {
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    font-size: 0.9rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0;
+    font-size: 0.875rem;
   }
 
   [dir="rtl"] .nav-link,
@@ -140,89 +137,82 @@
     letter-spacing: 0;
   }
 
-  /* Hero Heading Style — Playfair Display, refined display serif */
+  /* Hero Heading — Satoshi display */
   .heading-hero {
-    font-family: 'Playfair Display', 'Georgia', serif;
-    font-weight: 500;
-    letter-spacing: -0.015em;
-    line-height: 1.1;
+    font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
   }
 
   [dir="rtl"] .heading-hero {
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: 0;
+    line-height: 1.2;
   }
 
-  /* Section Heading Style — Playfair Display for consistency */
+  /* Section Heading — Satoshi */
   .heading-section {
-    font-family: 'Playfair Display', 'Georgia', serif;
-    letter-spacing: -0.01em;
-    font-weight: 600;
+    font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    line-height: 1.05;
   }
 
   [dir="rtl"] .heading-section {
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: 0;
+    line-height: 1.2;
   }
 
-  /* Eyebrow/Label Text - DM Sans for contrast against serif headings */
+  /* Eyebrow/Label - Inter 500, normal case, no wide tracking */
   .text-eyebrow {
-    font-family: 'DM Sans', system-ui, sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.7rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.8125rem;
     font-weight: 500;
   }
 
   [dir="rtl"] .text-eyebrow {
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
     text-transform: none;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
 
-  /* Luxury Button */
+  /* Modernist pill button (utility) */
   .btn-luxury {
-    @apply relative bg-transparent text-accent border border-accent 
-           px-8 py-3 transition-all duration-300 overflow-hidden;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-  }
-
-  .btn-luxury::before {
-    content: '';
-    @apply absolute inset-0 bg-accent opacity-0 transition-opacity duration-300;
-    z-index: -1;
-  }
-
-  .btn-luxury:hover::before {
-    @apply opacity-100;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5
+           bg-charcoal text-white transition-all duration-300;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0;
+    text-transform: none;
   }
 
   .btn-luxury:hover {
-    @apply text-accent-foreground;
+    @apply bg-accent text-charcoal;
   }
 
   [dir="rtl"] .btn-luxury {
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
-    font-weight: 500;
-    letter-spacing: 0;
+    font-weight: 600;
   }
 
-  /* Luxury Card - White with gold border and soft shadow */
+  /* Modernist Card */
   .card-luxury {
-    @apply bg-card border border-accent/30 overflow-hidden;
-    box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    @apply bg-card border border-border/40 overflow-hidden rounded-2xl;
+    box-shadow: none;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .card-luxury:hover {
     border-color: hsl(var(--accent));
-    box-shadow: 0 8px 24px -8px rgba(197, 160, 89, 0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px -16px rgba(26, 26, 26, 0.18);
   }
 
   /* Gold divider line */
@@ -230,10 +220,37 @@
     @apply h-px w-full bg-accent/40;
   }
 
-  /* Thin gold icon style */
+  /* Thin gold icon */
   .icon-luxury {
     @apply text-accent;
-    stroke-width: 1;
+    stroke-width: 1.5;
+  }
+
+  /* Live status pulse dot */
+  .pulse-dot {
+    @apply inline-block w-1.5 h-1.5 rounded-full bg-accent;
+    box-shadow: 0 0 0 0 hsl(var(--accent) / 0.6);
+    animation: pulse-dot 2s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%   { box-shadow: 0 0 0 0 hsl(var(--accent) / 0.6); }
+    70%  { box-shadow: 0 0 0 8px hsl(var(--accent) / 0); }
+    100% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0); }
+  }
+
+  /* Gold underline accent under a key word in headlines */
+  .accent-underline {
+    background-image: linear-gradient(
+      to top,
+      transparent 8%,
+      hsl(var(--accent) / 0.55) 8%,
+      hsl(var(--accent) / 0.55) 22%,
+      transparent 22%
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    padding: 0 0.05em;
   }
 }
 
