@@ -84,7 +84,7 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: "cv11", "ss01";
-    line-height: 1.7; /* Spacious brochure feel */
+    line-height: 1.5;
   }
 
   /* RTL Font Swap */
