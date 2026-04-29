@@ -91,69 +91,61 @@ const Hero = () => {
         )}
         style={{ y: textY }}
       >
-        <motion.p 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-eyebrow mb-4 text-sm md:text-base"
-          style={{ 
-            color: '#C5A059',
-            letterSpacing: '0.15em'
-          }}
+          className="inline-flex items-center gap-2 mb-6"
         >
-          {content.subtitle}
-        </motion.p>
-        <motion.h1 
+          <span className="pulse-dot" />
+          <span
+            className="text-eyebrow"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
+          >
+            {content.subtitle}
+          </span>
+        </motion.div>
+        <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="heading-hero mb-6 max-w-3xl mx-auto"
-          style={{ 
-            color: '#FFFFFF',
-            fontWeight: 400,
-            letterSpacing: '-0.01em',
-            fontSize: 'clamp(2rem, 4.5vw, 3.25rem)',
-            lineHeight: 1.2,
+          className="heading-hero mb-6 max-w-4xl mx-auto text-white"
+          style={{
+            fontSize: 'clamp(2.5rem, 6vw, 5rem)',
           }}
         >
           {content.headline}{' '}
-          <span style={{ color: '#C5A059', fontStyle: 'italic', fontWeight: 500 }}>{content.headlineHighlight}</span>
+          <span className="accent-underline text-white">{content.headlineHighlight}</span>
         </motion.h1>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed text-white/75"
-          style={{ 
-            fontFamily: "'DM Sans', sans-serif",
-            fontWeight: 300,
-            letterSpacing: '0.01em'
+          className="text-base md:text-lg mb-10 max-w-2xl mx-auto text-white/75"
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 400,
+            lineHeight: 1.5,
           }}
         >
           {content.tagline}
         </motion.p>
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="flex flex-col sm:flex-row gap-3 justify-center"
         >
-          <Button 
-            asChild
-            size="lg" 
-            className="px-10 py-6 bg-accent text-white hover:bg-accent/90 font-sans uppercase tracking-widest text-xs border-0"
-            style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.12em' }}
-          >
+          <Button asChild size="lg">
             <Link to="/buy">
               {content.exploreProperties}
-              <ArrowRight className={cn("h-4 w-4 rtl-flip", isRTL ? "me-2" : "ms-2")} strokeWidth={1} />
+              <ArrowRight className={cn("h-4 w-4 rtl-flip")} strokeWidth={2} />
             </Link>
           </Button>
-          <Button 
-            size="lg" 
-            variant="outline" 
-            className="border border-white/40 text-white hover:bg-white/10 hover:text-white hover:border-white/70 transition-all duration-300 px-10 py-6"
-            style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.08em', fontSize: '0.75rem', textTransform: 'uppercase' }}
+          <Button
+            size="lg"
+            variant="outline"
+            className="border-white/50 text-white hover:bg-white hover:text-charcoal"
             onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
           >
             {content.contactUs}
