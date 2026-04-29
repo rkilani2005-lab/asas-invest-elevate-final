@@ -92,8 +92,8 @@ const Footer = () => {
           {footerColumns.map((col) => (
             <div key={col.title}>
               <h3
-                className="nav-link mb-5 text-xs uppercase tracking-widest"
-                style={{ color: '#C5A059', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.12em' }}
+                className="mb-5 text-xs"
+                style={{ color: '#C5A059', fontFamily: "'Inter', sans-serif", fontWeight: 600, letterSpacing: 0, textTransform: 'none' }}
               >
                 {col.title}
               </h3>
@@ -103,7 +103,7 @@ const Footer = () => {
                     <Link
                       to={link.href}
                       className="text-sm transition-colors duration-300"
-                      style={{ color: 'rgba(255,255,255,0.45)', fontFamily: "'DM Sans', sans-serif" }}
+                      style={{ color: 'rgba(255,255,255,0.45)', fontFamily: "'Inter', sans-serif" }}
                       onMouseEnter={e => ((e.target as HTMLElement).style.color = '#C5A059')}
                       onMouseLeave={e => ((e.target as HTMLElement).style.color = 'rgba(255,255,255,0.45)')}
                     >
