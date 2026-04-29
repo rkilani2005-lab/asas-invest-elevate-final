@@ -107,11 +107,11 @@ const InsightsPage = () => {
             <ArrowLeft className={cn("h-4 w-4", isRTL ? "ml-2 rotate-180" : "mr-2")} />
             {isRTL ? "العودة إلى الرئيسية" : "Back to Home"}
           </Link>
-          <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
-            {isRTL ? "رؤى السوق" : "Market Insights"}
+          <p className="text-eyebrow text-accent mb-4 inline-flex items-center gap-2">
+            <span className="pulse-dot" aria-hidden /> {isRTL ? "رؤى السوق" : "Market Insights"}
           </p>
-          <h1 className={cn("font-serif text-4xl md:text-5xl font-medium mb-6 max-w-3xl", isRTL && "font-arabic")}>
-            {isRTL ? "تحليل الخبراء وذكاء السوق" : "Expert Analysis & Market Intelligence"}
+          <h1 className={cn("heading-hero text-4xl md:text-6xl mb-6 max-w-3xl text-white", isRTL && "font-arabic")}>
+            {isRTL ? "تحليل الخبراء وذكاء السوق" : (<>Expert Analysis &amp; <span className="accent-underline">Market Intelligence</span></>)}
           </h1>
           <p className="text-primary-foreground/80 text-lg max-w-2xl leading-relaxed">
             {isRTL 
@@ -177,7 +177,7 @@ const InsightsPage = () => {
                     {isRTL ? "مميز" : "Featured"} • {getCategoryLabel(featuredArticle.category)}
                   </div>
                   <h2 className={cn(
-                    "font-serif text-2xl md:text-3xl font-medium text-foreground mb-4 group-hover:text-accent transition-colors",
+                    "heading-section text-2xl md:text-4xl text-foreground mb-4 group-hover:text-accent transition-colors",
                     isRTL && "font-arabic text-right"
                   )}>
                     {getLocalizedContent(featuredArticle).title}
@@ -222,7 +222,7 @@ const InsightsPage = () => {
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4 lg:px-8">
           <div className={cn("flex items-center justify-between mb-8", isRTL && "flex-row-reverse")}>
-            <h2 className={cn("font-serif text-2xl font-medium text-foreground", isRTL && "font-arabic")}>
+            <h2 className={cn("heading-section text-2xl md:text-3xl text-foreground", isRTL && "font-arabic")}>
               {activeCategory === "All" 
                 ? (isRTL ? "أحدث المقالات" : "Latest Articles")
                 : getCategoryLabel(activeCategory)
@@ -253,14 +253,14 @@ const InsightsPage = () => {
                   <StaggerItem key={article.id}>
                     <Link to={`/insights/${article.slug}`}>
                       <article className={cn(
-                        "group bg-card border border-border rounded-xl p-6 hover:border-accent/30 transition-all duration-300 hover:shadow-elegant cursor-pointer h-full",
+                        "card-luxury p-6 cursor-pointer h-full",
                         isRTL && "text-right"
                       )}>
-                        <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
+                        <div className="inline-flex items-center rounded-full px-3 py-1 bg-accent/10 text-accent text-xs font-medium mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                           {getCategoryLabel(article.category)}
                         </div>
                         <h3 className={cn(
-                          "font-serif text-lg font-medium text-foreground mb-3 group-hover:text-accent transition-colors leading-snug",
+                          "heading-section text-xl text-foreground mb-3 group-hover:text-accent transition-colors",
                           isRTL && "font-arabic"
                         )}>
                           {content.title}
@@ -302,7 +302,7 @@ const InsightsPage = () => {
       <section className="py-16 bg-secondary/30">
         <div className="container mx-auto px-4 lg:px-8">
           <div className={cn("max-w-2xl mx-auto text-center", isRTL && "font-arabic")}>
-            <h2 className="font-serif text-2xl md:text-3xl font-medium text-foreground mb-4">
+            <h2 className="heading-section text-2xl md:text-4xl text-foreground mb-4">
               {isRTL ? "ابقَ على اطلاع برؤى السوق" : "Stay Updated with Market Insights"}
             </h2>
             <p className="text-muted-foreground mb-8">

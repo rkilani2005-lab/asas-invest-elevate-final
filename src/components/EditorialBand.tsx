@@ -103,12 +103,14 @@ const EditorialBand = () => {
                 {s.value}
               </span>
               <span
-                className="text-xs uppercase"
+                className="text-xs"
                 style={{
                   color: "rgba(255,255,255,0.55)",
-                  fontFamily: "'DM Sans', sans-serif",
-                  letterSpacing: "0.12em",
-                  maxWidth: "80px",
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 500,
+                  letterSpacing: 0,
+                  textTransform: "none",
+                  maxWidth: "120px",
                   lineHeight: 1.3,
                 }}
               >

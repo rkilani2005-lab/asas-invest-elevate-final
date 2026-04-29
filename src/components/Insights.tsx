@@ -103,10 +103,10 @@ const Insights = () => {
       <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
-          <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
-            {t("insights.subtitle")}
+          <p className="text-eyebrow text-accent mb-4 inline-flex items-center gap-2">
+            <span className="pulse-dot" aria-hidden /> {t("insights.subtitle")}
           </p>
-          <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-6">
+          <h2 className="heading-section text-3xl md:text-5xl text-foreground mb-6">
             {t("insights.title")}
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
@@ -135,13 +135,13 @@ const Insights = () => {
                 <StaggerItem key={article.id}>
                   <Link to={`/insights/${article.slug}`}>
                     <article className={cn(
-                      "group bg-card border border-border rounded-xl p-6 hover:border-accent/30 transition-all duration-300 hover:shadow-elegant cursor-pointer h-full",
+                      "card-luxury p-6 cursor-pointer h-full",
                       isRTL && "text-right"
                     )}>
-                      <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
+                      <div className="inline-flex items-center rounded-full px-3 py-1 bg-accent/10 text-accent text-xs font-medium mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {getCategoryLabel(article.category)}
                       </div>
-                      <h3 className="font-serif text-lg font-medium text-foreground mb-3 group-hover:text-accent transition-colors leading-snug">
+                      <h3 className="heading-section text-xl text-foreground mb-3 group-hover:text-accent transition-colors">
                         {content.title}
                       </h3>
                       <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
