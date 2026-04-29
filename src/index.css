@@ -302,8 +302,11 @@
   }
 
   /* Font utilities */
-  .font-heading {
-    font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+  .font-heading,
+  .font-serif {
+    font-family: 'Satoshi', 'Inter', system-ui, sans-serif !important;
+    letter-spacing: -0.03em;
+    font-weight: 700;
   }
 
   .font-nav {
