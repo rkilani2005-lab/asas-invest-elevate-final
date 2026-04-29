@@ -100,32 +100,38 @@ const Stats = () => {
             <StaggerItem key={index}>
               <div
                 className={cn(
-                  "py-10 px-8 text-center md:text-start",
+                  "py-10 px-8 text-center md:text-start rounded-xl transition-all duration-300",
+                  "hover:-translate-y-1",
                   index > 0 && "md:border-s"
                 )}
                 style={{ borderColor: 'rgba(197,160,89,0.15)' }}
               >
-                {/* Big number */}
+                {/* Big number — Satoshi 700, white; gold only on the suffix */}
                 <div
-                  className="heading-hero mb-3"
+                  className="mb-3"
                   style={{
-                    fontSize: 'clamp(2.8rem, 5vw, 4.5rem)',
-                    fontWeight: 300,
-                    color: '#C5A059',
-                    letterSpacing: '-0.03em',
+                    fontFamily: "'Satoshi', 'Inter', sans-serif",
+                    fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    letterSpacing: '-0.04em',
                     lineHeight: 1,
-                    fontStyle: 'italic',
                   }}
                 >
-                  {stat.value}{stat.suffix}
+                  {stat.value}
+                  {stat.suffix && (
+                    <span style={{ color: '#C5A059' }}>{stat.suffix}</span>
+                  )}
                 </div>
-                {/* Label */}
+                {/* Label — Inter 500, normal case */}
                 <p
-                  className="text-xs uppercase tracking-widest"
+                  className="text-xs"
                   style={{
-                    color: 'rgba(255,255,255,0.4)',
-                    fontFamily: "'DM Sans', sans-serif",
-                    letterSpacing: '0.14em',
+                    color: 'rgba(255,255,255,0.55)',
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 500,
+                    letterSpacing: 0,
+                    textTransform: 'none',
                   }}
                 >
                   {stat.label}
