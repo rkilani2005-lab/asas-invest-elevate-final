@@ -303,11 +303,11 @@
 
   /* Font utilities */
   .font-heading {
-    font-family: 'Playfair Display', 'Georgia', serif;
+    font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
   }
 
   .font-nav {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   .font-body {
