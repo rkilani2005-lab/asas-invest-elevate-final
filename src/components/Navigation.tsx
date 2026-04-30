@@ -204,8 +204,29 @@ const Navigation = () => {
                 animate={{ x: 0 }}
                 exit={{ x: isRTL ? "-100%" : "100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                drag="x"
+                dragDirectionLock
+                // In LTR the drawer sits on the right, so it can only be dragged rightward (positive x) to close.
+                // In RTL it sits on the left, so it can only be dragged leftward (negative x) to close.
+                dragConstraints={isRTL ? { left: -300, right: 0 } : { left: 0, right: 300 }}
+                dragElastic={{ left: isRTL ? 1 : 0, right: isRTL ? 0 : 1 }}
+                dragMomentum={false}
+                onDragEnd={(_, info) => {
+                  const closeThresholdPx = 80;
+                  const closeVelocity = 400;
+                  // Closing direction is toward the inline-end edge of the viewport.
+                  const closedByDistance = isRTL
+                    ? info.offset.x < -closeThresholdPx
+                    : info.offset.x > closeThresholdPx;
+                  const closedByVelocity = isRTL
+                    ? info.velocity.x < -closeVelocity
+                    : info.velocity.x > closeVelocity;
+                  if (closedByDistance || closedByVelocity) {
+                    setIsMobileMenuOpen(false);
+                  }
+                }}
                 className={cn(
-                  "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col",
+                  "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y",
                   // In RTL, anchor to the left so the drawer slides in from the left (inline-end)
                   isRTL ? "left-0" : "right-0"
                 )}
