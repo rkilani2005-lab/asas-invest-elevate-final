@@ -119,7 +119,7 @@ const Invest = () => {
                 { icon: Shield, title: t("invest.whyStability"), desc: t("invest.whyStabilityDesc") },
                 { icon: Award, title: t("invest.whyLifestyle"), desc: t("invest.whyLifestyleDesc") },
               ].map((item) => (
-                <div key={item.title} className={cn("flex gap-4", isRTL && "flex-row-reverse text-end")}>
+                <div key={item.title} className={cn("flex gap-4", isRTL && "text-end")}>
                   <div className="w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0">
                     <item.icon className="h-5 w-5 text-accent" strokeWidth={1} />
                   </div>

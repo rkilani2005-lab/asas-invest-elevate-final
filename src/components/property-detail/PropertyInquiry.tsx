@@ -113,8 +113,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
     <div className="py-12 bg-background border-y border-accent/20">
       <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
-          isRTL && "lg:flex-row-reverse"
+          "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
         )}>
           {/* Left - Info */}
           <div className={cn(isRTL && "text-end lg:order-2-2")}>
@@ -131,8 +130,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
             {/* WhatsApp Option */}
             <div className={cn(
-              "flex items-center gap-4 p-4 border border-accent/30 bg-white shadow-card",
-              isRTL && "flex-row-reverse"
+              "flex items-center gap-4 p-4 border border-accent/30 bg-white shadow-card"
             )}>
               <div className="w-12 h-12 border border-accent/30 rounded-full flex items-center justify-center flex-shrink-0">
                 <MessageCircle className="h-6 w-6 text-accent" strokeWidth={1} />
@@ -221,15 +219,13 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   {t("contact.interests")}
                 </label>
                 <div className={cn(
-                  "flex flex-wrap gap-4",
-                  isRTL && "flex-row-reverse"
+                  "flex flex-wrap gap-4"
                 )}>
                   {interestOptions.map((option) => (
                     <label
                       key={option.id}
                       className={cn(
-                        "flex items-center gap-2 cursor-pointer",
-                        isRTL && "flex-row-reverse"
+                        "flex items-center gap-2 cursor-pointer"
                       )}
                     >
                       <Checkbox

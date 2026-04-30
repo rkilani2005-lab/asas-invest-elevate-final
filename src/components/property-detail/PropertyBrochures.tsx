@@ -51,8 +51,7 @@ const PropertyBrochures = ({ property }: PropertyBrochuresProps) => {
                 )}
               >
                 <div className={cn(
-                  "flex items-start gap-4",
-                  isRTL && "flex-row-reverse"
+                  "flex items-start gap-4"
                 )}>
                   {/* PDF Icon */}
                   <div className="flex-shrink-0 w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -69,8 +68,7 @@ const PropertyBrochures = ({ property }: PropertyBrochuresProps) => {
                     </p>
                     
                     <div className={cn(
-                      "flex items-center gap-2",
-                      isRTL && "flex-row-reverse"
+                      "flex items-center gap-2"
                     )}>
                       <Button
                         size="sm"

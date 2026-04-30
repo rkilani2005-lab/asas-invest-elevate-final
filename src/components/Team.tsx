@@ -84,8 +84,7 @@ const Team = () => {
 
                 {/* Social Links */}
                 <div className={cn(
-                  "flex items-center justify-center gap-3",
-                  isRTL && "flex-row-reverse"
+                  "flex items-center justify-center gap-3"
                 )}>
                   <a
                     href={member.linkedin}

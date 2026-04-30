@@ -140,8 +140,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
           isRTL && "text-end"
         )}>
           <div className={cn(
-            "flex items-center gap-3",
-            isRTL && "flex-row-reverse"
+            "flex items-center gap-3"
           )}>
             <Check className="h-5 w-5 text-accent flex-shrink-0" strokeWidth={1} />
             <p className="text-foreground font-medium">

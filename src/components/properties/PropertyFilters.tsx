@@ -169,8 +169,7 @@ const PropertyFilters = ({
       {/* Active Filters & Clear */}
       {hasActiveFilters && (
         <div className={cn(
-          "mt-4 pt-4 border-t border-border flex items-center gap-2",
-          isRTL && "flex-row-reverse"
+          "mt-4 pt-4 border-t border-border flex items-center gap-2"
         )}>
           <Button
             variant="ghost"

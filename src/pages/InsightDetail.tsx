@@ -137,8 +137,7 @@ const InsightDetail = () => {
           <Link 
             to="/insights" 
             className={cn(
-              "inline-flex items-center text-primary-foreground/70 hover:text-primary-foreground mb-6 text-sm transition-colors",
-              isRTL && "flex-row-reverse"
+              "inline-flex items-center text-primary-foreground/70 hover:text-primary-foreground mb-6 text-sm transition-colors"
             )}
           >
             <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
@@ -166,23 +165,22 @@ const InsightDetail = () => {
           )}
           
           <div className={cn(
-            "flex flex-wrap items-center gap-6 text-sm text-primary-foreground/70",
-            isRTL && "flex-row-reverse"
+            "flex flex-wrap items-center gap-6 text-sm text-primary-foreground/70"
           )}>
             {content.author && (
-              <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
+              <div className={cn("flex items-center")}>
                 <User className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
                 {content.author}
               </div>
             )}
             {insight.published_at && (
-              <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
+              <div className={cn("flex items-center")}>
                 <Calendar className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
                 {format(new Date(insight.published_at), 'MMMM d, yyyy')}
               </div>
             )}
             {insight.read_time_minutes && (
-              <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
+              <div className={cn("flex items-center")}>
                 <Clock className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
                 {insight.read_time_minutes} {isRTL ? "دقائق للقراءة" : "min read"}
               </div>
@@ -235,8 +233,7 @@ const InsightDetail = () => {
       <section className="py-8 bg-secondary/30">
         <div className="container mx-auto px-4 lg:px-8 max-w-4xl">
           <div className={cn(
-            "flex items-center justify-between",
-            isRTL && "flex-row-reverse"
+            "flex items-center justify-between"
           )}>
             <p className="text-muted-foreground text-sm">
               {isRTL ? "شارك هذا المقال" : "Share this article"}

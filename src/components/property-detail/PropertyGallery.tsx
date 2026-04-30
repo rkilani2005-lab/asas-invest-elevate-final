@@ -182,8 +182,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
     <div className="py-12 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
         <div className={cn(
-          "flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4",
-          isRTL && "md:flex-row-reverse"
+          "flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4"
         )}>
           <h2 className={cn(
             "heading-section text-2xl md:text-3xl text-foreground",
@@ -192,12 +191,11 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
             {t("sections.gallery")}
           </h2>
 
-          <div className={cn("flex items-center gap-4", isRTL && "flex-row-reverse")}>
+          <div className={cn("flex items-center gap-4")}>
             {/* Images / Videos toggle */}
             {hasVideos && (
               <div className={cn(
-                "flex gap-1 border border-border p-1",
-                isRTL && "flex-row-reverse"
+                "flex gap-1 border border-border p-1"
               )}>
                 <button
                   onClick={() => setActiveSection("images")}
@@ -227,8 +225,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
             {/* Category sub-tabs (only for images) */}
             {activeSection === "images" && tabs.length > 1 && (
               <div className={cn(
-                "flex gap-1 border border-border p-1",
-                isRTL && "flex-row-reverse"
+                "flex gap-1 border border-border p-1"
               )}>
                 {tabs.map((tab) => (
                   <button
@@ -280,8 +277,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                   "opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 )}>
                   <div className={cn(
-                    "flex items-center gap-2 text-[10px] text-white/90 font-medium tracking-wider",
-                    isRTL && "flex-row-reverse"
+                    "flex items-center gap-2 text-[10px] text-white/90 font-medium tracking-wider"
                   )}>
                     {dims && (
                       <span className="bg-black/40 px-1.5 py-0.5 rounded">

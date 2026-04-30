@@ -94,8 +94,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
                     <div
                       key={amenity.id}
                       className={cn(
-                        "flex items-center p-4 border border-border hover:border-accent/30 transition-colors",
-                        isRTL && "flex-row-reverse"
+                        "flex items-center p-4 border border-border hover:border-accent/30 transition-colors"
                       )}
                     >
                       <div className={cn(

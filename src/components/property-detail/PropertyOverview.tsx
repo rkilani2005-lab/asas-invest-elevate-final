@@ -44,8 +44,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
     <div className="py-12 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
         <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-3 gap-12",
-          isRTL && "lg:flex-row-reverse"
+          "grid grid-cols-1 lg:grid-cols-3 gap-12"
         )}>
           {/* Main Content */}
           <div className={cn("lg:col-span-2", isRTL && "text-end")}>
@@ -65,7 +64,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
                 <h3 className="text-accent text-xs font-medium tracking-widest uppercase mb-4">Key Highlights</h3>
                 <ul className={cn("grid grid-cols-1 md:grid-cols-2 gap-3", isRTL && "text-end")}>
                   {highlights.map((highlight, index) => (
-                    <li key={index} className={cn("flex items-center text-muted-foreground", isRTL && "flex-row-reverse")}>
+                    <li key={index} className={cn("flex items-center text-muted-foreground")}>
                       <div className={cn("w-1.5 h-1.5 bg-accent flex-shrink-0", isRTL ? "ms-3" : "me-3")} />
                       {highlight}
                     </li>
@@ -91,7 +90,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
 
               <div className="space-y-4">
                 {allSpecs.map((spec, index) => (
-                  <div key={index} className={cn("flex items-start", isRTL && "flex-row-reverse text-end")}>
+                  <div key={index} className={cn("flex items-start", isRTL && "text-end")}>
                     <div className={cn("w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0", isRTL ? "ms-3" : "me-3")}>
                       <spec.icon className="h-5 w-5 text-accent" strokeWidth={1} />
                     </div>

@@ -82,8 +82,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                     )}
                   >
                     <div className={cn(
-                      "flex items-center gap-4",
-                      isRTL && "flex-row-reverse"
+                      "flex items-center gap-4"
                     )}>
                       <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                         <FileText className="h-6 w-6 text-primary" />
@@ -99,8 +98,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                         </p>
                       </div>
                       <div className={cn(
-                        "flex items-center gap-2",
-                        isRTL && "flex-row-reverse"
+                        "flex items-center gap-2"
                       )}>
                         <Button
                           size="icon"

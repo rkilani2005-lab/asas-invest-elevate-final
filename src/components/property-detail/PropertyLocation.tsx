@@ -54,8 +54,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
         </h2>
 
         <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-2 gap-8",
-          isRTL && "lg:flex-row-reverse"
+          "grid grid-cols-1 lg:grid-cols-2 gap-8"
         )}>
           {/* Map */}
           <div className="aspect-[4/3] overflow-hidden border border-border">
@@ -74,8 +73,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
           {/* Nearby Places */}
           <div className={cn(isRTL && "text-end")}>
             <div className={cn(
-              "flex items-center mb-6",
-              isRTL && "flex-row-reverse"
+              "flex items-center mb-6"
             )}>
               <MapPin className={cn("h-5 w-5 text-accent", isRTL ? "ms-2" : "me-2")} strokeWidth={1} />
               <span className="text-lg font-medium text-foreground">{location}</span>
@@ -93,8 +91,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
                         className="p-4 border border-border hover:border-accent/30 transition-colors"
                       >
                         <div className={cn(
-                          "flex items-center mb-2",
-                          isRTL && "flex-row-reverse"
+                          "flex items-center mb-2"
                         )}>
                           <div className={cn(
                             "w-8 h-8 border border-accent/30 flex items-center justify-center flex-shrink-0",

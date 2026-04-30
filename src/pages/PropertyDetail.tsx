@@ -200,20 +200,18 @@ const PropertyDetail = () => {
         {/* Back Button & Actions */}
         <div className="container mx-auto px-4 lg:px-8 py-6">
           <div className={cn(
-            "flex items-center justify-between",
-            isRTL && "flex-row-reverse"
+            "flex items-center justify-between"
           )}>
             <Link
               to={property.type === "off-plan" ? "/off-plan" : "/ready"}
               className={cn(
-                "flex items-center text-muted-foreground hover:text-accent transition-colors",
-                isRTL && "flex-row-reverse"
+                "flex items-center text-muted-foreground hover:text-accent transition-colors"
               )}
             >
               <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} strokeWidth={1} />
               <span className="text-sm">{t("property.type." + property.type.replace("-", ""))}</span>
             </Link>
-            <div className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}>
+            <div className={cn("flex items-center gap-2")}>
               <Button variant="outline" size="sm" className="gap-2 border-accent/30 text-foreground hover:border-accent">
                 <Share2 className="h-4 w-4" strokeWidth={1} />
                 <span className="hidden sm:inline">Share</span>
