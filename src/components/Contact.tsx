@@ -52,12 +52,39 @@ const Contact = () => {
   });
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
 
+  const [contactSettings, setContactSettings] = useState({
+    phone: "+971 4 XXX XXXX",
+    whatsapp: "+971 50 XXX XXXX",
+    email: "admin@asasinvest.com",
+    address_en: "",
+    address_ar: "",
+  });
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "contact")
+        .maybeSingle();
+      if (data?.value) {
+        setContactSettings((prev) => ({ ...prev, ...(data.value as any) }));
+      }
+    })();
+  }, []);
+
+  const waNumber = (contactSettings.whatsapp || "").replace(/[^0-9]/g, "");
+  const telNumber = (contactSettings.phone || "").replace(/[^0-9+]/g, "");
+  const officeAddress = isRTL
+    ? (contactSettings.address_ar || contactSettings.address_en)
+    : (contactSettings.address_en || contactSettings.address_ar);
+
   // Phone numbers and emails are shown LTR even in RTL via .ltr-numeric
   const contactInfo = [
-    { icon: Phone, label: t("contact.infoPhone"), details: "+971 4 XXX XXXX", link: "tel:+97140000000", ltr: true },
-    { icon: MessageCircle, label: t("contact.infoWhatsApp"), details: "+971 50 XXX XXXX", link: "https://wa.me/971500000000", ltr: true },
-    { icon: Mail, label: t("contact.infoEmail"), details: "admin@asasinvest.com", link: "mailto:admin@asasinvest.com", ltr: true },
-    { icon: MapPin, label: t("contact.infoOffice"), details: t("contact.officeAddress"), link: "#", ltr: false },
+    { icon: Phone, label: t("contact.infoPhone"), details: contactSettings.phone, link: `tel:${telNumber}`, ltr: true },
+    { icon: MessageCircle, label: t("contact.infoWhatsApp"), details: contactSettings.whatsapp, link: `https://wa.me/${waNumber}`, ltr: true },
+    { icon: Mail, label: t("contact.infoEmail"), details: contactSettings.email, link: `mailto:${contactSettings.email}`, ltr: true },
+    { icon: MapPin, label: t("contact.infoOffice"), details: officeAddress || t("contact.officeAddress"), link: "#", ltr: false },
   ];
 
   const handleContactSubmit = async (e: React.FormEvent) => {
