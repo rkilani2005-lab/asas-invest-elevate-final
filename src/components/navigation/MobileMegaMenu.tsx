@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useMegaMenuItems } from "./MegaMenu";
@@ -72,29 +73,41 @@ export default function MobileMegaMenu({ onLinkClick }: MobileMegaMenuProps) {
                   />
                 </button>
 
-                {isOpen && group.items && (
-                  <div id={submenuId} className="py-1 ps-4">
-                    {group.items.map((item) => {
-                      const isActive = location.pathname === item.href;
-                      return (
-                        <a
-                          key={item.href}
-                          href={item.href}
-                          className={cn(
-                            "block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200 cursor-pointer",
-                            isActive
-                              ? "text-accent font-medium"
-                              : "text-muted-foreground hover:text-accent hover:bg-accent/5"
-                          )}
-                          aria-current={isActive ? "page" : undefined}
-                          onClick={(e) => onLinkClick(e, item.href)}
-                        >
-                          {item.label}
-                        </a>
-                      );
-                    })}
-                  </div>
-                )}
+                <AnimatePresence initial={false}>
+                  {isOpen && group.items && (
+                    <motion.div
+                      id={submenuId}
+                      key="submenu"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="py-1 ps-4">
+                        {group.items.map((item) => {
+                          const isActive = location.pathname === item.href;
+                          return (
+                            <a
+                              key={item.href}
+                              href={item.href}
+                              className={cn(
+                                "block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200 cursor-pointer",
+                                isActive
+                                  ? "text-accent font-medium"
+                                  : "text-muted-foreground hover:text-accent hover:bg-accent/5"
+                              )}
+                              aria-current={isActive ? "page" : undefined}
+                              onClick={(e) => onLinkClick(e, item.href)}
+                            >
+                              {item.label}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </>
             )}
           </div>
