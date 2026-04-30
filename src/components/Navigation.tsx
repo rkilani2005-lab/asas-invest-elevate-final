@@ -277,13 +277,13 @@ const Navigation = () => {
                 initial={{ x: isRTL ? "100%" : "-100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: isRTL ? "100%" : "-100%" }}
-                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.35 }}
                 drag="x"
                 dragDirectionLock
                 // Drawer anchors on the inline-start side. Closing means dragging back
                 // toward that edge: leftward in LTR (negative x), rightward in RTL (positive x).
-                dragConstraints={isRTL ? { left: 0, right: 300 } : { left: -300, right: 0 }}
-                dragElastic={{ left: isRTL ? 0 : 1, right: isRTL ? 1 : 0 }}
+                dragConstraints={isRTL ? { left: 0, right: 0 } : { left: 0, right: 0 }}
+                dragElastic={0.15}
                 dragMomentum={false}
                 onDragEnd={(_, info) => {
                   const closeThresholdPx = 80;
