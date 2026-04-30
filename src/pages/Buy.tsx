@@ -74,7 +74,7 @@ const Buy = () => {
                       className="flex items-center justify-between px-4 py-3 border border-accent/20 hover:border-accent hover:bg-accent/5 transition-all duration-300 group"
                     >
                       <span className="text-sm font-medium text-foreground group-hover:text-accent">{link.label}</span>
-                      <ArrowRight className="h-4 w-4 text-accent opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
+                      <ArrowRight className="h-4 w-4 text-accent opacity-0 group-hover:opacity-100 transition-opacity rtl-flip" strokeWidth={1.5} />
                     </Link>
                   ))}
                 </div>
