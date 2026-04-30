@@ -218,7 +218,7 @@ const PropertyDetail = () => {
               </Button>
               <Button variant="outline" size="sm" className="gap-2 border-accent/30 text-foreground hover:border-accent" aria-label={t("common.save")}>
                 <Heart className="h-4 w-4" strokeWidth={1} />
-                <span className="hidden sm:inline">Save</span>
+                <span className="hidden sm:inline">{t("common.save")}</span>
               </Button>
             </div>
           </div>
