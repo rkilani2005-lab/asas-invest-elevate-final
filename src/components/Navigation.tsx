@@ -167,12 +167,15 @@ const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <button
+            ref={menuButtonRef}
             className={cn(
               "lg:hidden p-2 transition-colors duration-300",
               !isScrolled && isDarkHeroPage ? "text-white" : "text-foreground"
             )}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
+            aria-label={isMobileMenuOpen ? t("buttons.closeMenu", "Close menu") : t("buttons.openMenu", "Open menu")}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation-drawer"
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" strokeWidth={1} /> : <Menu className="h-6 w-6" strokeWidth={1} />}
           </button>
