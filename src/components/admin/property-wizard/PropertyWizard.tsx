@@ -37,6 +37,8 @@ export default function PropertyWizard({
   isEditing,
   propertyId,
 }: PropertyWizardProps) {
+  const { t } = useTranslation();
+  const steps = useSteps();
   const [currentStep, setCurrentStep] = useState(1);
 
   function updateData(updates: Partial<PropertyData>) {
