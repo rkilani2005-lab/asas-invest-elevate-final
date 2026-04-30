@@ -106,15 +106,22 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
         {/* Content */}
         <div className="p-5 flex-1 flex flex-col bg-card">
-          {/* Developer */}
-          {developer && (
-            <p className="text-xs font-medium text-accent mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-              {developer}
-            </p>
-          )}
+          {/* Developer (always reserves a line) */}
+          <p
+            className={cn(
+              "text-xs font-medium mb-2 min-h-[1rem]",
+              developer ? "text-accent" : "text-transparent select-none"
+            )}
+            style={{ fontFamily: "'Inter', sans-serif" }}
+            aria-hidden={!developer}
+          >
+            {developer || "—"}
+          </p>
 
-          {/* Title */}
-          <h3 className="heading-section text-xl text-foreground mb-3 group-hover:text-accent transition-colors duration-300 line-clamp-2">
+          {/* Title — always 2 lines tall */}
+          <h3
+            className="heading-section text-xl text-foreground mb-3 group-hover:text-accent transition-colors duration-300 line-clamp-2 min-h-[3.5rem]"
+          >
             {name}
           </h3>
 
@@ -139,37 +146,46 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             </p>
           </div>
 
-          {/* Secondary line */}
-          {secondaryLineParts.length > 0 && (
-            <p
-              className="text-xs text-muted-foreground mb-3"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              {secondaryLineParts.join(' · ')}
-            </p>
-          )}
+          {/* Secondary line (always reserves a line) */}
+          <p
+            className={cn(
+              "text-xs mb-3 min-h-[1rem]",
+              secondaryLineParts.length > 0 ? "text-muted-foreground" : "text-transparent select-none"
+            )}
+            style={{ fontFamily: "'Inter', sans-serif" }}
+            aria-hidden={secondaryLineParts.length === 0}
+          >
+            {secondaryLineParts.length > 0 ? secondaryLineParts.join(' · ') : "—"}
+          </p>
 
-          {/* Meta tokens with gold diamond separators */}
-          {metaTokens.length > 0 && (
-            <div
-              className="mt-auto pt-4 border-t border-border/50 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              {metaTokens.map((tk, i) => (
+          {/* Meta tokens with gold diamond separators (always rendered) */}
+          <div
+            className="mt-auto pt-4 border-t border-border/50 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground min-h-[2rem]"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
+            {metaTokens.length > 0 ? (
+              metaTokens.map((tk, i) => (
                 <span key={i} className="inline-flex items-center gap-2">
                   {i > 0 && <span className="text-accent" aria-hidden>◇</span>}
                   <span>{tk}</span>
                 </span>
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <span className="text-transparent select-none" aria-hidden>—</span>
+            )}
+          </div>
 
-          {/* Location footer */}
-          {location && (
-            <p className="text-xs text-muted-foreground/80 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-              {location}
-            </p>
-          )}
+          {/* Location footer (always reserves a line) */}
+          <p
+            className={cn(
+              "text-xs mt-2 min-h-[1rem]",
+              location ? "text-muted-foreground/80" : "text-transparent select-none"
+            )}
+            style={{ fontFamily: "'Inter', sans-serif" }}
+            aria-hidden={!location}
+          >
+            {location || "—"}
+          </p>
         </div>
       </article>
     </Link>
