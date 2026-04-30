@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useQueueCount, useNewSubmissionsCount, usePendingApprovalCount } from "@/hooks/useQueueCount";
 import { cn } from "@/lib/utils";
@@ -20,22 +21,6 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const navItems = [
-  { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/admin/properties", icon: Building2, label: "Properties" },
-  { href: "/admin/importer", icon: CloudDownload, label: "Auto Import" },
-  { href: "/admin/importer/approval", icon: ClipboardCheck, label: "Approvals" },
-  { href: "/admin/gallery", icon: Images, label: "Gallery" },
-  { href: "/admin/amenities", icon: Sparkles, label: "Amenity Library" },
-  { href: "/admin/communications", icon: Users, label: "Communications" },
-  { href: "/admin/email", icon: Mail, label: "Email" },
-  { href: "/admin/insights", icon: Newspaper, label: "Insights" },
-  { href: "/admin/home-content", icon: Home, label: "Home Page" },
-  { href: "/admin/about", icon: FileText, label: "About Page" },
-  { href: "/admin/translations", icon: Languages, label: "Translations" },
-  { href: "/admin/settings", icon: Settings, label: "Settings" },
-];
 
 function NavBadge({
   count,
@@ -64,10 +49,27 @@ function NavBadge({
 
 export default function AdminSidebar() {
   const location = useLocation();
+  const { t } = useTranslation();
   const { signOut, user } = useAdminAuth();
   const queueCount = useQueueCount();
   const newSubmissionsCount = useNewSubmissionsCount();
   const pendingApprovalCount = usePendingApprovalCount();
+
+  const navItems = [
+    { href: "/admin", icon: LayoutDashboard, label: t("admin.nav.dashboard") },
+    { href: "/admin/properties", icon: Building2, label: t("admin.nav.properties") },
+    { href: "/admin/importer", icon: CloudDownload, label: t("admin.nav.autoImport") },
+    { href: "/admin/importer/approval", icon: ClipboardCheck, label: t("admin.nav.approvals") },
+    { href: "/admin/gallery", icon: Images, label: t("admin.nav.gallery") },
+    { href: "/admin/amenities", icon: Sparkles, label: t("admin.nav.amenities") },
+    { href: "/admin/communications", icon: Users, label: t("admin.nav.communications") },
+    { href: "/admin/email", icon: Mail, label: t("admin.nav.email") },
+    { href: "/admin/insights", icon: Newspaper, label: t("admin.nav.insights") },
+    { href: "/admin/home-content", icon: Home, label: t("admin.nav.homePage") },
+    { href: "/admin/about", icon: FileText, label: t("admin.nav.aboutPage") },
+    { href: "/admin/translations", icon: Languages, label: t("admin.nav.translations") },
+    { href: "/admin/settings", icon: Settings, label: t("admin.nav.settings") },
+  ];
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -77,12 +79,12 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="w-64 bg-card border-r border-border flex flex-col">
+    <aside className="w-64 bg-card border-e border-border flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-border">
-        <h1 className="text-xl font-semibold">Asas CMS</h1>
+        <h1 className="text-xl font-semibold">{t("admin.brand")}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Content Management
+          {t("admin.brandSubtitle")}
         </p>
       </div>
 
@@ -123,7 +125,7 @@ export default function AdminSidebar() {
           className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
-          View Site
+          {t("admin.viewSite")}
         </a>
         <div className="px-3 py-2 text-xs text-muted-foreground truncate">
           {user?.email}
@@ -134,7 +136,7 @@ export default function AdminSidebar() {
           onClick={signOut}
         >
           <LogOut className="w-4 h-4" />
-          Sign Out
+          {t("admin.signOut")}
         </Button>
       </div>
     </aside>

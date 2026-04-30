@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminSidebar from "./AdminSidebar";
 import { Loader2 } from "lucide-react";
@@ -9,6 +10,7 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const { t } = useTranslation();
   const { user, isAdmin, isLoading } = useAdminAuth();
   const location = useLocation();
 
