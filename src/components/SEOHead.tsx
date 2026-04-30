@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 
 interface SEOHeadProps {
   title: string;
@@ -10,7 +11,8 @@ interface SEOHeadProps {
   jsonLd?: object | object[];
 }
 
-const SITE_NAME = "Asas Invest";
+const SITE_NAME_EN = "Asas Invest";
+const SITE_NAME_AR = "أساس إنفست";
 const DEFAULT_OG_IMAGE = "https://asasinvest.com/images/og-default.jpg";
 const SITE_URL = "https://asasinvest.com";
 
@@ -23,18 +25,34 @@ export default function SEOHead({
   noIndex = false,
   jsonLd,
 }: SEOHeadProps) {
-  const fullTitle = title.includes("Asas") ? title : `${title} | ${SITE_NAME}`;
-  const url = canonical || (typeof window !== "undefined" ? window.location.href.split("?")[0] : SITE_URL);
+  const { i18n } = useTranslation();
+  const lang = (i18n.language || "en").split("-")[0];
+  const isAr = lang === "ar";
+  const siteName = isAr ? SITE_NAME_AR : SITE_NAME_EN;
+
+  // Append site name only if missing (works for both langs)
+  const fullTitle =
+    title.includes(SITE_NAME_EN) || title.includes(SITE_NAME_AR)
+      ? title
+      : `${title} | ${siteName}`;
+
+  const url =
+    canonical ||
+    (typeof window !== "undefined" ? window.location.href.split("?")[0] : SITE_URL);
   const image = ogImage || DEFAULT_OG_IMAGE;
   const desc = description.length > 160 ? description.slice(0, 157) + "..." : description;
 
-  // Normalize JSON-LD to array
-  const jsonLdArray = jsonLd
-    ? Array.isArray(jsonLd) ? jsonLd : [jsonLd]
-    : [];
+  const jsonLdArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+
+  const ogLocale = isAr ? "ar_AE" : "en_US";
+  const ogLocaleAlt = isAr ? "en_US" : "ar_AE";
+
+  // hreflang — language is selected client-side via ?lang query, same canonical URL serves both.
+  const enHref = `${url}${url.includes("?") ? "&" : "?"}lang=en`;
+  const arHref = `${url}${url.includes("?") ? "&" : "?"}lang=ar`;
 
   return (
-    <Helmet>
+    <Helmet htmlAttributes={{ lang, dir: isAr ? "rtl" : "ltr" }}>
       <title>{fullTitle}</title>
       <meta name="description" content={desc} />
       <link rel="canonical" href={url} />
@@ -46,9 +64,9 @@ export default function SEOHead({
       <meta property="og:url" content={url} />
       <meta property="og:image" content={image} />
       <meta property="og:type" content={ogType} />
-      <meta property="og:site_name" content={SITE_NAME} />
-      <meta property="og:locale" content="en_US" />
-      <meta property="og:locale:alternate" content="ar_AE" />
+      <meta property="og:site_name" content={siteName} />
+      <meta property="og:locale" content={ogLocale} />
+      <meta property="og:locale:alternate" content={ogLocaleAlt} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -57,8 +75,8 @@ export default function SEOHead({
       <meta name="twitter:image" content={image} />
 
       {/* hreflang for bilingual */}
-      <link rel="alternate" hrefLang="en" href={url} />
-      <link rel="alternate" hrefLang="ar" href={url} />
+      <link rel="alternate" hrefLang="en" href={enHref} />
+      <link rel="alternate" hrefLang="ar" href={arHref} />
       <link rel="alternate" hrefLang="x-default" href={url} />
 
       {/* JSON-LD Structured Data */}
@@ -77,6 +95,7 @@ export const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
   "name": "Asas Invest",
+  "alternateName": "أساس إنفست",
   "url": "https://asasinvest.com",
   "logo": "https://asasinvest.com/favicon.png",
   "description": "Strategic property investment, leasing & wealth management in Dubai and the UAE",
@@ -149,6 +168,7 @@ export function articleJsonLd(article: {
   excerpt: string;
   datePublished: string;
   image?: string;
+  inLanguage?: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -157,6 +177,7 @@ export function articleJsonLd(article: {
     "url": `https://asasinvest.com/insights/${article.slug}`,
     "description": article.excerpt,
     "datePublished": article.datePublished,
+    "inLanguage": article.inLanguage || "en",
     ...(article.image ? { "image": article.image } : {}),
     "author": { "@type": "Organization", "name": "Asas Invest" },
     "publisher": {
@@ -211,6 +232,7 @@ export function collectionPageJsonLd(page: {
   name: string;
   description: string;
   url: string;
+  inLanguage?: string;
   properties?: Array<{ name: string; slug: string; image?: string; price?: string }>;
 }) {
   return {
@@ -219,6 +241,7 @@ export function collectionPageJsonLd(page: {
     "name": page.name,
     "description": page.description,
     "url": page.url,
+    "inLanguage": page.inLanguage || "en",
     "provider": { "@type": "Organization", "name": "Asas Invest" },
     ...(page.properties?.length ? {
       "mainEntity": {
@@ -251,6 +274,7 @@ export function propertyDetailJsonLd(property: {
   amenities?: string[];
   unitTypes?: string[];
   sizeRange?: string;
+  inLanguage?: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -258,6 +282,7 @@ export function propertyDetailJsonLd(property: {
     "name": property.name,
     "url": `https://asasinvest.com/property/${property.slug}`,
     "description": property.description,
+    "inLanguage": property.inLanguage || "en",
     ...(property.image ? { "image": property.image } : {}),
     ...(property.images?.length ? {
       "image": property.images.slice(0, 6),
