@@ -51,10 +51,11 @@ const InsightsPage = () => {
     author: language === 'ar' && item.author_ar ? item.author_ar : item.author_en,
   });
 
-  // Get category label
+  // Get category label (localized)
   const getCategoryLabel = (categoryName: string) => {
     const cat = categories.find(c => c.name === categoryName);
-    return cat?.label || categoryName;
+    if (!cat) return categoryName;
+    return language === "ar" ? (cat.labelAr || cat.label) : cat.label;
   };
 
   // Filter articles
