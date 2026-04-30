@@ -99,7 +99,7 @@ const PropertyCard = ({ property, index }: PropertyCardProps) => {
             </span>
             <Button variant="ghost" size="sm" className="text-accent hover:text-accent hover:bg-accent/10">
               View Details
-              <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
+              <ArrowRight className="ms-1.5 h-3.5 w-3.5 rtl-flip" />
             </Button>
           </div>
         </div>
@@ -169,7 +169,7 @@ const Properties = () => {
         <ScrollReveal delay={0.3} className="text-center mt-12">
           <Button variant="outline" size="lg" className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 text-sm font-medium tracking-wide">
             View All Properties
-            <ArrowRight className="ms-2 h-4 w-4" />
+            <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
           </Button>
         </ScrollReveal>
       </div>

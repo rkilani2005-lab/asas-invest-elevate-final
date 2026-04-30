@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { languages, LanguageCode } from '@/i18n/config';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   isDarkBackground = false
 }) => {
   const { language, setLanguage } = useLanguage();
+  const { t } = useTranslation();
 
   const toggleLanguage = () => {
     const newLang: LanguageCode = language === 'en' ? 'ar' : 'en';
@@ -28,7 +30,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           "text-sm font-medium text-muted-foreground hover:text-accent transition-colors",
           className
         )}
-        aria-label="Switch language"
+        aria-label={t('aria.switchLanguage')}
       >
         {language === 'en' ? 'العربية' : 'EN'}
       </button>
@@ -55,7 +57,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                 ? "text-white/70 hover:text-white"
                 : "text-muted-foreground hover:text-foreground"
           )}
-          aria-label={`Switch to ${languages[lang].name}`}
+          aria-label={t('aria.switchTo', { lang: languages[lang].name })}
         >
           {lang === 'en' ? 'EN' : 'ع'}
         </button>

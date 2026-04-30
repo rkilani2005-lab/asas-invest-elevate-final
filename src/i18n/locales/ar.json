@@ -162,7 +162,31 @@
     "subtitle": "رؤى السوق",
     "title": "أحدث التقارير والتحليلات",
     "description": "ابقَ على اطلاع مع تحليلاتنا ورؤانا الخبيرة حول سوق العقارات الإماراتي.",
-    "viewAll": "عرض جميع التقارير"
+    "viewAll": "عرض جميع التقارير",
+    "all": "الكل",
+    "featured": "مميز",
+    "searchPlaceholder": "البحث في المقالات...",
+    "heroEyebrow": "رؤى السوق",
+    "heroTitle": "تحليل الخبراء وذكاء السوق",
+    "heroDescription": "ابقَ على اطلاع بأحدث أبحاثنا وتقارير السوق ورؤى الاستثمار التي تغطي مشهد العقارات في دبي والإمارات.",
+    "readFullArticle": "اقرأ المقال كاملاً",
+    "latestArticles": "أحدث المقالات",
+    "articleCount_one": "{{count}} مقال",
+    "articleCount_other": "{{count}} مقال",
+    "minRead": "دقائق للقراءة",
+    "minShort": "د",
+    "by": "بقلم",
+    "noArticles": "لا توجد مقالات في هذه الفئة.",
+    "newsletterTitle": "ابقَ على اطلاع برؤى السوق",
+    "newsletterDesc": "اشترك في نشرتنا الإخبارية للحصول على تحديثات السوق الأسبوعية ونصائح الاستثمار والفرص العقارية الحصرية.",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "subscribe": "اشتراك",
+    "newsletterDisclaimer": "بالاشتراك، فإنك توافق على تلقي رسائل تسويقية من أساس إنفست.",
+    "backHome": "العودة إلى الرئيسية",
+    "backToInsights": "العودة إلى المقالات",
+    "shareArticle": "شارك هذا المقال",
+    "notFoundTitle": "المقال غير موجود",
+    "notFoundDesc": "عذراً، المقال الذي تبحث عنه غير موجود."
   },
   "featuredProperties": {
     "subtitle": "محفظتنا",
@@ -433,5 +457,41 @@
     "title": "ابنِ مسيرتك المهنية مع أساس",
     "description": "نبحث دائماً عن كفاءات متميزة تشاركنا شغفنا بالتميز العقاري والتفكير بالعميل أولاً. إذا كنت طموحاً ومستعداً لإحداث أثر، نودّ أن نسمع منك.",
     "applyNow": "أرسل سيرتك الذاتية"
+  },
+  "propertyTypes": {
+    "apartment": "شقة",
+    "villa": "فيلا",
+    "townhouse": "تاون هاوس",
+    "penthouse": "بنتهاوس",
+    "office": "مكتب",
+    "retail": "محل تجاري"
+  },
+  "common": {
+    "error": "خطأ",
+    "errorMessage": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "share": "مشاركة",
+    "backToTop": "العودة إلى الأعلى",
+    "save": "حفظ",
+    "previous": "السابق",
+    "next": "التالي",
+    "previousImage": "الصورة السابقة",
+    "nextImage": "الصورة التالية",
+    "previousSlide": "الشريحة السابقة",
+    "nextSlide": "الشريحة التالية",
+    "morePages": "المزيد من الصفحات",
+    "back": "رجوع"
+  },
+  "aria": {
+    "whatsapp": "تواصل عبر واتساب",
+    "switchLanguage": "تغيير اللغة",
+    "switchTo": "التبديل إلى {{lang}}"
+  },
+  "latestUpdates": {
+    "subtitle": "ابقَ على اطلاع",
+    "title": "آخر المستجدات",
+    "announcements": "إعلانات",
+    "pressReleases": "النشرات الصحفية",
+    "viewAllAnnouncements": "جميع الإعلانات",
+    "viewAllPress": "جميع النشرات الصحفية"
   }
 }

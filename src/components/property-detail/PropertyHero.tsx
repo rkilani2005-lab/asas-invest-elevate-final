@@ -15,7 +15,7 @@ interface PropertyHeroProps {
 }
 
 const PropertyHero = ({ property }: PropertyHeroProps) => {
-  const { isRTL } = useLanguage();
+  const { isRTL, t } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
@@ -94,23 +94,17 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
           <>
             <button
               onClick={isRTL ? nextImage : prevImage}
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300",
-                isRTL ? "end-4" : "start-4"
-              )}
-              aria-label="Previous image"
+              className="absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300 start-4"
+              aria-label={t("common.previousImage")}
             >
-              <ChevronLeft className={cn("h-5 w-5", isRTL && "rotate-180")} strokeWidth={1} />
+              <ChevronLeft className="h-5 w-5 rtl-flip" strokeWidth={1} />
             </button>
             <button
               onClick={isRTL ? prevImage : nextImage}
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300",
-                isRTL ? "start-4" : "end-4"
-              )}
-              aria-label="Next image"
+              className="absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300 end-4"
+              aria-label={t("common.nextImage")}
             >
-              <ChevronRight className={cn("h-5 w-5", isRTL && "rotate-180")} strokeWidth={1} />
+              <ChevronRight className="h-5 w-5 rtl-flip" strokeWidth={1} />
             </button>
           </>
         )}

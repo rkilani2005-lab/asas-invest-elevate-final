@@ -85,7 +85,7 @@ const WhatIsREIT = () => {
               <Link to="/insights">
                 <Button variant="outline" className="group">
                   Learn More
-                  <ArrowRight className="ms-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ms-2 h-4 w-4 group-hover:translate-x-1 transition-transform rtl-flip" />
                 </Button>
               </Link>
             </ScrollReveal>

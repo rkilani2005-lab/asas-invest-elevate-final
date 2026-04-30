@@ -39,7 +39,7 @@ const Sell = () => {
     });
     setLoading(false);
     if (error) {
-      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("common.errorMessage"), variant: "destructive" });
     } else {
       toast({ title: t("sell.successTitle"), description: t("sell.successDesc") });
       setForm({ name: "", email: "", phone: "", area: "", propertyType: "", size: "", message: "" });
@@ -111,12 +111,12 @@ const Sell = () => {
                     <Select value={form.propertyType} onValueChange={(v) => setForm(p => ({ ...p, propertyType: v }))}>
                       <SelectTrigger><SelectValue placeholder={t("sell.selectType")} /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="apartment">Apartment</SelectItem>
-                        <SelectItem value="villa">Villa</SelectItem>
-                        <SelectItem value="townhouse">Townhouse</SelectItem>
-                        <SelectItem value="penthouse">Penthouse</SelectItem>
-                        <SelectItem value="office">Office</SelectItem>
-                        <SelectItem value="retail">Retail</SelectItem>
+                        <SelectItem value="apartment">{t("propertyTypes.apartment")}</SelectItem>
+                        <SelectItem value="villa">{t("propertyTypes.villa")}</SelectItem>
+                        <SelectItem value="townhouse">{t("propertyTypes.townhouse")}</SelectItem>
+                        <SelectItem value="penthouse">{t("propertyTypes.penthouse")}</SelectItem>
+                        <SelectItem value="office">{t("propertyTypes.office")}</SelectItem>
+                        <SelectItem value="retail">{t("propertyTypes.retail")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

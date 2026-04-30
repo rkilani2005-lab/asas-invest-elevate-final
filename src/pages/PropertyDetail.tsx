@@ -208,17 +208,17 @@ const PropertyDetail = () => {
                 "flex items-center text-muted-foreground hover:text-accent transition-colors"
               )}
             >
-              <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} strokeWidth={1} />
+              <ArrowLeft className="h-4 w-4 me-2 rtl-flip" strokeWidth={1} />
               <span className="text-sm">{t("property.type." + property.type.replace("-", ""))}</span>
             </Link>
             <div className={cn("flex items-center gap-2")}>
-              <Button variant="outline" size="sm" className="gap-2 border-accent/30 text-foreground hover:border-accent">
+              <Button variant="outline" size="sm" className="gap-2 border-accent/30 text-foreground hover:border-accent" aria-label={t("common.share")}>
                 <Share2 className="h-4 w-4" strokeWidth={1} />
-                <span className="hidden sm:inline">Share</span>
+                <span className="hidden sm:inline">{t("common.share")}</span>
               </Button>
-              <Button variant="outline" size="sm" className="gap-2 border-accent/30 text-foreground hover:border-accent">
+              <Button variant="outline" size="sm" className="gap-2 border-accent/30 text-foreground hover:border-accent" aria-label={t("common.save")}>
                 <Heart className="h-4 w-4" strokeWidth={1} />
-                <span className="hidden sm:inline">Save</span>
+                <span className="hidden sm:inline">{t("common.save")}</span>
               </Button>
             </div>
           </div>

@@ -13,7 +13,7 @@ import { format } from "date-fns";
 
 const InsightDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { language, isRTL } = useLanguage();
+  const { language, isRTL, t } = useLanguage();
 
   // Fetch insight by slug
   const { data: insight, isLoading, error } = useQuery({
@@ -85,18 +85,15 @@ const InsightDetail = () => {
         <div className="pt-32 pb-16">
           <div className="container mx-auto px-4 lg:px-8 text-center">
             <h1 className="font-serif text-3xl font-medium text-foreground mb-4">
-              {isRTL ? "المقال غير موجود" : "Article Not Found"}
+              {t("insights.notFoundTitle")}
             </h1>
             <p className="text-muted-foreground mb-8">
-              {isRTL 
-                ? "عذراً، المقال الذي تبحث عنه غير موجود."
-                : "Sorry, the article you're looking for doesn't exist."
-              }
+              {t("insights.notFoundDesc")}
             </p>
             <Link to="/insights">
               <Button>
-                <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
-                {isRTL ? "العودة إلى المقالات" : "Back to Insights"}
+                <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
+                {t("insights.backToInsights")}
               </Button>
             </Link>
           </div>
@@ -140,8 +137,8 @@ const InsightDetail = () => {
               "inline-flex items-center text-primary-foreground/70 hover:text-primary-foreground mb-6 text-sm transition-colors"
             )}
           >
-            <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
-            {isRTL ? "العودة إلى المقالات" : "Back to Insights"}
+            <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
+            {t("insights.backToInsights")}
           </Link>
           
           <div className="inline-block px-3 py-1 bg-accent/20 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
@@ -168,21 +165,21 @@ const InsightDetail = () => {
             "flex flex-wrap items-center gap-6 text-sm text-primary-foreground/70"
           )}>
             {content.author && (
-              <div className={cn("flex items-center")}>
-                <User className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
+              <div className="flex items-center">
+                <User className="h-4 w-4 me-1.5" />
                 {content.author}
               </div>
             )}
             {insight.published_at && (
-              <div className={cn("flex items-center")}>
-                <Calendar className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 me-1.5" />
                 {format(new Date(insight.published_at), 'MMMM d, yyyy')}
               </div>
             )}
             {insight.read_time_minutes && (
-              <div className={cn("flex items-center")}>
-                <Clock className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
-                {insight.read_time_minutes} {isRTL ? "دقائق للقراءة" : "min read"}
+              <div className="flex items-center">
+                <Clock className="h-4 w-4 me-1.5" />
+                {insight.read_time_minutes} {t("insights.minRead")}
               </div>
             )}
           </div>
@@ -236,7 +233,7 @@ const InsightDetail = () => {
             "flex items-center justify-between"
           )}>
             <p className="text-muted-foreground text-sm">
-              {isRTL ? "شارك هذا المقال" : "Share this article"}
+              {t("insights.shareArticle")}
             </p>
             <Button 
               variant="outline" 
@@ -252,8 +249,8 @@ const InsightDetail = () => {
                 }
               }}
             >
-              <Share2 className={cn("h-4 w-4", isRTL ? "ms-2" : "me-2")} />
-              {isRTL ? "مشاركة" : "Share"}
+              <Share2 className="h-4 w-4 me-2" />
+              {t("common.share")}
             </Button>
           </div>
         </div>
@@ -264,8 +261,8 @@ const InsightDetail = () => {
         <div className="container mx-auto px-4 lg:px-8 max-w-4xl text-center">
           <Link to="/insights">
             <Button variant="outline" size="lg">
-              <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
-              {isRTL ? "عرض جميع المقالات" : "View All Articles"}
+              <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
+              {t("insights.viewAll")}
             </Button>
           </Link>
         </div>
