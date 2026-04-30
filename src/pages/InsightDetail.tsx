@@ -3,6 +3,7 @@ import { ArrowLeft, Calendar, Clock, User, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Navigation from "@/components/Navigation";
+import ViewAllButton from "@/components/ui/view-all-button";
 import Footer from "@/components/Footer";
 import SEOHead, { articleJsonLd, breadcrumbJsonLd } from "@/components/SEOHead";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -267,12 +268,9 @@ const InsightDetail = () => {
       {/* Back to Insights CTA */}
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4 lg:px-8 max-w-4xl text-center">
-          <Link to="/insights">
-            <Button variant="outline" size="lg">
-              <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
-              {t("buttons.viewAll")}
-            </Button>
-          </Link>
+          <div className="flex justify-center">
+            <ViewAllButton to="/insights" />
+          </div>
         </div>
       </section>
 

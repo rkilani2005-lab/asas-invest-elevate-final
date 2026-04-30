@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import ViewAllButton from "@/components/ui/view-all-button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -167,13 +168,10 @@ const Insights = () => {
         )}
 
         {/* View All CTA */}
-        <ScrollReveal delay={0.3} className="text-center">
-          <Link to="/insights">
-            <Button variant="outline" size="lg" className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 text-sm font-medium tracking-wide">
-              {t("buttons.viewAll")}
-              <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />
-            </Button>
-          </Link>
+        <ScrollReveal delay={0.3} className="mt-4">
+          <div className="flex justify-center">
+            <ViewAllButton to="/insights" />
+          </div>
         </ScrollReveal>
       </div>
     </section>

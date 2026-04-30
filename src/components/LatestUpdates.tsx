@@ -2,6 +2,7 @@ import { ArrowRight, Calendar, Megaphone, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import ViewAllButton from "@/components/ui/view-all-button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
@@ -74,12 +75,9 @@ const LatestUpdates = () => {
                 ))}
               </StaggerContainer>
 
-              <Link to="/insights">
-                <Button variant="ghost" className="group text-accent hover:text-accent">
-                  {t("buttons.viewAll")}
-                  <ArrowRight className="ms-2 h-4 w-4 group-hover:translate-x-1 transition-transform rtl-flip" />
-                </Button>
-              </Link>
+              <div className="flex justify-start">
+                <ViewAllButton to="/insights" />
+              </div>
             </div>
           </ScrollReveal>
 
@@ -111,12 +109,9 @@ const LatestUpdates = () => {
                 ))}
               </StaggerContainer>
 
-              <Link to="/insights">
-                <Button variant="ghost" className="group text-accent hover:text-accent">
-                  {t("buttons.viewAll")}
-                  <ArrowRight className="ms-2 h-4 w-4 group-hover:translate-x-1 transition-transform rtl-flip" />
-                </Button>
-              </Link>
+              <div className="flex justify-start">
+                <ViewAllButton to="/insights" />
+              </div>
             </div>
           </ScrollReveal>
         </div>
