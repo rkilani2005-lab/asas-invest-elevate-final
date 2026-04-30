@@ -87,59 +87,42 @@ const Stats = () => {
           </p>
         </ScrollReveal>
 
-        {/* Numbers — full-width horizontal, divided by thin vertical lines */}
-        <StaggerContainer
-          className={cn(
-            "grid gap-0",
-            stats.length === 3
-              ? "grid-cols-1 md:grid-cols-3"
-              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-          )}
-        >
-          {stats.map((stat, index) => (
-            <StaggerItem key={index}>
-              <div
-                className={cn(
-                  "py-10 px-8 text-center md:text-start rounded-xl transition-all duration-300",
-                  "hover:-translate-y-1",
-                  index > 0 && "md:border-s"
-                )}
-                style={{ borderColor: 'rgba(197,160,89,0.15)' }}
-              >
-                {/* Big number — Satoshi 700, white; gold only on the suffix */}
-                <div
-                  className="mb-3"
+        {/* Tagline pillars — replaces stat numbers */}
+        <ScrollReveal>
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-center gap-6 md:gap-0">
+            {[
+              t("stats.tagline.item1"),
+              t("stats.tagline.item2"),
+              t("stats.tagline.item3"),
+            ].map((item, index, arr) => (
+              <div key={index} className="flex items-center justify-center flex-1">
+                <p
+                  className="text-center px-6"
                   style={{
                     fontFamily: "'Satoshi', 'Inter', sans-serif",
-                    fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-                    fontWeight: 700,
+                    fontWeight: 600,
+                    fontSize: 'clamp(1.1rem, 1.8vw, 1.5rem)',
                     color: '#FFFFFF',
-                    letterSpacing: '-0.04em',
-                    lineHeight: 1,
+                    letterSpacing: '-0.01em',
+                    lineHeight: 1.3,
                   }}
                 >
-                  {stat.value}
-                  {stat.suffix && (
-                    <span style={{ color: '#C5A059' }}>{stat.suffix}</span>
-                  )}
-                </div>
-                {/* Label — Inter 500, normal case */}
-                <p
-                  className="text-xs"
-                  style={{
-                    color: 'rgba(255,255,255,0.55)',
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 500,
-                    letterSpacing: 0,
-                    textTransform: 'none',
-                  }}
-                >
-                  {stat.label}
+                  {item}
                 </p>
+                {index < arr.length - 1 && (
+                  <span
+                    className="hidden md:inline-block"
+                    style={{
+                      width: '1px',
+                      height: '40px',
+                      background: 'rgba(197,160,89,0.4)',
+                    }}
+                  />
+                )}
               </div>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
+            ))}
+          </div>
+        </ScrollReveal>
       </div>
 
       {/* Subtle bottom gold rule */}
