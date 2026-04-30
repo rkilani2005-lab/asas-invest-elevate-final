@@ -69,18 +69,12 @@ const PropertyFilters = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* Search */}
         <div className="relative lg:col-span-2">
-          <Search className={cn(
-            "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground",
-            isRTL ? "end-3" : "start-3"
-          )} strokeWidth={1} />
+          <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground start-3" strokeWidth={1} />
           <Input
             placeholder={t("filters.search")}
             value={filters.search}
             onChange={(e) => updateFilter("search", e.target.value)}
-            className={cn(
-              "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-              isRTL ? "pe-10 text-end" : "ps-10"
-            )}
+            className="h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground ps-10"
           />
         </div>
 
