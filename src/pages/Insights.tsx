@@ -22,11 +22,11 @@ const InsightsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const categories = [
-    { name: "All", icon: FileText },
-    { name: "market_news", label: "Dubai Market", icon: Building },
-    { name: "investment_guide", label: "Investment Guide", icon: TrendingUp },
-    { name: "project_updates", label: "Project Updates", icon: MapPin },
-    { name: "lifestyle", label: "Lifestyle", icon: FileText },
+    { name: "All", icon: FileText, label: "All", labelAr: "الكل" },
+    { name: "market_news", label: "Dubai Market", labelAr: "سوق دبي", icon: Building },
+    { name: "investment_guide", label: "Investment Guide", labelAr: "دليل الاستثمار", icon: TrendingUp },
+    { name: "project_updates", label: "Project Updates", labelAr: "تحديثات المشاريع", icon: MapPin },
+    { name: "lifestyle", label: "Lifestyle", labelAr: "أسلوب الحياة", icon: FileText },
   ];
 
   // Fetch insights from database
@@ -51,10 +51,11 @@ const InsightsPage = () => {
     author: language === 'ar' && item.author_ar ? item.author_ar : item.author_en,
   });
 
-  // Get category label
+  // Get category label (localized)
   const getCategoryLabel = (categoryName: string) => {
     const cat = categories.find(c => c.name === categoryName);
-    return cat?.label || categoryName;
+    if (!cat) return categoryName;
+    return language === "ar" ? (cat.labelAr || cat.label) : cat.label;
   };
 
   // Filter articles
@@ -139,7 +140,7 @@ const InsightsPage = () => {
                   )}
                 >
                   <category.icon className="h-4 w-4 me-2" />
-                  {category.name === "All" ? t("insights.all") : (category.label || category.name)}
+                  {category.name === "All" ? t("insights.all") : getCategoryLabel(category.name)}
                 </button>
               ))}
             </div>
