@@ -190,7 +190,10 @@ const Navigation = () => {
       )}
     >
       <div className="w-full px-6 lg:px-10">
-        <div className="flex items-center justify-between h-20">
+        {/* On mobile, force LTR direction so the logo stays on the visual left and the
+            hamburger on the visual right in both English and Arabic. Desktop (lg+) inherits
+            the document direction so the mega menu mirrors correctly in RTL. */}
+        <div className="flex items-center justify-between h-20 [direction:ltr] lg:[direction:inherit]">
           {/* Logo */}
           <Link to="/" className="flex items-center shrink-0">
             <img 
@@ -294,7 +297,7 @@ const Navigation = () => {
                   isRTL ? "left-0" : "right-0"
                 )}
               >
-                <div className="flex items-center justify-between h-20 px-6 border-b border-border">
+                <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
                   <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
                     <img 
                       src={logoWhiteBg} 
