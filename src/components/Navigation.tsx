@@ -272,9 +272,14 @@ const Navigation = () => {
                 aria-modal="true"
                 aria-label={t("navigation.mobileMenuLabel", "Site navigation")}
                 id="mobile-navigation-drawer"
-                dir={isRTL ? "rtl" : "ltr"}
-                // English (LTR): slide in from the LEFT edge → start off-screen at -100%.
-                // Arabic  (RTL): slide in from the RIGHT edge → start off-screen at +100%.
+                // Force LTR on the OUTER animated element so Framer Motion's `x`
+                // values are never visually inverted by an RTL ancestor. The inner
+                // content sets its own `dir` for text/layout flow.
+                dir="ltr"
+                // Anchor to the visual RIGHT in RTL, visual LEFT in LTR.
+                // Slide in from the same edge (always 100% offset toward that edge):
+                //   RTL → starts at +100% (off-screen right) → animates to 0 (rests at right).
+                //   LTR → starts at -100% (off-screen left)  → animates to 0 (rests at left).
                 initial={{ x: isRTL ? "100%" : "-100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: isRTL ? "100%" : "-100%" }}
@@ -299,42 +304,48 @@ const Navigation = () => {
                   }
                 }}
                 style={{
-                  // Pin to a physical edge regardless of any ancestor `dir` inheritance:
-                  // Arabic anchors to the visual RIGHT, English to the visual LEFT.
-                  [isRTL ? "right" : "left"]: 0,
-                  [isRTL ? "left" : "right"]: "auto",
+                  position: "fixed",
+                  top: 0,
+                  bottom: 0,
+                  // Hard-pin to a physical edge with explicit left/right (no logical
+                  // properties) so RTL inheritance can never flip the anchor.
+                  left: isRTL ? "auto" : 0,
+                  right: isRTL ? 0 : "auto",
                 }}
-                className="fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y"
+                className="w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y"
               >
-                <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
-                  <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
-                    <img 
-                      src={logoWhiteBg} 
-                      alt="Asas Invest" 
-                      className="h-10 w-auto object-contain"
-                    />
-                  </Link>
-                  <button
-                    ref={closeButtonRef}
-                    className="p-2 text-foreground hover:text-accent transition-colors rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    aria-label={t("buttons.closeMenu", "Close menu")}
-                  >
-                    <X className="h-5 w-5" strokeWidth={1.5} />
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto py-6 px-6">
-                  <MobileMegaMenu onLinkClick={handleMobileLinkClick} />
-                </div>
-
-                <div className="px-6 py-6 border-t border-border space-y-4">
-                  <div className="flex justify-start">
-                    <LanguageSwitcher />
+                {/* Inner wrapper restores the document direction for text & layout flow */}
+                <div dir={isRTL ? "rtl" : "ltr"} className="flex flex-col h-full">
+                  <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
+                    <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
+                      <img 
+                        src={logoWhiteBg} 
+                        alt="Asas Invest" 
+                        className="h-10 w-auto object-contain"
+                      />
+                    </Link>
+                    <button
+                      ref={closeButtonRef}
+                      className="p-2 text-foreground hover:text-accent transition-colors rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      aria-label={t("buttons.closeMenu", "Close menu")}
+                    >
+                      <X className="h-5 w-5" strokeWidth={1.5} />
+                    </button>
                   </div>
-                  <Button variant="luxury" className="w-full" onClick={(e) => handleMobileLinkClick(e as any, '/#contact')}>
-                    {t("buttons.contactUs")}
-                  </Button>
+
+                  <div className="flex-1 overflow-y-auto py-6 px-6">
+                    <MobileMegaMenu onLinkClick={handleMobileLinkClick} />
+                  </div>
+
+                  <div className="px-6 py-6 border-t border-border space-y-4">
+                    <div className="flex justify-start">
+                      <LanguageSwitcher />
+                    </div>
+                    <Button variant="luxury" className="w-full" onClick={(e) => handleMobileLinkClick(e as any, '/#contact')}>
+                      {t("buttons.contactUs")}
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             </>
