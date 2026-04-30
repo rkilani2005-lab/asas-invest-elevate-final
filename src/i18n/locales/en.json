@@ -364,7 +364,13 @@
     "allCategories": "All Categories",
     "category": "Category",
     "residential": "Residential",
-    "commercial": "Commercial"
+    "commercial": "Commercial",
+    "studio": "Studio",
+    "priceUnder1M": "Under AED 1M",
+    "price1to2M": "AED 1M - 2M",
+    "price2to5M": "AED 2M - 5M",
+    "price5to10M": "AED 5M - 10M",
+    "priceAbove10M": "Above AED 10M"
   },
   "buy": {
     "subtitle": "Acquire",

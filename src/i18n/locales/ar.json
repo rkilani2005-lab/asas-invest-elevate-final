@@ -364,7 +364,13 @@
     "allCategories": "جميع الفئات",
     "category": "الفئة",
     "residential": "سكني",
-    "commercial": "تجاري"
+    "commercial": "تجاري",
+    "studio": "استوديو",
+    "priceUnder1M": "أقل من 1 مليون د.إ",
+    "price1to2M": "1 - 2 مليون د.إ",
+    "price2to5M": "2 - 5 مليون د.إ",
+    "price5to10M": "5 - 10 مليون د.إ",
+    "priceAbove10M": "أكثر من 10 مليون د.إ"
   },
   "buy": {
     "subtitle": "الاستحواذ",
