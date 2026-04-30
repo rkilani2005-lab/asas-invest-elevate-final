@@ -165,21 +165,21 @@ const InsightDetail = () => {
             "flex flex-wrap items-center gap-6 text-sm text-primary-foreground/70"
           )}>
             {content.author && (
-              <div className={cn("flex items-center")}>
-                <User className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
+              <div className="flex items-center">
+                <User className="h-4 w-4 me-1.5" />
                 {content.author}
               </div>
             )}
             {insight.published_at && (
-              <div className={cn("flex items-center")}>
-                <Calendar className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 me-1.5" />
                 {format(new Date(insight.published_at), 'MMMM d, yyyy')}
               </div>
             )}
             {insight.read_time_minutes && (
-              <div className={cn("flex items-center")}>
-                <Clock className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
-                {insight.read_time_minutes} {isRTL ? "دقائق للقراءة" : "min read"}
+              <div className="flex items-center">
+                <Clock className="h-4 w-4 me-1.5" />
+                {insight.read_time_minutes} {t("insights.minRead")}
               </div>
             )}
           </div>
@@ -233,7 +233,7 @@ const InsightDetail = () => {
             "flex items-center justify-between"
           )}>
             <p className="text-muted-foreground text-sm">
-              {isRTL ? "شارك هذا المقال" : "Share this article"}
+              {t("insights.shareArticle")}
             </p>
             <Button 
               variant="outline" 
@@ -249,8 +249,8 @@ const InsightDetail = () => {
                 }
               }}
             >
-              <Share2 className={cn("h-4 w-4", isRTL ? "ms-2" : "me-2")} />
-              {isRTL ? "مشاركة" : "Share"}
+              <Share2 className="h-4 w-4 me-2" />
+              {t("common.share")}
             </Button>
           </div>
         </div>
