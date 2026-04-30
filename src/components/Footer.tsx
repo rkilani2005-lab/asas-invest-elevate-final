@@ -55,6 +55,11 @@ const Footer = () => {
                 src={logoBlackBg}
                 alt="Asas Invest Real Estate"
                 className="h-12 w-auto object-contain"
+                style={{
+                  filter: "brightness(0) invert(1)",
+                  opacity: 0.92,
+                  mixBlendMode: "screen",
+                }}
               />
             </div>
             <p className="mb-6 max-w-sm text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
