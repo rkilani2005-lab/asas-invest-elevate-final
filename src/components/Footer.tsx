@@ -1,7 +1,7 @@
 import { Instagram, Linkedin, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import logoBlackBg from "@/assets/logo-black-bg.jpeg";
+import logoTransparent from "@/assets/logo-transparent.png";
 import { cn } from "@/lib/utils";
 
 const Footer = () => {
@@ -52,13 +52,9 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <div className="flex items-center mb-6">
               <img
-                src={logoBlackBg}
+                src={logoTransparent}
                 alt="Asas Invest Real Estate"
                 className="h-12 w-auto object-contain"
-                style={{
-                  mixBlendMode: "lighten",
-                  backgroundColor: "#111111",
-                }}
               />
             </div>
             <p className="mb-6 max-w-sm text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
