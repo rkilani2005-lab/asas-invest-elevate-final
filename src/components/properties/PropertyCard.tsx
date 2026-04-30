@@ -44,19 +44,19 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
     const d = new Date(property.handover_date);
     if (!isNaN(d.getTime())) {
       const q = Math.floor(d.getMonth() / 3) + 1;
-      metaTokens.push(`Q${q} ${d.getFullYear()} handover`);
+      metaTokens.push(t("property.handoverFormat", { quarter: q, year: d.getFullYear() }));
     }
   }
 
   // Secondary line: price-per-sqft + handover (best-effort)
   const pricePerSqft = (property as any).price_per_sqft;
   const secondaryLineParts: string[] = [];
-  if (pricePerSqft) secondaryLineParts.push(`AED ${pricePerSqft} / sqft`);
+  if (pricePerSqft) secondaryLineParts.push(t("property.pricePerSqft", { price: pricePerSqft }));
   if (property.handover_date) {
     const d = new Date(property.handover_date);
     if (!isNaN(d.getTime())) {
       const q = Math.floor(d.getMonth() / 3) + 1;
-      secondaryLineParts.push(`Q${q} ${d.getFullYear()} handover`);
+      secondaryLineParts.push(t("property.handoverFormat", { quarter: q, year: d.getFullYear() }));
     }
   }
 
@@ -98,7 +98,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
                   background: 'hsl(var(--accent))',
                 }}
               >
-                {yieldValue}% yield
+                {yieldValue}% {t("property.yieldSuffix")}
               </span>
             </div>
           )}
