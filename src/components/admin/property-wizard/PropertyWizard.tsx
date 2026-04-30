@@ -128,24 +128,24 @@ export default function PropertyWizard({
           onClick={() => goToStep(currentStep - 1)}
           disabled={currentStep === 1}
         >
-          Previous
+          {t("admin.wizard.previous")}
         </Button>
         <div className="flex items-center gap-2">
           {currentStep < 4 ? (
             <Button onClick={() => goToStep(currentStep + 1)}>
-              Next Step
+              {t("admin.wizard.next")}
             </Button>
           ) : (
             <Button onClick={onSave} disabled={isSaving}>
               {isSaving ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                  {t("admin.wizard.saving")}
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {isEditing ? "Update Property" : "Create Property"}
+                  <Save className="me-2 h-4 w-4" />
+                  {isEditing ? t("admin.wizard.update") : t("admin.wizard.create")}
                 </>
               )}
             </Button>
