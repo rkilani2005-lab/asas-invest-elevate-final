@@ -160,14 +160,14 @@ const Contact = () => {
         </ScrollReveal>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <StaggerContainer className="space-y-4">
+          <StaggerContainer className="flex flex-col gap-4 self-start">
             {contactInfo.map((info, index) => (
-              <StaggerItem key={index}>
+              <StaggerItem key={index} className="!h-auto">
                 <a
                   href={info.link}
                   target={info.link.startsWith("http") ? "_blank" : undefined}
                   rel={info.link.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="border border-accent/30 p-5 flex items-start gap-4 group hover:border-accent transition-all duration-300 block bg-white shadow-card"
+                  className="border border-accent/30 p-5 flex items-start gap-4 group hover:border-accent transition-all duration-300 bg-white shadow-card"
                 >
                   <div className="w-10 h-10 border border-accent/30 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:border-accent transition-colors duration-300">
                     <info.icon className="h-5 w-5 text-accent" strokeWidth={1} />
