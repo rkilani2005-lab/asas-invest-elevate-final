@@ -217,18 +217,24 @@ const Navigation = () => {
           {/* Right actions */}
           <div className="hidden lg:flex items-center gap-x-4 shrink-0">
             <LanguageSwitcher isDarkBackground={!isScrolled && isDarkHeroPage} />
-            <Link to="/#contact">
-              <Button 
-                variant={!isScrolled && isDarkHeroPage ? "outline" : "luxury"} 
-                size="sm" 
-                className={cn(
-                  "px-6 transition-all duration-300",
-                  !isScrolled && isDarkHeroPage && "border-white/50 text-white hover:bg-white/10"
-                )}
-              >
-                {t("buttons.contactUs")}
-              </Button>
-            </Link>
+            <Button
+              variant={!isScrolled && isDarkHeroPage ? "outline" : "luxury"}
+              size="sm"
+              className={cn(
+                "px-6 transition-all duration-300",
+                !isScrolled && isDarkHeroPage && "border-white/50 text-white hover:bg-white/10"
+              )}
+              onClick={(e) => {
+                e.preventDefault();
+                if (location.pathname === "/") {
+                  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+                } else {
+                  navigate("/#contact");
+                }
+              }}
+            >
+              {t("buttons.contactUs")}
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
