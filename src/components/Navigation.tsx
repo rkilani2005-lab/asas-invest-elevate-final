@@ -130,8 +130,8 @@ const Navigation = () => {
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
                 className={cn(
                   "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col",
-                  // Drawer always opens from the inline-end side (right in LTR, left in RTL)
-                  "end-0"
+                  // In RTL, anchor to the left so the drawer slides in from the left (inline-end)
+                  isRTL ? "left-0" : "right-0"
                 )}
               >
                 <div className="flex items-center justify-between h-20 px-6 border-b border-border">
