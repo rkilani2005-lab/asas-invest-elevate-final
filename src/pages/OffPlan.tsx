@@ -111,17 +111,21 @@ const OffPlan = () => {
 
   return (<>
       <SEOHead
-        title="Off-Plan Properties in Dubai | Asas Invest"
-        description="Explore exclusive off-plan developments in Dubai from top developers. Early-bird pricing, flexible payment plans, high ROI potential."
+        title={t("seo.offPlan.title")}
+        description={t("seo.offPlan.description")}
         canonical="https://asasinvest.com/off-plan"
         jsonLd={[
-          breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Off-Plan"}]),
+          breadcrumbJsonLd([
+            { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+            { name: t("seo.breadcrumb.offPlan") },
+          ]),
           collectionPageJsonLd({
-            name: "Off-Plan Properties in Dubai",
-            description: "Explore exclusive off-plan developments in Dubai from top developers",
+            name: t("seo.offPlan.collectionName"),
+            description: t("seo.offPlan.collectionDesc"),
             url: "https://asasinvest.com/off-plan",
+            inLanguage: language,
             properties: (properties || []).slice(0, 10).map((p: any) => ({
-              name: p.name_en || "",
+              name: (language === "ar" ? p.name_ar : p.name_en) || p.name_en || "",
               slug: p.slug || "",
               image: p.media?.find((m: any) => m.type === "hero" || m.type === "render")?.url,
               price: p.price_range || undefined,
