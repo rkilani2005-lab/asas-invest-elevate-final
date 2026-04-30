@@ -117,6 +117,69 @@ const Navigation = () => {
     };
   }, [isMobileMenuOpen]);
 
+  // Edge-swipe-to-open: detect a touch that starts within ~24px of the inline-end
+  // edge of the viewport and travels inward beyond a threshold. Mirrors automatically
+  // for RTL: in LTR start near the right edge and swipe left; in RTL start near the
+  // left edge and swipe right.
+  useEffect(() => {
+    if (isMobileMenuOpen) return;
+    if (typeof window === "undefined") return;
+
+    const EDGE_ZONE = 24; // px from the inline-end edge where a swipe may begin
+    const OPEN_DISTANCE = 60; // inward travel required to open
+    const MAX_VERTICAL_DRIFT = 40; // ignore mostly-vertical swipes
+
+    let startX: number | null = null;
+    let startY: number | null = null;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      // Only trigger on mobile viewports where the drawer is reachable
+      if (window.innerWidth >= 1024) return;
+      const touch = e.touches[0];
+      if (!touch) return;
+      const fromInlineEnd = isRTL
+        ? touch.clientX <= EDGE_ZONE
+        : touch.clientX >= window.innerWidth - EDGE_ZONE;
+      if (!fromInlineEnd) return;
+      startX = touch.clientX;
+      startY = touch.clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (startX === null || startY === null) return;
+      const touch = e.touches[0];
+      if (!touch) return;
+      const dx = touch.clientX - startX;
+      const dy = Math.abs(touch.clientY - startY);
+      if (dy > MAX_VERTICAL_DRIFT) {
+        startX = startY = null;
+        return;
+      }
+      // Inward = away from the inline-end edge
+      const inwardTravel = isRTL ? dx : -dx;
+      if (inwardTravel >= OPEN_DISTANCE) {
+        setIsMobileMenuOpen(true);
+        startX = startY = null;
+      }
+    };
+
+    const reset = () => {
+      startX = startY = null;
+    };
+
+    document.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("touchend", reset, { passive: true });
+    document.addEventListener("touchcancel", reset, { passive: true });
+
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", reset);
+      document.removeEventListener("touchcancel", reset);
+    };
+  }, [isMobileMenuOpen, isRTL]);
+
   return (
     <nav
       className={cn(
