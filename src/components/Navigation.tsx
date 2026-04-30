@@ -117,15 +117,15 @@ const Navigation = () => {
     };
   }, [isMobileMenuOpen]);
 
-  // Edge-swipe-to-open: detect a touch that starts within ~24px of the inline-end
+  // Edge-swipe-to-open: detect a touch that starts within ~24px of the inline-start
   // edge of the viewport and travels inward beyond a threshold. Mirrors automatically
-  // for RTL: in LTR start near the right edge and swipe left; in RTL start near the
-  // left edge and swipe right.
+  // for RTL: in LTR start near the LEFT edge and swipe right; in RTL start near the
+  // RIGHT edge and swipe left. Matches the drawer's open animation direction.
   useEffect(() => {
     if (isMobileMenuOpen) return;
     if (typeof window === "undefined") return;
 
-    const EDGE_ZONE = 24; // px from the inline-end edge where a swipe may begin
+    const EDGE_ZONE = 24; // px from the inline-start edge where a swipe may begin
     const OPEN_DISTANCE = 60; // inward travel required to open
     const MAX_VERTICAL_DRIFT = 40; // ignore mostly-vertical swipes
 
@@ -137,10 +137,10 @@ const Navigation = () => {
       if (window.innerWidth >= 1024) return;
       const touch = e.touches[0];
       if (!touch) return;
-      const fromInlineEnd = isRTL
-        ? touch.clientX <= EDGE_ZONE
-        : touch.clientX >= window.innerWidth - EDGE_ZONE;
-      if (!fromInlineEnd) return;
+      const fromInlineStart = isRTL
+        ? touch.clientX >= window.innerWidth - EDGE_ZONE
+        : touch.clientX <= EDGE_ZONE;
+      if (!fromInlineStart) return;
       startX = touch.clientX;
       startY = touch.clientY;
     };
@@ -155,8 +155,8 @@ const Navigation = () => {
         startX = startY = null;
         return;
       }
-      // Inward = away from the inline-end edge
-      const inwardTravel = isRTL ? dx : -dx;
+      // Inward = away from the inline-start edge (rightward in LTR, leftward in RTL)
+      const inwardTravel = isRTL ? -dx : dx;
       if (inwardTravel >= OPEN_DISTANCE) {
         setIsMobileMenuOpen(true);
         startX = startY = null;
@@ -266,35 +266,36 @@ const Navigation = () => {
                 aria-modal="true"
                 aria-label={t("navigation.mobileMenuLabel", "Site navigation")}
                 id="mobile-navigation-drawer"
-                initial={{ x: isRTL ? "-100%" : "100%" }}
+                // English (LTR): slide in from the LEFT edge → start off-screen at -100%.
+                // Arabic  (RTL): slide in from the RIGHT edge → start off-screen at +100%.
+                initial={{ x: isRTL ? "100%" : "-100%" }}
                 animate={{ x: 0 }}
-                exit={{ x: isRTL ? "-100%" : "100%" }}
+                exit={{ x: isRTL ? "100%" : "-100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
                 drag="x"
                 dragDirectionLock
-                // In LTR the drawer sits on the right, so it can only be dragged rightward (positive x) to close.
-                // In RTL it sits on the left, so it can only be dragged leftward (negative x) to close.
-                dragConstraints={isRTL ? { left: -300, right: 0 } : { left: 0, right: 300 }}
-                dragElastic={{ left: isRTL ? 1 : 0, right: isRTL ? 0 : 1 }}
+                // Drawer anchors on the inline-start side. Closing means dragging back
+                // toward that edge: leftward in LTR (negative x), rightward in RTL (positive x).
+                dragConstraints={isRTL ? { left: 0, right: 300 } : { left: -300, right: 0 }}
+                dragElastic={{ left: isRTL ? 0 : 1, right: isRTL ? 1 : 0 }}
                 dragMomentum={false}
                 onDragEnd={(_, info) => {
                   const closeThresholdPx = 80;
                   const closeVelocity = 400;
-                  // Closing direction is toward the inline-end edge of the viewport.
                   const closedByDistance = isRTL
-                    ? info.offset.x < -closeThresholdPx
-                    : info.offset.x > closeThresholdPx;
+                    ? info.offset.x > closeThresholdPx
+                    : info.offset.x < -closeThresholdPx;
                   const closedByVelocity = isRTL
-                    ? info.velocity.x < -closeVelocity
-                    : info.velocity.x > closeVelocity;
+                    ? info.velocity.x > closeVelocity
+                    : info.velocity.x < -closeVelocity;
                   if (closedByDistance || closedByVelocity) {
                     setIsMobileMenuOpen(false);
                   }
                 }}
                 className={cn(
                   "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y",
-                  // In RTL, anchor to the left so the drawer slides in from the left (inline-end)
-                  isRTL ? "left-0" : "right-0"
+                  // Anchor to the inline-start edge: left in LTR, right in RTL.
+                  isRTL ? "right-0" : "left-0"
                 )}
               >
                 <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
