@@ -64,6 +64,11 @@
       "item3": "Trusted by 1K+ GCC investors"
     }
   },
+  "editorial": {
+    "stat1": "Property Tax",
+    "stat2": "Avg. Rental Yield",
+    "stat3": "Safe City Index"
+  },
   "trust": {
     "subtitle": "Trust & Credentials",
     "title": "Built on Regulation, Reputation & Results",
