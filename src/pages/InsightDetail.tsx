@@ -106,23 +106,31 @@ const InsightDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title={`${insight.title_en} | Asas Invest`}
-        description={insight.meta_description_en || insight.excerpt_en || `${insight.title_en} — Dubai real estate insights from Asas Invest`}
+        title={(language === "ar" && insight.title_ar) ? insight.title_ar : insight.title_en}
+        description={
+          (language === "ar"
+            ? insight.meta_description_ar || insight.excerpt_ar
+            : insight.meta_description_en || insight.excerpt_en) ||
+          t("seo.insightDetail.descFallback", {
+            title: (language === "ar" && insight.title_ar) ? insight.title_ar : insight.title_en,
+          })
+        }
         canonical={`https://asasinvest.com/insights/${slug}`}
         ogImage={insight.featured_image || undefined}
         ogType="article"
         jsonLd={[
           articleJsonLd({
-            title: insight.title_en,
+            title: (language === "ar" && insight.title_ar) ? insight.title_ar : insight.title_en,
             slug: slug || "",
-            excerpt: insight.excerpt_en || "",
+            excerpt: (language === "ar" ? insight.excerpt_ar : insight.excerpt_en) || "",
             datePublished: insight.published_at || insight.created_at || "",
             image: insight.featured_image || undefined,
+            inLanguage: language,
           }),
           breadcrumbJsonLd([
-            { name: "Home", url: "https://asasinvest.com" },
-            { name: "Insights", url: "https://asasinvest.com/insights" },
-            { name: insight.title_en },
+            { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+            { name: t("seo.breadcrumb.insights"), url: "https://asasinvest.com/insights" },
+            { name: (language === "ar" && insight.title_ar) ? insight.title_ar : insight.title_en },
           ]),
         ]}
       />

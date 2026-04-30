@@ -143,43 +143,56 @@ const PropertyDetail = () => {
 
   const name = language === "ar" && property.name_ar ? property.name_ar : property.name_en;
   const tagline = language === "ar" && property.tagline_ar ? property.tagline_ar : property.tagline_en;
+  const isAr = language === "ar";
 
-  // SEO data
+  // SEO data — pick localized fields when available, fall back to English
   const heroImage = property.media?.find((m) => m.type === "hero" || m.type === "render")?.url;
   const allImages = property.media?.filter((m) => m.type === "hero" || m.type === "render" || m.type === "interior").map((m) => m.url).filter(Boolean) || [];
-  const seoDescription = (property.overview_en || property.tagline_en || `${property.name_en} - ${property.type === "ready" ? "Ready" : "Off-Plan"} property in ${property.location_en || "Dubai"}`)
-    .replace(/<[^>]*>/g, "").slice(0, 155);
-  const amenityNames = property.amenities?.map((a) => a.name_en).filter(Boolean) || [];
+  const seoName = name || property.name_en || "";
+  const seoLocation = (isAr ? property.location_ar : property.location_en) || property.location_en || "";
+  const seoOverview = (isAr ? property.overview_ar : property.overview_en) || property.overview_en;
+  const seoTagline = tagline || property.tagline_en;
+  const rawSeoDesc =
+    seoOverview ||
+    seoTagline ||
+    t("seo.propertyDetail.descFallback", { name: seoName });
+  const seoDescription = String(rawSeoDesc).replace(/<[^>]*>/g, "").slice(0, 155);
+  const seoDeveloper = (isAr ? property.developer_ar : property.developer_en) || property.developer_en;
+  const amenityNames = property.amenities?.map((a) => (isAr ? a.name_ar : a.name_en) || a.name_en).filter(Boolean) || [];
   const unitTypes = property.unit_types && Array.isArray(property.unit_types) ? property.unit_types : [];
+  const breadcrumbCategory = property.type === "ready"
+    ? t("seo.breadcrumb.ready")
+    : t("seo.breadcrumb.offPlan");
 
   return (
     <div className="min-h-screen bg-background grain-overlay">
       <SEOHead
-        title={`${property.name_en}${property.location_en ? ` | ${property.location_en}` : ""} | Asas Invest`}
+        title={`${seoName}${seoLocation ? ` | ${seoLocation}` : ""}`}
         description={seoDescription}
         canonical={`https://asasinvest.com/property/${slug}`}
         ogImage={heroImage}
         ogType="product"
         jsonLd={[
           propertyDetailJsonLd({
-            name: property.name_en || "",
+            name: seoName,
             slug: slug || "",
             description: seoDescription,
             image: heroImage,
             images: allImages as string[],
             priceRange: property.price_range || undefined,
-            location: property.location_en || undefined,
+            location: seoLocation || undefined,
             type: property.type || undefined,
-            developer: property.developer_en || undefined,
+            developer: seoDeveloper || undefined,
             handoverDate: property.handover_date || undefined,
             amenities: amenityNames as string[],
             unitTypes: unitTypes as string[],
             sizeRange: property.size_range || undefined,
+            inLanguage: language,
           }),
           breadcrumbJsonLd([
-            { name: "Home", url: "https://asasinvest.com" },
-            { name: property.type === "ready" ? "Ready Properties" : "Off-Plan", url: `https://asasinvest.com/${property.type === "ready" ? "ready" : "off-plan"}` },
-            { name: property.name_en || "" },
+            { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+            { name: breadcrumbCategory, url: `https://asasinvest.com/${property.type === "ready" ? "ready" : "off-plan"}` },
+            { name: seoName },
           ]),
         ]}
       />
