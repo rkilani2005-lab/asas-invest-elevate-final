@@ -52,13 +52,20 @@ const PropertyFilters = ({
 
   const hasActiveFilters = Object.values(filters).some(v => v !== "");
 
-  const bedroomOptions = ["Studio", "1", "2", "3", "4", "5+"];
+  const bedroomOptions: { value: string; label: string }[] = [
+    { value: "Studio", label: t("filters.studio") },
+    { value: "1", label: `1 ${t("property.beds")}` },
+    { value: "2", label: `2 ${t("property.beds")}` },
+    { value: "3", label: `3 ${t("property.beds")}` },
+    { value: "4", label: `4 ${t("property.beds")}` },
+    { value: "5+", label: `5+ ${t("property.beds")}` },
+  ];
   const priceRanges = [
-    { value: "0-1000000", label: "Under AED 1M" },
-    { value: "1000000-2000000", label: "AED 1M - 2M" },
-    { value: "2000000-5000000", label: "AED 2M - 5M" },
-    { value: "5000000-10000000", label: "AED 5M - 10M" },
-    { value: "10000000+", label: "Above AED 10M" },
+    { value: "0-1000000", label: t("filters.priceUnder1M") },
+    { value: "1000000-2000000", label: t("filters.price1to2M") },
+    { value: "2000000-5000000", label: t("filters.price2to5M") },
+    { value: "5000000-10000000", label: t("filters.price5to10M") },
+    { value: "10000000+", label: t("filters.priceAbove10M") },
   ];
 
   return (
@@ -152,8 +159,8 @@ const PropertyFilters = ({
           <SelectContent className="bg-white border-accent/30">
             <SelectItem value="all">{t("filters.allBedrooms")}</SelectItem>
             {bedroomOptions.map((bed) => (
-              <SelectItem key={bed} value={bed}>
-                {bed} {bed !== "Studio" && t("property.beds")}
+              <SelectItem key={bed.value} value={bed.value}>
+                {bed.label}
               </SelectItem>
             ))}
           </SelectContent>
