@@ -77,8 +77,10 @@ const EditorialBand = () => {
             letterSpacing: "-0.01em",
           }}
         >
-          "The world's smartest{" "}
-          <span style={{ color: "#C5A059" }}>tax-free</span> real estate market."
+          <Trans
+            i18nKey="editorial.quote"
+            components={{ 1: <span style={{ color: "#C5A059" }} /> }}
+          />
         </motion.p>
 
         {/* Inline stat chips */}
