@@ -1,4 +1,10 @@
 {
+  "navigation": {
+    "mobileMenuLabel": "Site navigation",
+    "primaryMenuLabel": "Primary",
+    "expandSubmenu": "Expand {{label}} submenu",
+    "collapseSubmenu": "Collapse {{label}} submenu"
+  },
   "nav": {
     "home": "Home",
     "offPlan": "Off-Plan",
