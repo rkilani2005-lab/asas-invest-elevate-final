@@ -140,7 +140,7 @@ const InsightsPage = () => {
                   )}
                 >
                   <category.icon className="h-4 w-4 me-2" />
-                  {category.name === "All" ? t("insights.all") : (category.label || category.name)}
+                  {category.name === "All" ? t("insights.all") : getCategoryLabel(category.name)}
                 </button>
               ))}
             </div>
