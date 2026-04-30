@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -18,12 +19,15 @@ interface PropertyWizardProps {
   propertyId?: string;
 }
 
-const steps = [
-  { id: 1, title: "General Info", description: "Basic property details" },
-  { id: 2, title: "Media", description: "Images and video" },
-  { id: 3, title: "Details", description: "Amenities and location" },
-  { id: 4, title: "Financials", description: "Payment and status" },
-];
+const useSteps = () => {
+  const { t } = useTranslation();
+  return [
+    { id: 1, title: t("admin.wizard.stepGeneral"), description: t("admin.wizard.stepGeneralDesc") },
+    { id: 2, title: t("admin.wizard.stepMedia"), description: t("admin.wizard.stepMediaDesc") },
+    { id: 3, title: t("admin.wizard.stepDetails"), description: t("admin.wizard.stepDetailsDesc") },
+    { id: 4, title: t("admin.wizard.stepFinancials"), description: t("admin.wizard.stepFinancialsDesc") },
+  ];
+};
 
 export default function PropertyWizard({
   data,
