@@ -6,6 +6,7 @@ import apartmentImage from "@/assets/property-apartment.jpg";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 interface PropertyCardProps {
   property: {
@@ -109,6 +110,7 @@ const PropertyCard = ({ property, index }: PropertyCardProps) => {
 };
 
 const Properties = () => {
+  const { t } = useTranslation();
   const properties = [
     {
       image: marinaImage,
@@ -168,7 +170,7 @@ const Properties = () => {
         {/* View All CTA */}
         <ScrollReveal delay={0.3} className="text-center mt-12">
           <Button variant="outline" size="lg" className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 text-sm font-medium tracking-wide">
-            View All Properties
+            {t("buttons.viewAll")}
             <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
           </Button>
         </ScrollReveal>
