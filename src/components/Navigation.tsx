@@ -117,6 +117,69 @@ const Navigation = () => {
     };
   }, [isMobileMenuOpen]);
 
+  // Edge-swipe-to-open: detect a touch that starts within ~24px of the inline-end
+  // edge of the viewport and travels inward beyond a threshold. Mirrors automatically
+  // for RTL: in LTR start near the right edge and swipe left; in RTL start near the
+  // left edge and swipe right.
+  useEffect(() => {
+    if (isMobileMenuOpen) return;
+    if (typeof window === "undefined") return;
+
+    const EDGE_ZONE = 24; // px from the inline-end edge where a swipe may begin
+    const OPEN_DISTANCE = 60; // inward travel required to open
+    const MAX_VERTICAL_DRIFT = 40; // ignore mostly-vertical swipes
+
+    let startX: number | null = null;
+    let startY: number | null = null;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      // Only trigger on mobile viewports where the drawer is reachable
+      if (window.innerWidth >= 1024) return;
+      const touch = e.touches[0];
+      if (!touch) return;
+      const fromInlineEnd = isRTL
+        ? touch.clientX <= EDGE_ZONE
+        : touch.clientX >= window.innerWidth - EDGE_ZONE;
+      if (!fromInlineEnd) return;
+      startX = touch.clientX;
+      startY = touch.clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (startX === null || startY === null) return;
+      const touch = e.touches[0];
+      if (!touch) return;
+      const dx = touch.clientX - startX;
+      const dy = Math.abs(touch.clientY - startY);
+      if (dy > MAX_VERTICAL_DRIFT) {
+        startX = startY = null;
+        return;
+      }
+      // Inward = away from the inline-end edge
+      const inwardTravel = isRTL ? dx : -dx;
+      if (inwardTravel >= OPEN_DISTANCE) {
+        setIsMobileMenuOpen(true);
+        startX = startY = null;
+      }
+    };
+
+    const reset = () => {
+      startX = startY = null;
+    };
+
+    document.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("touchend", reset, { passive: true });
+    document.addEventListener("touchcancel", reset, { passive: true });
+
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", reset);
+      document.removeEventListener("touchcancel", reset);
+    };
+  }, [isMobileMenuOpen, isRTL]);
+
   return (
     <nav
       className={cn(
@@ -204,8 +267,29 @@ const Navigation = () => {
                 animate={{ x: 0 }}
                 exit={{ x: isRTL ? "-100%" : "100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                drag="x"
+                dragDirectionLock
+                // In LTR the drawer sits on the right, so it can only be dragged rightward (positive x) to close.
+                // In RTL it sits on the left, so it can only be dragged leftward (negative x) to close.
+                dragConstraints={isRTL ? { left: -300, right: 0 } : { left: 0, right: 300 }}
+                dragElastic={{ left: isRTL ? 1 : 0, right: isRTL ? 0 : 1 }}
+                dragMomentum={false}
+                onDragEnd={(_, info) => {
+                  const closeThresholdPx = 80;
+                  const closeVelocity = 400;
+                  // Closing direction is toward the inline-end edge of the viewport.
+                  const closedByDistance = isRTL
+                    ? info.offset.x < -closeThresholdPx
+                    : info.offset.x > closeThresholdPx;
+                  const closedByVelocity = isRTL
+                    ? info.velocity.x < -closeVelocity
+                    : info.velocity.x > closeVelocity;
+                  if (closedByDistance || closedByVelocity) {
+                    setIsMobileMenuOpen(false);
+                  }
+                }}
                 className={cn(
-                  "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col",
+                  "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y",
                   // In RTL, anchor to the left so the drawer slides in from the left (inline-end)
                   isRTL ? "left-0" : "right-0"
                 )}
