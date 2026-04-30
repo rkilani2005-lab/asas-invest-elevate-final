@@ -28,7 +28,7 @@ const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
       transition={{ delay: 1, type: 'spring', stiffness: 260, damping: 20 }}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
-      aria-label="Chat on WhatsApp"
+      aria-label={t('aria.whatsapp')}
     >
       <MessageCircle className="w-6 h-6" fill="currentColor" />
     </motion.a>
