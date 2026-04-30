@@ -272,6 +272,7 @@ const Navigation = () => {
                 aria-modal="true"
                 aria-label={t("navigation.mobileMenuLabel", "Site navigation")}
                 id="mobile-navigation-drawer"
+                dir={isRTL ? "rtl" : "ltr"}
                 // English (LTR): slide in from the LEFT edge → start off-screen at -100%.
                 // Arabic  (RTL): slide in from the RIGHT edge → start off-screen at +100%.
                 initial={{ x: isRTL ? "100%" : "-100%" }}
@@ -280,9 +281,8 @@ const Navigation = () => {
                 transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.35 }}
                 drag="x"
                 dragDirectionLock
-                // Drawer anchors on the inline-start side. Closing means dragging back
-                // toward that edge: leftward in LTR (negative x), rightward in RTL (positive x).
-                dragConstraints={isRTL ? { left: 0, right: 0 } : { left: 0, right: 0 }}
+                // Allow dragging only toward the anchored edge to close.
+                dragConstraints={isRTL ? { left: 0, right: 300 } : { left: -300, right: 0 }}
                 dragElastic={0.15}
                 dragMomentum={false}
                 onDragEnd={(_, info) => {
@@ -298,11 +298,13 @@ const Navigation = () => {
                     setIsMobileMenuOpen(false);
                   }
                 }}
-                className={cn(
-                  "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y",
-                  // Anchor to the inline-start edge: left in LTR, right in RTL.
-                  isRTL ? "right-0" : "left-0"
-                )}
+                style={{
+                  // Pin to a physical edge regardless of any ancestor `dir` inheritance:
+                  // Arabic anchors to the visual RIGHT, English to the visual LEFT.
+                  [isRTL ? "right" : "left"]: 0,
+                  [isRTL ? "left" : "right"]: "auto",
+                }}
+                className="fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y"
               >
                 <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
                   <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
