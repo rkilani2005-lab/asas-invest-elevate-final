@@ -613,5 +613,70 @@
         "a": "Total buying costs are approximately 7-8% on top of the property price. This includes 4% DLD registration fee, 2% agency commission, AED 580 DLD admin fee, AED 4,200 title deed issuance fee, and conveyancing costs. There is no stamp duty, VAT on resale properties, or annual property tax."
       }
     ]
+  },
+  "admin": {
+    "brand": "Asas CMS",
+    "brandSubtitle": "Content Management",
+    "viewSite": "View Site",
+    "signOut": "Sign Out",
+    "accessDenied": "Access Denied",
+    "accessDeniedMessage": "You don't have permission to access the admin area.",
+    "returnHome": "Return to homepage",
+    "nav": {
+      "dashboard": "Dashboard",
+      "properties": "Properties",
+      "autoImport": "Auto Import",
+      "approvals": "Approvals",
+      "gallery": "Gallery",
+      "amenities": "Amenity Library",
+      "communications": "Communications",
+      "email": "Email",
+      "insights": "Insights",
+      "homePage": "Home Page",
+      "aboutPage": "About Page",
+      "translations": "Translations",
+      "settings": "Settings"
+    },
+    "login": {
+      "title": "Admin Login",
+      "description": "Sign in to access the CMS dashboard",
+      "email": "Email",
+      "password": "Password",
+      "emailPlaceholder": "admin@example.com",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "missingCredentials": "Please enter email and password",
+      "welcome": "Welcome back!"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Overview of your site content and activity",
+      "totalProperties": "Total Properties",
+      "totalPropertiesDesc": "{{offPlan}} off-plan, {{ready}} ready",
+      "newInquiries": "New Inquiries",
+      "newInquiriesDesc": "{{total}} total inquiries",
+      "translations": "Translations",
+      "translationsDesc": "UI text entries",
+      "quickActions": "Quick Actions",
+      "manageProperties": "Manage Properties",
+      "viewInquiries": "View Inquiries",
+      "editTranslations": "Edit Translations",
+      "previewSite": "Preview Site"
+    },
+    "wizard": {
+      "stepGeneral": "General Info",
+      "stepGeneralDesc": "Basic property details",
+      "stepMedia": "Media",
+      "stepMediaDesc": "Images and video",
+      "stepDetails": "Details",
+      "stepDetailsDesc": "Amenities and location",
+      "stepFinancials": "Financials",
+      "stepFinancialsDesc": "Payment and status",
+      "previous": "Previous",
+      "next": "Next Step",
+      "saving": "Saving...",
+      "create": "Create Property",
+      "update": "Update Property"
+    }
   }
 }
