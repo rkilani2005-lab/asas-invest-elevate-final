@@ -7,13 +7,15 @@ import WhyAsas from "@/components/WhyAsas";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import SEOHead, { organizationJsonLd, websiteJsonLd } from "@/components/SEOHead";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Asas Invest | Dubai Real Estate Investment & Advisory"
-        description="Strategic property investment, leasing & wealth management in Dubai. Off-plan projects, ready properties, Golden Visa advisory. Building generational wealth through smart real estate."
+        title={t("seo.home.title")}
+        description={t("seo.home.description")}
         canonical="https://asasinvest.com/"
         jsonLd={[organizationJsonLd, websiteJsonLd]}
       />

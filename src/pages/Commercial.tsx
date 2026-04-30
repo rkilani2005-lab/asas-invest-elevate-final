@@ -47,10 +47,13 @@ const Commercial = () => {
 
   return (<>
       <SEOHead
-        title="Commercial Real Estate Dubai | Asas Invest"
-        description="Offices, retail spaces and warehouses for sale and lease in Dubai business districts. RERA licensed, expert commercial advisory."
+        title={t("seo.commercial.title")}
+        description={t("seo.commercial.description")}
         canonical="https://asasinvest.com/commercial"
-        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Commercial"}])}
+        jsonLd={breadcrumbJsonLd([
+          { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+          { name: t("seo.breadcrumb.commercial") },
+        ])}
       />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />

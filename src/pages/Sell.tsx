@@ -48,10 +48,13 @@ const Sell = () => {
 
   return (<>
       <SEOHead
-        title="Sell Your Dubai Property | Asas Invest"
-        description="List your property with Dubai trusted advisors. Free valuation, global buyer network, professional marketing."
+        title={t("seo.sell.title")}
+        description={t("seo.sell.description")}
         canonical="https://asasinvest.com/sell"
-        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Sell"}])}
+        jsonLd={breadcrumbJsonLd([
+          { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+          { name: t("seo.breadcrumb.sell") },
+        ])}
       />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
