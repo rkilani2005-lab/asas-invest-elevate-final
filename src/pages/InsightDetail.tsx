@@ -261,8 +261,8 @@ const InsightDetail = () => {
         <div className="container mx-auto px-4 lg:px-8 max-w-4xl text-center">
           <Link to="/insights">
             <Button variant="outline" size="lg">
-              <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
-              {isRTL ? "عرض جميع المقالات" : "View All Articles"}
+              <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
+              {t("insights.viewAll")}
             </Button>
           </Link>
         </div>
