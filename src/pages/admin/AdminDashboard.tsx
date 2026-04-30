@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Users, Languages, FileText } from "lucide-react";
@@ -13,6 +14,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats>({
     totalProperties: 0,
     offPlanProperties: 0,
@@ -62,21 +64,24 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      title: "Total Properties",
+      title: t("admin.dashboard.totalProperties"),
       value: stats.totalProperties,
-      description: `${stats.offPlanProperties} off-plan, ${stats.readyProperties} ready`,
+      description: t("admin.dashboard.totalPropertiesDesc", {
+        offPlan: stats.offPlanProperties,
+        ready: stats.readyProperties,
+      }),
       icon: Building2,
     },
     {
-      title: "New Inquiries",
+      title: t("admin.dashboard.newInquiries"),
       value: stats.newInquiries,
-      description: `${stats.totalInquiries} total inquiries`,
+      description: t("admin.dashboard.newInquiriesDesc", { total: stats.totalInquiries }),
       icon: Users,
     },
     {
-      title: "Translations",
+      title: t("admin.dashboard.translations"),
       value: stats.translations,
-      description: "UI text entries",
+      description: t("admin.dashboard.translationsDesc"),
       icon: Languages,
     },
   ];
@@ -84,9 +89,9 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-semibold">Dashboard</h1>
+        <h1 className="text-3xl font-semibold">{t("admin.dashboard.title")}</h1>
         <p className="text-muted-foreground mt-1">
-          Overview of your site content and activity
+          {t("admin.dashboard.subtitle")}
         </p>
       </div>
 
@@ -115,7 +120,7 @@ export default function AdminDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Quick Actions
+            {t("admin.dashboard.quickActions")}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -124,21 +129,21 @@ export default function AdminDashboard() {
             className="p-4 rounded-lg border border-border hover:bg-muted transition-colors text-center"
           >
             <Building2 className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-            <span className="text-sm font-medium">Manage Properties</span>
+            <span className="text-sm font-medium">{t("admin.dashboard.manageProperties")}</span>
           </a>
           <a
             href="/admin/inquiries"
             className="p-4 rounded-lg border border-border hover:bg-muted transition-colors text-center"
           >
             <Users className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-            <span className="text-sm font-medium">View Inquiries</span>
+            <span className="text-sm font-medium">{t("admin.dashboard.viewInquiries")}</span>
           </a>
           <a
             href="/admin/translations"
             className="p-4 rounded-lg border border-border hover:bg-muted transition-colors text-center"
           >
             <Languages className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-            <span className="text-sm font-medium">Edit Translations</span>
+            <span className="text-sm font-medium">{t("admin.dashboard.editTranslations")}</span>
           </a>
           <a
             href="/"
@@ -147,7 +152,7 @@ export default function AdminDashboard() {
             className="p-4 rounded-lg border border-border hover:bg-muted transition-colors text-center"
           >
             <FileText className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-            <span className="text-sm font-medium">Preview Site</span>
+            <span className="text-sm font-medium">{t("admin.dashboard.previewSite")}</span>
           </a>
         </CardContent>
       </Card>

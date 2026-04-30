@@ -613,5 +613,70 @@
         "a": "تبلغ تكاليف الشراء الإجمالية نحو 7–8٪ فوق سعر العقار، وتشمل: 4٪ رسم تسجيل لدائرة الأراضي، 2٪ عمولة الوكالة، 580 درهماً رسوم إدارية، 4,200 درهم رسم إصدار سند الملكية، إضافة إلى رسوم نقل الملكية. ولا توجد رسوم دمغة أو ضريبة قيمة مضافة على إعادة البيع أو ضريبة عقارية سنوية."
       }
     ]
+  },
+  "admin": {
+    "brand": "نظام أساس",
+    "brandSubtitle": "إدارة المحتوى",
+    "viewSite": "عرض الموقع",
+    "signOut": "تسجيل الخروج",
+    "accessDenied": "الوصول مرفوض",
+    "accessDeniedMessage": "ليست لديك صلاحية الوصول إلى منطقة الإدارة.",
+    "returnHome": "العودة إلى الصفحة الرئيسية",
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "properties": "العقارات",
+      "autoImport": "الاستيراد التلقائي",
+      "approvals": "الموافقات",
+      "gallery": "المعرض",
+      "amenities": "مكتبة المرافق",
+      "communications": "المراسلات",
+      "email": "البريد الإلكتروني",
+      "insights": "المقالات",
+      "homePage": "الصفحة الرئيسية",
+      "aboutPage": "صفحة من نحن",
+      "translations": "الترجمات",
+      "settings": "الإعدادات"
+    },
+    "login": {
+      "title": "تسجيل دخول الإدارة",
+      "description": "سجّل الدخول للوصول إلى لوحة إدارة المحتوى",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "emailPlaceholder": "admin@example.com",
+      "submit": "تسجيل الدخول",
+      "submitting": "جارٍ تسجيل الدخول...",
+      "missingCredentials": "يرجى إدخال البريد الإلكتروني وكلمة المرور",
+      "welcome": "أهلاً بعودتك"
+    },
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "subtitle": "نظرة عامة على محتوى موقعك ونشاطه",
+      "totalProperties": "إجمالي العقارات",
+      "totalPropertiesDesc": "{{offPlan}} على الخارطة، {{ready}} جاهزة",
+      "newInquiries": "استفسارات جديدة",
+      "newInquiriesDesc": "{{total}} إجمالي الاستفسارات",
+      "translations": "الترجمات",
+      "translationsDesc": "نصوص واجهة المستخدم",
+      "quickActions": "إجراءات سريعة",
+      "manageProperties": "إدارة العقارات",
+      "viewInquiries": "عرض الاستفسارات",
+      "editTranslations": "تعديل الترجمات",
+      "previewSite": "معاينة الموقع"
+    },
+    "wizard": {
+      "stepGeneral": "معلومات عامة",
+      "stepGeneralDesc": "تفاصيل العقار الأساسية",
+      "stepMedia": "الوسائط",
+      "stepMediaDesc": "الصور والفيديو",
+      "stepDetails": "التفاصيل",
+      "stepDetailsDesc": "المرافق والموقع",
+      "stepFinancials": "المالية",
+      "stepFinancialsDesc": "الدفع والحالة",
+      "previous": "السابق",
+      "next": "الخطوة التالية",
+      "saving": "جارٍ الحفظ...",
+      "create": "إنشاء عقار",
+      "update": "تحديث العقار"
+    }
   }
 }

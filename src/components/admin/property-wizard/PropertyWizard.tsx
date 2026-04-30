@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -18,12 +19,15 @@ interface PropertyWizardProps {
   propertyId?: string;
 }
 
-const steps = [
-  { id: 1, title: "General Info", description: "Basic property details" },
-  { id: 2, title: "Media", description: "Images and video" },
-  { id: 3, title: "Details", description: "Amenities and location" },
-  { id: 4, title: "Financials", description: "Payment and status" },
-];
+const useSteps = () => {
+  const { t } = useTranslation();
+  return [
+    { id: 1, title: t("admin.wizard.stepGeneral"), description: t("admin.wizard.stepGeneralDesc") },
+    { id: 2, title: t("admin.wizard.stepMedia"), description: t("admin.wizard.stepMediaDesc") },
+    { id: 3, title: t("admin.wizard.stepDetails"), description: t("admin.wizard.stepDetailsDesc") },
+    { id: 4, title: t("admin.wizard.stepFinancials"), description: t("admin.wizard.stepFinancialsDesc") },
+  ];
+};
 
 export default function PropertyWizard({
   data,
@@ -33,6 +37,8 @@ export default function PropertyWizard({
   isEditing,
   propertyId,
 }: PropertyWizardProps) {
+  const { t } = useTranslation();
+  const steps = useSteps();
   const [currentStep, setCurrentStep] = useState(1);
 
   function updateData(updates: Partial<PropertyData>) {
@@ -122,24 +128,24 @@ export default function PropertyWizard({
           onClick={() => goToStep(currentStep - 1)}
           disabled={currentStep === 1}
         >
-          Previous
+          {t("admin.wizard.previous")}
         </Button>
         <div className="flex items-center gap-2">
           {currentStep < 4 ? (
             <Button onClick={() => goToStep(currentStep + 1)}>
-              Next Step
+              {t("admin.wizard.next")}
             </Button>
           ) : (
             <Button onClick={onSave} disabled={isSaving}>
               {isSaving ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                  {t("admin.wizard.saving")}
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {isEditing ? "Update Property" : "Create Property"}
+                  <Save className="me-2 h-4 w-4" />
+                  {isEditing ? t("admin.wizard.update") : t("admin.wizard.create")}
                 </>
               )}
             </Button>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 import { Loader2, Lock } from "lucide-react";
 
 export default function AdminLogin() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,23 +26,23 @@ export default function AdminLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email.trim() || !password.trim()) {
-      toast.error("Please enter email and password");
+      toast.error(t("admin.login.missingCredentials"));
       return;
     }
 
     setIsSubmitting(true);
-    
+
     const { error } = await signIn(email, password);
-    
+
     if (error) {
       toast.error(error.message);
       setIsSubmitting(false);
       return;
     }
 
-    toast.success("Welcome back!");
+    toast.success(t("admin.login.welcome"));
     // Navigation will happen via useEffect when isAdmin becomes true
   };
 
@@ -51,19 +53,19 @@ export default function AdminLogin() {
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
             <Lock className="w-6 h-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <CardTitle className="text-2xl">{t("admin.login.title")}</CardTitle>
           <CardDescription>
-            Sign in to access the CMS dashboard
+            {t("admin.login.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("admin.login.email")}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder={t("admin.login.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isSubmitting}
@@ -71,7 +73,7 @@ export default function AdminLogin() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("admin.login.password")}</Label>
               <Input
                 id="password"
                 type="password"
@@ -85,11 +87,11 @@ export default function AdminLogin() {
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                  {t("admin.login.submitting")}
                 </>
               ) : (
-                "Sign In"
+                t("admin.login.submit")
               )}
             </Button>
           </form>
