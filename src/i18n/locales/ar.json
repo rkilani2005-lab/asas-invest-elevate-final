@@ -263,7 +263,8 @@
     "submit": "إرسال",
     "clearFilters": "إعادة ضبط الفلاتر",
     "openMenu": "فتح القائمة",
-    "closeMenu": "إغلاق القائمة"
+    "closeMenu": "إغلاق القائمة",
+    "viewAll": "عرض الكل"
   },
   "sections": {
     "overview": "نظرة عامة",

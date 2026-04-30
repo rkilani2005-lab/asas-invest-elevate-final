@@ -263,7 +263,8 @@
     "submit": "Submit",
     "clearFilters": "Clear Filters",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "viewAll": "View All"
   },
   "sections": {
     "overview": "Overview",
