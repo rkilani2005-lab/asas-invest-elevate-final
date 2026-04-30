@@ -3,7 +3,7 @@ import Hero from "@/components/Hero";
 import FeaturedProperties from "@/components/FeaturedProperties";
 import EditorialBand from "@/components/EditorialBand";
 import Stats from "@/components/Stats";
-import WhyAsas from "@/components/WhyAsas";
+import TrustCredentials from "@/components/TrustCredentials";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import SEOHead, { organizationJsonLd, websiteJsonLd } from "@/components/SEOHead";
@@ -39,7 +39,7 @@ const Index = () => {
         <FeaturedProperties />
         <EditorialBand />
         <Stats />
-        <WhyAsas />
+        <TrustCredentials />
         <Contact />
       </main>
       <Footer />

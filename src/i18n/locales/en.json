@@ -59,6 +59,31 @@
     "totalSqFt": "Total Sq. Ft",
     "portfolioValue": "Portfolio Value"
   },
+  "trust": {
+    "subtitle": "Trust & Credentials",
+    "title": "Built on Regulation, Reputation & Results",
+    "description": "Asas Invest operates under full UAE regulatory compliance and partners with the region's most established developers. Our credibility is built on transparent practice, recognized expertise, and consistent client outcomes.",
+    "developerPartners": "Developer Partners",
+    "featuredIn": "Featured In",
+    "pillars": {
+      "licensed": {
+        "title": "RERA Licensed",
+        "description": "Fully registered with Dubai Land Department and the Real Estate Regulatory Agency, ensuring every transaction meets UAE legal standards."
+      },
+      "partners": {
+        "title": "Premier Partners",
+        "description": "Authorized channel partner of Dubai's top developers including Emaar, Damac, Meraas, Sobha, Nakheel, and Aldar."
+      },
+      "awards": {
+        "title": "Industry Recognition",
+        "description": "Honored for excellence in luxury sales, off-plan advisory, and high-net-worth client service across the Emirates."
+      },
+      "press": {
+        "title": "Trusted Voice",
+        "description": "Quoted by leading regional and international publications on Dubai real estate market trends and investment strategy."
+      }
+    }
+  },
   "whyAsas": {
     "subtitle": "Why Choose Us",
     "title": "A New Approach to Real Estate Investment",
