@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 const InsightsPage = () => {
-  const { language, isRTL } = useLanguage();
+  const { language, isRTL, t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -99,24 +99,19 @@ const InsightsPage = () => {
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <Link 
             to="/" 
-            className={cn(
-              "inline-flex items-center text-primary-foreground/70 hover:text-primary-foreground mb-6 text-sm transition-colors"
-            )}
+            className="inline-flex items-center text-primary-foreground/70 hover:text-primary-foreground mb-6 text-sm transition-colors"
           >
-            <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
-            {isRTL ? "العودة إلى الرئيسية" : "Back to Home"}
+            <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
+            {t("insights.backHome")}
           </Link>
           <p className="text-eyebrow text-accent mb-4 inline-flex items-center gap-2">
-            <span className="pulse-dot" aria-hidden /> {isRTL ? "رؤى السوق" : "Market Insights"}
+            <span className="pulse-dot" aria-hidden /> {t("insights.heroEyebrow")}
           </p>
           <h1 className={cn("heading-hero text-4xl md:text-6xl mb-6 max-w-3xl text-white", isRTL && "font-arabic")}>
-            {isRTL ? "تحليل الخبراء وذكاء السوق" : (<>Expert Analysis &amp; <span className="accent-underline">Market Intelligence</span></>)}
+            {t("insights.heroTitle")}
           </h1>
           <p className="text-primary-foreground/80 text-lg max-w-2xl leading-relaxed">
-            {isRTL 
-              ? "ابقَ على اطلاع بأحدث أبحاثنا وتقارير السوق ورؤى الاستثمار التي تغطي مشهد العقارات في دبي والإمارات."
-              : "Stay informed with our latest research, market reports, and investment insights covering Dubai and the UAE real estate landscape."
-            }
+            {t("insights.heroDescription")}
           </p>
         </div>
       </section>
@@ -140,21 +135,18 @@ const InsightsPage = () => {
                       : "bg-secondary text-foreground hover:bg-secondary/80"
                   )}
                 >
-                  <category.icon className={cn("h-4 w-4", isRTL ? "ms-2" : "me-2")} />
-                  {category.name === "All" ? (isRTL ? "الكل" : "All") : (category.label || category.name)}
+                  <category.icon className="h-4 w-4 me-2" />
+                  {category.name === "All" ? t("insights.all") : (category.label || category.name)}
                 </button>
               ))}
             </div>
             
             {/* Search */}
             <div className="relative w-full md:w-72">
-              <Search className={cn(
-                "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground",
-                isRTL ? "end-3" : "start-3"
-              )} />
+              <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground start-3" />
               <Input 
-                placeholder={isRTL ? "البحث في المقالات..." : "Search articles..."} 
-                className={cn("bg-secondary border-0", isRTL ? "pe-10 text-end" : "ps-10")}
+                placeholder={t("insights.searchPlaceholder")} 
+                className="bg-secondary border-0 ps-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -168,34 +160,32 @@ const InsightsPage = () => {
         <section className="py-12 bg-background">
           <div className="container mx-auto px-4 lg:px-8">
             <ScrollReveal direction="up" className="bg-secondary/50 rounded-2xl p-8 md:p-12 hover:bg-secondary/70 transition-colors duration-300 cursor-pointer group">
-              <div className={cn("flex flex-col lg:flex-row gap-8")}>
+              <div className="flex flex-col lg:flex-row gap-8">
                 <div className="lg:w-2/3">
                   <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
-                    {isRTL ? "مميز" : "Featured"} • {getCategoryLabel(featuredArticle.category)}
+                    {t("insights.featured")} • {getCategoryLabel(featuredArticle.category)}
                   </div>
                   <h2 className={cn(
                     "heading-section text-2xl md:text-4xl text-foreground mb-4 group-hover:text-accent transition-colors",
-                    isRTL && "font-arabic text-end"
+                    isRTL && "font-arabic"
                   )}>
                     {getLocalizedContent(featuredArticle).title}
                   </h2>
-                  <p className={cn("text-muted-foreground leading-relaxed mb-6", isRTL && "text-end")}>
+                  <p className="text-muted-foreground leading-relaxed mb-6">
                     {getLocalizedContent(featuredArticle).excerpt}
                   </p>
-                  <div className={cn(
-                    "flex flex-wrap items-center gap-4 text-sm text-muted-foreground"
-                  )}>
-                    <div className={cn("flex items-center")}>
-                      <Calendar className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 me-1.5" />
                       {featuredArticle.published_at && format(new Date(featuredArticle.published_at), 'MMMM d, yyyy')}
                     </div>
-                    <div className={cn("flex items-center")}>
-                      <Clock className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
-                      {featuredArticle.read_time_minutes} {isRTL ? "دقائق للقراءة" : "min read"}
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 me-1.5" />
+                      {featuredArticle.read_time_minutes} {t("insights.minRead")}
                     </div>
                     {getLocalizedContent(featuredArticle).author && (
                       <span className="text-foreground/60">
-                        {isRTL ? "بقلم" : "By"} {getLocalizedContent(featuredArticle).author}
+                        {t("insights.by")} {getLocalizedContent(featuredArticle).author}
                       </span>
                     )}
                   </div>
@@ -203,8 +193,8 @@ const InsightsPage = () => {
                 <div className="lg:w-1/3 flex items-center justify-center lg:justify-end">
                   <Link to={`/insights/${featuredArticle.slug}`}>
                     <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                      {isRTL ? "اقرأ المقال كاملاً" : "Read Full Article"}
-                      <ArrowRight className={cn("h-4 w-4", isRTL ? "me-2 rotate-180" : "ms-2")} />
+                      {t("insights.readFullArticle")}
+                      <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />
                     </Button>
                   </Link>
                 </div>
@@ -217,15 +207,15 @@ const InsightsPage = () => {
       {/* Articles Grid */}
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className={cn("flex items-center justify-between mb-8")}>
+          <div className="flex items-center justify-between mb-8">
             <h2 className={cn("heading-section text-2xl md:text-3xl text-foreground", isRTL && "font-arabic")}>
               {activeCategory === "All" 
-                ? (isRTL ? "أحدث المقالات" : "Latest Articles")
+                ? t("insights.latestArticles")
                 : getCategoryLabel(activeCategory)
               }
             </h2>
             <span className="text-muted-foreground text-sm">
-              {filteredArticles.length} {isRTL ? "مقال" : `article${filteredArticles.length !== 1 ? "s" : ""}`}
+              {t("insights.articleCount", { count: filteredArticles.length })}
             </span>
           </div>
 
@@ -248,10 +238,7 @@ const InsightsPage = () => {
                 return (
                   <StaggerItem key={article.id}>
                     <Link to={`/insights/${article.slug}`}>
-                      <article className={cn(
-                        "card-luxury p-6 cursor-pointer h-full",
-                        isRTL && "text-end"
-                      )}>
+                      <article className="card-luxury p-6 cursor-pointer h-full">
                         <div className="inline-flex items-center rounded-full px-3 py-1 bg-accent/10 text-accent text-xs font-medium mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                           {getCategoryLabel(article.category)}
                         </div>
@@ -264,16 +251,14 @@ const InsightsPage = () => {
                         <p className="text-muted-foreground text-sm mb-4 leading-relaxed line-clamp-3">
                           {content.excerpt}
                         </p>
-                        <div className={cn(
-                          "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border"
-                        )}>
-                          <div className={cn("flex items-center")}>
-                            <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ms-1.5" : "me-1.5")} />
+                        <div className="flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border">
+                          <div className="flex items-center">
+                            <Calendar className="h-3.5 w-3.5 me-1.5" />
                             <span>
                               {article.published_at && format(new Date(article.published_at), 'MMM d, yyyy')}
                             </span>
                           </div>
-                          <span>{article.read_time_minutes} {isRTL ? "د" : "min"}</span>
+                          <span>{article.read_time_minutes} {t("insights.minShort")}</span>
                         </div>
                       </article>
                     </Link>
@@ -286,7 +271,7 @@ const InsightsPage = () => {
           {!isLoading && filteredArticles.length === 0 && (
             <div className="text-center py-16">
               <p className="text-muted-foreground">
-                {isRTL ? "لا توجد مقالات في هذه الفئة." : "No articles found in this category."}
+                {t("insights.noArticles")}
               </p>
             </div>
           )}
