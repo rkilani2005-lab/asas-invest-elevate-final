@@ -144,7 +144,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="heading-hero mb-6 max-w-4xl mx-auto text-white"
+          className="heading-hero mb-6 max-w-4xl mx-auto text-white text-5xl font-bold"
           style={{
             fontSize: 'clamp(2.5rem, 6vw, 5rem)',
           }}
