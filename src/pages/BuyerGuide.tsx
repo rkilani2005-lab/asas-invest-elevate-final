@@ -1,4 +1,5 @@
 import SEOHead, { breadcrumbJsonLd, faqJsonLd } from "@/components/SEOHead";
+import { localizedFaq } from "@/lib/seo-helpers";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -28,18 +29,16 @@ const BuyerGuide = () => {
 
   return (<>
       <SEOHead
-        title="Dubai Property Buyer Guide | Asas Invest"
-        description="Step-by-step guide to buying property in Dubai. Costs, legal process, financing options, RERA regulations explained for first-time buyers."
+        title={t("seo.buyerGuide.title")}
+        description={t("seo.buyerGuide.description")}
         canonical="https://asasinvest.com/buy/guide"
         jsonLd={[
-          breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Buy",url:"https://asasinvest.com/buy"},{name:"Buyer Guide"}]),
-          faqJsonLd([
-            { question: "How do I buy property in Dubai as a foreigner?", answer: "Foreigners can buy freehold property in designated areas across Dubai. The process involves selecting a property, signing a Memorandum of Understanding (MOU), paying a 10% deposit, obtaining a No Objection Certificate (NOC) from the developer, and completing the transfer at the Dubai Land Department (DLD) with a 4% registration fee." },
-            { question: "What are the costs of buying property in Dubai?", answer: "Total buying costs are approximately 7-8% on top of the property price. This includes 4% DLD registration fee, 2% agency commission, AED 580 DLD admin fee, AED 4,200 title deed issuance fee, and conveyancing costs. There is no stamp duty, VAT on resale properties, or annual property tax." },
-            { question: "Can I get a mortgage in Dubai as a non-resident?", answer: "Yes, non-residents can obtain mortgages from UAE banks. The maximum loan-to-value (LTV) is typically 50% for non-residents (vs 80% for UAE residents). You will need passport copies, bank statements, salary certificates, and proof of address. Interest rates range from 3-5% for fixed-rate mortgages." },
-            { question: "What is the DLD registration fee?", answer: "The Dubai Land Department charges a 4% transfer fee on the property purchase price, split between buyer and seller (typically 2% each, though this is negotiable). This is a one-time fee paid at the time of property transfer registration." },
-            { question: "Do I need a residency visa to buy property in Dubai?", answer: "No visa is required to purchase property in Dubai. However, buying property worth AED 750,000 or more qualifies you for a 2-year residency visa, and property worth AED 2 million or more qualifies for the 10-year Golden Visa." },
+          breadcrumbJsonLd([
+            { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+            { name: t("seo.breadcrumb.buy"), url: "https://asasinvest.com/buy" },
+            { name: t("seo.breadcrumb.buyerGuide") },
           ]),
+          faqJsonLd(localizedFaq(t, "seo.faqBuyerGuide")),
         ]}
       />
     <div className="min-h-screen bg-background grain-overlay">

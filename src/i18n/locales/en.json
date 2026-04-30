@@ -493,5 +493,125 @@
     "pressReleases": "Press Releases",
     "viewAllAnnouncements": "All Announcements",
     "viewAllPress": "All Press Releases"
+  },
+  "seo": {
+    "siteName": "Asas Invest",
+    "breadcrumb": {
+      "home": "Home",
+      "buy": "Buy",
+      "offPlan": "Off-Plan",
+      "ready": "Ready Properties",
+      "commercial": "Commercial",
+      "sell": "Sell",
+      "invest": "Invest",
+      "about": "About",
+      "careers": "Careers",
+      "insights": "Insights",
+      "buyerGuide": "Buyer Guide"
+    },
+    "home": {
+      "title": "Asas Invest | Dubai Real Estate Investment & Advisory",
+      "description": "Strategic property investment, leasing & wealth management in Dubai. Off-plan projects, ready properties, Golden Visa advisory. Building generational wealth through smart real estate."
+    },
+    "buy": {
+      "title": "Buy Property in Dubai | Asas Invest",
+      "description": "Find your ideal home or investment property in Dubai. Freehold ownership, expert advisory, curated selection from top developers."
+    },
+    "offPlan": {
+      "title": "Off-Plan Properties in Dubai | Asas Invest",
+      "description": "Explore exclusive off-plan developments in Dubai from top developers. Early-bird pricing, flexible payment plans, high ROI potential.",
+      "collectionName": "Off-Plan Properties in Dubai",
+      "collectionDesc": "Explore exclusive off-plan developments in Dubai from top developers"
+    },
+    "ready": {
+      "title": "Ready Properties for Sale in Dubai | Asas Invest",
+      "description": "Browse move-in ready apartments, villas and penthouses across Dubai premium communities. Immediate handover, freehold ownership.",
+      "collectionName": "Ready Properties for Sale in Dubai",
+      "collectionDesc": "Move-in ready apartments, villas and penthouses across Dubai premium communities"
+    },
+    "commercial": {
+      "title": "Commercial Real Estate Dubai | Asas Invest",
+      "description": "Offices, retail spaces and warehouses for sale and lease in Dubai business districts. RERA licensed, expert commercial advisory."
+    },
+    "sell": {
+      "title": "Sell Your Dubai Property | Asas Invest",
+      "description": "List your property with Dubai trusted advisors. Free valuation, global buyer network, professional marketing."
+    },
+    "invest": {
+      "title": "Invest in Dubai Real Estate | Asas Invest",
+      "description": "Grow your wealth through Dubai property investment. 6-9% rental yields, Golden Visa eligibility, zero income tax, expert portfolio advisory."
+    },
+    "about": {
+      "title": "About Asas Invest | Dubai Trusted Real Estate Advisors",
+      "description": "Meet the team behind Asas Invest. RERA licensed, strategic property investment and wealth management in Dubai and the UAE."
+    },
+    "careers": {
+      "title": "Careers at Asas Invest | Join Our Dubai Real Estate Team",
+      "description": "Join Asas Invest and build your career in Dubai luxury real estate. Current openings in sales, marketing, and property management."
+    },
+    "insights": {
+      "title": "Dubai Real Estate Market Insights | Asas Invest",
+      "description": "Expert analysis, market trends and investment guides for Dubai property investors. Data-driven insights to inform your investment decisions."
+    },
+    "buyerGuide": {
+      "title": "Dubai Property Buyer Guide | Asas Invest",
+      "description": "Step-by-step guide to buying property in Dubai. Costs, legal process, financing options, RERA regulations explained for first-time buyers."
+    },
+    "propertyDetail": {
+      "descFallback": "Discover {{name}} — premium real estate in Dubai with Asas Invest."
+    },
+    "insightDetail": {
+      "descFallback": "{{title}} — Dubai real estate insights from Asas Invest"
+    },
+    "faqBuy": [
+      {
+        "q": "What types of property can I buy in Dubai?",
+        "a": "Dubai offers a wide range of property types including studios, apartments (1-4 bedrooms), penthouses, townhouses, villas, duplexes, and commercial spaces. Properties are available as off-plan (under construction with payment plans) or ready (completed and available for immediate move-in)."
+      },
+      {
+        "q": "Which areas in Dubai allow freehold ownership for foreigners?",
+        "a": "Foreigners can buy freehold property in over 50 designated areas including Dubai Marina, Downtown Dubai, Palm Jumeirah, JBR, Dubai Hills Estate, Business Bay, DIFC, Dubai Creek Harbour, Arabian Ranches, and Dubai Sports City among many others."
+      },
+      {
+        "q": "How long does it take to buy property in Dubai?",
+        "a": "A property purchase in Dubai typically takes 2-4 weeks for ready properties and can be completed in a few days for off-plan purchases. The process involves property selection, MOU signing, NOC from developer, and DLD transfer registration."
+      }
+    ],
+    "faqInvest": [
+      {
+        "q": "What is the minimum investment for Dubai real estate?",
+        "a": "You can invest in Dubai property from AED 500,000 (approximately USD 136,000). Off-plan projects often offer entry points with 10-20% down payment and flexible payment plans spread over construction and post-handover periods."
+      },
+      {
+        "q": "Can foreigners buy property in Dubai?",
+        "a": "Yes. Foreigners can purchase freehold property in designated areas across Dubai including Dubai Marina, Downtown Dubai, Palm Jumeirah, Dubai Hills Estate, and many more communities. There are no nationality restrictions for freehold purchases."
+      },
+      {
+        "q": "What is the Golden Visa through property investment?",
+        "a": "The UAE Golden Visa grants 10-year renewable residency to property investors who purchase real estate worth AED 2 million or more. The property can be off-plan or ready, and investors can include their family members."
+      },
+      {
+        "q": "What rental yields can I expect in Dubai?",
+        "a": "Dubai offers average rental yields of 6-9% annually, significantly higher than most global cities. Areas like Dubai Marina, JVC, and Dubai Sports City offer some of the highest yields, while premium communities offer strong capital appreciation."
+      },
+      {
+        "q": "Is there property tax in Dubai?",
+        "a": "Dubai has zero annual property tax, zero capital gains tax, and zero income tax on rental earnings. The only transaction costs are a 4% Dubai Land Department registration fee on purchase and standard service charges for building maintenance."
+      },
+      {
+        "q": "What is the difference between off-plan and ready properties?",
+        "a": "Off-plan properties are purchased during construction, typically at lower prices with flexible payment plans. Ready properties are completed and available for immediate occupancy or rental income. Both offer freehold ownership for foreign investors."
+      }
+    ],
+    "faqBuyerGuide": [
+      {
+        "q": "How do I buy property in Dubai as a foreigner?",
+        "a": "Foreigners can buy freehold property in designated areas across Dubai. The process involves selecting a property, signing a Memorandum of Understanding (MOU), paying a 10% deposit, obtaining a No Objection Certificate (NOC) from the developer, and completing the transfer at the Dubai Land Department (DLD) with a 4% registration fee."
+      },
+      {
+        "q": "What are the costs of buying property in Dubai?",
+        "a": "Total buying costs are approximately 7-8% on top of the property price. This includes 4% DLD registration fee, 2% agency commission, AED 580 DLD admin fee, AED 4,200 title deed issuance fee, and conveyancing costs. There is no stamp duty, VAT on resale properties, or annual property tax."
+      }
+    ]
   }
 }

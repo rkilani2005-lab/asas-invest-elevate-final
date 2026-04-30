@@ -1,4 +1,5 @@
 import SEOHead, { breadcrumbJsonLd, faqJsonLd } from "@/components/SEOHead";
+import { localizedFaq } from "@/lib/seo-helpers";
 import { Link } from "react-router-dom";
 import { Building2, Home, ArrowRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -32,16 +33,15 @@ const Buy = () => {
 
   return (<>
       <SEOHead
-        title="Buy Property in Dubai | Asas Invest"
-        description="Find your ideal home or investment property in Dubai. Freehold ownership, expert advisory, curated selection from top developers."
+        title={t("seo.buy.title")}
+        description={t("seo.buy.description")}
         canonical="https://asasinvest.com/buy"
         jsonLd={[
-          breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Buy"}]),
-          faqJsonLd([
-            { question: "What types of property can I buy in Dubai?", answer: "Dubai offers a wide range of property types including studios, apartments (1-4 bedrooms), penthouses, townhouses, villas, duplexes, and commercial spaces. Properties are available as off-plan (under construction with payment plans) or ready (completed and available for immediate move-in)." },
-            { question: "Which areas in Dubai allow freehold ownership for foreigners?", answer: "Foreigners can buy freehold property in over 50 designated areas including Dubai Marina, Downtown Dubai, Palm Jumeirah, JBR, Dubai Hills Estate, Business Bay, DIFC, Dubai Creek Harbour, Arabian Ranches, and Dubai Sports City among many others." },
-            { question: "How long does it take to buy property in Dubai?", answer: "A property purchase in Dubai typically takes 2-4 weeks for ready properties and can be completed in a few days for off-plan purchases. The process involves property selection, MOU signing, NOC from developer, and DLD transfer registration." },
+          breadcrumbJsonLd([
+            { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+            { name: t("seo.breadcrumb.buy") },
           ]),
+          faqJsonLd(localizedFaq(t, "seo.faqBuy")),
         ]}
       />
     <div className="min-h-screen bg-background grain-overlay">

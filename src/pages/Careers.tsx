@@ -11,10 +11,14 @@ const Careers = () => {
 
   return (<>
       <SEOHead
-        title="Careers at Asas Invest | Join Our Dubai Real Estate Team"
-        description="Join Asas Invest and build your career in Dubai luxury real estate. Current openings in sales, marketing, and property management."
+        title={t("seo.careers.title")}
+        description={t("seo.careers.description")}
         canonical="https://asasinvest.com/about/careers"
-        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"About",url:"https://asasinvest.com/about"},{name:"Careers"}])}
+        jsonLd={breadcrumbJsonLd([
+          { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+          { name: t("seo.breadcrumb.about"), url: "https://asasinvest.com/about" },
+          { name: t("seo.breadcrumb.careers") },
+        ])}
       />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />

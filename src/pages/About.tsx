@@ -38,10 +38,16 @@ const About = () => {
 
   return (<>
       <SEOHead
-        title="About Asas Invest | Dubai Trusted Real Estate Advisors"
-        description="Meet the team behind Asas Invest. RERA licensed, strategic property investment and wealth management in Dubai and the UAE."
+        title={t("seo.about.title")}
+        description={t("seo.about.description")}
         canonical="https://asasinvest.com/about"
-        jsonLd={[organizationJsonLd, breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"About"}])]}
+        jsonLd={[
+          organizationJsonLd,
+          breadcrumbJsonLd([
+            { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+            { name: t("seo.breadcrumb.about") },
+          ]),
+        ]}
       />
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />

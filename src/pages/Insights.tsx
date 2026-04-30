@@ -72,10 +72,13 @@ const InsightsPage = () => {
 
   return (<>
       <SEOHead
-        title="Dubai Real Estate Market Insights | Asas Invest"
-        description="Expert analysis, market trends and investment guides for Dubai property investors. Data-driven insights to inform your investment decisions."
+        title={t("seo.insights.title")}
+        description={t("seo.insights.description")}
         canonical="https://asasinvest.com/insights"
-        jsonLd={breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Insights"}])}
+        jsonLd={breadcrumbJsonLd([
+          { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+          { name: t("seo.breadcrumb.insights") },
+        ])}
       />
     <div className="min-h-screen bg-background">
       <Navigation />

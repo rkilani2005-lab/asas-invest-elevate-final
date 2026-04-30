@@ -111,17 +111,21 @@ const Ready = () => {
 
   return (<>
       <SEOHead
-        title="Ready Properties for Sale in Dubai | Asas Invest"
-        description="Browse move-in ready apartments, villas and penthouses across Dubai premium communities. Immediate handover, freehold ownership."
+        title={t("seo.ready.title")}
+        description={t("seo.ready.description")}
         canonical="https://asasinvest.com/ready"
         jsonLd={[
-          breadcrumbJsonLd([{name:"Home",url:"https://asasinvest.com"},{name:"Ready Properties"}]),
+          breadcrumbJsonLd([
+            { name: t("seo.breadcrumb.home"), url: "https://asasinvest.com" },
+            { name: t("seo.breadcrumb.ready") },
+          ]),
           collectionPageJsonLd({
-            name: "Ready Properties for Sale in Dubai",
-            description: "Move-in ready apartments, villas and penthouses across Dubai premium communities",
+            name: t("seo.ready.collectionName"),
+            description: t("seo.ready.collectionDesc"),
             url: "https://asasinvest.com/ready",
+            inLanguage: language,
             properties: (properties || []).slice(0, 10).map((p: any) => ({
-              name: p.name_en || "",
+              name: (language === "ar" ? p.name_ar : p.name_en) || p.name_en || "",
               slug: p.slug || "",
               image: p.media?.find((m: any) => m.type === "hero" || m.type === "render")?.url,
               price: p.price_range || undefined,
