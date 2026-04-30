@@ -22,11 +22,11 @@ const InsightsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const categories = [
-    { name: "All", icon: FileText },
-    { name: "market_news", label: "Dubai Market", icon: Building },
-    { name: "investment_guide", label: "Investment Guide", icon: TrendingUp },
-    { name: "project_updates", label: "Project Updates", icon: MapPin },
-    { name: "lifestyle", label: "Lifestyle", icon: FileText },
+    { name: "All", icon: FileText, label: "All", labelAr: "الكل" },
+    { name: "market_news", label: "Dubai Market", labelAr: "سوق دبي", icon: Building },
+    { name: "investment_guide", label: "Investment Guide", labelAr: "دليل الاستثمار", icon: TrendingUp },
+    { name: "project_updates", label: "Project Updates", labelAr: "تحديثات المشاريع", icon: MapPin },
+    { name: "lifestyle", label: "Lifestyle", labelAr: "أسلوب الحياة", icon: FileText },
   ];
 
   // Fetch insights from database
