@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useMegaMenuItems } from "./MegaMenu";
