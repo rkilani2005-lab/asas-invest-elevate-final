@@ -391,21 +391,17 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                   <>
                     <button
                       onClick={(e) => { e.stopPropagation(); isRTL ? nextImage() : prevImage(); }}
-                      className={cn(
-                        "absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
-                        isRTL ? "end-4" : "start-4"
-                      )}
+                      className="absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80 start-4"
+                      aria-label={t("common.previousImage")}
                     >
-                      <ChevronLeft className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
+                      <ChevronLeft className="h-6 w-6 text-foreground rtl-flip" strokeWidth={1} />
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); isRTL ? prevImage() : nextImage(); }}
-                      className={cn(
-                        "absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
-                        isRTL ? "start-4" : "end-4"
-                      )}
+                      className="absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80 end-4"
+                      aria-label={t("common.nextImage")}
                     >
-                      <ChevronRight className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
+                      <ChevronRight className="h-6 w-6 text-foreground rtl-flip" strokeWidth={1} />
                     </button>
                   </>
                 )}

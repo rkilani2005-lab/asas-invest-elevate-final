@@ -15,7 +15,7 @@ interface PropertyHeroProps {
 }
 
 const PropertyHero = ({ property }: PropertyHeroProps) => {
-  const { isRTL } = useLanguage();
+  const { isRTL, t } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
