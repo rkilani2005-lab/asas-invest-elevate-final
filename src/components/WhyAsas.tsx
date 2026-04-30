@@ -148,7 +148,7 @@ const WhyAsas = () => {
         {/* Mission Statement — full-width, start-aligned, editorial */}
         <ScrollReveal delay={0.2}>
           <div
-            className=relative px-10 md:px-16 py-12 md:py-14 overflow-hidden"
+            className="relative px-10 md:px-16 py-12 md:py-14 overflow-hidden"
             style={{
               borderInlineStart: '2px solid #C5A059',
               background: 'rgba(197,160,89,0.04)',

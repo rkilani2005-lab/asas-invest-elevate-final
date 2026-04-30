@@ -54,7 +54,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="absolute inset-y-0 start-0 bg-accent
+              className="absolute inset-y-0 start-0 bg-accent"
             />
           </div>
           

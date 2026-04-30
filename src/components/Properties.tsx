@@ -63,7 +63,7 @@ const PropertyCard = ({ property, index }: PropertyCardProps) => {
         </div>
 
         {/* Content */}
-        <div className=p-6">
+        <div className="p-6">
           <div className="flex items-center text-muted-foreground text-sm mb-2">
             <MapPin className="h-3.5 w-3.5 me-1.5" />
             <span>{property.location}</span>

@@ -80,7 +80,7 @@ const Stats = () => {
         {/* Section label — minimal, start-aligned */}
         <ScrollReveal>
           <p
-            className=text-eyebrow mb-16"
+            className="text-eyebrow mb-16"
             style={{ color: 'rgba(197,160,89,0.7)', letterSpacing: '0.15em' }}
           >
             {content.subtitle || t("stats.subtitle")}

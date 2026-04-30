@@ -431,7 +431,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 </motion.div>
 
                 {/* Counter */}
-                <div className="absolute bottom-4 start-1/2 -translate-x-1/2 text-muted-foreground text-sm tracking-wider>
+                <div className="absolute bottom-4 start-1/2 -translate-x-1/2 text-muted-foreground text-sm tracking-wider">
                   {currentIndex + 1} / {currentMedia.length}
                 </div>
               </motion.div>
