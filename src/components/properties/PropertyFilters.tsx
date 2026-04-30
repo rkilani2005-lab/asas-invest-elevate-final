@@ -71,7 +71,7 @@ const PropertyFilters = ({
         <div className="relative lg:col-span-2">
           <Search className={cn(
             "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground",
-            isRTL ? "end-3-3" : "start-3
+            isRTL ? "end-3" : "start-3"
           )} strokeWidth={1} />
           <Input
             placeholder={t("filters.search")}
@@ -79,7 +79,7 @@ const PropertyFilters = ({
             onChange={(e) => updateFilter("search", e.target.value)}
             className={cn(
               "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-              isRTL ? "pe-10 text-endht" : "ps-10"
+              isRTL ? "pe-10 text-end" : "ps-10"
             )}
           />
         </div>
@@ -91,7 +91,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-endht"
+            isRTL && "text-end"
           )}>
             <SelectValue placeholder={t("filters.allLocations")} />
           </SelectTrigger>
@@ -112,7 +112,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-endht"
+            isRTL && "text-end"
           )}>
             <SelectValue placeholder={t("filters.allDevelopers")} />
           </SelectTrigger>
@@ -133,7 +133,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-endht"
+            isRTL && "text-end"
           )}>
             <SelectValue placeholder={t("filters.allCategories")} />
           </SelectTrigger>
@@ -151,7 +151,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-endht"
+            isRTL && "text-end"
           )}>
             <SelectValue placeholder={t("filters.allBedrooms")} />
           </SelectTrigger>

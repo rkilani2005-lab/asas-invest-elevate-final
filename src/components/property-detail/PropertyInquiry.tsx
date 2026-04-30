@@ -158,7 +158,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 <div>
                   <label className={cn(
                     "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-endht"
+                    isRTL && "text-end"
                   )}>
                     {t("contact.name")} *
                   </label>
@@ -168,7 +168,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     className={cn(
                       "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                      isRTL && "text-endht"
+                      isRTL && "text-end"
                     )}
                     placeholder={t("contact.name")}
                   />
@@ -176,7 +176,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 <div>
                   <label className={cn(
                     "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-endht"
+                    isRTL && "text-end"
                   )}>
                     {t("contact.email")} *
                   </label>
@@ -187,7 +187,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     className={cn(
                       "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                      isRTL && "text-endht"
+                      isRTL && "text-end"
                     )}
                     placeholder="your@email.com"
                   />
@@ -197,7 +197,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <div>
                 <label className={cn(
                   "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                  isRTL && "text-endht"
+                  isRTL && "text-end"
                 )}>
                   {t("contact.phone")}
                 </label>
@@ -207,7 +207,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   className={cn(
                     "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                    isRTL && "text-endht"
+                    isRTL && "text-end"
                   )}
                   placeholder="+971 XX XXX XXXX"
                 />
@@ -216,7 +216,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <div>
                 <label className={cn(
                   "block text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider",
-                  isRTL && "text-endht"
+                  isRTL && "text-end"
                 )}>
                   {t("contact.interests")}
                 </label>
@@ -246,7 +246,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <div>
                 <label className={cn(
                   "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                  isRTL && "text-endht"
+                  isRTL && "text-end"
                 )}>
                   {t("contact.message")}
                 </label>
@@ -255,7 +255,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   className={cn(
                     "bg-white border-accent/30 rounded-none focus:border-accent resize-none text-foreground",
-                    isRTL && "text-endht"
+                    isRTL && "text-end"
                   )}
                   rows={4}
                   placeholder="Tell us about your investment goals..."

@@ -36,7 +36,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "heading-section text-2xl md:text-3xl text-foreground mb-4",
-          isRTL && "text-endht"
+          isRTL && "text-end"
         )}>
           {t("sections.paymentPlan")}
         </h2>
@@ -98,13 +98,13 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
                 transition={{ delay: 0.3 + index * 0.1 }}
                 className={cn(
                   "relative border border-border p-6 hover:border-accent/30 transition-all duration-300",
-                  isRTL && "text-endht"
+                  isRTL && "text-end"
                 )}
               >
                 {/* Step Number */}
                 <div className={cn(
                   "absolute -top-3 bg-accent text-accent-foreground text-xs font-medium px-3 py-1 tracking-wider",
-                  isRTL ? "end-4-4" : "start-4
+                  isRTL ? "end-4" : "start-4"
                 )}>
                   STEP {index + 1}
                 </div>
@@ -126,7 +126,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
                 {!milestone.isLast && (
                   <div className={cn(
                     "hidden lg:block absolute top-1/2 -translate-y-1/2 w-6 h-[1px] bg-border",
-                    isRTL ? "-start-6 : "-end-6-6"
+                    isRTL ? "-start-6" : "-end-6"
                   )} />
                 )}
               </motion.div>
@@ -137,7 +137,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
         {/* Summary */}
         <div className={cn(
           "mt-10 p-6 border border-accent/30",
-          isRTL && "text-endht"
+          isRTL && "text-end"
         )}>
           <div className={cn(
             "flex items-center gap-3",

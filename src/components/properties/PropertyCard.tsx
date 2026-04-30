@@ -64,7 +64,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
     <Link to={`/property/${property.slug}`} className="group block">
       <article className={cn(
         "card-luxury h-full flex flex-col",
-        isRTL && "text-endht"
+        isRTL && "text-end"
       )}>
         {/* Image */}
         <div className="relative aspect-[16/10] overflow-hidden">

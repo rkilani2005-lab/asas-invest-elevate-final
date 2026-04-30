@@ -153,11 +153,11 @@ const InsightsPage = () => {
             <div className="relative w-full md:w-72">
               <Search className={cn(
                 "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground",
-                isRTL ? "end-3-3" : "start-3
+                isRTL ? "end-3" : "start-3"
               )} />
               <Input 
                 placeholder={isRTL ? "البحث في المقالات..." : "Search articles..."} 
-                className={cn("bg-secondary border-0", isRTL ? "pe-10 text-endht" : "ps-10")}
+                className={cn("bg-secondary border-0", isRTL ? "pe-10 text-end" : "ps-10")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -178,11 +178,11 @@ const InsightsPage = () => {
                   </div>
                   <h2 className={cn(
                     "heading-section text-2xl md:text-4xl text-foreground mb-4 group-hover:text-accent transition-colors",
-                    isRTL && "font-arabic text-endht"
+                    isRTL && "font-arabic text-end"
                   )}>
                     {getLocalizedContent(featuredArticle).title}
                   </h2>
-                  <p className={cn("text-muted-foreground leading-relaxed mb-6", isRTL && "text-endht")}>
+                  <p className={cn("text-muted-foreground leading-relaxed mb-6", isRTL && "text-end")}>
                     {getLocalizedContent(featuredArticle).excerpt}
                   </p>
                   <div className={cn(
@@ -254,7 +254,7 @@ const InsightsPage = () => {
                     <Link to={`/insights/${article.slug}`}>
                       <article className={cn(
                         "card-luxury p-6 cursor-pointer h-full",
-                        isRTL && "text-endht"
+                        isRTL && "text-end"
                       )}>
                         <div className="inline-flex items-center rounded-full px-3 py-1 bg-accent/10 text-accent text-xs font-medium mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                           {getCategoryLabel(article.category)}
@@ -315,7 +315,7 @@ const InsightsPage = () => {
               <Input 
                 type="email" 
                 placeholder={isRTL ? "أدخل بريدك الإلكتروني" : "Enter your email"} 
-                className={cn("bg-background border-border flex-1", isRTL && "text-endht")}
+                className={cn("bg-background border-border flex-1", isRTL && "text-end")}
               />
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                 {isRTL ? "اشتراك" : "Subscribe"}

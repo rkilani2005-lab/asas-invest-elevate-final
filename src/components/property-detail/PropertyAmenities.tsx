@@ -54,7 +54,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
         <div className="container mx-auto px-4 lg:px-8">
           <h2 className={cn(
             "heading-section text-2xl md:text-3xl text-foreground mb-8",
-            isRTL && "text-endht"
+            isRTL && "text-end"
           )}>
             {t("sections.amenities")}
           </h2>
@@ -71,7 +71,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "heading-section text-2xl md:text-3xl text-foreground mb-8",
-          isRTL && "text-endht"
+          isRTL && "text-end"
         )}>
           {t("sections.amenities")}
         </h2>
@@ -81,7 +81,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
             <div key={category}>
               <h3 className={cn(
                 "text-accent text-xs font-medium tracking-widest uppercase mb-4",
-                isRTL && "text-endht"
+                isRTL && "text-end"
               )}>
                 {category}
               </h3>

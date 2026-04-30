@@ -187,7 +187,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
         )}>
           <h2 className={cn(
             "heading-section text-2xl md:text-3xl text-foreground",
-            isRTL && "text-endht"
+            isRTL && "text-end"
           )}>
             {t("sections.gallery")}
           </h2>
@@ -359,7 +359,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                     )}
                   </div>
                   {video.caption && (
-                    <div className={cn("p-3", isRTL && "text-endht")}>
+                    <div className={cn("p-3", isRTL && "text-end")}>
                       <p className="text-sm text-muted-foreground">{video.caption}</p>
                     </div>
                   )}
@@ -397,7 +397,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                       onClick={(e) => { e.stopPropagation(); isRTL ? nextImage() : prevImage(); }}
                       className={cn(
                         "absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
-                        isRTL ? "end-4-4" : "start-4
+                        isRTL ? "end-4" : "start-4"
                       )}
                     >
                       <ChevronLeft className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
@@ -406,7 +406,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                       onClick={(e) => { e.stopPropagation(); isRTL ? prevImage() : nextImage(); }}
                       className={cn(
                         "absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
-                        isRTL ? "start-4 : "end-4-4"
+                        isRTL ? "start-4" : "end-4"
                       )}
                     >
                       <ChevronRight className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />

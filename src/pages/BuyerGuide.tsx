@@ -52,11 +52,11 @@ const BuyerGuide = () => {
           </ScrollReveal>
           {bodyContent ? (
             <div
-              className={cn("max-w-none text-muted-foreground leading-relaxed [&_p]:mb-4 [&_h2]:text-accent [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-4 [&_ul]:list-disc [&_ul]:ps-6 [&_li]:mb-2", isRTL && "text-endht")}
+              className={cn("max-w-none text-muted-foreground leading-relaxed [&_p]:mb-4 [&_h2]:text-accent [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-4 [&_ul]:list-disc [&_ul]:ps-6 [&_li]:mb-2", isRTL && "text-end")}
               dangerouslySetInnerHTML={{ __html: bodyContent }}
             />
           ) : (
-            <div className={cn("text-muted-foreground leading-relaxed space-y-6", isRTL && "text-endht")}>
+            <div className={cn("text-muted-foreground leading-relaxed space-y-6", isRTL && "text-end")}>
               <p>{t("buyerGuide.intro")}</p>
               <h2 className="heading-section text-xl text-foreground">{t("buyerGuide.step1Title")}</h2>
               <p>{t("buyerGuide.step1Desc")}</p>

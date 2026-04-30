@@ -136,7 +136,7 @@ const Insights = () => {
                   <Link to={`/insights/${article.slug}`}>
                     <article className={cn(
                       "card-luxury p-6 cursor-pointer h-full",
-                      isRTL && "text-endht"
+                      isRTL && "text-end"
                     )}>
                       <div className="inline-flex items-center rounded-full px-3 py-1 bg-accent/10 text-accent text-xs font-medium mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {getCategoryLabel(article.category)}

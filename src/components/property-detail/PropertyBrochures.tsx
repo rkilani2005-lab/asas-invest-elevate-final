@@ -28,7 +28,7 @@ const PropertyBrochures = ({ property }: PropertyBrochuresProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "font-serif text-2xl md:text-3xl font-medium text-foreground mb-8",
-          isRTL && "text-endht"
+          isRTL && "text-end"
         )}>
           {language === "ar" ? "الكتيبات والمستندات" : "Brochures & Documents"}
         </h2>
@@ -47,7 +47,7 @@ const PropertyBrochures = ({ property }: PropertyBrochuresProps) => {
                 transition={{ delay: index * 0.1 }}
                 className={cn(
                   "group bg-background rounded-xl border border-border p-6 hover:border-accent/30 hover:shadow-lg transition-all duration-300",
-                  isRTL && "text-endht"
+                  isRTL && "text-end"
                 )}
               >
                 <div className={cn(

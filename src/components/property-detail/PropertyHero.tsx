@@ -96,7 +96,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
               onClick={isRTL ? nextImage : prevImage}
               className={cn(
                 "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300",
-                isRTL ? "end-4-4" : "start-4
+                isRTL ? "end-4" : "start-4"
               )}
               aria-label="Previous image"
             >
@@ -106,7 +106,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
               onClick={isRTL ? prevImage : nextImage}
               className={cn(
                 "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300",
-                isRTL ? "start-4 : "end-4-4"
+                isRTL ? "start-4" : "end-4"
               )}
               aria-label="Next image"
             >
@@ -138,7 +138,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
         {property.video_url && (
           <div className={cn(
             "absolute bottom-6 z-10",
-            isRTL ? "start-6 : "end-6-6"
+            isRTL ? "start-6" : "end-6"
           )}>
             <Button
               variant="luxury"
