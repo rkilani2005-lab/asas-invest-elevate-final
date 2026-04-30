@@ -57,7 +57,12 @@
     "description": "Our portfolio is composed of premium residential, commercial, and hospitality assets designed to provide investors with safe, stable, and steady returns.",
     "propertiesManaged": "Properties Managed",
     "totalSqFt": "Total Sq. Ft",
-    "portfolioValue": "Portfolio Value"
+    "portfolioValue": "Portfolio Value",
+    "tagline": {
+      "item1": "Smart investments across top real estate markets",
+      "item2": "High ROI",
+      "item3": "Trusted by 1K+ GCC investors"
+    }
   },
   "trust": {
     "subtitle": "Trust & Credentials",
