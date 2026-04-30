@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -48,6 +48,40 @@ const Hero = () => {
     contactUs: heroContent?.contactUs || t("hero.contactUs"),
   };
   const ref = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [loadVideo, setLoadVideo] = useState(false);
+
+  // Defer the heavy hero video until after first paint / idle so the poster
+  // image becomes the LCP and the page becomes interactive faster.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Skip on slow connections / data-saver
+    const conn = (navigator as any).connection;
+    if (conn?.saveData) return;
+    if (conn?.effectiveType && /(^|-)2g$/.test(conn.effectiveType)) return;
+
+    const trigger = () => setLoadVideo(true);
+    const idle = (window as any).requestIdleCallback;
+    const handle = idle
+      ? idle(trigger, { timeout: 2000 })
+      : window.setTimeout(trigger, 1200);
+    return () => {
+      if (idle && (window as any).cancelIdleCallback) {
+        (window as any).cancelIdleCallback(handle);
+      } else {
+        clearTimeout(handle as number);
+      }
+    };
+  }, []);
+
+  // Once the source is attached, kick off playback
+  useEffect(() => {
+    if (loadVideo && videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [loadVideo]);
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"]
@@ -65,14 +99,15 @@ const Hero = () => {
         style={{ y: backgroundY }}
       >
         <video
-          autoPlay
+          ref={videoRef}
           muted
           loop
           playsInline
+          preload="none"
           poster="/images/dubai-skyline.jpg"
           className="w-full h-[120%] object-cover brightness-105 saturate-110"
         >
-          <source src={content.video_url} type="video/mp4" />
+          {loadVideo && <source src={content.video_url} type="video/mp4" />}
         </video>
         {/* Classic Header: Deep Charcoal top-down linear gradient overlay */}
         <div 
