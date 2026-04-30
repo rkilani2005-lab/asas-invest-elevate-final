@@ -56,9 +56,8 @@ const Footer = () => {
                 alt="Asas Invest Real Estate"
                 className="h-12 w-auto object-contain"
                 style={{
-                  filter: "brightness(0) invert(1)",
-                  opacity: 0.92,
-                  mixBlendMode: "screen",
+                  mixBlendMode: "lighten",
+                  backgroundColor: "#111111",
                 }}
               />
             </div>
