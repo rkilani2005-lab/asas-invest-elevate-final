@@ -151,12 +151,12 @@ const Insights = () => {
                         "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border"
                       )}>
                         <div className={cn("flex items-center")}>
-                          <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ms-1.5" : "me-1.5")} />
+                          <Calendar className="h-3.5 w-3.5 me-1.5" />
                           <span>
                             {article.published_at && format(new Date(article.published_at), 'MMM d, yyyy')}
                           </span>
                         </div>
-                        <span>{article.read_time_minutes} {isRTL ? "د" : "min"}</span>
+                        <span>{article.read_time_minutes} {t("insights.minShort")}</span>
                       </div>
                     </article>
                   </Link>
