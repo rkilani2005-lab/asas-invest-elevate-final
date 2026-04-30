@@ -2,6 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { Trans } from "react-i18next";
 
 const EditorialBand = () => {
   const { t, isRTL } = useLanguage();
@@ -76,8 +77,10 @@ const EditorialBand = () => {
             letterSpacing: "-0.01em",
           }}
         >
-          "The world's smartest{" "}
-          <span style={{ color: "#C5A059" }}>tax-free</span> real estate market."
+          <Trans
+            i18nKey="editorial.quote"
+            components={{ 1: <span style={{ color: "#C5A059" }} /> }}
+          />
         </motion.p>
 
         {/* Inline stat chips */}
