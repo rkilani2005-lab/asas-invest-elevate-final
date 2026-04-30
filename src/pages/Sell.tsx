@@ -70,7 +70,7 @@ const Sell = () => {
                 <div key={i} className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 border border-accent/30 flex items-center justify-center mb-4 relative">
                     <step.icon className="h-7 w-7 text-accent" strokeWidth={1} />
-                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-accent text-accent-foreground text-xs flex items-center justify-center font-medium">
+                    <span className="absolute -top-2 -end-2 w-6 h-6 bg-accent text-accent-foreground text-xs flex items-center justify-center font-mediumum">
                       {i + 1}
                     </span>
                   </div>

@@ -44,18 +44,17 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
     <div className="py-12 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
         <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-3 gap-12",
-          isRTL && "lg:flex-row-reverse"
+          "grid grid-cols-1 lg:grid-cols-3 gap-12"
         )}>
           {/* Main Content */}
-          <div className={cn("lg:col-span-2", isRTL && "text-right")}>
+          <div className={cn("lg:col-span-2", isRTL && "text-end")}>
             <h2 className="heading-section text-2xl md:text-3xl text-foreground mb-6">
               {t("sections.overview")}
             </h2>
             
             {overview && (
               <div 
-                className="max-w-none text-muted-foreground leading-relaxed mb-8 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-2 [&_strong]:font-semibold [&_em]:italic"
+                className="max-w-none text-muted-foreground leading-relaxed mb-8 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:ps-6 [&_ol]:list-decimal [&_ol]:ps-6 [&_li]:mb-2 [&_strong]:font-semibold [&_em]:italic"
                 dangerouslySetInnerHTML={{ __html: overview }}
               />
             )}
@@ -63,10 +62,10 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
             {highlights.length > 0 && (
               <div className="mt-8">
                 <h3 className="text-accent text-xs font-medium tracking-widest uppercase mb-4">Key Highlights</h3>
-                <ul className={cn("grid grid-cols-1 md:grid-cols-2 gap-3", isRTL && "text-right")}>
+                <ul className={cn("grid grid-cols-1 md:grid-cols-2 gap-3", isRTL && "text-end")}>
                   {highlights.map((highlight, index) => (
-                    <li key={index} className={cn("flex items-center text-muted-foreground", isRTL && "flex-row-reverse")}>
-                      <div className={cn("w-1.5 h-1.5 bg-accent flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
+                    <li key={index} className={cn("flex items-center text-muted-foreground")}>
+                      <div className={cn("w-1.5 h-1.5 bg-accent flex-shrink-0", isRTL ? "ms-3" : "me-3")} />
                       {highlight}
                     </li>
                   ))}
@@ -78,12 +77,12 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
           {/* Specs Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white border border-accent/30 p-6 sticky top-40 shadow-card">
-              <h3 className={cn("text-accent text-xs font-medium tracking-widest uppercase mb-6", isRTL && "text-right")}>
+              <h3 className={cn("text-accent text-xs font-medium tracking-widest uppercase mb-6", isRTL && "text-end")}>
                 Property Details
               </h3>
               
               {property.price_range && (
-                <div className={cn("pb-4 mb-4 border-b border-border", isRTL && "text-right")}>
+                <div className={cn("pb-4 mb-4 border-b border-border", isRTL && "text-end")}>
                   <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">{t("property.price")}</p>
                   <p className="heading-section text-2xl text-foreground">{property.price_range}</p>
                 </div>
@@ -91,8 +90,8 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
 
               <div className="space-y-4">
                 {allSpecs.map((spec, index) => (
-                  <div key={index} className={cn("flex items-start", isRTL && "flex-row-reverse text-right")}>
-                    <div className={cn("w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0", isRTL ? "ml-3" : "mr-3")}>
+                  <div key={index} className={cn("flex items-start", isRTL && "text-end")}>
+                    <div className={cn("w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0", isRTL ? "ms-3" : "me-3")}>
                       <spec.icon className="h-5 w-5 text-accent" strokeWidth={1} />
                     </div>
                     <div>

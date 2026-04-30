@@ -77,7 +77,7 @@ const Stats = () => {
       <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)' }} />
 
       <div className="container mx-auto px-4 lg:px-8 py-20">
-        {/* Section label — minimal, left-aligned */}
+        {/* Section label — minimal, start-aligned */}
         <ScrollReveal>
           <p
             className="text-eyebrow mb-16"

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Mail, Phone, MapPin, MessageCircle, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,40 +32,37 @@ async function submitForm(payload: Record<string, unknown>) {
 }
 
 const Contact = () => {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("contact");
 
-  // Shared states
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // Contact form
   const [contactForm, setContactForm] = useState({
     name: "", email: "", phone: "", subject: "", message: "", language: "en", consent: false,
   });
 
-  // Callback form
   const [callbackForm, setCallbackForm] = useState({
     name: "", phone: "", callback_time: "morning", note: "",
   });
 
-  // Newsletter form
   const [newsletterForm, setNewsletterForm] = useState({
     email: "", name: "", language: "en",
   });
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
 
+  // Phone numbers and emails are shown LTR even in RTL via .ltr-numeric
   const contactInfo = [
-    { icon: Phone, label: "Phone", details: "+971 4 XXX XXXX", link: "tel:+97140000000" },
-    { icon: MessageCircle, label: "WhatsApp", details: "+971 50 XXX XXXX", link: "https://wa.me/971500000000" },
-    { icon: Mail, label: "Email", details: "admin@asasinvest.com", link: "mailto:admin@asasinvest.com" },
-    { icon: MapPin, label: "Office", details: "Business Bay, Dubai, UAE", link: "#" },
+    { icon: Phone, label: t("contact.infoPhone"), details: "+971 4 XXX XXXX", link: "tel:+97140000000", ltr: true },
+    { icon: MessageCircle, label: t("contact.infoWhatsApp"), details: "+971 50 XXX XXXX", link: "https://wa.me/971500000000", ltr: true },
+    { icon: Mail, label: t("contact.infoEmail"), details: "admin@asasinvest.com", link: "mailto:admin@asasinvest.com", ltr: true },
+    { icon: MapPin, label: t("contact.infoOffice"), details: t("contact.officeAddress"), link: "#", ltr: false },
   ];
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactForm.consent) {
-      toast.error("Please agree to receive communications from ASAS.");
+      toast.error(t("contact.consentRequired"));
       return;
     }
     setIsSubmitting(true);
@@ -78,19 +74,19 @@ const Contact = () => {
         visitor_phone: contactForm.phone,
         visitor_message: contactForm.message,
         subject: contactForm.subject,
-        preferred_language: contactForm.language,
+        preferred_language: language,
         consent_given: contactForm.consent,
         source_page: window.location.pathname,
       });
       if (result.success) {
         setSubmitted(true);
-        toast.success("Message sent! We'll respond within 24 hours.");
+        toast.success(t("contact.successToast"));
         setContactForm({ name: "", email: "", phone: "", subject: "", message: "", language: "en", consent: false });
       } else {
-        toast.error(result.error || "Something went wrong. Please try again.");
+        toast.error(result.error || t("contact.errorGeneric"));
       }
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error(t("contact.errorNetwork"));
     } finally {
       setIsSubmitting(false);
     }
@@ -103,7 +99,7 @@ const Contact = () => {
       const result = await submitForm({
         form_type: "callback",
         visitor_name: callbackForm.name,
-        visitor_email: "callback@asasinvest.com", // placeholder for callback-only
+        visitor_email: "callback@asasinvest.com",
         visitor_phone: callbackForm.phone,
         visitor_message: callbackForm.note,
         callback_time: callbackForm.callback_time,
@@ -111,13 +107,13 @@ const Contact = () => {
         consent_given: true,
       });
       if (result.success) {
-        toast.success("Callback requested! We'll call you within 2 hours.");
+        toast.success(t("contact.callbackSuccess"));
         setCallbackForm({ name: "", phone: "", callback_time: "morning", note: "" });
       } else {
-        toast.error(result.error || "Something went wrong.");
+        toast.error(result.error || t("contact.errorGeneric"));
       }
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error(t("contact.errorNetwork"));
     } finally {
       setIsSubmitting(false);
     }
@@ -137,21 +133,25 @@ const Contact = () => {
       });
       if (result.success) {
         setNewsletterSubmitted(true);
-        toast.success("Subscribed! Welcome to the ASAS community.");
+        toast.success(t("contact.newsletterSuccess"));
       } else {
-        toast.error(result.error || "Something went wrong.");
+        toast.error(result.error || t("contact.errorGeneric"));
       }
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error(t("contact.errorNetwork"));
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const labelCls = "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider";
+  const inputCls = "bg-white border-accent/30 focus:border-accent rounded-none";
+
+  const reqMark = <span className="text-accent ms-0.5" aria-label={t("contact.required")}>*</span>;
+
   return (
     <section id="contact" className="py-24 bg-background grain-overlay">
       <div className={cn("container mx-auto px-4 lg:px-8 relative z-10", isRTL && "font-arabic")}>
-        {/* Section Header */}
         <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
           <p className="text-eyebrow text-accent mb-4">{t("contact.title")}</p>
           <h2 className="heading-section text-3xl md:text-4xl text-foreground mb-6">
@@ -160,7 +160,6 @@ const Contact = () => {
         </ScrollReveal>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Contact Info */}
           <StaggerContainer className="space-y-4">
             {contactInfo.map((info, index) => (
               <StaggerItem key={index}>
@@ -175,22 +174,23 @@ const Contact = () => {
                   </div>
                   <div>
                     <div className="font-medium text-foreground text-sm mb-0.5">{info.label}</div>
-                    <div className="text-muted-foreground text-sm">{info.details}</div>
+                    <div className={cn("text-muted-foreground text-sm", info.ltr && "ltr-numeric")}>
+                      {info.details}
+                    </div>
                   </div>
                 </a>
               </StaggerItem>
             ))}
           </StaggerContainer>
 
-          {/* Form Area */}
           <ScrollReveal direction={isRTL ? "left" : "right"} className="lg:col-span-2">
             <div className="bg-white border border-accent/30 shadow-card">
               <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSubmitted(false); }}>
                 <TabsList className="w-full rounded-none border-b border-accent/20 bg-transparent h-auto p-0">
                   {[
-                    { id: "contact", label: "General Inquiry" },
-                    { id: "callback", label: "Request Callback" },
-                    { id: "newsletter", label: "Newsletter" },
+                    { id: "contact", label: t("contact.tabContact") },
+                    { id: "callback", label: t("contact.tabCallback") },
+                    { id: "newsletter", label: t("contact.tabNewsletter") },
                   ].map((tab) => (
                     <TabsTrigger
                       key={tab.id}
@@ -209,84 +209,76 @@ const Contact = () => {
                       <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Check className="w-8 h-8 text-accent" />
                       </div>
-                      <h3 className="text-xl font-semibold text-foreground mb-2">Message Sent!</h3>
-                      <p className="text-muted-foreground">Our team will respond within 24 hours. Check your email for a confirmation.</p>
+                      <h3 className="text-xl font-semibold text-foreground mb-2">{t("contact.messageSent")}</h3>
+                      <p className="text-muted-foreground">{t("contact.messageSentDesc")}</p>
                       <Button variant="outline" className="mt-6" onClick={() => setSubmitted(false)}>
-                        Send Another Message
+                        {t("contact.sendAnother")}
                       </Button>
                     </div>
                   ) : (
                     <form onSubmit={handleContactSubmit} className="space-y-5">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                          <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                            Full Name *
-                          </label>
+                          <label className={labelCls}>{t("contact.name")} {reqMark}</label>
                           <Input
-                            placeholder="Your full name"
+                            placeholder={t("contact.namePlaceholder")}
                             value={contactForm.name}
                             onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                             required
-                            className="bg-white border-accent/30 focus:border-accent rounded-none"
+                            className={inputCls}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                            Email Address *
-                          </label>
+                          <label className={labelCls}>{t("contact.email")} {reqMark}</label>
                           <Input
                             type="email"
-                            placeholder="your@email.com"
+                            dir="ltr"
+                            placeholder={t("contact.emailPlaceholder")}
                             value={contactForm.email}
                             onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                             required
-                            className="bg-white border-accent/30 focus:border-accent rounded-none"
+                            className={inputCls}
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                          <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                            Phone Number
-                          </label>
+                          <label className={labelCls}>{t("contact.phone")}</label>
                           <Input
                             type="tel"
-                            placeholder="+971 XX XXX XXXX"
+                            dir="ltr"
+                            placeholder={t("contact.phonePlaceholder")}
                             value={contactForm.phone}
                             onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                            className="bg-white border-accent/30 focus:border-accent rounded-none"
+                            className={inputCls}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                            Subject
-                          </label>
+                          <label className={labelCls}>{t("contact.subject")}</label>
                           <Select value={contactForm.subject} onValueChange={(v) => setContactForm({ ...contactForm, subject: v })}>
-                            <SelectTrigger className="bg-white border-accent/30 rounded-none focus:border-accent">
-                              <SelectValue placeholder="Select subject" />
+                            <SelectTrigger className={inputCls}>
+                              <SelectValue placeholder={t("contact.subjectPlaceholder")} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="general">General Inquiry</SelectItem>
-                              <SelectItem value="property">Property Information</SelectItem>
-                              <SelectItem value="partnership">Partnership</SelectItem>
-                              <SelectItem value="media">Media & Press</SelectItem>
-                              <SelectItem value="careers">Careers</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
+                              <SelectItem value="general">{t("contact.subjectGeneral")}</SelectItem>
+                              <SelectItem value="property">{t("contact.subjectProperty")}</SelectItem>
+                              <SelectItem value="partnership">{t("contact.subjectPartnership")}</SelectItem>
+                              <SelectItem value="media">{t("contact.subjectMedia")}</SelectItem>
+                              <SelectItem value="careers">{t("contact.subjectCareers")}</SelectItem>
+                              <SelectItem value="other">{t("contact.subjectOther")}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                          Message *
-                        </label>
+                        <label className={labelCls}>{t("contact.message")} {reqMark}</label>
                         <Textarea
-                          placeholder="Tell us how we can help..."
+                          placeholder={t("contact.messagePlaceholder")}
                           rows={4}
                           value={contactForm.message}
                           onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                           required
-                          className="bg-white border-accent/30 focus:border-accent resize-none rounded-none"
+                          className={cn(inputCls, "resize-none")}
                         />
                       </div>
                       <div className="flex items-start gap-3">
@@ -298,8 +290,8 @@ const Contact = () => {
                           className="mt-0.5 w-4 h-4 accent-[hsl(var(--accent))] cursor-pointer"
                         />
                         <label htmlFor="consent" className="text-xs text-muted-foreground cursor-pointer leading-relaxed">
-                          I agree to receive communications from ASAS Real Estate. Your data is handled per our{" "}
-                          <a href="#" className="text-accent hover:underline">Privacy Policy</a>.
+                          {t("contact.consentLabel")}{" "}
+                          <a href="#" className="text-accent hover:underline">{t("contact.privacyPolicy")}</a>.
                         </label>
                       </div>
                       <Button
@@ -309,7 +301,7 @@ const Contact = () => {
                         className="w-full rounded-none"
                         disabled={isSubmitting}
                       >
-                        {isSubmitting ? <><Loader2 className="w-4 h-4 me-2 animate-spin" /> Sending...</> : t("buttons.submit")}
+                        {isSubmitting ? <><Loader2 className="w-4 h-4 me-2 animate-spin" /> {t("contact.sending")}</> : t("buttons.submit")}
                       </Button>
                     </form>
                   )}
@@ -317,63 +309,54 @@ const Contact = () => {
 
                 {/* CALLBACK */}
                 <TabsContent value="callback" className="p-8 mt-0">
-                  <p className="text-sm text-muted-foreground mb-6">
-                    Leave your number and our team will call you back within 2 business hours (Sun–Thu, 9 AM–6 PM GST).
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-6">{t("contact.callbackIntro")}</p>
                   <form onSubmit={handleCallbackSubmit} className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                          Full Name *
-                        </label>
+                        <label className={labelCls}>{t("contact.name")} {reqMark}</label>
                         <Input
-                          placeholder="Your full name"
+                          placeholder={t("contact.namePlaceholder")}
                           value={callbackForm.name}
                           onChange={(e) => setCallbackForm({ ...callbackForm, name: e.target.value })}
                           required
-                          className="bg-white border-accent/30 focus:border-accent rounded-none"
+                          className={inputCls}
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                          Phone Number *
-                        </label>
+                        <label className={labelCls}>{t("contact.phone")} {reqMark}</label>
                         <Input
                           type="tel"
-                          placeholder="+971 XX XXX XXXX"
+                          dir="ltr"
+                          placeholder={t("contact.phonePlaceholder")}
                           value={callbackForm.phone}
                           onChange={(e) => setCallbackForm({ ...callbackForm, phone: e.target.value })}
                           required
-                          className="bg-white border-accent/30 focus:border-accent rounded-none"
+                          className={inputCls}
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                        Best Time to Call
-                      </label>
+                      <label className={labelCls}>{t("contact.callbackTime")}</label>
                       <Select value={callbackForm.callback_time} onValueChange={(v) => setCallbackForm({ ...callbackForm, callback_time: v })}>
-                        <SelectTrigger className="bg-white border-accent/30 rounded-none">
+                        <SelectTrigger className={inputCls}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="asap">ASAP</SelectItem>
-                          <SelectItem value="morning">Morning (9 AM–12 PM)</SelectItem>
-                          <SelectItem value="afternoon">Afternoon (12 PM–3 PM)</SelectItem>
-                          <SelectItem value="evening">Evening (3 PM–6 PM)</SelectItem>
+                          <SelectItem value="asap">{t("contact.callbackAsap")}</SelectItem>
+                          <SelectItem value="morning">{t("contact.callbackMorning")}</SelectItem>
+                          <SelectItem value="afternoon">{t("contact.callbackAfternoon")}</SelectItem>
+                          <SelectItem value="evening">{t("contact.callbackEvening")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                        Brief Note (optional)
-                      </label>
+                      <label className={labelCls}>{t("contact.callbackNote")}</label>
                       <Textarea
-                        placeholder="Property of interest, questions, etc."
+                        placeholder={t("contact.callbackNotePlaceholder")}
                         rows={3}
                         value={callbackForm.note}
                         onChange={(e) => setCallbackForm({ ...callbackForm, note: e.target.value })}
-                        className="bg-white border-accent/30 focus:border-accent resize-none rounded-none"
+                        className={cn(inputCls, "resize-none")}
                       />
                     </div>
                     <Button
@@ -383,7 +366,7 @@ const Contact = () => {
                       className="w-full rounded-none"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Requesting...</> : "Request Callback"}
+                      {isSubmitting ? <><Loader2 className="w-4 h-4 me-2 animate-spin" /> {t("contact.callbackRequesting")}</> : t("contact.callbackRequest")}
                     </Button>
                   </form>
                 </TabsContent>
@@ -395,45 +378,38 @@ const Contact = () => {
                       <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Check className="w-8 h-8 text-accent" />
                       </div>
-                      <h3 className="text-xl font-semibold text-foreground mb-2">Welcome to ASAS!</h3>
-                      <p className="text-muted-foreground">You'll receive exclusive Dubai property updates and market insights.</p>
+                      <h3 className="text-xl font-semibold text-foreground mb-2">{t("contact.newsletterWelcome")}</h3>
+                      <p className="text-muted-foreground">{t("contact.newsletterWelcomeDesc")}</p>
                     </div>
                   ) : (
                     <>
-                      <p className="text-sm text-muted-foreground mb-6">
-                        Subscribe for curated updates on Dubai's most exclusive properties, market insights, and early access to new launches.
-                      </p>
+                      <p className="text-sm text-muted-foreground mb-6">{t("contact.newsletterIntro")}</p>
                       <form onSubmit={handleNewsletterSubmit} className="space-y-5">
                         <div>
-                          <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                            Name (optional)
-                          </label>
+                          <label className={labelCls}>{t("contact.newsletterName")}</label>
                           <Input
-                            placeholder="Your name"
+                            placeholder={t("contact.namePlaceholderShort")}
                             value={newsletterForm.name}
                             onChange={(e) => setNewsletterForm({ ...newsletterForm, name: e.target.value })}
-                            className="bg-white border-accent/30 focus:border-accent rounded-none"
+                            className={inputCls}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                            Email Address *
-                          </label>
+                          <label className={labelCls}>{t("contact.email")} {reqMark}</label>
                           <Input
                             type="email"
-                            placeholder="your@email.com"
+                            dir="ltr"
+                            placeholder={t("contact.emailPlaceholder")}
                             value={newsletterForm.email}
                             onChange={(e) => setNewsletterForm({ ...newsletterForm, email: e.target.value })}
                             required
-                            className="bg-white border-accent/30 focus:border-accent rounded-none"
+                            className={inputCls}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                            Preferred Language
-                          </label>
+                          <label className={labelCls}>{t("contact.newsletterLanguage")}</label>
                           <Select value={newsletterForm.language} onValueChange={(v) => setNewsletterForm({ ...newsletterForm, language: v })}>
-                            <SelectTrigger className="bg-white border-accent/30 rounded-none">
+                            <SelectTrigger className={inputCls}>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -449,7 +425,7 @@ const Contact = () => {
                           className="w-full rounded-none"
                           disabled={isSubmitting}
                         >
-                          {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Subscribing...</> : "Subscribe"}
+                          {isSubmitting ? <><Loader2 className="w-4 h-4 me-2 animate-spin" /> {t("contact.newsletterSubscribing")}</> : t("contact.newsletterSubscribe")}
                         </Button>
                       </form>
                     </>

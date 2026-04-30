@@ -53,7 +53,7 @@ const Navigation = () => {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 start-0 end-0 z-50 transition-all duration-3000",
         isScrolled 
           ? "bg-background/95 backdrop-blur-md border-b border-border shadow-lg" 
           : "bg-transparent"
@@ -130,7 +130,8 @@ const Navigation = () => {
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
                 className={cn(
                   "fixed top-0 bottom-0 w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col",
-                  isRTL ? "left-0" : "right-0"
+                  // Drawer always opens from the inline-end side (right in LTR, left in RTL)
+                  "end-0"
                 )}
               >
                 <div className="flex items-center justify-between h-20 px-6 border-b border-border">

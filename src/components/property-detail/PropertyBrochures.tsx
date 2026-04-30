@@ -28,7 +28,7 @@ const PropertyBrochures = ({ property }: PropertyBrochuresProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "font-serif text-2xl md:text-3xl font-medium text-foreground mb-8",
-          isRTL && "text-right"
+          isRTL && "text-end"
         )}>
           {language === "ar" ? "الكتيبات والمستندات" : "Brochures & Documents"}
         </h2>
@@ -47,12 +47,11 @@ const PropertyBrochures = ({ property }: PropertyBrochuresProps) => {
                 transition={{ delay: index * 0.1 }}
                 className={cn(
                   "group bg-background rounded-xl border border-border p-6 hover:border-accent/30 hover:shadow-lg transition-all duration-300",
-                  isRTL && "text-right"
+                  isRTL && "text-end"
                 )}
               >
                 <div className={cn(
-                  "flex items-start gap-4",
-                  isRTL && "flex-row-reverse"
+                  "flex items-start gap-4"
                 )}>
                   {/* PDF Icon */}
                   <div className="flex-shrink-0 w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -69,8 +68,7 @@ const PropertyBrochures = ({ property }: PropertyBrochuresProps) => {
                     </p>
                     
                     <div className={cn(
-                      "flex items-center gap-2",
-                      isRTL && "flex-row-reverse"
+                      "flex items-center gap-2"
                     )}>
                       <Button
                         size="sm"

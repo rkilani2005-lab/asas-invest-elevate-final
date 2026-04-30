@@ -39,7 +39,7 @@ const WhatIsREIT = () => {
                 />
               </div>
               <motion.div 
-                className="absolute -bottom-6 -right-6 bg-primary text-primary-foreground p-6 rounded-xl shadow-elegant hidden md:block"
+                className="absolute -bottom-6 -end-6 bg-primary text-primary-foreground p-6 rounded-xl shadow-elegant hidden md:blockck"
                 style={{ y: badgeY }}
               >
                 <div className="font-serif text-3xl font-bold">10+</div>
@@ -49,7 +49,7 @@ const WhatIsREIT = () => {
           </ScrollReveal>
 
           {/* Content Side */}
-          <div className="lg:pl-8">
+          <div className="lg:ps-8">
             <ScrollReveal direction="right">
               <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">
                 Real Estate Investment
@@ -85,7 +85,7 @@ const WhatIsREIT = () => {
               <Link to="/insights">
                 <Button variant="outline" className="group">
                   Learn More
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ms-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             </ScrollReveal>

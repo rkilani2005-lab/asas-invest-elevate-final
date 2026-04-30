@@ -87,9 +87,37 @@
     line-height: 1.5;
   }
 
-  /* RTL Font Swap */
+  /* RTL Font Swap + Arabic-tuned typography
+     Arabic letters render visually smaller than Latin at the same point size,
+     so we scale up slightly and increase leading. Letter-spacing must be 0 —
+     wide tracking breaks Arabic ligatures. */
   [dir="rtl"] body {
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-size: 1.06rem; /* ~+6% body scale */
+    line-height: 1.75;
+    letter-spacing: 0;
+  }
+
+  /* Reset any wide/narrow tracking utilities under RTL */
+  [dir="rtl"] .tracking-tight,
+  [dir="rtl"] .tracking-tighter,
+  [dir="rtl"] .tracking-wide,
+  [dir="rtl"] .tracking-wider,
+  [dir="rtl"] .tracking-widest {
+    letter-spacing: 0 !important;
+  }
+
+  /* Uppercase has no meaning in Arabic — neutralize it */
+  [dir="rtl"] .uppercase {
+    text-transform: none !important;
+  }
+
+  /* Phone numbers, emails, URLs stay LTR even inside RTL paragraphs */
+  [dir="rtl"] .ltr-numeric,
+  [dir="rtl"] [data-ltr="true"] {
+    direction: ltr;
+    unicode-bidi: isolate;
+    display: inline-block;
   }
 
   /* Heading Typography — Satoshi, Modernist */

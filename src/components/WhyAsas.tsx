@@ -145,7 +145,7 @@ const WhyAsas = () => {
           </div>
         </div>
 
-        {/* Mission Statement — full-width, left-aligned, editorial */}
+        {/* Mission Statement — full-width, start-aligned, editorial */}
         <ScrollReveal delay={0.2}>
           <div
             className="relative px-10 md:px-16 py-12 md:py-14 overflow-hidden"

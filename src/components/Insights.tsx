@@ -136,7 +136,7 @@ const Insights = () => {
                   <Link to={`/insights/${article.slug}`}>
                     <article className={cn(
                       "card-luxury p-6 cursor-pointer h-full",
-                      isRTL && "text-right"
+                      isRTL && "text-end"
                     )}>
                       <div className="inline-flex items-center rounded-full px-3 py-1 bg-accent/10 text-accent text-xs font-medium mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {getCategoryLabel(article.category)}
@@ -148,11 +148,10 @@ const Insights = () => {
                         {content.excerpt}
                       </p>
                       <div className={cn(
-                        "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border",
-                        isRTL && "flex-row-reverse"
+                        "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border"
                       )}>
-                        <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                          <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ml-1.5" : "mr-1.5")} />
+                        <div className={cn("flex items-center")}>
+                          <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ms-1.5" : "me-1.5")} />
                           <span>
                             {article.published_at && format(new Date(article.published_at), 'MMM d, yyyy')}
                           </span>
@@ -172,7 +171,7 @@ const Insights = () => {
           <Link to="/insights">
             <Button variant="outline" size="lg" className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 text-sm font-medium tracking-wide">
               {t("insights.viewAll")}
-              <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} />
+              <ArrowRight className={cn("h-4 w-4", isRTL ? "me-2 rotate-180" : "ms-2")} />
             </Button>
           </Link>
         </ScrollReveal>

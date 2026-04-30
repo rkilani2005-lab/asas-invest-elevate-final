@@ -63,10 +63,10 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
     <>
       <div className="relative h-[60vh] md:h-[80vh] w-full overflow-hidden grain-overlay">
         {/* Cinematic Letterbox - Top Bar */}
-        <div className="absolute top-0 left-0 right-0 h-20 md:h-24 bg-gradient-to-b from-charcoal via-charcoal/90 to-transparent z-10" />
+        <div className="absolute top-0 start-0 end-0 h-20 md:h-24 bg-gradient-to-b from-charcoal via-charcoal/90 to-transparent z-100" />
         
         {/* Cinematic Letterbox - Bottom Bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 md:h-20 bg-gradient-to-t from-charcoal via-charcoal/80 to-transparent z-10" />
+        <div className="absolute bottom-0 start-0 end-0 h-16 md:h-20 bg-gradient-to-t from-charcoal via-charcoal/80 to-transparent z-100" />
         
         {/* Image Carousel */}
         <AnimatePresence mode="wait">
@@ -96,7 +96,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
               onClick={isRTL ? nextImage : prevImage}
               className={cn(
                 "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300",
-                isRTL ? "right-4" : "left-4"
+                isRTL ? "end-4" : "start-4"
               )}
               aria-label="Previous image"
             >
@@ -106,7 +106,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
               onClick={isRTL ? prevImage : nextImage}
               className={cn(
                 "absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 border border-accent/50 bg-background/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300",
-                isRTL ? "left-4" : "right-4"
+                isRTL ? "start-4" : "end-4"
               )}
               aria-label="Next image"
             >
@@ -117,7 +117,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
 
         {/* Image Indicators */}
         {images.length > 1 && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+          <div className="absolute bottom-6 start-1/2 -translate-x-1/2 z-10 flex gap-2">
             {images.map((_, index) => (
               <button
                 key={index}
@@ -138,7 +138,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
         {property.video_url && (
           <div className={cn(
             "absolute bottom-6 z-10",
-            isRTL ? "left-6" : "right-6"
+            isRTL ? "start-6" : "end-6"
           )}>
             <Button
               variant="luxury"
@@ -157,7 +157,7 @@ const PropertyHero = ({ property }: PropertyHeroProps) => {
         <DialogContent className="max-w-4xl w-[95vw] p-0 bg-black border-none overflow-hidden">
           <button
             onClick={() => setShowVideoModal(false)}
-            className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
+            className="absolute top-4 end-4 z-50 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colorsrs"
             aria-label="Close video"
           >
             <X className="h-5 w-5 text-white" />

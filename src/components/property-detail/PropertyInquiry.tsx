@@ -113,11 +113,10 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
     <div className="py-12 bg-background border-y border-accent/20">
       <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
         <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
-          isRTL && "lg:flex-row-reverse"
+          "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
         )}>
           {/* Left - Info */}
-          <div className={cn(isRTL && "text-right lg:order-2")}>
+          <div className={cn(isRTL && "text-end lg:order-2-2")}>
             <p className="text-accent text-xs font-medium tracking-widest uppercase mb-4">
               {t("sections.inquire")}
             </p>
@@ -131,8 +130,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
 
             {/* WhatsApp Option */}
             <div className={cn(
-              "flex items-center gap-4 p-4 border border-accent/30 bg-white shadow-card",
-              isRTL && "flex-row-reverse"
+              "flex items-center gap-4 p-4 border border-accent/30 bg-white shadow-card"
             )}>
               <div className="w-12 h-12 border border-accent/30 rounded-full flex items-center justify-center flex-shrink-0">
                 <MessageCircle className="h-6 w-6 text-accent" strokeWidth={1} />
@@ -158,7 +156,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 <div>
                   <label className={cn(
                     "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-right"
+                    isRTL && "text-end"
                   )}>
                     {t("contact.name")} *
                   </label>
@@ -168,7 +166,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     className={cn(
                       "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                      isRTL && "text-right"
+                      isRTL && "text-end"
                     )}
                     placeholder={t("contact.name")}
                   />
@@ -176,7 +174,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 <div>
                   <label className={cn(
                     "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-right"
+                    isRTL && "text-end"
                   )}>
                     {t("contact.email")} *
                   </label>
@@ -187,7 +185,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     className={cn(
                       "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                      isRTL && "text-right"
+                      isRTL && "text-end"
                     )}
                     placeholder="your@email.com"
                   />
@@ -197,7 +195,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <div>
                 <label className={cn(
                   "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                  isRTL && "text-right"
+                  isRTL && "text-end"
                 )}>
                   {t("contact.phone")}
                 </label>
@@ -207,7 +205,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   className={cn(
                     "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                    isRTL && "text-right"
+                    isRTL && "text-end"
                   )}
                   placeholder="+971 XX XXX XXXX"
                 />
@@ -216,20 +214,18 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <div>
                 <label className={cn(
                   "block text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider",
-                  isRTL && "text-right"
+                  isRTL && "text-end"
                 )}>
                   {t("contact.interests")}
                 </label>
                 <div className={cn(
-                  "flex flex-wrap gap-4",
-                  isRTL && "flex-row-reverse"
+                  "flex flex-wrap gap-4"
                 )}>
                   {interestOptions.map((option) => (
                     <label
                       key={option.id}
                       className={cn(
-                        "flex items-center gap-2 cursor-pointer",
-                        isRTL && "flex-row-reverse"
+                        "flex items-center gap-2 cursor-pointer"
                       )}
                     >
                       <Checkbox
@@ -246,7 +242,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <div>
                 <label className={cn(
                   "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                  isRTL && "text-right"
+                  isRTL && "text-end"
                 )}>
                   {t("contact.message")}
                 </label>
@@ -255,7 +251,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   className={cn(
                     "bg-white border-accent/30 rounded-none focus:border-accent resize-none text-foreground",
-                    isRTL && "text-right"
+                    isRTL && "text-end"
                   )}
                   rows={4}
                   placeholder="Tell us about your investment goals..."
@@ -274,7 +270,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 ) : (
                   <>
                     {t("buttons.registerInterest")}
-                    <Send className={cn("h-4 w-4", isRTL ? "mr-2" : "ml-2")} strokeWidth={1} />
+                    <Send className={cn("h-4 w-4", isRTL ? "me-2" : "ms-2")} strokeWidth={1} />
                   </>
                 )}
               </Button>

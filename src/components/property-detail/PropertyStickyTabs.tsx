@@ -24,7 +24,7 @@ const PropertyStickyTabs = ({ activeTab, onTabChange, tabs }: PropertyStickyTabs
         <nav className="overflow-x-auto scrollbar-hide">
           <div className={cn(
             "flex min-w-max",
-            isRTL ? "flex-row-reverse" : ""
+            ""
           )}>
             {visibleTabs.map((tab) => (
               <button

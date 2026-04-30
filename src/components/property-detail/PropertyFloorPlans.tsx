@@ -50,7 +50,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "font-serif text-2xl md:text-3xl font-medium text-foreground mb-8",
-          isRTL && "text-right"
+          isRTL && "text-end"
         )}>
           {t("sections.floorPlans")}
         </h2>
@@ -60,7 +60,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
           <div className="mb-8">
             <h3 className={cn(
               "text-lg font-medium text-foreground mb-4",
-              isRTL && "text-right"
+              isRTL && "text-end"
             )}>
               {language === "ar" ? "مخططات PDF" : "PDF Floor Plans"}
             </h3>
@@ -78,12 +78,11 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                     transition={{ delay: index * 0.1 }}
                     className={cn(
                       "group bg-secondary/50 rounded-xl border border-border p-4 hover:border-accent/30 hover:shadow-md transition-all duration-300",
-                      isRTL && "text-right"
+                      isRTL && "text-end"
                     )}
                   >
                     <div className={cn(
-                      "flex items-center gap-4",
-                      isRTL && "flex-row-reverse"
+                      "flex items-center gap-4"
                     )}>
                       <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                         <FileText className="h-6 w-6 text-primary" />
@@ -99,8 +98,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                         </p>
                       </div>
                       <div className={cn(
-                        "flex items-center gap-2",
-                        isRTL && "flex-row-reverse"
+                        "flex items-center gap-2"
                       )}>
                         <Button
                           size="icon"
@@ -148,7 +146,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
             {pdfPlans.length > 0 && (
               <h3 className={cn(
                 "text-lg font-medium text-foreground mb-4",
-                isRTL && "text-right"
+                isRTL && "text-end"
               )}>
                 {language === "ar" ? "مخططات صور" : "Image Floor Plans"}
               </h3>
@@ -188,7 +186,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                     {/* Info */}
                     <div className={cn(
                       "p-4 border-t border-border bg-background",
-                      isRTL && "text-right"
+                      isRTL && "text-end"
                     )}>
                       <p className="font-medium text-foreground mb-1">
                         {caption || `Floor Plan ${index + 1}`}
@@ -219,7 +217,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
               {/* Close Button */}
               <button
                 onClick={closeLightbox}
-                className="absolute top-4 right-4 z-50 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+                className="absolute top-4 end-4 z-50 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colorsrs"
               >
                 <X className="h-6 w-6 text-white" />
               </button>
@@ -231,7 +229,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="absolute top-4 right-20 z-50 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+                className="absolute top-4 end-20 z-50 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colorsrs"
               >
                 <Download className="h-5 w-5 text-white" />
               </a>

@@ -69,18 +69,12 @@ const PropertyFilters = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* Search */}
         <div className="relative lg:col-span-2">
-          <Search className={cn(
-            "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground",
-            isRTL ? "right-3" : "left-3"
-          )} strokeWidth={1} />
+          <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground start-3" strokeWidth={1} />
           <Input
             placeholder={t("filters.search")}
             value={filters.search}
             onChange={(e) => updateFilter("search", e.target.value)}
-            className={cn(
-              "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-              isRTL ? "pr-10 text-right" : "pl-10"
-            )}
+            className="h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground ps-10"
           />
         </div>
 
@@ -91,7 +85,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-right"
+            isRTL && "text-end"
           )}>
             <SelectValue placeholder={t("filters.allLocations")} />
           </SelectTrigger>
@@ -112,7 +106,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-right"
+            isRTL && "text-end"
           )}>
             <SelectValue placeholder={t("filters.allDevelopers")} />
           </SelectTrigger>
@@ -133,7 +127,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-right"
+            isRTL && "text-end"
           )}>
             <SelectValue placeholder={t("filters.allCategories")} />
           </SelectTrigger>
@@ -151,7 +145,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-right"
+            isRTL && "text-end"
           )}>
             <SelectValue placeholder={t("filters.allBedrooms")} />
           </SelectTrigger>
@@ -169,8 +163,7 @@ const PropertyFilters = ({
       {/* Active Filters & Clear */}
       {hasActiveFilters && (
         <div className={cn(
-          "mt-4 pt-4 border-t border-border flex items-center gap-2",
-          isRTL && "flex-row-reverse"
+          "mt-4 pt-4 border-t border-border flex items-center gap-2"
         )}>
           <Button
             variant="ghost"
@@ -178,7 +171,7 @@ const PropertyFilters = ({
             onClick={clearFilters}
             className="text-muted-foreground hover:text-accent"
           >
-            <X className={cn("h-4 w-4", isRTL ? "ml-1.5" : "mr-1.5")} strokeWidth={1} />
+            <X className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} strokeWidth={1} />
             {t("buttons.clearFilters")}
           </Button>
         </div>

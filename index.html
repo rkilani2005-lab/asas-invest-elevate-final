@@ -33,6 +33,25 @@
 
     <!-- Preload hero background for faster LCP -->
     <link rel="preload" as="image" href="/images/dubai-skyline.jpg" fetchpriority="high" />
+
+    <!-- Set dir/lang BEFORE React mounts to avoid LTR flash for Arabic users -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('i18nextLng') || '';
+          var lang = stored.split('-')[0];
+          if (lang !== 'ar' && lang !== 'en') {
+            var nav = (navigator.language || 'en').toLowerCase();
+            lang = nav.indexOf('ar') === 0 ? 'ar' : 'en';
+          }
+          document.documentElement.lang = lang;
+          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        } catch (e) {
+          document.documentElement.lang = 'en';
+          document.documentElement.dir = 'ltr';
+        }
+      })();
+    </script>
   </head>
 
   <body>

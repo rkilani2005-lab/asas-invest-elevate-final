@@ -100,11 +100,10 @@ const InsightsPage = () => {
           <Link 
             to="/" 
             className={cn(
-              "inline-flex items-center text-primary-foreground/70 hover:text-primary-foreground mb-6 text-sm transition-colors",
-              isRTL && "flex-row-reverse"
+              "inline-flex items-center text-primary-foreground/70 hover:text-primary-foreground mb-6 text-sm transition-colors"
             )}
           >
-            <ArrowLeft className={cn("h-4 w-4", isRTL ? "ml-2 rotate-180" : "mr-2")} />
+            <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
             {isRTL ? "العودة إلى الرئيسية" : "Back to Home"}
           </Link>
           <p className="text-eyebrow text-accent mb-4 inline-flex items-center gap-2">
@@ -126,11 +125,10 @@ const InsightsPage = () => {
       <section className="py-8 border-b border-border bg-background sticky top-20 z-40">
         <div className="container mx-auto px-4 lg:px-8">
           <div className={cn(
-            "flex flex-col md:flex-row md:items-center justify-between gap-4",
-            isRTL && "md:flex-row-reverse"
+            "flex flex-col md:flex-row md:items-center justify-between gap-4"
           )}>
             {/* Categories */}
-            <div className={cn("flex flex-wrap gap-2", isRTL && "flex-row-reverse")}>
+            <div className={cn("flex flex-wrap gap-2")}>
               {categories.map((category) => (
                 <button
                   key={category.name}
@@ -139,11 +137,10 @@ const InsightsPage = () => {
                     "inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
                     activeCategory === category.name
                       ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-foreground hover:bg-secondary/80",
-                    isRTL && "flex-row-reverse"
+                      : "bg-secondary text-foreground hover:bg-secondary/80"
                   )}
                 >
-                  <category.icon className={cn("h-4 w-4", isRTL ? "ml-2" : "mr-2")} />
+                  <category.icon className={cn("h-4 w-4", isRTL ? "ms-2" : "me-2")} />
                   {category.name === "All" ? (isRTL ? "الكل" : "All") : (category.label || category.name)}
                 </button>
               ))}
@@ -153,11 +150,11 @@ const InsightsPage = () => {
             <div className="relative w-full md:w-72">
               <Search className={cn(
                 "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground",
-                isRTL ? "right-3" : "left-3"
+                isRTL ? "end-3" : "start-3"
               )} />
               <Input 
                 placeholder={isRTL ? "البحث في المقالات..." : "Search articles..."} 
-                className={cn("bg-secondary border-0", isRTL ? "pr-10 text-right" : "pl-10")}
+                className={cn("bg-secondary border-0", isRTL ? "pe-10 text-end" : "ps-10")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -171,30 +168,29 @@ const InsightsPage = () => {
         <section className="py-12 bg-background">
           <div className="container mx-auto px-4 lg:px-8">
             <ScrollReveal direction="up" className="bg-secondary/50 rounded-2xl p-8 md:p-12 hover:bg-secondary/70 transition-colors duration-300 cursor-pointer group">
-              <div className={cn("flex flex-col lg:flex-row gap-8", isRTL && "lg:flex-row-reverse")}>
+              <div className={cn("flex flex-col lg:flex-row gap-8")}>
                 <div className="lg:w-2/3">
                   <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-medium tracking-wide mb-4">
                     {isRTL ? "مميز" : "Featured"} • {getCategoryLabel(featuredArticle.category)}
                   </div>
                   <h2 className={cn(
                     "heading-section text-2xl md:text-4xl text-foreground mb-4 group-hover:text-accent transition-colors",
-                    isRTL && "font-arabic text-right"
+                    isRTL && "font-arabic text-end"
                   )}>
                     {getLocalizedContent(featuredArticle).title}
                   </h2>
-                  <p className={cn("text-muted-foreground leading-relaxed mb-6", isRTL && "text-right")}>
+                  <p className={cn("text-muted-foreground leading-relaxed mb-6", isRTL && "text-end")}>
                     {getLocalizedContent(featuredArticle).excerpt}
                   </p>
                   <div className={cn(
-                    "flex flex-wrap items-center gap-4 text-sm text-muted-foreground",
-                    isRTL && "flex-row-reverse"
+                    "flex flex-wrap items-center gap-4 text-sm text-muted-foreground"
                   )}>
-                    <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                      <Calendar className={cn("h-4 w-4", isRTL ? "ml-1.5" : "mr-1.5")} />
+                    <div className={cn("flex items-center")}>
+                      <Calendar className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
                       {featuredArticle.published_at && format(new Date(featuredArticle.published_at), 'MMMM d, yyyy')}
                     </div>
-                    <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                      <Clock className={cn("h-4 w-4", isRTL ? "ml-1.5" : "mr-1.5")} />
+                    <div className={cn("flex items-center")}>
+                      <Clock className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
                       {featuredArticle.read_time_minutes} {isRTL ? "دقائق للقراءة" : "min read"}
                     </div>
                     {getLocalizedContent(featuredArticle).author && (
@@ -208,7 +204,7 @@ const InsightsPage = () => {
                   <Link to={`/insights/${featuredArticle.slug}`}>
                     <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                       {isRTL ? "اقرأ المقال كاملاً" : "Read Full Article"}
-                      <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} />
+                      <ArrowRight className={cn("h-4 w-4", isRTL ? "me-2 rotate-180" : "ms-2")} />
                     </Button>
                   </Link>
                 </div>
@@ -221,7 +217,7 @@ const InsightsPage = () => {
       {/* Articles Grid */}
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className={cn("flex items-center justify-between mb-8", isRTL && "flex-row-reverse")}>
+          <div className={cn("flex items-center justify-between mb-8")}>
             <h2 className={cn("heading-section text-2xl md:text-3xl text-foreground", isRTL && "font-arabic")}>
               {activeCategory === "All" 
                 ? (isRTL ? "أحدث المقالات" : "Latest Articles")
@@ -254,7 +250,7 @@ const InsightsPage = () => {
                     <Link to={`/insights/${article.slug}`}>
                       <article className={cn(
                         "card-luxury p-6 cursor-pointer h-full",
-                        isRTL && "text-right"
+                        isRTL && "text-end"
                       )}>
                         <div className="inline-flex items-center rounded-full px-3 py-1 bg-accent/10 text-accent text-xs font-medium mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                           {getCategoryLabel(article.category)}
@@ -269,11 +265,10 @@ const InsightsPage = () => {
                           {content.excerpt}
                         </p>
                         <div className={cn(
-                          "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border",
-                          isRTL && "flex-row-reverse"
+                          "flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border"
                         )}>
-                          <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                            <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ml-1.5" : "mr-1.5")} />
+                          <div className={cn("flex items-center")}>
+                            <Calendar className={cn("h-3.5 w-3.5", isRTL ? "ms-1.5" : "me-1.5")} />
                             <span>
                               {article.published_at && format(new Date(article.published_at), 'MMM d, yyyy')}
                             </span>
@@ -311,11 +306,11 @@ const InsightsPage = () => {
                 : "Subscribe to our newsletter for weekly market updates, investment tips, and exclusive property opportunities."
               }
             </p>
-            <form className={cn("flex flex-col sm:flex-row gap-3 max-w-md mx-auto", isRTL && "sm:flex-row-reverse")}>
+            <form className={cn("flex flex-col sm:flex-row gap-3 max-w-md mx-auto")}>
               <Input 
                 type="email" 
                 placeholder={isRTL ? "أدخل بريدك الإلكتروني" : "Enter your email"} 
-                className={cn("bg-background border-border flex-1", isRTL && "text-right")}
+                className={cn("bg-background border-border flex-1", isRTL && "text-end")}
               />
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                 {isRTL ? "اشتراك" : "Subscribe"}
