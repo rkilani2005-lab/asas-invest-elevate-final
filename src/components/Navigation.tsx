@@ -297,7 +297,7 @@ const Navigation = () => {
                   isRTL ? "left-0" : "right-0"
                 )}
               >
-                <div className="flex items-center justify-between h-20 px-6 border-b border-border">
+                <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
                   <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
                     <img 
                       src={logoWhiteBg} 
