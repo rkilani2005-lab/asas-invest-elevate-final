@@ -70,14 +70,11 @@ const FeaturedProperties = () => {
                 {t("featuredProperties.description")}
               </p>
             </div>
-            <Link
+            <ViewAllButton
               to="/buy"
-              className="text-charcoal hover:text-accent text-sm font-medium inline-flex items-center gap-2 self-start md:self-end border-b border-accent pb-1 transition-colors"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              {t("buttons.viewAll")}
-              <ArrowRight className="h-4 w-4 rtl-flip" strokeWidth={2} />
-            </Link>
+              variant="inline"
+              className="self-start md:self-end"
+            />
           </div>
         </ScrollReveal>
 
@@ -125,13 +122,8 @@ const FeaturedProperties = () => {
             )}
             
             {offPlanProperties.length > 0 && (
-              <div className="text-center mt-10">
-                <Button asChild variant="luxury" size="lg" className="px-10">
-                  <Link to="/off-plan">
-                    {t("buttons.viewAll")}
-                    <ArrowRight className="h-4 w-4 ms-2 rtl-flip" strokeWidth={1} />
-                  </Link>
-                </Button>
+              <div className="flex justify-center mt-10">
+                <ViewAllButton to="/off-plan" />
               </div>
             )}
           </TabsContent>
@@ -161,13 +153,8 @@ const FeaturedProperties = () => {
             )}
             
             {readyProperties.length > 0 && (
-              <div className="text-center mt-10">
-                <Button asChild variant="luxury" size="lg" className="px-10">
-                  <Link to="/ready">
-                    {t("buttons.viewAll")}
-                    <ArrowRight className="h-4 w-4 ms-2 rtl-flip" strokeWidth={1} />
-                  </Link>
-                </Button>
+              <div className="flex justify-center mt-10">
+                <ViewAllButton to="/ready" />
               </div>
             )}
           </TabsContent>
