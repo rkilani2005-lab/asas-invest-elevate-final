@@ -75,7 +75,7 @@ const FeaturedProperties = () => {
               className="text-charcoal hover:text-accent text-sm font-medium inline-flex items-center gap-2 self-start md:self-end border-b border-accent pb-1 transition-colors"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              {t("buttons.viewAll") ?? "View all"}
+              {t("buttons.viewAll")}
               <ArrowRight className="h-4 w-4 rtl-flip" strokeWidth={2} />
             </Link>
           </div>
@@ -128,7 +128,7 @@ const FeaturedProperties = () => {
               <div className="text-center mt-10">
                 <Button asChild variant="luxury" size="lg" className="px-10">
                   <Link to="/off-plan">
-                    {t("featuredProperties.viewAllOffPlan")}
+                    {t("buttons.viewAll")}
                     <ArrowRight className="h-4 w-4 ms-2 rtl-flip" strokeWidth={1} />
                   </Link>
                 </Button>
@@ -164,7 +164,7 @@ const FeaturedProperties = () => {
               <div className="text-center mt-10">
                 <Button asChild variant="luxury" size="lg" className="px-10">
                   <Link to="/ready">
-                    {t("featuredProperties.viewAllReady")}
+                    {t("buttons.viewAll")}
                     <ArrowRight className="h-4 w-4 ms-2 rtl-flip" strokeWidth={1} />
                   </Link>
                 </Button>

@@ -270,7 +270,7 @@ const InsightDetail = () => {
           <Link to="/insights">
             <Button variant="outline" size="lg">
               <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
-              {t("insights.viewAll")}
+              {t("buttons.viewAll")}
             </Button>
           </Link>
         </div>

@@ -76,7 +76,7 @@ const LatestUpdates = () => {
 
               <Link to="/insights">
                 <Button variant="ghost" className="group text-accent hover:text-accent">
-                  {t("latestUpdates.viewAllAnnouncements")}
+                  {t("buttons.viewAll")}
                   <ArrowRight className="ms-2 h-4 w-4 group-hover:translate-x-1 transition-transform rtl-flip" />
                 </Button>
               </Link>
@@ -113,7 +113,7 @@ const LatestUpdates = () => {
 
               <Link to="/insights">
                 <Button variant="ghost" className="group text-accent hover:text-accent">
-                  {t("latestUpdates.viewAllPress")}
+                  {t("buttons.viewAll")}
                   <ArrowRight className="ms-2 h-4 w-4 group-hover:translate-x-1 transition-transform rtl-flip" />
                 </Button>
               </Link>
