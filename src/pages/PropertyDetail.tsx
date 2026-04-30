@@ -210,7 +210,7 @@ const PropertyDetail = () => {
                 isRTL && "flex-row-reverse"
               )}
             >
-              <ArrowLeft className={cn("h-4 w-4", isRTL ? "ml-2 rotate-180" : "mr-2")} strokeWidth={1} />
+              <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} strokeWidth={1} />
               <span className="text-sm">{t("property.type." + property.type.replace("-", ""))}</span>
             </Link>
             <div className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}>
@@ -228,7 +228,7 @@ const PropertyDetail = () => {
 
         {/* Title Section */}
         <div className="container mx-auto px-4 lg:px-8 pb-8">
-          <div className={cn("max-w-4xl", isRTL && "text-right mr-auto ml-0")}>
+          <div className={cn("max-w-4xl", isRTL && "text-end me-auto ms-0-0")}>
             <p className="text-accent text-xs font-medium tracking-widest uppercase mb-2">
               {language === "ar" && property.developer_ar ? property.developer_ar : property.developer_en}
             </p>

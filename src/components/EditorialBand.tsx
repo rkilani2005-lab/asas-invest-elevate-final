@@ -51,7 +51,7 @@ const EditorialBand = () => {
 
       {/* Gold top rule */}
       <div
-        className="absolute top-0 left-0 right-0"
+        className="absolute top-0 start-0 end-00"
         style={{
           height: "1px",
           background:
@@ -134,7 +134,7 @@ const EditorialBand = () => {
 
       {/* Gold bottom rule */}
       <div
-        className="absolute bottom-0 left-0 right-0"
+        className="absolute bottom-0 start-0 end-00"
         style={{
           height: "1px",
           background:

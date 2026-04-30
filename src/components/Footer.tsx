@@ -123,7 +123,7 @@ const Footer = () => {
           <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
             {t("footer.copyright")}
           </p>
-          <p className="text-xs text-center md:text-right" style={{ color: 'rgba(255,255,255,0.25)' }}>
+          <p className="text-xs text-center md:text-endht" style={{ color: 'rgba(255,255,255,0.25)' }}>
             {t("footer.address")}
           </p>
         </div>

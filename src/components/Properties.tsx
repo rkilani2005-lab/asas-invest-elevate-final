@@ -57,15 +57,15 @@ const PropertyCard = ({ property, index }: PropertyCardProps) => {
             className="w-full h-[120%] object-cover group-hover:scale-105 transition-transform duration-500"
             style={{ y: imageY }}
           />
-          <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-xs font-medium tracking-wide ${getTypeStyles(property.type)}`}>
+          <div className={`absolute top-4 start-4 px-3 py-1.5 rounded-full text-xs font-medium tracking-wide ${getTypeStyles(property.type)}`}>
             {property.type}
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className=p-6">
           <div className="flex items-center text-muted-foreground text-sm mb-2">
-            <MapPin className="h-3.5 w-3.5 mr-1.5" />
+            <MapPin className="h-3.5 w-3.5 me-1.5" />
             <span>{property.location}</span>
           </div>
           <h3 className="heading-section text-xl text-foreground mb-4 group-hover:text-accent transition-colors">
@@ -99,7 +99,7 @@ const PropertyCard = ({ property, index }: PropertyCardProps) => {
             </span>
             <Button variant="ghost" size="sm" className="text-accent hover:text-accent hover:bg-accent/10">
               View Details
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
@@ -169,7 +169,7 @@ const Properties = () => {
         <ScrollReveal delay={0.3} className="text-center mt-12">
           <Button variant="outline" size="lg" className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 text-sm font-medium tracking-wide">
             View All Properties
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ms-2 h-4 w-4" />
           </Button>
         </ScrollReveal>
       </div>

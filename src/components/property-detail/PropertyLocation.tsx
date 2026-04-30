@@ -48,7 +48,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "heading-section text-2xl md:text-3xl text-foreground mb-8",
-          isRTL && "text-right"
+          isRTL && "text-endht"
         )}>
           {t("sections.location")}
         </h2>
@@ -72,12 +72,12 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
           </div>
 
           {/* Nearby Places */}
-          <div className={cn(isRTL && "text-right")}>
+          <div className={cn(isRTL && "text-endht")}>
             <div className={cn(
               "flex items-center mb-6",
               isRTL && "flex-row-reverse"
             )}>
-              <MapPin className={cn("h-5 w-5 text-accent", isRTL ? "ml-2" : "mr-2")} strokeWidth={1} />
+              <MapPin className={cn("h-5 w-5 text-accent", isRTL ? "ms-2" : "me-2")} strokeWidth={1} />
               <span className="text-lg font-medium text-foreground">{location}</span>
             </div>
 
@@ -98,7 +98,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
                         )}>
                           <div className={cn(
                             "w-8 h-8 border border-accent/30 flex items-center justify-center flex-shrink-0",
-                            isRTL ? "ml-2" : "mr-2"
+                            isRTL ? "ms-2" : "me-2"
                           )}>
                             <Icon className="h-4 w-4 text-accent" strokeWidth={1} />
                           </div>
@@ -106,7 +106,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
                         </div>
                         <p className={cn(
                           "text-xs text-muted-foreground",
-                          isRTL ? "pr-10 text-right" : "pl-10"
+                          isRTL ? "pe-10 text-endht" : "ps-10"
                         )}>
                           {place.distance}
                         </p>

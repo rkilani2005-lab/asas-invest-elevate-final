@@ -95,7 +95,7 @@ const InsightDetail = () => {
             </p>
             <Link to="/insights">
               <Button>
-                <ArrowLeft className={cn("h-4 w-4", isRTL ? "ml-2 rotate-180" : "mr-2")} />
+                <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
                 {isRTL ? "العودة إلى المقالات" : "Back to Insights"}
               </Button>
             </Link>
@@ -141,7 +141,7 @@ const InsightDetail = () => {
               isRTL && "flex-row-reverse"
             )}
           >
-            <ArrowLeft className={cn("h-4 w-4", isRTL ? "ml-2 rotate-180" : "mr-2")} />
+            <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
             {isRTL ? "العودة إلى المقالات" : "Back to Insights"}
           </Link>
           
@@ -151,7 +151,7 @@ const InsightDetail = () => {
           
           <h1 className={cn(
             "font-serif text-3xl md:text-4xl lg:text-5xl font-medium mb-6 leading-tight",
-            isRTL && "font-arabic text-right"
+            isRTL && "font-arabic text-endht"
           )}>
             {content.title}
           </h1>
@@ -159,7 +159,7 @@ const InsightDetail = () => {
           {content.excerpt && (
             <p className={cn(
               "text-primary-foreground/80 text-lg leading-relaxed mb-8",
-              isRTL && "text-right"
+              isRTL && "text-endht"
             )}>
               {content.excerpt}
             </p>
@@ -171,19 +171,19 @@ const InsightDetail = () => {
           )}>
             {content.author && (
               <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                <User className={cn("h-4 w-4", isRTL ? "ml-1.5" : "mr-1.5")} />
+                <User className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
                 {content.author}
               </div>
             )}
             {insight.published_at && (
               <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                <Calendar className={cn("h-4 w-4", isRTL ? "ml-1.5" : "mr-1.5")} />
+                <Calendar className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
                 {format(new Date(insight.published_at), 'MMMM d, yyyy')}
               </div>
             )}
             {insight.read_time_minutes && (
               <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                <Clock className={cn("h-4 w-4", isRTL ? "ml-1.5" : "mr-1.5")} />
+                <Clock className={cn("h-4 w-4", isRTL ? "ms-1.5" : "me-1.5")} />
                 {insight.read_time_minutes} {isRTL ? "دقائق للقراءة" : "min read"}
               </div>
             )}
@@ -219,12 +219,12 @@ const InsightDetail = () => {
               "[&_p]:text-muted-foreground [&_p]:leading-relaxed [&_p]:mb-4",
               "[&_a]:text-accent [&_a]:no-underline hover:[&_a]:underline",
               "[&_strong]:text-foreground [&_strong]:font-semibold",
-              "[&_ul]:text-muted-foreground [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4",
-              "[&_ol]:text-muted-foreground [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4",
+              "[&_ul]:text-muted-foreground [&_ul]:list-disc [&_ul]:ps-6 [&_ul]:mb-4",
+              "[&_ol]:text-muted-foreground [&_ol]:list-decimal [&_ol]:ps-6 [&_ol]:mb-4",
               "[&_li]:mb-2",
-              "[&_blockquote]:border-l-4 [&_blockquote]:border-accent [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-foreground/80",
+              "[&_blockquote]:border-s-4 [&_blockquote]:border-accent [&_blockquote]:ps-4 [&_blockquote]:italic [&_blockquote]:text-foreground/80",
               "[&_img]:rounded-lg [&_img]:my-6",
-              isRTL && "text-right font-arabic"
+              isRTL && "text-end font-arabicic"
             )}
             dangerouslySetInnerHTML={{ __html: content.content || '' }}
           />
@@ -255,7 +255,7 @@ const InsightDetail = () => {
                 }
               }}
             >
-              <Share2 className={cn("h-4 w-4", isRTL ? "ml-2" : "mr-2")} />
+              <Share2 className={cn("h-4 w-4", isRTL ? "ms-2" : "me-2")} />
               {isRTL ? "مشاركة" : "Share"}
             </Button>
           </div>
@@ -267,7 +267,7 @@ const InsightDetail = () => {
         <div className="container mx-auto px-4 lg:px-8 max-w-4xl text-center">
           <Link to="/insights">
             <Button variant="outline" size="lg">
-              <ArrowLeft className={cn("h-4 w-4", isRTL ? "ml-2 rotate-180" : "mr-2")} />
+              <ArrowLeft className={cn("h-4 w-4", isRTL ? "ms-2 rotate-180" : "me-2")} />
               {isRTL ? "عرض جميع المقالات" : "View All Articles"}
             </Button>
           </Link>

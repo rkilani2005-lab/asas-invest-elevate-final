@@ -133,7 +133,7 @@ export default function MegaMenu({ navTextClass, activeNavClass, navStyle, isDar
           {/* Dropdown Panel */}
           {group.items && openMenu === group.label && (
             <div
-              className="absolute top-full pt-2 z-50 left-0"
+              className="absolute top-full pt-2 z-50 start-0
               onMouseEnter={() => handleMouseEnter(group.label)}
               onMouseLeave={handleMouseLeave}
             >

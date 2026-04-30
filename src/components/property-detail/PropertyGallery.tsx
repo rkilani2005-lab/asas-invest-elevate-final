@@ -187,7 +187,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
         )}>
           <h2 className={cn(
             "heading-section text-2xl md:text-3xl text-foreground",
-            isRTL && "text-right"
+            isRTL && "text-endht"
           )}>
             {t("sections.gallery")}
           </h2>
@@ -276,7 +276,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 </div>
                 {/* Image metadata overlay */}
                 <div className={cn(
-                  "absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent",
+                  "absolute bottom-0 start-0 end-0 p-2 bg-gradient-to-t from-black/70 to-transparentt",
                   "opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 )}>
                   <div className={cn(
@@ -353,13 +353,13 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                         className="w-full h-full flex items-center justify-center bg-secondary group cursor-pointer"
                       >
                         <div className="w-16 h-16 rounded-full bg-accent/90 flex items-center justify-center group-hover:bg-accent transition-colors shadow-lg">
-                          <Play className="h-7 w-7 text-accent-foreground ml-1" fill="currentColor" />
+                          <Play className="h-7 w-7 text-accent-foreground ms-1" fill="currentColor" />
                         </div>
                       </button>
                     )}
                   </div>
                   {video.caption && (
-                    <div className={cn("p-3", isRTL && "text-right")}>
+                    <div className={cn("p-3", isRTL && "text-endht")}>
                       <p className="text-sm text-muted-foreground">{video.caption}</p>
                     </div>
                   )}
@@ -385,7 +385,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 {/* Close Button */}
                 <button
                   onClick={closeLightbox}
-                  className="absolute top-4 right-4 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80"
+                  className="absolute top-4 end-4 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/8080"
                 >
                   <X className="h-6 w-6 text-foreground" strokeWidth={1} />
                 </button>
@@ -397,7 +397,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                       onClick={(e) => { e.stopPropagation(); isRTL ? nextImage() : prevImage(); }}
                       className={cn(
                         "absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
-                        isRTL ? "right-4" : "left-4"
+                        isRTL ? "end-4-4" : "start-4
                       )}
                     >
                       <ChevronLeft className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
@@ -406,7 +406,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                       onClick={(e) => { e.stopPropagation(); isRTL ? prevImage() : nextImage(); }}
                       className={cn(
                         "absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 border border-border rounded-full flex items-center justify-center hover:border-accent transition-colors bg-background/80",
-                        isRTL ? "left-4" : "right-4"
+                        isRTL ? "start-4 : "end-4-4"
                       )}
                     >
                       <ChevronRight className={cn("h-6 w-6 text-foreground", isRTL && "rotate-180")} strokeWidth={1} />
@@ -431,7 +431,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                 </motion.div>
 
                 {/* Counter */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-muted-foreground text-sm tracking-wider">
+                <div className="absolute bottom-4 start-1/2 -translate-x-1/2 text-muted-foreground text-sm tracking-wider>
                   {currentIndex + 1} / {currentMedia.length}
                 </div>
               </motion.div>

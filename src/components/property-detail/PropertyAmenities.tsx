@@ -54,7 +54,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
         <div className="container mx-auto px-4 lg:px-8">
           <h2 className={cn(
             "heading-section text-2xl md:text-3xl text-foreground mb-8",
-            isRTL && "text-right"
+            isRTL && "text-endht"
           )}>
             {t("sections.amenities")}
           </h2>
@@ -71,7 +71,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "heading-section text-2xl md:text-3xl text-foreground mb-8",
-          isRTL && "text-right"
+          isRTL && "text-endht"
         )}>
           {t("sections.amenities")}
         </h2>
@@ -81,7 +81,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
             <div key={category}>
               <h3 className={cn(
                 "text-accent text-xs font-medium tracking-widest uppercase mb-4",
-                isRTL && "text-right"
+                isRTL && "text-endht"
               )}>
                 {category}
               </h3>
@@ -100,7 +100,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
                     >
                       <div className={cn(
                         "w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0",
-                        isRTL ? "ml-3" : "mr-3"
+                        isRTL ? "ms-3" : "me-3"
                       )}>
                         {/* Ultra-thin 1pt gold-tinted icon */}
                         <Icon className="h-5 w-5 text-accent" strokeWidth={1} />
