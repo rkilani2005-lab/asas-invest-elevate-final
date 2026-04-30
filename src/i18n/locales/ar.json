@@ -255,7 +255,9 @@
     "contactUs": "تواصل معنا",
     "learnMore": "اعرف المزيد",
     "submit": "إرسال",
-    "clearFilters": "إعادة ضبط الفلاتر"
+    "clearFilters": "إعادة ضبط الفلاتر",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة"
   },
   "sections": {
     "overview": "نظرة عامة",

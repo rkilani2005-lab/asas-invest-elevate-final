@@ -255,7 +255,9 @@
     "contactUs": "Contact Us",
     "learnMore": "Learn More",
     "submit": "Submit",
-    "clearFilters": "Clear Filters"
+    "clearFilters": "Clear Filters",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "sections": {
     "overview": "Overview",

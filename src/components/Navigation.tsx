@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
@@ -38,6 +38,10 @@ const Navigation = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
   const handleMobileLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     setIsMobileMenuOpen(false);
@@ -49,6 +53,69 @@ const Navigation = () => {
       }
     }, 300);
   };
+
+  // Lock body scroll, trap focus, and handle ESC while drawer is open
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    // Move focus into the drawer
+    const focusTimer = window.setTimeout(() => {
+      closeButtonRef.current?.focus();
+    }, 50);
+
+    const getFocusable = (): HTMLElement[] => {
+      if (!drawerRef.current) return [];
+      return Array.from(
+        drawerRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hasAttribute("aria-hidden") && el.offsetParent !== null);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setIsMobileMenuOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+
+      const focusables = getFocusable();
+      if (focusables.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+
+      // Tab order is logical (DOM order) — works identically in LTR and RTL
+      if (e.shiftKey) {
+        if (active === first || !drawerRef.current?.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last || !drawerRef.current?.contains(active)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      // Restore focus to the trigger
+      menuButtonRef.current?.focus();
+    };
+  }, [isMobileMenuOpen]);
 
   return (
     <nav
@@ -100,12 +167,15 @@ const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <button
+            ref={menuButtonRef}
             className={cn(
               "lg:hidden p-2 transition-colors duration-300",
               !isScrolled && isDarkHeroPage ? "text-white" : "text-foreground"
             )}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
+            aria-label={isMobileMenuOpen ? t("buttons.closeMenu", "Close menu") : t("buttons.openMenu", "Open menu")}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation-drawer"
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" strokeWidth={1} /> : <Menu className="h-6 w-6" strokeWidth={1} />}
           </button>
@@ -122,8 +192,14 @@ const Navigation = () => {
                 transition={{ duration: 0.3 }}
                 className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-[60] lg:hidden"
                 onClick={() => setIsMobileMenuOpen(false)}
+                aria-hidden="true"
               />
               <motion.div
+                ref={drawerRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={t("navigation.mobileMenuLabel", "Site navigation")}
+                id="mobile-navigation-drawer"
                 initial={{ x: isRTL ? "-100%" : "100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: isRTL ? "-100%" : "100%" }}
@@ -143,9 +219,10 @@ const Navigation = () => {
                     />
                   </Link>
                   <button
-                    className="p-2 text-foreground hover:text-accent transition-colors"
+                    ref={closeButtonRef}
+                    className="p-2 text-foreground hover:text-accent transition-colors rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    aria-label="Close menu"
+                    aria-label={t("buttons.closeMenu", "Close menu")}
                   >
                     <X className="h-5 w-5" strokeWidth={1.5} />
                   </button>
