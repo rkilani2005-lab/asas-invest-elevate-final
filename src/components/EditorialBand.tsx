@@ -2,6 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { Trans } from "react-i18next";
 
 const EditorialBand = () => {
   const { t, isRTL } = useLanguage();
