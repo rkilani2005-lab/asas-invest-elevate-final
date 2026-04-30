@@ -192,8 +192,14 @@ const Navigation = () => {
                 transition={{ duration: 0.3 }}
                 className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-[60] lg:hidden"
                 onClick={() => setIsMobileMenuOpen(false)}
+                aria-hidden="true"
               />
               <motion.div
+                ref={drawerRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={t("navigation.mobileMenuLabel", "Site navigation")}
+                id="mobile-navigation-drawer"
                 initial={{ x: isRTL ? "-100%" : "100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: isRTL ? "-100%" : "100%" }}
@@ -213,9 +219,10 @@ const Navigation = () => {
                     />
                   </Link>
                   <button
-                    className="p-2 text-foreground hover:text-accent transition-colors"
+                    ref={closeButtonRef}
+                    className="p-2 text-foreground hover:text-accent transition-colors rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    aria-label="Close menu"
+                    aria-label={t("buttons.closeMenu", "Close menu")}
                   >
                     <X className="h-5 w-5" strokeWidth={1.5} />
                   </button>
