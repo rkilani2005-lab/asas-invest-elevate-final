@@ -162,7 +162,30 @@
     "subtitle": "Market Insights",
     "title": "Latest from Our Team",
     "description": "Stay informed with our expert analysis and insights on the UAE real estate market.",
-    "viewAll": "View All Insights"
+    "viewAll": "View All Insights",
+    "all": "All",
+    "featured": "Featured",
+    "searchPlaceholder": "Search articles...",
+    "heroEyebrow": "Market Insights",
+    "heroTitle": "Expert Analysis & Market Intelligence",
+    "heroDescription": "Stay informed with our latest research, market reports, and investment insights covering Dubai and the UAE real estate landscape.",
+    "readFullArticle": "Read Full Article",
+    "latestArticles": "Latest Articles",
+    "articleCount_one": "{{count}} article",
+    "articleCount_other": "{{count}} articles",
+    "minRead": "min read",
+    "minShort": "min",
+    "by": "By",
+    "noArticles": "No articles found in this category.",
+    "newsletterTitle": "Stay Updated with Market Insights",
+    "newsletterDesc": "Subscribe to our newsletter for weekly market updates, investment tips, and exclusive property opportunities.",
+    "emailPlaceholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "newsletterDisclaimer": "By subscribing, you agree to receive marketing communications from Asas Invest.",
+    "backHome": "Back to Home",
+    "backToInsights": "Back to Insights",
+    "notFoundTitle": "Article Not Found",
+    "notFoundDesc": "Sorry, the article you're looking for doesn't exist."
   },
   "featuredProperties": {
     "subtitle": "Our Portfolio",
@@ -433,5 +456,40 @@
     "title": "Build Your Career at Asas Invest",
     "description": "We're always looking for talented individuals who share our passion for real estate excellence and client-first thinking. If you're driven, ambitious, and ready to make an impact, we'd love to hear from you.",
     "applyNow": "Send Your CV"
+  },
+  "propertyTypes": {
+    "apartment": "Apartment",
+    "villa": "Villa",
+    "townhouse": "Townhouse",
+    "penthouse": "Penthouse",
+    "office": "Office",
+    "retail": "Retail"
+  },
+  "common": {
+    "error": "Error",
+    "errorMessage": "Something went wrong. Please try again.",
+    "share": "Share",
+    "save": "Save",
+    "previous": "Previous",
+    "next": "Next",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "morePages": "More pages",
+    "back": "Back"
+  },
+  "aria": {
+    "whatsapp": "Chat on WhatsApp",
+    "switchLanguage": "Switch language",
+    "switchTo": "Switch to {{lang}}"
+  },
+  "latestUpdates": {
+    "subtitle": "Stay Informed",
+    "title": "Latest Updates",
+    "announcements": "Announcements",
+    "pressReleases": "Press Releases",
+    "viewAllAnnouncements": "All Announcements",
+    "viewAllPress": "All Press Releases"
   }
 }
