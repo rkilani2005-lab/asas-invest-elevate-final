@@ -1,4 +1,10 @@
 {
+  "navigation": {
+    "mobileMenuLabel": "قائمة التنقل",
+    "primaryMenuLabel": "القائمة الرئيسية",
+    "expandSubmenu": "فتح قائمة {{label}}",
+    "collapseSubmenu": "إغلاق قائمة {{label}}"
+  },
   "nav": {
     "home": "الرئيسية",
     "offPlan": "مشاريع قيد الإنشاء",
