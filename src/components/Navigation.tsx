@@ -117,15 +117,15 @@ const Navigation = () => {
     };
   }, [isMobileMenuOpen]);
 
-  // Edge-swipe-to-open: detect a touch that starts within ~24px of the inline-end
+  // Edge-swipe-to-open: detect a touch that starts within ~24px of the inline-start
   // edge of the viewport and travels inward beyond a threshold. Mirrors automatically
-  // for RTL: in LTR start near the right edge and swipe left; in RTL start near the
-  // left edge and swipe right.
+  // for RTL: in LTR start near the LEFT edge and swipe right; in RTL start near the
+  // RIGHT edge and swipe left. Matches the drawer's open animation direction.
   useEffect(() => {
     if (isMobileMenuOpen) return;
     if (typeof window === "undefined") return;
 
-    const EDGE_ZONE = 24; // px from the inline-end edge where a swipe may begin
+    const EDGE_ZONE = 24; // px from the inline-start edge where a swipe may begin
     const OPEN_DISTANCE = 60; // inward travel required to open
     const MAX_VERTICAL_DRIFT = 40; // ignore mostly-vertical swipes
 
@@ -137,10 +137,10 @@ const Navigation = () => {
       if (window.innerWidth >= 1024) return;
       const touch = e.touches[0];
       if (!touch) return;
-      const fromInlineEnd = isRTL
-        ? touch.clientX <= EDGE_ZONE
-        : touch.clientX >= window.innerWidth - EDGE_ZONE;
-      if (!fromInlineEnd) return;
+      const fromInlineStart = isRTL
+        ? touch.clientX >= window.innerWidth - EDGE_ZONE
+        : touch.clientX <= EDGE_ZONE;
+      if (!fromInlineStart) return;
       startX = touch.clientX;
       startY = touch.clientY;
     };
@@ -155,8 +155,8 @@ const Navigation = () => {
         startX = startY = null;
         return;
       }
-      // Inward = away from the inline-end edge
-      const inwardTravel = isRTL ? dx : -dx;
+      // Inward = away from the inline-start edge (rightward in LTR, leftward in RTL)
+      const inwardTravel = isRTL ? -dx : dx;
       if (inwardTravel >= OPEN_DISTANCE) {
         setIsMobileMenuOpen(true);
         startX = startY = null;
