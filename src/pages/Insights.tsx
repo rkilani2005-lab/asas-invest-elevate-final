@@ -283,29 +283,23 @@ const InsightsPage = () => {
         <div className="container mx-auto px-4 lg:px-8">
           <div className={cn("max-w-2xl mx-auto text-center", isRTL && "font-arabic")}>
             <h2 className="heading-section text-2xl md:text-4xl text-foreground mb-4">
-              {isRTL ? "ابقَ على اطلاع برؤى السوق" : "Stay Updated with Market Insights"}
+              {t("insights.newsletterTitle")}
             </h2>
             <p className="text-muted-foreground mb-8">
-              {isRTL 
-                ? "اشترك في نشرتنا الإخبارية للحصول على تحديثات السوق الأسبوعية ونصائح الاستثمار والفرص العقارية الحصرية."
-                : "Subscribe to our newsletter for weekly market updates, investment tips, and exclusive property opportunities."
-              }
+              {t("insights.newsletterDesc")}
             </p>
-            <form className={cn("flex flex-col sm:flex-row gap-3 max-w-md mx-auto")}>
+            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <Input 
                 type="email" 
-                placeholder={isRTL ? "أدخل بريدك الإلكتروني" : "Enter your email"} 
-                className={cn("bg-background border-border flex-1", isRTL && "text-end")}
+                placeholder={t("insights.emailPlaceholder")} 
+                className="bg-background border-border flex-1"
               />
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                {isRTL ? "اشتراك" : "Subscribe"}
+                {t("insights.subscribe")}
               </Button>
             </form>
             <p className="text-xs text-muted-foreground mt-4">
-              {isRTL 
-                ? "بالاشتراك، فإنك توافق على تلقي رسائل تسويقية من أساس إنفست."
-                : "By subscribing, you agree to receive marketing communications from Asas Invest."
-              }
+              {t("insights.newsletterDisclaimer")}
             </p>
           </div>
         </div>
