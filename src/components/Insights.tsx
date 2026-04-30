@@ -170,7 +170,7 @@ const Insights = () => {
         <ScrollReveal delay={0.3} className="text-center">
           <Link to="/insights">
             <Button variant="outline" size="lg" className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 text-sm font-medium tracking-wide">
-              {t("insights.viewAll")}
+              {t("buttons.viewAll")}
               <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />
             </Button>
           </Link>
