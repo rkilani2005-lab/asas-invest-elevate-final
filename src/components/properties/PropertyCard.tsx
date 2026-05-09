@@ -61,11 +61,14 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   }
 
   return (
-    <Link to={`/property/${property.slug}`} className="group block">
-      <article className={cn(
-        "card-luxury h-full flex flex-col",
-        isRTL && "text-end"
-      )}>
+    <Link to={`/property/${property.slug}`} className="group block" dir={isRTL ? "rtl" : "ltr"}>
+      <article
+        dir={isRTL ? "rtl" : "ltr"}
+        className={cn(
+          "card-luxury h-full flex flex-col",
+          isRTL ? "text-right" : "text-left"
+        )}
+      >
         {/* Image */}
         <div className="relative aspect-[16/10] overflow-hidden">
           <ProgressiveImage
