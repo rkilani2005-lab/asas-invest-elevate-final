@@ -116,7 +116,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
           "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
         )}>
           {/* Left - Info */}
-          <div className={cn(isRTL && "text-end lg:order-2-2")}>
+          <div className={cn(isRTL && "text-end lg:order-2")}>
             <p className="text-accent text-xs font-medium tracking-widest uppercase mb-4">
               {t("sections.inquire")}
             </p>
