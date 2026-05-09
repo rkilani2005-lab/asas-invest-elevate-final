@@ -19,6 +19,7 @@ import {
   CloudDownload,
   Mail,
   ClipboardCheck,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
