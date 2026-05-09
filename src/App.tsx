@@ -51,6 +51,7 @@ const ImporterApproval = lazy(() => import("./pages/admin/importer/ImporterAppro
 const AdminCommunications = lazy(() => import("./pages/admin/AdminCommunications"));
 const AdminEmailSettings = lazy(() => import("./pages/admin/AdminEmailSettings"));
 const AdminEmailPage = lazy(() => import("./pages/admin/AdminEmailPage"));
+const AdminSellerSubmissions = lazy(() => import("./pages/admin/AdminSellerSubmissions"));
 
 const queryClient = new QueryClient();
 
