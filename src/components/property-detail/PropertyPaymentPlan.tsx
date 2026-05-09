@@ -42,7 +42,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
         </h2>
         <p className={cn(
           "text-muted-foreground mb-10 max-w-2xl",
-          isRTL && "text-end me-0 ms-autoto"
+          isRTL && "text-end me-0 ms-auto"
         )}>
           Flexible payment structure designed to make your investment journey seamless.
         </p>
@@ -81,10 +81,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
         </div>
 
         {/* Timeline Cards */}
-        <div className={cn(
-          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
-          isRTL && "direction-rtl"
-        )}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {milestonesWithProgress.map((milestone, index) => {
             const milestoneText = language === "ar" && milestone.milestone_ar 
               ? milestone.milestone_ar 
