@@ -144,8 +144,8 @@ const Sell = () => {
           <div id="list" className="max-w-3xl mx-auto text-center mt-20">
             <h2 className="heading-section text-2xl text-foreground mb-4">{t("sell.listTitle")}</h2>
             <p className="text-muted-foreground leading-relaxed mb-6">{t("sell.listDesc")}</p>
-            <Button variant="luxury" size="lg" onClick={() => document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' })}>
-              {t("sell.getStarted")}
+            <Button asChild variant="luxury" size="lg">
+              <Link to="/list-property">{t("sell.getStarted")}</Link>
             </Button>
           </div>
         </div>
