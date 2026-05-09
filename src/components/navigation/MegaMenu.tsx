@@ -33,7 +33,7 @@ export function useMegaMenuItems() {
       label: t("nav.sell"),
       items: [
         { label: t("nav.sellValuation"), href: "/sell", description: t("nav.sellValuationDesc") },
-        { label: t("nav.sellList"), href: "/sell#list", description: t("nav.sellListDesc") },
+        { label: t("nav.sellList"), href: "/list-property", description: t("nav.sellListDesc") },
       ],
     },
     {

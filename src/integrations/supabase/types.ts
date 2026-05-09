@@ -1140,6 +1140,96 @@ export type Database = {
           },
         ]
       }
+      seller_submissions: {
+        Row: {
+          admin_notes: string | null
+          approved_property_id: string | null
+          bathrooms: string | null
+          bedrooms: string | null
+          category: string
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          developer_ar: string | null
+          developer_en: string | null
+          highlights: Json | null
+          id: string
+          location_ar: string | null
+          location_en: string | null
+          photos: Json | null
+          preferred_language: string | null
+          price_aed: string | null
+          property_name_ar: string | null
+          property_name_en: string
+          reviewed_at: string | null
+          seller_email: string
+          seller_name: string
+          seller_phone: string | null
+          size_sqft: string | null
+          status: string
+          unit_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_property_id?: string | null
+          bathrooms?: string | null
+          bedrooms?: string | null
+          category?: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          developer_ar?: string | null
+          developer_en?: string | null
+          highlights?: Json | null
+          id?: string
+          location_ar?: string | null
+          location_en?: string | null
+          photos?: Json | null
+          preferred_language?: string | null
+          price_aed?: string | null
+          property_name_ar?: string | null
+          property_name_en: string
+          reviewed_at?: string | null
+          seller_email: string
+          seller_name: string
+          seller_phone?: string | null
+          size_sqft?: string | null
+          status?: string
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_property_id?: string | null
+          bathrooms?: string | null
+          bedrooms?: string | null
+          category?: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          developer_ar?: string | null
+          developer_en?: string | null
+          highlights?: Json | null
+          id?: string
+          location_ar?: string | null
+          location_en?: string | null
+          photos?: Json | null
+          preferred_language?: string | null
+          price_aed?: string | null
+          property_name_ar?: string | null
+          property_name_en?: string
+          reviewed_at?: string | null
+          seller_email?: string
+          seller_name?: string
+          seller_phone?: string | null
+          size_sqft?: string | null
+          status?: string
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seo_meta: {
         Row: {
           created_at: string | null

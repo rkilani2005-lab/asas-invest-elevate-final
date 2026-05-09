@@ -19,6 +19,7 @@ import {
   CloudDownload,
   Mail,
   ClipboardCheck,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -60,6 +61,7 @@ export default function AdminSidebar() {
     { href: "/admin/properties", icon: Building2, label: t("admin.nav.properties") },
     { href: "/admin/importer", icon: CloudDownload, label: t("admin.nav.autoImport") },
     { href: "/admin/importer/approval", icon: ClipboardCheck, label: t("admin.nav.approvals") },
+    { href: "/admin/seller-submissions", icon: Tag, label: "Seller Submissions" },
     { href: "/admin/gallery", icon: Images, label: t("admin.nav.gallery") },
     { href: "/admin/amenities", icon: Sparkles, label: t("admin.nav.amenities") },
     { href: "/admin/communications", icon: Users, label: t("admin.nav.communications") },

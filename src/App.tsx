@@ -21,6 +21,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Buy = lazy(() => import("./pages/Buy"));
 const Commercial = lazy(() => import("./pages/Commercial"));
 const Sell = lazy(() => import("./pages/Sell"));
+const ListProperty = lazy(() => import("./pages/ListProperty"));
 const Invest = lazy(() => import("./pages/Invest"));
 const About = lazy(() => import("./pages/About"));
 const BuyerGuide = lazy(() => import("./pages/BuyerGuide"));
@@ -50,6 +51,7 @@ const ImporterApproval = lazy(() => import("./pages/admin/importer/ImporterAppro
 const AdminCommunications = lazy(() => import("./pages/admin/AdminCommunications"));
 const AdminEmailSettings = lazy(() => import("./pages/admin/AdminEmailSettings"));
 const AdminEmailPage = lazy(() => import("./pages/admin/AdminEmailPage"));
+const AdminSellerSubmissions = lazy(() => import("./pages/admin/AdminSellerSubmissions"));
 
 const queryClient = new QueryClient();
 
@@ -74,6 +76,7 @@ const App = () => (
                   <Route path="/ready" element={<Ready />} />
                   <Route path="/commercial" element={<Commercial />} />
                   <Route path="/sell" element={<Sell />} />
+                  <Route path="/list-property" element={<ListProperty />} />
                   <Route path="/invest" element={<Invest />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/about/careers" element={<Careers />} />
@@ -90,6 +93,7 @@ const App = () => (
                   <Route path="/admin/properties/import" element={<AdminLayout><AdminBulkImport /></AdminLayout>} />
                   <Route path="/admin/gallery" element={<AdminLayout><AdminGallery /></AdminLayout>} />
                   <Route path="/admin/inquiries" element={<AdminLayout><AdminInquiries /></AdminLayout>} />
+                  <Route path="/admin/seller-submissions" element={<AdminLayout><AdminSellerSubmissions /></AdminLayout>} />
                   <Route path="/admin/communications" element={<AdminLayout><AdminCommunications /></AdminLayout>} />
                   <Route path="/admin/communications/settings" element={<AdminLayout><AdminEmailSettings /></AdminLayout>} />
                   <Route path="/admin/email" element={<AdminLayout><AdminEmailPage /></AdminLayout>} />
