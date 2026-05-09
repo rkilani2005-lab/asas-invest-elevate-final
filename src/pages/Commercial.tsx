@@ -79,7 +79,6 @@ const Commercial = () => {
                   <SelectItem value="office">{t("commercial.office")}</SelectItem>
                   <SelectItem value="retail">{t("commercial.retail")}</SelectItem>
                   <SelectItem value="warehouse">{t("commercial.warehouse")}</SelectItem>
-                  <SelectItem value="full_floor">{t("commercial.fullFloor")}</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={filters.ownership} onValueChange={(v) => setFilters(prev => ({ ...prev, ownership: v }))}>
