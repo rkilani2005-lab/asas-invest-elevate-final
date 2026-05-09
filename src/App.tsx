@@ -21,6 +21,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Buy = lazy(() => import("./pages/Buy"));
 const Commercial = lazy(() => import("./pages/Commercial"));
 const Sell = lazy(() => import("./pages/Sell"));
+const ListProperty = lazy(() => import("./pages/ListProperty"));
 const Invest = lazy(() => import("./pages/Invest"));
 const About = lazy(() => import("./pages/About"));
 const BuyerGuide = lazy(() => import("./pages/BuyerGuide"));
