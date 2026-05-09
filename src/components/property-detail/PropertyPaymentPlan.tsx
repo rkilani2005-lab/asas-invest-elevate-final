@@ -42,7 +42,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
         </h2>
         <p className={cn(
           "text-muted-foreground mb-10 max-w-2xl",
-          isRTL && "text-end me-0 ms-autoto"
+          isRTL && "text-end me-0 ms-auto"
         )}>
           Flexible payment structure designed to make your investment journey seamless.
         </p>
