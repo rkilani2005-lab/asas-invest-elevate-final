@@ -17,8 +17,11 @@ const Invest = () => {
 
   const price = parseFloat(purchasePrice) || 0;
   const rent = parseFloat(expectedRent) || 0;
+  const netRent = rent * 0.85;
   const grossROI = price > 0 ? (rent / price * 100).toFixed(2) : "0.00";
-  const netROI = price > 0 ? ((rent * 0.85) / price * 100).toFixed(2) : "0.00";
+  const netROI = price > 0 ? (netRent / price * 100).toFixed(2) : "0.00";
+  const formatAED = (n: number) =>
+    new Intl.NumberFormat(isRTL ? "ar-AE" : "en-AE", { maximumFractionDigits: 0 }).format(n);
 
   const valueProps = [
     { icon: TrendingUp, title: t("invest.yieldsTitle"), desc: t("invest.yieldsDesc") },
@@ -88,6 +91,16 @@ const Invest = () => {
                     onChange={(e) => setExpectedRent(e.target.value)}
                     placeholder="e.g., 96000"
                   />
+                </div>
+              </div>
+              <div className="border border-accent/20 divide-y divide-accent/20 mb-6">
+                <div className="flex items-center justify-between p-4">
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("invest.grossRent")}</span>
+                  <span className="text-sm font-medium text-foreground tabular-nums">AED {formatAED(rent)}</span>
+                </div>
+                <div className="flex items-center justify-between p-4">
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("invest.netRent")}</span>
+                  <span className="text-sm font-medium text-foreground tabular-nums">AED {formatAED(netRent)}</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-6">
