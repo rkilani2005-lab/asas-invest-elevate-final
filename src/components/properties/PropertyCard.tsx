@@ -60,12 +60,16 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
     }
   }
 
+  const dirAttr = isRTL ? "rtl" : "ltr";
+  const alignClass = isRTL ? "text-right" : "text-left";
+
   return (
-    <Link to={`/property/${property.slug}`} className="group block" dir={isRTL ? "rtl" : "ltr"}>
+    <Link to={`/property/${property.slug}`} className="group block" dir={dirAttr}>
       <article
-        dir={isRTL ? "rtl" : "ltr"}
+        dir={dirAttr}
         className={cn(
-          "card-luxury h-full flex flex-col text-start"
+          "card-luxury h-full flex flex-col",
+          alignClass
         )}
       >
         {/* Image */}
