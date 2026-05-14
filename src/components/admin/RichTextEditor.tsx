@@ -34,13 +34,26 @@ export default function RichTextEditor({
       attributes: {
         class: cn(
           "min-h-[300px] p-4 prose prose-sm max-w-none focus:outline-none",
-          dir === "rtl" && "text-end"
+          dir === "rtl" && "text-start"
         ),
         dir,
       },
     },
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      // Strip baked-in directional inline styles & dir attributes so the
+      // saved HTML stays direction-neutral and inherits from the render container.
+      const raw = editor.getHTML();
+      const cleaned = raw
+        .replace(/\s*dir="(ltr|rtl)"/gi, "")
+        .replace(/style="([^"]*)"/gi, (_m, styles: string) => {
+          const filtered = styles
+            .split(";")
+            .map((s) => s.trim())
+            .filter((s) => s && !/^(text-align|direction)\s*:/i.test(s))
+            .join("; ");
+          return filtered ? `style="${filtered}"` : "";
+        });
+      onChange(cleaned);
     },
   });
 
