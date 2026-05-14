@@ -18,10 +18,16 @@ const Invest = () => {
   const price = parseFloat(purchasePrice) || 0;
   const rent = parseFloat(expectedRent) || 0;
   const netRent = rent * 0.85;
-  const grossROI = price > 0 ? (rent / price * 100).toFixed(2) : "0.00";
-  const netROI = price > 0 ? (netRent / price * 100).toFixed(2) : "0.00";
-  const formatAED = (n: number) =>
-    new Intl.NumberFormat(isRTL ? "ar-AE" : "en-AE", { maximumFractionDigits: 0 }).format(n);
+  const grossROIValue = price > 0 ? (rent / price) * 100 : 0;
+  const netROIValue = price > 0 ? (netRent / price) * 100 : 0;
+  // Use Latin digits (en-AE) for consistency in financial figures across locales.
+  const numberFmt = new Intl.NumberFormat("en-AE", { maximumFractionDigits: 0 });
+  const percentFmt = new Intl.NumberFormat("en-AE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const formatAED = (n: number) => `AED ${numberFmt.format(n)}`;
+  const formatPct = (n: number) => `${percentFmt.format(n)}%`;
 
   const valueProps = [
     { icon: TrendingUp, title: t("invest.yieldsTitle"), desc: t("invest.yieldsDesc") },
