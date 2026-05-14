@@ -34,7 +34,7 @@ export default function RichTextEditor({
       attributes: {
         class: cn(
           "min-h-[300px] p-4 prose prose-sm max-w-none focus:outline-none",
-          dir === "rtl" && "text-right"
+          dir === "rtl" && "text-end"
         ),
         dir,
       },

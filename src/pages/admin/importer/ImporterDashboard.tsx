@@ -86,7 +86,7 @@ export default function ImporterDashboard() {
         </div>
         <Button asChild>
           <Link to="/admin/importer/scan">
-            <CloudDownload className="w-4 h-4 mr-2" />
+            <CloudDownload className="w-4 h-4 me-2" />
             Scan Drive
           </Link>
         </Button>

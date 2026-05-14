@@ -261,13 +261,13 @@ export default function AdminEmailSettings() {
                   <div className="flex items-center gap-2">
                     {account.is_connected ? (
                       <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
-                        <CheckCircle className="w-3 h-3 mr-1" /> Connected
+                        <CheckCircle className="w-3 h-3 me-1" /> Connected
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="text-muted-foreground">Disconnected</Badge>
                     )}
                     <Button size="sm" variant="outline" onClick={() => testConnection(account.id)}>
-                      <TestTube2 className="w-3 h-3 mr-1" /> Test
+                      <TestTube2 className="w-3 h-3 me-1" /> Test
                     </Button>
                     <Button
                       size="sm"
@@ -297,9 +297,9 @@ export default function AdminEmailSettings() {
                   onClick={() => connectAccount(purpose)}
                   className="justify-start"
                 >
-                  <Plus className="w-3 h-3 mr-2" />
+                  <Plus className="w-3 h-3 me-2" />
                   {label.split(" ")[0]}
-                  {connectedPurposes.has(purpose) && <CheckCircle className="w-3 h-3 ml-auto text-green-500" />}
+                  {connectedPurposes.has(purpose) && <CheckCircle className="w-3 h-3 ms-auto text-green-500" />}
                 </Button>
               ))}
             </div>
@@ -397,7 +397,7 @@ export default function AdminEmailSettings() {
                 rel="noopener noreferrer"
               >
                 <Button variant="outline" size="sm">
-                  <ExternalLink className="w-3 h-3 mr-1" /> Open Google Cloud Console
+                  <ExternalLink className="w-3 h-3 me-1" /> Open Google Cloud Console
                 </Button>
               </a>
               <Button size="sm" onClick={() => setShowSetupGuide(false)}>Done</Button>

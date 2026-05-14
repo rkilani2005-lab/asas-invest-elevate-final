@@ -172,7 +172,7 @@ export default function AdminBulkImport() {
             </Button>
             <h1 className="text-3xl font-semibold">Bulk Import</h1>
           </div>
-          <p className="text-muted-foreground ml-12">
+          <p className="text-muted-foreground ms-12">
             Import multiple properties from a CSV file
           </p>
         </div>
@@ -194,7 +194,7 @@ export default function AdminBulkImport() {
                   supported fields, instructions, and a sample row.
                 </p>
                 <Button variant="outline" onClick={downloadCSVTemplate}>
-                  <Download className="w-4 h-4 mr-2" />
+                  <Download className="w-4 h-4 me-2" />
                   Download CSV Template
                 </Button>
               </div>
@@ -238,7 +238,7 @@ export default function AdminBulkImport() {
                 <Badge variant="destructive" className="text-[10px] px-1 py-0">
                   required
                 </Badge>
-                <span className="text-muted-foreground ml-2">
+                <span className="text-muted-foreground ms-2">
                   Property name (English)
                 </span>
               </div>
@@ -247,7 +247,7 @@ export default function AdminBulkImport() {
                 <Badge variant="destructive" className="text-[10px] px-1 py-0">
                   required
                 </Badge>
-                <span className="text-muted-foreground ml-2">
+                <span className="text-muted-foreground ms-2">
                   URL-safe unique identifier
                 </span>
               </div>
@@ -256,37 +256,37 @@ export default function AdminBulkImport() {
                 <Badge variant="destructive" className="text-[10px] px-1 py-0">
                   required
                 </Badge>
-                <span className="text-muted-foreground ml-2">
+                <span className="text-muted-foreground ms-2">
                   off-plan | ready
                 </span>
               </div>
               <div>
                 <span className="font-medium">status</span>
-                <span className="text-muted-foreground ml-2">
+                <span className="text-muted-foreground ms-2">
                   available | reserved | sold
                 </span>
               </div>
               <div>
                 <span className="font-medium">unit_types</span>
-                <span className="text-muted-foreground ml-2">
+                <span className="text-muted-foreground ms-2">
                   Pipe-separated (Studio|1BR|2BR)
                 </span>
               </div>
               <div>
                 <span className="font-medium">highlights_en/ar</span>
-                <span className="text-muted-foreground ml-2">
+                <span className="text-muted-foreground ms-2">
                   Pipe-separated bullet points
                 </span>
               </div>
               <div>
                 <span className="font-medium">handover_date</span>
-                <span className="text-muted-foreground ml-2">
+                <span className="text-muted-foreground ms-2">
                   YYYY-MM-DD format
                 </span>
               </div>
               <div>
                 <span className="font-medium">is_featured</span>
-                <span className="text-muted-foreground ml-2">true | false</span>
+                <span className="text-muted-foreground ms-2">true | false</span>
               </div>
             </div>
           </Card>
@@ -301,7 +301,7 @@ export default function AdminBulkImport() {
               variant="secondary"
               className="bg-green-500/10 text-green-600"
             >
-              <CheckCircle2 className="w-3 h-3 mr-1" />
+              <CheckCircle2 className="w-3 h-3 me-1" />
               {parseResult.valid.length} valid
             </Badge>
             {parseResult.errors.length > 0 && (
@@ -309,7 +309,7 @@ export default function AdminBulkImport() {
                 variant="secondary"
                 className="bg-red-500/10 text-red-600"
               >
-                <XCircle className="w-3 h-3 mr-1" />
+                <XCircle className="w-3 h-3 me-1" />
                 {parseResult.errors.length} errors
               </Badge>
             )}
@@ -320,7 +320,7 @@ export default function AdminBulkImport() {
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Validation Errors</AlertTitle>
               <AlertDescription>
-                <ul className="list-disc pl-4 mt-2 space-y-1">
+                <ul className="list-disc ps-4 mt-2 space-y-1">
                   {parseResult.errors.map((err, i) => (
                     <li key={i}>
                       Row {err.row}: {err.message}
@@ -396,7 +396,7 @@ export default function AdminBulkImport() {
               onClick={handleImport}
               disabled={parseResult.valid.length === 0}
             >
-              <Upload className="w-4 h-4 mr-2" />
+              <Upload className="w-4 h-4 me-2" />
               Import {parseResult.valid.length} Properties
             </Button>
           </div>
@@ -441,7 +441,7 @@ export default function AdminBulkImport() {
               <XCircle className="h-4 w-4" />
               <AlertTitle>Failed Imports</AlertTitle>
               <AlertDescription>
-                <ul className="list-disc pl-4 mt-2 space-y-1">
+                <ul className="list-disc ps-4 mt-2 space-y-1">
                   {importResults.failed.map((f, i) => (
                     <li key={i}>
                       <strong>{f.slug}</strong>: {f.error}

@@ -100,7 +100,7 @@ export default function PropertyWizard({
                     step.id
                   )}
                 </div>
-                <div className="text-left hidden sm:block">
+                <div className="text-start hidden sm:block">
                   <p className="text-sm font-medium">{step.title}</p>
                   <p className="text-xs opacity-70">{step.description}</p>
                 </div>

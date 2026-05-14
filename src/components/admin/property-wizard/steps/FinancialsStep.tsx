@@ -200,7 +200,7 @@ export default function FinancialsStep({ data, onChange }: FinancialsStepProps) 
 
           <div className="flex items-center justify-between pt-4 border-t">
             <Button variant="outline" onClick={addMilestone}>
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="me-2 h-4 w-4" />
               Add Milestone
             </Button>
             <div className="flex items-center gap-2">

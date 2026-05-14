@@ -180,19 +180,19 @@ function ApprovalCard({ job, onAction }: { job: Record<string, unknown>; onActio
               <TabsContent value="arabic" className="mt-3 space-y-3" dir="rtl">
                 {job.tagline_ar && (
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 text-right">الشعار</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 text-end">الشعار</p>
                     <p className="text-sm italic font-arabic">{job.tagline_ar as string}</p>
                   </div>
                 )}
                 {job.overview_ar && (
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 text-right">النظرة العامة</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 text-end">النظرة العامة</p>
                     <p className="text-sm text-muted-foreground leading-relaxed font-arabic">{job.overview_ar as string}</p>
                   </div>
                 )}
                 {highlightsAr.length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 text-right">المميزات</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 text-end">المميزات</p>
                     <ul className="space-y-1">
                       {highlightsAr.map((h, i) => (
                         <li key={i} className="text-sm flex items-start gap-2 justify-end font-arabic">{h}<CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" /></li>
@@ -214,7 +214,7 @@ function ApprovalCard({ job, onAction }: { job: Record<string, unknown>; onActio
                 )}
                 {job.investment_ar && (
                   <div dir="rtl">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 text-right">نص الاستثمار (AR)</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 text-end">نص الاستثمار (AR)</p>
                     <p className="text-sm text-muted-foreground leading-relaxed font-arabic">{job.investment_ar as string}</p>
                   </div>
                 )}
@@ -253,7 +253,7 @@ function ApprovalCard({ job, onAction }: { job: Record<string, unknown>; onActio
                     onClick={() => handleAction("reject")}
                     disabled={!!acting || errors.length > 0}
                   >
-                    {acting === "reject" ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5 mr-1.5" />}
+                    {acting === "reject" ? <Loader2 className="w-3.5 h-3.5 me-1.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5 me-1.5" />}
                     Reject & Notify Team
                   </Button>
                   <Button
@@ -262,7 +262,7 @@ function ApprovalCard({ job, onAction }: { job: Record<string, unknown>; onActio
                     onClick={() => handleAction("approve")}
                     disabled={!!acting || errors.length > 0}
                   >
-                    {acting === "approve" ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />}
+                    {acting === "approve" ? <Loader2 className="w-3.5 h-3.5 me-1.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 me-1.5" />}
                     Approve & Publish
                   </Button>
                 </div>
@@ -341,7 +341,7 @@ export default function ImporterApproval() {
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => refetch()}>
-          <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
+          <RefreshCw className="w-3.5 h-3.5 me-1.5" /> Refresh
         </Button>
       </div>
 

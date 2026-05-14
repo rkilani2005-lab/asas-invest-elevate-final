@@ -460,12 +460,12 @@ export default function AdminHomeContent() {
         <Button onClick={handleSave} disabled={isSaving}>
           {isSaving ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="me-2 h-4 w-4 animate-spin" />
               Saving...
             </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="me-2 h-4 w-4" />
               Save All Changes
             </>
           )}
@@ -500,7 +500,7 @@ export default function AdminHomeContent() {
                     <Button
                       variant="destructive"
                       size="icon"
-                      className="absolute top-2 right-2 h-8 w-8"
+                      className="absolute top-2 end-2 h-8 w-8"
                       onClick={() => {
                         updateHero("en", "video_url", "");
                         updateHero("ar", "video_url", "");
@@ -716,7 +716,7 @@ export default function AdminHomeContent() {
                 </SortableContext>
               </DndContext>
               <Button variant="outline" onClick={() => addValueCard("en")}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 Add Value Card
               </Button>
             </CardContent>
@@ -748,7 +748,7 @@ export default function AdminHomeContent() {
                 </SortableContext>
               </DndContext>
               <Button variant="outline" onClick={() => addValueCard("ar")}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 Add Value Card
               </Button>
             </CardContent>
@@ -830,7 +830,7 @@ export default function AdminHomeContent() {
                 </SortableContext>
               </DndContext>
               <Button variant="outline" onClick={() => addStat("en")}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 Add Statistic
               </Button>
             </CardContent>
@@ -862,7 +862,7 @@ export default function AdminHomeContent() {
                 </SortableContext>
               </DndContext>
               <Button variant="outline" onClick={() => addStat("ar")}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 Add Statistic
               </Button>
             </CardContent>

@@ -208,11 +208,11 @@ export default function ImporterSettings() {
             </div>
             {isConnected ? (
               <Badge variant="secondary" className="bg-green-500/10 text-green-600">
-                <CheckCircle2 className="w-3 h-3 mr-1" /> Connected
+                <CheckCircle2 className="w-3 h-3 me-1" /> Connected
               </Badge>
             ) : (
               <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600">
-                <AlertCircle className="w-3 h-3 mr-1" /> Not connected
+                <AlertCircle className="w-3 h-3 me-1" /> Not connected
               </Badge>
             )}
           </div>
@@ -246,24 +246,24 @@ export default function ImporterSettings() {
           <div className="flex gap-2 flex-wrap">
             {!isConnected ? (
               <Button onClick={handleConnect} disabled={connecting}>
-                {connecting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <LogIn className="w-4 h-4 mr-2" />}
+                {connecting ? <Loader2 className="w-4 h-4 me-2 animate-spin" /> : <LogIn className="w-4 h-4 me-2" />}
                 Connect Google Drive
               </Button>
             ) : (
               <>
                 <Button variant="outline" onClick={handleTest} disabled={testing}>
-                  {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <TestTube className="w-4 h-4 mr-2" />}
+                  {testing ? <Loader2 className="w-4 h-4 me-2 animate-spin" /> : <TestTube className="w-4 h-4 me-2" />}
                   Test Connection
                 </Button>
                 <Button variant="outline" onClick={handleConnect} disabled={connecting}>
-                  <RefreshCw className="w-4 h-4 mr-2" /> Reconnect
+                  <RefreshCw className="w-4 h-4 me-2" /> Reconnect
                 </Button>
                 <Button
                   variant="outline"
                   className="text-destructive hover:text-destructive"
                   onClick={handleDisconnect}
                 >
-                  <LogOut className="w-4 h-4 mr-2" /> Disconnect
+                  <LogOut className="w-4 h-4 me-2" /> Disconnect
                 </Button>
               </>
             )}
@@ -323,7 +323,7 @@ export default function ImporterSettings() {
                 <RadioGroupItem value={opt.value} id={`interval-${opt.value}`} className="mt-0.5" />
                 <label htmlFor={`interval-${opt.value}`} className="cursor-pointer flex-1">
                   <span className="font-medium text-sm">{opt.label}</span>
-                  <span className="text-xs text-muted-foreground ml-2">{opt.desc}</span>
+                  <span className="text-xs text-muted-foreground ms-2">{opt.desc}</span>
                 </label>
               </div>
             ))}
@@ -340,7 +340,7 @@ export default function ImporterSettings() {
       {/* ── Actions ── */}
       <div className="flex gap-3">
         <Button onClick={handleSaveSettings} disabled={saving}>
-          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+          {saving ? <Loader2 className="w-4 h-4 me-2 animate-spin" /> : null}
           Save Settings
         </Button>
         <Button
@@ -348,7 +348,7 @@ export default function ImporterSettings() {
           onClick={handleScanNow}
           disabled={runningNow || !isConnected || !rootFolderInput}
         >
-          {runningNow ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+          {runningNow ? <Loader2 className="w-4 h-4 me-2 animate-spin" /> : <Play className="w-4 h-4 me-2" />}
           Scan Now
         </Button>
       </div>

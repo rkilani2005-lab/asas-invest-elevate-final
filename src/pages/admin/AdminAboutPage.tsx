@@ -102,7 +102,7 @@ function SectionEditor({ section, onSave, saving }: { section: any; onSave: (s: 
           disabled={saving}
           size="sm"
         >
-          <Save className="h-4 w-4 mr-2" />
+          <Save className="h-4 w-4 me-2" />
           Save Section
         </Button>
       </CardContent>

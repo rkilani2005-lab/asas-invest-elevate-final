@@ -172,19 +172,19 @@ export default function AdminInquiries() {
           </p>
         </div>
         <Button onClick={exportToCSV} variant="outline">
-          <Download className="w-4 h-4 mr-2" />
+          <Download className="w-4 h-4 me-2" />
           Export CSV
         </Button>
       </div>
 
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search by name or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
         <Select value={sourceFilter} onValueChange={setSourceFilter}>
@@ -224,7 +224,7 @@ export default function AdminInquiries() {
               <TableHead>Interests</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-end">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -243,7 +243,7 @@ export default function AdminInquiries() {
                   <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                  <TableCell className="text-end"><Skeleton className="h-8 w-8 ms-auto" /></TableCell>
                 </TableRow>
               ))
             ) : filteredInquiries.length === 0 ? (
@@ -314,7 +314,7 @@ export default function AdminInquiries() {
                   <TableCell className="text-muted-foreground">
                     {format(new Date(inquiry.created_at!), "MMM d, yyyy")}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <Button
                       variant="ghost"
                       size="icon"

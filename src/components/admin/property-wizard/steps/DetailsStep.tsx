@@ -434,7 +434,7 @@ export default function DetailsStep({ data, onChange }: DetailsStepProps) {
                   disabled={!customAmenity.name_en || !customAmenity.category}
                   className="w-full"
                 >
-                  <Plus className="h-4 w-4 mr-1" />
+                  <Plus className="h-4 w-4 me-1" />
                   Add
                 </Button>
               </div>
@@ -479,7 +479,7 @@ export default function DetailsStep({ data, onChange }: DetailsStepProps) {
                 </SortableContext>
               </DndContext>
               <Button variant="outline" onClick={() => addLandmark("en")}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 Add Landmark
               </Button>
             </TabsContent>
@@ -505,7 +505,7 @@ export default function DetailsStep({ data, onChange }: DetailsStepProps) {
                 </SortableContext>
               </DndContext>
               <Button variant="outline" onClick={() => addLandmark("ar")}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 إضافة معلم
               </Button>
             </TabsContent>

@@ -289,10 +289,10 @@ export default function AdminCommunications() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => refetch()}>
-            <RefreshCw className="w-4 h-4 mr-2" /> Refresh
+            <RefreshCw className="w-4 h-4 me-2" /> Refresh
           </Button>
           <Button variant="outline" onClick={exportCSV}>
-            <Download className="w-4 h-4 mr-2" /> Export CSV
+            <Download className="w-4 h-4 me-2" /> Export CSV
           </Button>
         </div>
       </div>
@@ -319,8 +319,8 @@ export default function AdminCommunications() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Search name, email, phone..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input placeholder="Search name, email, phone..." value={search} onChange={(e) => setSearch(e.target.value)} className="ps-9" />
         </div>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-[180px]">
@@ -357,7 +357,7 @@ export default function AdminCommunications() {
               <TableHead>Status</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-end">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -444,7 +444,7 @@ export default function AdminCommunications() {
                   <TableCell className="text-xs text-muted-foreground">
                     {s.created_at ? formatDistanceToNow(new Date(s.created_at), { addSuffix: true }) : "—"}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedId(s.id); }}>
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -464,7 +464,7 @@ export default function AdminCommunications() {
           </DialogHeader>
           {selectedSubmission && (
             <ScrollArea className="flex-1">
-              <div className="space-y-6 pr-4">
+              <div className="space-y-6 pe-4">
                 {/* Visitor info */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-3">
@@ -583,7 +583,7 @@ export default function AdminCommunications() {
                     disabled={updateNotesMutation.isPending}
                     onClick={() => updateNotesMutation.mutate({ id: selectedSubmission.id, notes: notesValue })}
                   >
-                    {updateNotesMutation.isPending ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : null}
+                    {updateNotesMutation.isPending ? <Loader2 className="w-3 h-3 me-1 animate-spin" /> : null}
                     Save Notes
                   </Button>
                 </div>
@@ -607,7 +607,7 @@ export default function AdminCommunications() {
                                 <p className="text-xs text-destructive mt-1">{log.error_message}</p>
                               )}
                             </div>
-                            <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
+                            <div className="text-end flex-shrink-0 flex flex-col items-end gap-1">
                               <span className={`text-xs px-2 py-0.5 rounded-full border ${
                                 log.status === "sent" ? "bg-primary/10 text-primary border-primary/20" :
                                 log.status === "queued" ? "bg-muted text-muted-foreground border-muted" :
@@ -640,27 +640,27 @@ export default function AdminCommunications() {
                       onClick={() => resendEmailMutation.mutate(selectedSubmission)}
                     >
                       {resendingId === selectedSubmission.id
-                        ? <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                        : <RotateCcw className="w-3 h-3 mr-1" />}
+                        ? <Loader2 className="w-3 h-3 me-1 animate-spin" />
+                        : <RotateCcw className="w-3 h-3 me-1" />}
                       {selectedSubmission.email_sent ? "Resend Email" : "Send Email"}
                     </Button>
                   )}
                   <a href={`mailto:${selectedSubmission.visitor_email}`} target="_blank" rel="noreferrer">
                     <Button size="sm" variant="outline">
-                      <Mail className="w-3 h-3 mr-1" /> Reply via Email
+                      <Mail className="w-3 h-3 me-1" /> Reply via Email
                     </Button>
                   </a>
                   {selectedSubmission.visitor_phone && (
                     <a href={`https://wa.me/${selectedSubmission.visitor_phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">
                       <Button size="sm" variant="outline">
-                        <MessageSquare className="w-3 h-3 mr-1" /> WhatsApp
+                        <MessageSquare className="w-3 h-3 me-1" /> WhatsApp
                       </Button>
                     </a>
                   )}
                   {selectedSubmission.visitor_phone && (
                     <a href={`tel:${selectedSubmission.visitor_phone}`}>
                       <Button size="sm" variant="outline">
-                        <Phone className="w-3 h-3 mr-1" /> Call
+                        <Phone className="w-3 h-3 me-1" /> Call
                       </Button>
                     </a>
                   )}
