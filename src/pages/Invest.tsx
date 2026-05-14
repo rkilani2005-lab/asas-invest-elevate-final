@@ -18,10 +18,16 @@ const Invest = () => {
   const price = parseFloat(purchasePrice) || 0;
   const rent = parseFloat(expectedRent) || 0;
   const netRent = rent * 0.85;
-  const grossROI = price > 0 ? (rent / price * 100).toFixed(2) : "0.00";
-  const netROI = price > 0 ? (netRent / price * 100).toFixed(2) : "0.00";
-  const formatAED = (n: number) =>
-    new Intl.NumberFormat(isRTL ? "ar-AE" : "en-AE", { maximumFractionDigits: 0 }).format(n);
+  const grossROIValue = price > 0 ? (rent / price) * 100 : 0;
+  const netROIValue = price > 0 ? (netRent / price) * 100 : 0;
+  // Use Latin digits (en-AE) for consistency in financial figures across locales.
+  const numberFmt = new Intl.NumberFormat("en-AE", { maximumFractionDigits: 0 });
+  const percentFmt = new Intl.NumberFormat("en-AE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const formatAED = (n: number) => `AED ${numberFmt.format(n)}`;
+  const formatPct = (n: number) => `${percentFmt.format(n)}%`;
 
   const valueProps = [
     { icon: TrendingUp, title: t("invest.yieldsTitle"), desc: t("invest.yieldsDesc") },
@@ -94,23 +100,23 @@ const Invest = () => {
                 </div>
               </div>
               <div className="border border-accent/20 divide-y divide-accent/20 mb-6">
-                <div className="flex items-center justify-between p-4">
+                <div className="flex items-center justify-between p-4 gap-4">
                   <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("invest.grossRent")}</span>
-                  <span className="text-sm font-medium text-foreground tabular-nums">AED {formatAED(rent)}</span>
+                  <span dir="ltr" className="text-sm font-medium text-foreground tabular-nums">{formatAED(rent)}</span>
                 </div>
-                <div className="flex items-center justify-between p-4">
+                <div className="flex items-center justify-between p-4 gap-4">
                   <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("invest.netRent")}</span>
-                  <span className="text-sm font-medium text-foreground tabular-nums">AED {formatAED(netRent)}</span>
+                  <span dir="ltr" className="text-sm font-medium text-foreground tabular-nums">{formatAED(netRent)}</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="p-6 border border-accent/30 text-center">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t("invest.grossROI")}</p>
-                  <p className="heading-hero text-3xl text-accent">{grossROI}%</p>
+                  <p dir="ltr" className="heading-hero text-3xl text-accent tabular-nums">{formatPct(grossROIValue)}</p>
                 </div>
                 <div className="p-6 border border-accent/30 text-center">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t("invest.netROI")}</p>
-                  <p className="heading-hero text-3xl text-accent">{netROI}%</p>
+                  <p dir="ltr" className="heading-hero text-3xl text-accent tabular-nums">{formatPct(netROIValue)}</p>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground mt-4 text-center">{t("invest.calcNote")}</p>
