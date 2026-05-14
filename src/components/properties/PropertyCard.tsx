@@ -60,12 +60,16 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
     }
   }
 
+  const dirAttr = isRTL ? "rtl" : "ltr";
+  const alignClass = isRTL ? "text-right" : "text-left";
+
   return (
-    <Link to={`/property/${property.slug}`} className="group block" dir={isRTL ? "rtl" : "ltr"}>
+    <Link to={`/property/${property.slug}`} className="group block" dir={dirAttr}>
       <article
-        dir={isRTL ? "rtl" : "ltr"}
+        dir={dirAttr}
         className={cn(
-          "card-luxury h-full flex flex-col text-start"
+          "card-luxury h-full flex flex-col",
+          alignClass
         )}
       >
         {/* Image */}
@@ -110,8 +114,10 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         <div className="p-5 flex-1 flex flex-col bg-card">
           {/* Developer (always reserves a line) */}
           <p
+            dir={dirAttr}
             className={cn(
               "text-xs font-medium mb-2 min-h-[1rem]",
+              alignClass,
               developer ? "text-accent" : "text-transparent select-none"
             )}
             style={{ fontFamily: "'Inter', sans-serif" }}
@@ -122,18 +128,23 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
           {/* Title — always 2 lines tall */}
           <h3
-            className="heading-section text-xl text-foreground mb-3 group-hover:text-accent transition-colors duration-300 line-clamp-2 min-h-[3.5rem]"
+            dir={dirAttr}
+            className={cn(
+              "heading-section text-xl text-foreground mb-3 group-hover:text-accent transition-colors duration-300 line-clamp-2 min-h-[3.5rem]",
+              alignClass
+            )}
           >
             {name}
           </h3>
 
           {/* Price */}
-          <div className="mb-2">
-            <p className="text-xs text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <div className="mb-2" dir={dirAttr}>
+            <p className={cn("text-xs text-muted-foreground", alignClass)} style={{ fontFamily: "'Inter', sans-serif" }}>
               {t("property.from")}
             </p>
             <p
               className={cn(
+                alignClass,
                 property.price_range ? "text-foreground" : "text-muted-foreground/50 italic"
               )}
               style={{
@@ -150,8 +161,10 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
           {/* Secondary line (always reserves a line) */}
           <p
+            dir={dirAttr}
             className={cn(
               "text-xs mb-3 min-h-[1rem]",
+              alignClass,
               secondaryLineParts.length > 0 ? "text-muted-foreground" : "text-transparent select-none"
             )}
             style={{ fontFamily: "'Inter', sans-serif" }}
@@ -162,7 +175,11 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
           {/* Meta tokens with gold diamond separators (always rendered) */}
           <div
-            className="mt-auto pt-4 border-t border-border/50 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground min-h-[2rem]"
+            dir={dirAttr}
+            className={cn(
+              "mt-auto pt-4 border-t border-border/50 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground min-h-[2rem]",
+              isRTL ? "justify-end" : "justify-start"
+            )}
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {metaTokens.length > 0 ? (
@@ -179,8 +196,10 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
           {/* Location footer (always reserves a line) */}
           <p
+            dir={dirAttr}
             className={cn(
               "text-xs mt-2 min-h-[1rem]",
+              alignClass,
               location ? "text-muted-foreground/80" : "text-transparent select-none"
             )}
             style={{ fontFamily: "'Inter', sans-serif" }}
