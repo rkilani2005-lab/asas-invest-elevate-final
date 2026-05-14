@@ -65,8 +65,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
       <article
         dir={isRTL ? "rtl" : "ltr"}
         className={cn(
-          "card-luxury h-full flex flex-col",
-          isRTL ? "text-right" : "text-left"
+          "card-luxury h-full flex flex-col text-start"
         )}
       >
         {/* Image */}

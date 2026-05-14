@@ -95,7 +95,7 @@ export default function AdminEmailPage() {
       <Tabs defaultValue="log">
         <TabsList>
           <TabsTrigger value="log">
-            <Mail className="w-4 h-4 mr-2" /> Email Log
+            <Mail className="w-4 h-4 me-2" /> Email Log
           </TabsTrigger>
           <TabsTrigger value="settings">Settings & Accounts</TabsTrigger>
         </TabsList>
@@ -122,12 +122,12 @@ export default function AdminEmailPage() {
           {/* Filters */}
           <div className="flex gap-3 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search recipient, subject…"
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-                className="pl-9"
+                className="ps-9"
               />
             </div>
             <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0); }}>

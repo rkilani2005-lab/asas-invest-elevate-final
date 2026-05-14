@@ -259,7 +259,7 @@ export default function ImporterScan() {
           </p>
         </div>
         <Button onClick={handleScan} disabled={scanning}>
-          {scanning ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+          {scanning ? <Loader2 className="w-4 h-4 me-2 animate-spin" /> : <RefreshCw className="w-4 h-4 me-2" />}
           {scanning ? "Scanning…" : folders.length > 0 ? "Re-scan" : "Scan Drive"}
         </Button>
       </div>
@@ -290,7 +290,7 @@ export default function ImporterScan() {
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={selectAll}>Select All New</Button>
               <Button size="sm" disabled={!selected.size || creating} onClick={handleProcess}>
-                {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ChevronRight className="w-4 h-4 mr-2" />}
+                {creating ? <Loader2 className="w-4 h-4 me-2 animate-spin" /> : <ChevronRight className="w-4 h-4 me-2" />}
                 Process {selected.size > 0 ? `${selected.size} ` : ""}Selected
               </Button>
             </div>
@@ -339,7 +339,7 @@ export default function ImporterScan() {
 
                     {folder.already_imported ? (
                       <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-600">
-                        <CheckCircle2 className="w-3 h-3 mr-1" /> Imported
+                        <CheckCircle2 className="w-3 h-3 me-1" /> Imported
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="text-xs">New</Badge>
@@ -353,7 +353,7 @@ export default function ImporterScan() {
           {selected.size > 0 && (
             <div className="sticky bottom-4 flex justify-end">
               <Button size="lg" onClick={handleProcess} disabled={creating}>
-                {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CloudDownload className="w-4 h-4 mr-2" />}
+                {creating ? <Loader2 className="w-4 h-4 me-2 animate-spin" /> : <CloudDownload className="w-4 h-4 me-2" />}
                 Process {selected.size} Propert{selected.size === 1 ? "y" : "ies"}
               </Button>
             </div>

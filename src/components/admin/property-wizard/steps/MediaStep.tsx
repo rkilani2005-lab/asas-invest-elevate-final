@@ -115,7 +115,7 @@ function SortableMediaItem({
         />
       )}
       {isHero && (
-        <div className="absolute top-2 left-2 px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-medium rounded">
+        <div className="absolute top-2 start-2 px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-medium rounded">
           Hero
         </div>
       )}

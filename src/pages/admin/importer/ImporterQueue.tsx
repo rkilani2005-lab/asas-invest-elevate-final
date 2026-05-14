@@ -1000,7 +1000,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
       <div>
         <Label className="text-xs text-muted-foreground mb-1 block">
           {label}
-          {isEmpty && <span className="ml-2 text-yellow-500 text-xs">⚠ Empty</span>}
+          {isEmpty && <span className="ms-2 text-yellow-500 text-xs">⚠ Empty</span>}
         </Label>
         {multiline ? (
           <Textarea
@@ -1147,7 +1147,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
               <span className="text-green-600 font-medium">
                 {formatFileSize(f.compressedSize)}
                 {f.savedPct !== undefined && f.savedPct > 0 && (
-                  <span className="text-muted-foreground ml-1">−{f.savedPct}%</span>
+                  <span className="text-muted-foreground ms-1">−{f.savedPct}%</span>
                 )}
               </span>
             )}
@@ -1220,7 +1220,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                     ) : (
                       <Sparkles className="w-3 h-3" />
                     )}
-                    <span className="ml-1">Extract</span>
+                    <span className="ms-1">Extract</span>
                   </Button>
                 )}
 
@@ -1229,7 +1229,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                   <>
                     <Button size="sm" variant="outline" onClick={startEditing}>
                       <Edit3 className="w-3 h-3" />
-                      <span className="ml-1">Edit</span>
+                      <span className="ms-1">Edit</span>
                     </Button>
                     <Button
                       size="sm"
@@ -1244,7 +1244,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                       ) : (
                         <RotateCcw className="w-3 h-3" />
                       )}
-                      <span className="ml-1">Redo</span>
+                      <span className="ms-1">Redo</span>
                     </Button>
                     <Button
                       size="sm"
@@ -1256,7 +1256,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                       ) : (
                         <Send className="w-3 h-3" />
                       )}
-                      <span className="ml-1">Publish</span>
+                      <span className="ms-1">Publish</span>
                     </Button>
                   </>
                 )}
@@ -1276,7 +1276,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                       ) : (
                         <RotateCcw className="w-3 h-3" />
                       )}
-                      <span className="ml-1">Redo Extraction</span>
+                      <span className="ms-1">Redo Extraction</span>
                     </Button>
                     <Button
                       size="sm"
@@ -1285,7 +1285,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                       className="text-blue-600 border-blue-300 hover:bg-blue-50"
                     >
                       <ScanSearch className="w-3 h-3" />
-                      <span className="ml-1">Redo Scan</span>
+                      <span className="ms-1">Redo Scan</span>
                     </Button>
                   </>
                 )}
@@ -1298,7 +1298,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                     asChild
                   >
                     <Link to={job.cms_url} target="_blank">
-                      <Eye className="w-3 h-3 mr-1" />View
+                      <Eye className="w-3 h-3 me-1" />View
                     </Link>
                   </Button>
                 )}
@@ -1420,7 +1420,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                     {job.import_status === "reviewing" && (
                       <div className="flex gap-2 pt-2 flex-wrap">
                         <Button size="sm" variant="outline" onClick={startEditing}>
-                          <Edit3 className="w-3 h-3 mr-1" />Edit Data
+                          <Edit3 className="w-3 h-3 me-1" />Edit Data
                         </Button>
                         <Button
                           size="sm"
@@ -1430,9 +1430,9 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                           className="text-amber-600 border-amber-300 hover:bg-amber-50"
                         >
                           {extracting ? (
-                            <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                            <Loader2 className="w-3 h-3 animate-spin me-1" />
                           ) : (
-                            <RotateCcw className="w-3 h-3 mr-1" />
+                            <RotateCcw className="w-3 h-3 me-1" />
                           )}
                           Redo Extraction
                         </Button>
@@ -1442,9 +1442,9 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                           disabled={publishing}
                         >
                           {publishing ? (
-                            <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                            <Loader2 className="w-3 h-3 animate-spin me-1" />
                           ) : (
-                            <Send className="w-3 h-3 mr-1" />
+                            <Send className="w-3 h-3 me-1" />
                           )}
                           Publish to CMS
                         </Button>
@@ -1461,7 +1461,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                     <div>
                       <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                         <Image className="w-3 h-3" /> Images ({imageMedia.length})
-                        <span className="ml-2 text-[10px] bg-purple-500/10 text-purple-600 px-1.5 py-0.5 rounded">
+                        <span className="ms-2 text-[10px] bg-purple-500/10 text-purple-600 px-1.5 py-0.5 rounded">
                           client-compressed → ≤600 KB
                         </span>
                       </h4>
@@ -1572,7 +1572,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                         <div>
                           <span className="font-medium">{log.action}</span>
                           {log.details && (
-                            <span className="text-muted-foreground ml-2">
+                            <span className="text-muted-foreground ms-2">
                               {log.details}
                             </span>
                           )}
@@ -1682,7 +1682,7 @@ export default function ImporterQueue() {
           </p>
         </div>
         <Button variant="outline" onClick={() => refetch()}>
-          <RefreshCw className="w-4 h-4 mr-2" />Refresh
+          <RefreshCw className="w-4 h-4 me-2" />Refresh
         </Button>
       </div>
 
@@ -1705,7 +1705,7 @@ export default function ImporterQueue() {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleRefreshAndDismiss}>
-              <RefreshCw className="w-3 h-3 mr-1" />View
+              <RefreshCw className="w-3 h-3 me-1" />View
             </Button>
             <button
               onClick={dismissBanner}

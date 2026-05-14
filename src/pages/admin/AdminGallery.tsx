@@ -149,7 +149,7 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
       />
       {/* Large file warning indicator */}
       {isLargeFile && !isSelectionMode && (
-        <div className="absolute top-2 right-2 z-20" title="File size over 500KB - consider re-compressing">
+        <div className="absolute top-2 end-2 z-20" title="File size over 500KB - consider re-compressing">
           <div className="p-1.5 bg-red-500 rounded-full shadow-md animate-pulse">
             <AlertCircle className="h-4 w-4 text-white" />
           </div>
@@ -157,7 +157,7 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
       )}
       {/* Selection checkbox */}
       {isSelectionMode && (
-        <div className="absolute top-2 left-2 z-20">
+        <div className="absolute top-2 start-2 z-20">
           <div className={`p-1 rounded ${isSelected ? "bg-primary" : "bg-background/90"}`}>
             {isSelected ? (
               <CheckSquare className="h-5 w-5 text-primary-foreground" />
@@ -168,13 +168,13 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
         </div>
       )}
       {isHero && (
-        <div className={`absolute top-2 ${isSelectionMode ? 'left-10' : 'left-2'} px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-medium rounded z-10`}>
+        <div className={`absolute top-2 ${isSelectionMode ? 'start-10' : 'start-2'} px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-medium rounded z-10`}>
           Hero
         </div>
       )}
       {!isSelectionMode && (
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors">
-          <div className={`absolute top-2 ${isHero ? 'left-14' : 'left-2'} opacity-0 group-hover:opacity-100 transition-opacity`}>
+          <div className={`absolute top-2 ${isHero ? 'start-14' : 'start-2'} opacity-0 group-hover:opacity-100 transition-opacity`}>
             <button
               {...attributes}
               {...listeners}
@@ -183,7 +183,7 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
-          <div className={`absolute ${isLargeFile ? 'top-12' : 'top-2'} right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity`}>
+          <div className={`absolute ${isLargeFile ? 'top-12' : 'top-2'} end-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity`}>
             <button
               onClick={() => onEdit(image)}
               className="p-1.5 bg-background/90 rounded hover:bg-background"
@@ -208,7 +208,7 @@ function SortableImage({ image, onDelete, onPreview, onEdit, isSelectionMode, is
           </div>
         </div>
       )}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+      <div className="absolute bottom-0 start-0 end-0 bg-gradient-to-t from-black/60 to-transparent p-2">
         <div className="flex items-center justify-between gap-1">
           <p className="text-white text-xs truncate flex-1">
             {image.caption_en || "No caption"}
@@ -1167,7 +1167,7 @@ export default function AdminGallery() {
                           >
                             {bulkUpdateCategoryMutation.isPending ? (
                               <>
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                <Loader2 className="h-4 w-4 animate-spin me-2" />
                                 Updating...
                               </>
                             ) : (
@@ -1484,7 +1484,7 @@ export default function AdminGallery() {
               >
                 {updateMutation.isPending ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="h-4 w-4 animate-spin me-2" />
                     Saving...
                   </>
                 ) : (
@@ -1503,7 +1503,7 @@ export default function AdminGallery() {
           onClick={() => setPreviewImage(null)}
         >
           <button
-            className="absolute top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-white/20"
+            className="absolute top-4 end-4 p-2 bg-white/10 rounded-full hover:bg-white/20"
             onClick={() => setPreviewImage(null)}
           >
             <X className="h-6 w-6 text-white" />

@@ -225,11 +225,11 @@ export default function InsightEditorPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => handleSave(false)} disabled={isSaving}>
-            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
             Save Draft
           </Button>
           <Button onClick={() => handleSave(true)} disabled={isSaving}>
-            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eye className="mr-2 h-4 w-4" />}
+            {isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Eye className="me-2 h-4 w-4" />}
             {data.is_published ? "Update" : "Publish"}
           </Button>
         </div>
@@ -404,7 +404,7 @@ export default function InsightEditorPage() {
                   <Button
                     variant="destructive"
                     size="icon"
-                    className="absolute top-2 right-2 h-8 w-8"
+                    className="absolute top-2 end-2 h-8 w-8"
                     onClick={() => updateField("featured_image", "")}
                   >
                     <X className="h-4 w-4" />

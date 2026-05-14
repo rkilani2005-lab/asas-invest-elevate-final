@@ -154,7 +154,7 @@ export default function AdminTranslations() {
                 setFormData({ key: "", en_text: "", ar_text: "", category: "ui" });
               }}
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-4 h-4 me-2" />
               Add Translation
             </Button>
           </DialogTrigger>
@@ -221,7 +221,7 @@ export default function AdminTranslations() {
                   Cancel
                 </Button>
                 <Button type="submit">
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="w-4 h-4 me-2" />
                   {editingTranslation ? "Update" : "Create"}
                 </Button>
               </div>
@@ -232,12 +232,12 @@ export default function AdminTranslations() {
 
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search translations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -261,7 +261,7 @@ export default function AdminTranslations() {
               <TableHead>English</TableHead>
               <TableHead>Arabic</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-end">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -292,7 +292,7 @@ export default function AdminTranslations() {
                   <TableCell>
                     <Badge variant="secondary">{translation.category}</Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="ghost"

@@ -137,7 +137,7 @@ export default function AdminInsights() {
         </div>
         <Button asChild>
           <Link to="/admin/insights/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="me-2 h-4 w-4" />
             New Article
           </Link>
         </Button>
@@ -146,12 +146,12 @@ export default function AdminInsights() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by title..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="ps-10"
           />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>

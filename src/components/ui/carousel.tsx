@@ -41,10 +41,16 @@ function useCarousel() {
 
 const Carousel = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & CarouselProps>(
   ({ orientation = "horizontal", opts, setApi, plugins, className, children, ...props }, ref) => {
+    const { i18n } = useTranslation();
+    const isRTL = i18n.dir() === "rtl";
     const [carouselRef, api] = useEmblaCarousel(
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
+        // Auto-direct horizontal carousels to follow the document direction so
+        // Arabic users see slides flow right-to-left and arrows behave correctly.
+        // Caller can still override via `opts.direction`.
+        direction: opts?.direction ?? (orientation === "horizontal" && isRTL ? "rtl" : "ltr"),
       },
       plugins,
     );

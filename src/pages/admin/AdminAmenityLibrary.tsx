@@ -199,7 +199,7 @@ export default function AdminAmenityLibrary() {
           </p>
         </div>
         <Button onClick={openCreateDialog}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 me-2" />
           Add Amenity
         </Button>
       </div>
@@ -214,7 +214,7 @@ export default function AdminAmenityLibrary() {
               <TableHead>Name (AR)</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="w-[80px]">Active</TableHead>
-              <TableHead className="w-[100px] text-right">Actions</TableHead>
+              <TableHead className="w-[100px] text-end">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -252,7 +252,7 @@ export default function AdminAmenityLibrary() {
                         {amenity.is_active ? "Yes" : "No"}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <div className="flex justify-end gap-1">
                         <Button
                           variant="ghost"
@@ -356,7 +356,7 @@ export default function AdminAmenityLibrary() {
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isSaving && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
               {editingId ? "Update" : "Create"}
             </Button>
           </DialogFooter>

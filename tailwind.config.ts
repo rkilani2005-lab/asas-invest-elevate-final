@@ -77,6 +77,8 @@ export default {
         // Arabic Fonts
         'arabic-heading': ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
         'arabic-body': ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
+        // Alias used across the app via `isRTL && "font-arabic"`
+        arabic: ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
         'tighter': '-0.04em',
