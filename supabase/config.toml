@@ -56,3 +56,7 @@ verify_jwt = false
 
 [functions.sitemap]
 verify_jwt = false
+
+
+[functions.translate-content]
+verify_jwt = false

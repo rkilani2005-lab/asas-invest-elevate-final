@@ -3,6 +3,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import ProgressiveImage from "@/components/ui/progressive-image";
 import { getStorageThumbnailUrl } from "@/lib/image-utils";
+import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
+import { AutoTranslatedChip } from "@/components/ui/AutoTranslatedChip";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyCardProps {
@@ -14,9 +16,15 @@ interface PropertyCardProps {
 const PropertyCard = ({ property }: PropertyCardProps) => {
   const { t, isRTL, language } = useLanguage();
 
-  const name = language === "ar" && property.name_ar ? property.name_ar : property.name_en;
-  const location = language === "ar" && property.location_ar ? property.location_ar : property.location_en;
-  const developer = language === "ar" && property.developer_ar ? property.developer_ar : property.developer_en;
+  // AI fallback: if AR is empty, fetch a Gemini-via-Lovable translation of EN
+  // (cached in translations_cache). In English these are no-ops returning EN.
+  const nameField      = useAutoTranslatedField(property.name_en,      property.name_ar,      `property:${property.id}:name`);
+  const locationField  = useAutoTranslatedField(property.location_en,  property.location_ar,  `property:${property.id}:location`);
+  const developerField = useAutoTranslatedField(property.developer_en, property.developer_ar, `property:${property.id}:developer`);
+
+  const name      = nameField.value;
+  const location  = locationField.value;
+  const developer = developerField.value;
 
   // Pick a hero image
   const sortedMedia = [...(property.media || [])].sort(
@@ -118,6 +126,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             aria-hidden={!developer}
           >
             {developer || "—"}
+            {developer && developerField.autoTranslated && <AutoTranslatedChip />}
           </p>
 
           {/* Title — always 2 lines tall */}
@@ -125,6 +134,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             className="heading-section text-xl text-foreground mb-3 group-hover:text-accent transition-colors duration-300 line-clamp-2 min-h-[3.5rem]"
           >
             {name}
+            {nameField.autoTranslated && <AutoTranslatedChip />}
           </h3>
 
           {/* Price */}

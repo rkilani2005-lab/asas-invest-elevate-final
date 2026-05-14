@@ -1,6 +1,8 @@
 import { MapPin, Building2, Maximize2, Calendar, Car, Key, Zap, UtensilsCrossed, Bath, ParkingCircle, TrendingUp, Users, Receipt } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
+import { AutoTranslatedChip } from "@/components/ui/AutoTranslatedChip";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyOverviewProps {
@@ -10,9 +12,22 @@ interface PropertyOverviewProps {
 const PropertyOverview = ({ property }: PropertyOverviewProps) => {
   const { t, isRTL, language } = useLanguage();
 
-  const overview = language === "ar" && property.overview_ar ? property.overview_ar : property.overview_en;
-  const location = language === "ar" && property.location_ar ? property.location_ar : property.location_en;
-  const highlights = language === "ar" && property.highlights_ar 
+  const overviewField = useAutoTranslatedField(
+    property.overview_en,
+    property.overview_ar,
+    `property:${property.id}:overview`,
+  );
+  const locationField = useAutoTranslatedField(
+    property.location_en,
+    property.location_ar,
+    `property:${property.id}:location`,
+  );
+
+  const overview = overviewField.value;
+  const location = locationField.value;
+  // Highlights are an array — kept as-is for now; translation of bullet
+  // lists is best done at the admin step, not at render time.
+  const highlights = language === "ar" && property.highlights_ar
     ? property.highlights_ar as string[]
     : property.highlights_en as string[] || [];
 
