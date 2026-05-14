@@ -93,6 +93,16 @@ const Invest = () => {
                   />
                 </div>
               </div>
+              <div className="border border-accent/20 divide-y divide-accent/20 mb-6">
+                <div className="flex items-center justify-between p-4">
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("invest.grossRent")}</span>
+                  <span className="text-sm font-medium text-foreground tabular-nums">AED {formatAED(rent)}</span>
+                </div>
+                <div className="flex items-center justify-between p-4">
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("invest.netRent")}</span>
+                  <span className="text-sm font-medium text-foreground tabular-nums">AED {formatAED(netRent)}</span>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="p-6 border border-accent/30 text-center">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t("invest.grossROI")}</p>
