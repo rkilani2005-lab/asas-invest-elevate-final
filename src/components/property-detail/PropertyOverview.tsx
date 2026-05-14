@@ -68,8 +68,13 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
             </h2>
             
             {overview && (
-              <div 
-                className="max-w-none text-muted-foreground leading-relaxed mb-8 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:ps-6 [&_ol]:list-decimal [&_ol]:ps-6 [&_li]:mb-2 [&_strong]:font-semibold [&_em]:italic"
+              <div
+                dir={isRTL ? "rtl" : "ltr"}
+                className={cn(
+                  "max-w-none text-muted-foreground leading-relaxed mb-8 text-start",
+                  "[&_*]:!text-start [&_p]:!text-start [&_li]:!text-start [&_h1]:!text-start [&_h2]:!text-start [&_h3]:!text-start [&_h4]:!text-start",
+                  "[&_p]:mb-4 [&_ul]:list-disc [&_ul]:ps-6 [&_ol]:list-decimal [&_ol]:ps-6 [&_li]:mb-2 [&_strong]:font-semibold [&_em]:italic"
+                )}
                 dangerouslySetInnerHTML={{ __html: overview }}
               />
             )}
