@@ -17,8 +17,8 @@ const Invest = () => {
 
   const price = parseFloat(purchasePrice) || 0;
   const rent = parseFloat(expectedRent) || 0;
-  const grossROI = price > 0 ? ((rent * 12) / price * 100).toFixed(2) : "0.00";
-  const netROI = price > 0 ? (((rent * 12) * 0.85) / price * 100).toFixed(2) : "0.00";
+  const grossROI = price > 0 ? (rent / price * 100).toFixed(2) : "0.00";
+  const netROI = price > 0 ? ((rent * 0.85) / price * 100).toFixed(2) : "0.00";
 
   const valueProps = [
     { icon: TrendingUp, title: t("invest.yieldsTitle"), desc: t("invest.yieldsDesc") },
@@ -86,7 +86,7 @@ const Invest = () => {
                     type="number"
                     value={expectedRent}
                     onChange={(e) => setExpectedRent(e.target.value)}
-                    placeholder="e.g., 8000"
+                    placeholder="e.g., 96000"
                   />
                 </div>
               </div>

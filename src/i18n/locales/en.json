@@ -525,7 +525,7 @@
     "calcTitle": "ROI Calculator",
     "calcDesc": "Estimate your potential returns on a Dubai property investment.",
     "purchasePrice": "Purchase Price (AED)",
-    "monthlyRent": "Expected Monthly Rent (AED)",
+    "monthlyRent": "Expected Annual Rent (AED)",
     "grossROI": "Gross ROI",
     "netROI": "Net ROI (est.)",
     "calcNote": "Net ROI assumes ~15% deduction for maintenance, service charges, and vacancy.",
