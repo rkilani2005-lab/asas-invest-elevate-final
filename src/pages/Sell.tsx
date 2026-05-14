@@ -61,11 +61,39 @@ const Sell = () => {
       <Navigation />
       <main className="pt-24 pb-16 relative z-10">
         <div className={cn("container mx-auto px-4 lg:px-8", isRTL && "font-arabic")}>
-          <ScrollReveal className="max-w-3xl mx-auto text-center mb-16">
+          <ScrollReveal className="max-w-3xl mx-auto text-center mb-12">
             <p className="text-eyebrow text-accent mb-4">{t("sell.subtitle")}</p>
             <h1 className="heading-hero text-3xl md:text-4xl lg:text-5xl text-accent mb-6">{t("sell.title")}</h1>
             <p className="text-muted-foreground text-lg leading-relaxed">{t("sell.description")}</p>
           </ScrollReveal>
+
+          {/* Two-path chooser — make the difference obvious */}
+          <div className="max-w-5xl mx-auto mb-16 grid md:grid-cols-2 gap-6">
+            <div className="card-luxury p-6 md:p-8 flex flex-col">
+              <p className="text-eyebrow text-accent mb-2">{t("sell.path1Eyebrow")}</p>
+              <h2 className="heading-section text-xl md:text-2xl text-foreground mb-3">
+                {t("sell.path1Title")}
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">
+                {t("sell.path1Desc")}
+              </p>
+              <Button asChild variant="outline" className="self-start">
+                <a href="#valuation-form">{t("sell.path1Cta")}</a>
+              </Button>
+            </div>
+            <div className="card-luxury p-6 md:p-8 flex flex-col border-accent/40">
+              <p className="text-eyebrow text-accent mb-2">{t("sell.path2Eyebrow")}</p>
+              <h2 className="heading-section text-xl md:text-2xl text-foreground mb-3">
+                {t("sell.path2Title")}
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">
+                {t("sell.path2Desc")}
+              </p>
+              <Button asChild variant="luxury" className="self-start">
+                <Link to="/list-property">{t("sell.path2Cta")}</Link>
+              </Button>
+            </div>
+          </div>
 
           {/* Process Timeline */}
           <div className="max-w-4xl mx-auto mb-20">
@@ -85,7 +113,7 @@ const Sell = () => {
           </div>
 
           {/* Valuation Form */}
-          <div className="max-w-2xl mx-auto">
+          <div id="valuation-form" className="max-w-2xl mx-auto scroll-mt-24">
             <div className="card-luxury p-8">
               <h2 className="heading-section text-xl text-foreground mb-6 text-center">{t("sell.formTitle")}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -140,14 +168,6 @@ const Sell = () => {
             </div>
           </div>
 
-          {/* List Your Property */}
-          <div id="list" className="max-w-3xl mx-auto text-center mt-20">
-            <h2 className="heading-section text-2xl text-foreground mb-4">{t("sell.listTitle")}</h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">{t("sell.listDesc")}</p>
-            <Button asChild variant="luxury" size="lg">
-              <Link to="/list-property">{t("sell.getStarted")}</Link>
-            </Button>
-          </div>
         </div>
       </main>
       <Footer />

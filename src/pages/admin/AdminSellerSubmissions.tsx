@@ -38,6 +38,7 @@ type Submission = {
   description_en: string | null;
   description_ar: string | null;
   photos: string[] | null;
+  video_url: string | null;
   admin_notes: string | null;
   approved_property_id: string | null;
   reviewed_at: string | null;
@@ -136,6 +137,7 @@ export default function AdminSellerSubmissions() {
               : null,
             overview_en: active.description_en,
             overview_ar: active.description_ar,
+            video_url: active.video_url,
             office_type:
               active.category === "commercial" ? active.unit_type : null,
           } as any,
@@ -351,6 +353,20 @@ export default function AdminSellerSubmissions() {
                         </a>
                       ))}
                     </div>
+                  </Section>
+                )}
+
+                {active.video_url && (
+                  <Section title="Video">
+                    <a
+                      href={active.video_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-accent underline break-all text-sm"
+                      dir="ltr"
+                    >
+                      {active.video_url}
+                    </a>
                   </Section>
                 )}
 

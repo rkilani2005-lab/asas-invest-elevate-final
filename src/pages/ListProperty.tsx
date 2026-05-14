@@ -1,7 +1,7 @@
 import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Upload, X, Loader2, Video, CheckCircle2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -27,8 +27,8 @@ const MAX_FILE_MB = 8;
 const ListProperty = () => {
   const { t, isRTL, language } = useLanguage();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
+  const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
   const [form, setForm] = useState({
     seller_name: "",
@@ -49,6 +49,7 @@ const ListProperty = () => {
     price_aed: "",
     description_en: "",
     description_ar: "",
+    video_url: "",
   });
 
   const update = (k: keyof typeof form, v: string) =>
@@ -100,12 +101,21 @@ const ListProperty = () => {
       });
       return;
     }
+    // Light validation: if a video URL is provided it must look like a URL.
+    if (form.video_url && !/^https?:\/\/\S+$/i.test(form.video_url.trim())) {
+      toast({
+        title: t("listProperty.errorTitle"),
+        description: t("listProperty.invalidVideoUrl"),
+        variant: "destructive",
+      });
+      return;
+    }
     setSubmitting(true);
     try {
       // 1. Insert submission to get id
       const { data: inserted, error: insErr } = await supabase
         .from("seller_submissions")
-        .insert([{ ...form, photos: [] }])
+        .insert([{ ...form, video_url: form.video_url.trim() || null, photos: [] }])
         .select("id")
         .single();
       if (insErr) throw insErr;
@@ -124,7 +134,11 @@ const ListProperty = () => {
         title: t("listProperty.successTitle"),
         description: t("listProperty.successDesc"),
       });
-      setTimeout(() => navigate("/sell"), 1500);
+      // Show in-page success card instead of bouncing back to /sell.
+      setSubmittedId(inserted.id);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     } catch (err) {
       console.error(err);
       toast({
@@ -170,6 +184,54 @@ const ListProperty = () => {
               </p>
             </ScrollReveal>
 
+            {submittedId ? (
+              <div className="max-w-2xl mx-auto card-luxury p-8 md:p-12 text-center space-y-6">
+                <div className="w-16 h-16 mx-auto rounded-full bg-accent/15 flex items-center justify-center">
+                  <CheckCircle2 className="h-9 w-9 text-accent" strokeWidth={1.25} />
+                </div>
+                <div className="space-y-3">
+                  <h2 className="heading-section text-2xl md:text-3xl text-foreground">
+                    {t("listProperty.thanksTitle")}
+                  </h2>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {t("listProperty.thanksBody")}
+                  </p>
+                  <p className="text-xs text-muted-foreground/70" dir="ltr">
+                    {t("listProperty.referenceLabel")}: {submittedId.slice(0, 8)}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                  <Button asChild variant="luxury">
+                    <Link to="/">{t("listProperty.backHome")}</Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSubmittedId(null);
+                      setPhotos([]);
+                      setForm((p) => ({
+                        ...p,
+                        property_name_en: "",
+                        property_name_ar: "",
+                        location_en: "",
+                        location_ar: "",
+                        developer_en: "",
+                        developer_ar: "",
+                        bedrooms: "",
+                        bathrooms: "",
+                        size_sqft: "",
+                        price_aed: "",
+                        description_en: "",
+                        description_ar: "",
+                        video_url: "",
+                      }));
+                    }}
+                  >
+                    {t("listProperty.submitAnother")}
+                  </Button>
+                </div>
+              </div>
+            ) : (
             <form
               onSubmit={handleSubmit}
               className="max-w-3xl mx-auto card-luxury p-6 md:p-10 space-y-10"
@@ -419,6 +481,37 @@ const ListProperty = () => {
                 )}
               </section>
 
+              {/* Video */}
+              <section className="space-y-4">
+                <h2 className="heading-section text-xl text-foreground border-b border-accent/20 pb-2">
+                  {t("listProperty.sectionVideo")}
+                </h2>
+                <p className="text-sm text-muted-foreground -mt-1">
+                  {t("listProperty.videoHint")}
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="video_url">
+                    {t("listProperty.videoUrl")}
+                  </Label>
+                  <div className="relative">
+                    <Video
+                      className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-muted-foreground pointer-events-none"
+                      strokeWidth={1.5}
+                    />
+                    <Input
+                      id="video_url"
+                      type="url"
+                      inputMode="url"
+                      dir="ltr"
+                      placeholder="https://youtube.com/watch?v=…  or  https://vimeo.com/…"
+                      className="ps-9"
+                      value={form.video_url}
+                      onChange={(e) => update("video_url", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </section>
+
               <Button
                 type="submit"
                 variant="luxury"
@@ -436,6 +529,7 @@ const ListProperty = () => {
                 )}
               </Button>
             </form>
+            )}
           </div>
         </main>
         <Footer />
