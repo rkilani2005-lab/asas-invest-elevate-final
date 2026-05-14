@@ -44,8 +44,13 @@
             var nav = (navigator.language || 'en').toLowerCase();
             lang = nav.indexOf('ar') === 0 ? 'ar' : 'en';
           }
+          var dir = lang === 'ar' ? 'rtl' : 'ltr';
           document.documentElement.lang = lang;
-          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+          document.documentElement.dir = dir;
+          // <body> doesn't exist yet in <head>; mirror dir on it as soon as it does.
+          document.addEventListener('DOMContentLoaded', function () {
+            if (document.body) document.body.dir = dir;
+          });
         } catch (e) {
           document.documentElement.lang = 'en';
           document.documentElement.dir = 'ltr';
