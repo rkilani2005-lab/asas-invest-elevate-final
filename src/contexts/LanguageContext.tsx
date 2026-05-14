@@ -39,7 +39,12 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     const dir = languages[language].dir;
     document.documentElement.dir = dir;
     document.documentElement.lang = language;
-    
+    // Mirror dir on <body> so any descendant relying on the closest [dir] ancestor
+    // (e.g. third-party widgets, portals appended to body) inherits correctly.
+    if (document.body) {
+      document.body.dir = dir;
+    }
+
     // Update font family based on language
     if (language === 'ar') {
       document.documentElement.style.setProperty('--font-body', '"IBM Plex Sans Arabic", sans-serif');
