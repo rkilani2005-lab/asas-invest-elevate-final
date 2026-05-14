@@ -100,23 +100,23 @@ const Invest = () => {
                 </div>
               </div>
               <div className="border border-accent/20 divide-y divide-accent/20 mb-6">
-                <div className="flex items-center justify-between p-4">
+                <div className="flex items-center justify-between p-4 gap-4">
                   <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("invest.grossRent")}</span>
-                  <span className="text-sm font-medium text-foreground tabular-nums">AED {formatAED(rent)}</span>
+                  <span dir="ltr" className="text-sm font-medium text-foreground tabular-nums">{formatAED(rent)}</span>
                 </div>
-                <div className="flex items-center justify-between p-4">
+                <div className="flex items-center justify-between p-4 gap-4">
                   <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("invest.netRent")}</span>
-                  <span className="text-sm font-medium text-foreground tabular-nums">AED {formatAED(netRent)}</span>
+                  <span dir="ltr" className="text-sm font-medium text-foreground tabular-nums">{formatAED(netRent)}</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="p-6 border border-accent/30 text-center">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t("invest.grossROI")}</p>
-                  <p className="heading-hero text-3xl text-accent">{grossROI}%</p>
+                  <p dir="ltr" className="heading-hero text-3xl text-accent tabular-nums">{formatPct(grossROIValue)}</p>
                 </div>
                 <div className="p-6 border border-accent/30 text-center">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t("invest.netROI")}</p>
-                  <p className="heading-hero text-3xl text-accent">{netROI}%</p>
+                  <p dir="ltr" className="heading-hero text-3xl text-accent tabular-nums">{formatPct(netROIValue)}</p>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground mt-4 text-center">{t("invest.calcNote")}</p>
