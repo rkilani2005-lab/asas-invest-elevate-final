@@ -256,7 +256,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     isRTL && "text-end"
                   )}
                   rows={4}
-                  placeholder="Tell us about your investment goals..."
+                  placeholder={t("inquire.messagePlaceholder")}
                 />
               </div>
 
