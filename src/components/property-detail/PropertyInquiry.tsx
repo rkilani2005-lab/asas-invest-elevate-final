@@ -268,7 +268,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 className="w-full rounded-none"
               >
                 {isSubmitting ? (
-                  "Submitting..."
+                  t("inquire.submitting")
                 ) : (
                   <>
                     {t("buttons.registerInterest")}
