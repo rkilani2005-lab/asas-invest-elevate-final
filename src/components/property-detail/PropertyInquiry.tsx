@@ -138,9 +138,9 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 <MessageCircle className="h-6 w-6 text-accent" strokeWidth={1} />
               </div>
               <div>
-                <p className="font-medium text-foreground mb-1">Prefer WhatsApp?</p>
+                <p className="font-medium text-foreground mb-1">{t("inquire.preferWhatsapp")}</p>
                 <a
-                  href={`https://wa.me/971500000000?text=I'm interested in ${encodeURIComponent(propertyName)}`}
+                  href={`https://wa.me/971500000000?text=${encodeURIComponent(`${t("inquire.whatsappPrefix")} ${propertyName}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-accent hover:underline text-sm"
