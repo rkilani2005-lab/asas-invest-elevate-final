@@ -124,11 +124,10 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               {t("sections.inquire")}
             </p>
             <h2 className="font-serif text-3xl md:text-4xl font-medium text-accent mb-6">
-              Interested in {propertyName}?
+              {t("inquire.interestedIn", { property: propertyName })}
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-              Our investment advisors are ready to help you explore this opportunity. 
-              Fill out the form and we'll get back to you within 24 hours.
+              {t("inquire.intro")}
             </p>
 
             {/* WhatsApp Option */}
