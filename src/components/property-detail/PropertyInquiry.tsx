@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyInquiryProps {
@@ -16,8 +17,10 @@ interface PropertyInquiryProps {
 }
 
 const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
-  const { t, isRTL, language } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { toast } = useToast();
+  const nameField = useAutoTranslatedField(property.name_en, property.name_ar, `property:${property.id}:name`);
+  const propertyName = nameField.value || property.name_en;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -68,8 +71,8 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
     } catch (error) {
       console.error("Error submitting inquiry:", error);
       toast({
-        title: "Error",
-        description: "Failed to submit inquiry. Please try again.",
+        title: t("inquire.errorTitle"),
+        description: t("inquire.errorDesc"),
         variant: "destructive",
       });
     } finally {
@@ -77,7 +80,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
     }
   };
 
-  const propertyName = language === "ar" && property.name_ar ? property.name_ar : property.name_en;
+  
 
   if (isSubmitted) {
     return (
@@ -95,13 +98,13 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               {t("contact.success")}
             </h3>
             <p className="text-muted-foreground mb-6">
-              Our team will review your inquiry about {propertyName} and get back to you shortly.
+              {t("inquire.successDesc", { property: propertyName })}
             </p>
             <Button
               variant="luxury"
               onClick={() => setIsSubmitted(false)}
             >
-              Submit Another Inquiry
+              {t("inquire.submitAnother")}
             </Button>
           </motion.div>
         </div>
@@ -121,11 +124,10 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               {t("sections.inquire")}
             </p>
             <h2 className="font-serif text-3xl md:text-4xl font-medium text-accent mb-6">
-              Interested in {propertyName}?
+              {t("inquire.interestedIn", { property: propertyName })}
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-              Our investment advisors are ready to help you explore this opportunity. 
-              Fill out the form and we'll get back to you within 24 hours.
+              {t("inquire.intro")}
             </p>
 
             {/* WhatsApp Option */}
@@ -136,9 +138,9 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 <MessageCircle className="h-6 w-6 text-accent" strokeWidth={1} />
               </div>
               <div>
-                <p className="font-medium text-foreground mb-1">Prefer WhatsApp?</p>
+                <p className="font-medium text-foreground mb-1">{t("inquire.preferWhatsapp")}</p>
                 <a
-                  href={`https://wa.me/971500000000?text=I'm interested in ${encodeURIComponent(propertyName)}`}
+                  href={`https://wa.me/971500000000?text=${encodeURIComponent(`${t("inquire.whatsappPrefix")} ${propertyName}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-accent hover:underline text-sm"
@@ -254,7 +256,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     isRTL && "text-end"
                   )}
                   rows={4}
-                  placeholder="Tell us about your investment goals..."
+                  placeholder={t("inquire.messagePlaceholder")}
                 />
               </div>
 
@@ -266,7 +268,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 className="w-full rounded-none"
               >
                 {isSubmitting ? (
-                  "Submitting..."
+                  t("inquire.submitting")
                 ) : (
                   <>
                     {t("buttons.registerInterest")}

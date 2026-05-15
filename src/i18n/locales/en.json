@@ -383,6 +383,18 @@
     "newsletterSuccess": "Subscribed! Welcome to the Asas Invest community.",
     "required": "required"
   },
+  "inquire": {
+    "interestedIn": "Interested in {{property}}?",
+    "intro": "Our investment advisors are ready to help you explore this opportunity. Fill out the form and we'll get back to you within 24 hours.",
+    "preferWhatsapp": "Prefer WhatsApp?",
+    "messagePlaceholder": "Tell us about your investment goals...",
+    "submitting": "Submitting...",
+    "successDesc": "Our team will review your inquiry about {{property}} and get back to you shortly.",
+    "submitAnother": "Submit Another Inquiry",
+    "errorTitle": "Error",
+    "errorDesc": "Failed to submit inquiry. Please try again.",
+    "whatsappPrefix": "I'm interested in"
+  },
   "footer": {
     "about": "About Asas Invest",
     "aboutText": "Premium real estate investment opportunities in Dubai and the UAE.",
