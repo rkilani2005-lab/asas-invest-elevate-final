@@ -5,6 +5,8 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
+import { AutoTranslatedChip } from "@/components/ui/AutoTranslatedChip";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyAmenitiesProps {
@@ -28,25 +30,57 @@ const iconMap: Record<string, LucideIcon> = {
   ac: Wind,
 };
 
-const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
-  const { t, isRTL, language } = useLanguage();
+const getIcon = (iconName: string | null): LucideIcon => {
+  if (iconName && iconMap[iconName.toLowerCase()]) {
+    return iconMap[iconName.toLowerCase()];
+  }
+  return Sparkles;
+};
 
-  // Group amenities by category
+const AmenityCategoryHeading = ({ category, propertyId }: { category: string; propertyId: string }) => {
+  const { isRTL } = useLanguage();
+  const field = useAutoTranslatedField(category, null, `amenity-category:${propertyId}:${category}`);
+  return (
+    <h3 className={cn(
+      "text-accent text-xs font-medium tracking-widest uppercase mb-4 text-start",
+      isRTL && "text-end"
+    )}>
+      {field.value}
+      {field.autoTranslated && <AutoTranslatedChip />}
+    </h3>
+  );
+};
+
+const AmenityItem = ({ amenity }: { amenity: Tables<"amenities"> }) => {
+  const { isRTL } = useLanguage();
+  const Icon = getIcon(amenity.icon);
+  const field = useAutoTranslatedField(amenity.name_en, amenity.name_ar, `amenity:${amenity.id}:name`);
+
+  return (
+    <div className="flex items-center p-4 border border-border hover:border-accent/30 transition-colors">
+      <div className={cn(
+        "w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0",
+        isRTL ? "ms-3" : "me-3"
+      )}>
+        <Icon className="h-5 w-5 text-accent" strokeWidth={1} />
+      </div>
+      <span className="text-sm font-medium text-foreground">
+        {field.value}
+        {field.autoTranslated && <AutoTranslatedChip />}
+      </span>
+    </div>
+  );
+};
+
+const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
+  const { t, isRTL } = useLanguage();
+
   const groupedAmenities = property.amenities.reduce((acc, amenity) => {
     const category = amenity.category || "General";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
+    if (!acc[category]) acc[category] = [];
     acc[category].push(amenity);
     return acc;
   }, {} as Record<string, Tables<"amenities">[]>);
-
-  const getIcon = (iconName: string | null): LucideIcon => {
-    if (iconName && iconMap[iconName.toLowerCase()]) {
-      return iconMap[iconName.toLowerCase()];
-    }
-    return Sparkles;
-  };
 
   if (property.amenities.length === 0) {
     return (
@@ -79,35 +113,11 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
         <div className="space-y-10">
           {Object.entries(groupedAmenities).map(([category, amenities]) => (
             <div key={category}>
-              <h3 className={cn(
-                "text-accent text-xs font-medium tracking-widest uppercase mb-4",
-                isRTL && "text-end"
-              )}>
-                {category}
-              </h3>
+              <AmenityCategoryHeading category={category} propertyId={property.id} />
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {amenities.map((amenity) => {
-                  const Icon = getIcon(amenity.icon);
-                  const name = language === "ar" && amenity.name_ar ? amenity.name_ar : amenity.name_en;
-                  
-                  return (
-                    <div
-                      key={amenity.id}
-                      className={cn(
-                        "flex items-center p-4 border border-border hover:border-accent/30 transition-colors"
-                      )}
-                    >
-                      <div className={cn(
-                        "w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0",
-                        isRTL ? "ms-3" : "me-3"
-                      )}>
-                        {/* Ultra-thin 1pt gold-tinted icon */}
-                        <Icon className="h-5 w-5 text-accent" strokeWidth={1} />
-                      </div>
-                      <span className="text-sm font-medium text-foreground">{name}</span>
-                    </div>
-                  );
-                })}
+                {amenities.map((amenity) => (
+                  <AmenityItem key={amenity.id} amenity={amenity} />
+                ))}
               </div>
             </div>
           ))}
