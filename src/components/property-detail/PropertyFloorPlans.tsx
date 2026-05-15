@@ -49,7 +49,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
     <div className="py-12 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
-          "font-serif text-2xl md:text-3xl font-medium text-foreground mb-8",
+          "font-serif text-2xl md:text-3xl font-medium text-foreground text-start mb-8",
           isRTL && "text-end"
         )}>
           {t("sections.floorPlans")}

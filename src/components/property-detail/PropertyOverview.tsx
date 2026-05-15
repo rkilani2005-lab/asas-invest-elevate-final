@@ -63,7 +63,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
         )}>
           {/* Main Content */}
           <div className={cn("lg:col-span-2", isRTL && "text-end")}>
-            <h2 className="heading-section text-2xl md:text-3xl text-foreground mb-6">
+            <h2 className="heading-section text-2xl md:text-3xl text-foreground text-start mb-6">
               {t("sections.overview")}
             </h2>
             

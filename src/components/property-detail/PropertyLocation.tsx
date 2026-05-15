@@ -47,7 +47,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
     <div className="py-12 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
-          "heading-section text-2xl md:text-3xl text-foreground mb-8",
+          "heading-section text-2xl md:text-3xl text-foreground text-start mb-8",
           isRTL && "text-end"
         )}>
           {t("sections.location")}
