@@ -2,6 +2,8 @@ import { Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
+import { AutoTranslatedChip } from "@/components/ui/AutoTranslatedChip";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyPaymentPlanProps {
@@ -10,8 +12,22 @@ interface PropertyPaymentPlanProps {
   };
 }
 
+const MilestoneText = ({ milestone }: { milestone: Tables<"payment_milestones"> }) => {
+  const field = useAutoTranslatedField(
+    milestone.milestone_en,
+    milestone.milestone_ar,
+    `milestone:${milestone.id}:text`,
+  );
+  return (
+    <p className="text-sm text-muted-foreground leading-relaxed">
+      {field.value}
+      {field.autoTranslated && <AutoTranslatedChip />}
+    </p>
+  );
+};
+
 const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
-  const { t, isRTL, language } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   const milestones = property.payment_milestones
     .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
@@ -20,7 +36,6 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
     return null;
   }
 
-  // Calculate cumulative progress for visualization
   let cumulativePercentage = 0;
   const milestonesWithProgress = milestones.map((milestone, index) => {
     cumulativePercentage += milestone.percentage;
@@ -41,10 +56,10 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
           {t("sections.paymentPlan")}
         </h2>
         <p className={cn(
-          "text-muted-foreground mb-10 max-w-2xl",
+          "text-muted-foreground mb-10 max-w-2xl text-start",
           isRTL && "text-end me-0 ms-auto"
         )}>
-          Flexible payment structure designed to make your investment journey seamless.
+          {t("paymentPlan.description")}
         </p>
 
         {/* Progress Bar */}
@@ -57,8 +72,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
               className="absolute inset-y-0 start-0 bg-accent"
             />
           </div>
-          
-          {/* Milestone Markers */}
+
           <div className="relative mt-2">
             {milestonesWithProgress.map((milestone, index) => (
               <div
@@ -82,66 +96,52 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
 
         {/* Timeline Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {milestonesWithProgress.map((milestone, index) => {
-            const milestoneText = language === "ar" && milestone.milestone_ar 
-              ? milestone.milestone_ar 
-              : milestone.milestone_en;
-            
-            return (
-              <motion.div
-                key={milestone.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                className={cn(
-                  "relative border border-border p-6 hover:border-accent/30 transition-all duration-300",
-                  isRTL && "text-end"
-                )}
-              >
-                {/* Step Number */}
+          {milestonesWithProgress.map((milestone, index) => (
+            <motion.div
+              key={milestone.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+              className={cn(
+                "relative border border-border p-6 hover:border-accent/30 transition-all duration-300 text-start",
+                isRTL && "text-end"
+              )}
+            >
+              <div className={cn(
+                "absolute -top-3 bg-accent text-accent-foreground text-xs font-medium px-3 py-1 tracking-wider",
+                isRTL ? "end-4" : "start-4"
+              )}>
+                {t("paymentPlan.step", { n: index + 1 })}
+              </div>
+
+              <div className="mt-4 mb-4">
+                <span className="font-serif text-4xl text-accent">
+                  {milestone.percentage}
+                </span>
+                <span className="text-2xl text-muted-foreground">%</span>
+              </div>
+
+              <MilestoneText milestone={milestone} />
+
+              {!milestone.isLast && (
                 <div className={cn(
-                  "absolute -top-3 bg-accent text-accent-foreground text-xs font-medium px-3 py-1 tracking-wider",
-                  isRTL ? "end-4" : "start-4"
-                )}>
-                  STEP {index + 1}
-                </div>
-
-                {/* Percentage */}
-                <div className="mt-4 mb-4">
-                  <span className="font-serif text-4xl text-accent">
-                    {milestone.percentage}
-                  </span>
-                  <span className="text-2xl text-muted-foreground">%</span>
-                </div>
-
-                {/* Milestone Description */}
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {milestoneText}
-                </p>
-
-                {/* Connector Line (except last) */}
-                {!milestone.isLast && (
-                  <div className={cn(
-                    "hidden lg:block absolute top-1/2 -translate-y-1/2 w-6 h-[1px] bg-border",
-                    isRTL ? "-start-6" : "-end-6"
-                  )} />
-                )}
-              </motion.div>
-            );
-          })}
+                  "hidden lg:block absolute top-1/2 -translate-y-1/2 w-6 h-[1px] bg-border",
+                  isRTL ? "-start-6" : "-end-6"
+                )} />
+              )}
+            </motion.div>
+          ))}
         </div>
 
         {/* Summary */}
         <div className={cn(
-          "mt-10 p-6 border border-accent/30",
+          "mt-10 p-6 border border-accent/30 text-start",
           isRTL && "text-end"
         )}>
-          <div className={cn(
-            "flex items-center gap-3"
-          )}>
+          <div className="flex items-center gap-3">
             <Check className="h-5 w-5 text-accent flex-shrink-0" strokeWidth={1} />
             <p className="text-foreground font-medium">
-              Total payment structure spans from booking to handover, with flexible milestone-based payments.
+              {t("paymentPlan.summary")}
             </p>
           </div>
         </div>
