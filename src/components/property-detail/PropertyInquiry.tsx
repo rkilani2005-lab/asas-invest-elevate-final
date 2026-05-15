@@ -17,8 +17,10 @@ interface PropertyInquiryProps {
 }
 
 const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
-  const { t, isRTL, language } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { toast } = useToast();
+  const nameField = useAutoTranslatedField(property.name_en, property.name_ar, `property:${property.id}:name`);
+  const propertyName = nameField.value || property.name_en;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
