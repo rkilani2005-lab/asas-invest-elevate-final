@@ -80,7 +80,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
     }
   };
 
-  const propertyName = language === "ar" && property.name_ar ? property.name_ar : property.name_en;
+  
 
   if (isSubmitted) {
     return (
