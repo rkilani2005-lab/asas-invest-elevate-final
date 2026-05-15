@@ -98,13 +98,13 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               {t("contact.success")}
             </h3>
             <p className="text-muted-foreground mb-6">
-              Our team will review your inquiry about {propertyName} and get back to you shortly.
+              {t("inquire.successDesc", { property: propertyName })}
             </p>
             <Button
               variant="luxury"
               onClick={() => setIsSubmitted(false)}
             >
-              Submit Another Inquiry
+              {t("inquire.submitAnother")}
             </Button>
           </motion.div>
         </div>
