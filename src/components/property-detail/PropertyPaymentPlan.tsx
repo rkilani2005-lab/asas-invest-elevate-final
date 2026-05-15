@@ -35,7 +35,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
     <div className="py-12 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
-          "heading-section text-2xl md:text-3xl text-foreground mb-4",
+          "heading-section text-2xl md:text-3xl text-foreground text-start mb-4",
           isRTL && "text-end"
         )}>
           {t("sections.paymentPlan")}

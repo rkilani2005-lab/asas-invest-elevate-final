@@ -185,7 +185,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
           "flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4"
         )}>
           <h2 className={cn(
-            "heading-section text-2xl md:text-3xl text-foreground",
+            "heading-section text-2xl md:text-3xl text-foreground text-start",
             isRTL && "text-end"
           )}>
             {t("sections.gallery")}
