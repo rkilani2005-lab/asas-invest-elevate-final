@@ -71,8 +71,8 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
     } catch (error) {
       console.error("Error submitting inquiry:", error);
       toast({
-        title: "Error",
-        description: "Failed to submit inquiry. Please try again.",
+        title: t("inquire.errorTitle"),
+        description: t("inquire.errorDesc"),
         variant: "destructive",
       });
     } finally {
