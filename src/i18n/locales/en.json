@@ -313,6 +313,11 @@
     "investment": "Investment",
     "inquire": "Inquire"
   },
+  "paymentPlan": {
+    "description": "Flexible payment structure designed to make your investment journey seamless.",
+    "step": "STEP {{n}}",
+    "summary": "Total payment structure spans from booking to handover, with flexible milestone-based payments."
+  },
   "contact": {
     "title": "Get in Touch",
     "subtitle": "We're here to help you find your perfect investment",
