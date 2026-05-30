@@ -5,6 +5,7 @@ import ProgressiveImage from "@/components/ui/progressive-image";
 import { getStorageThumbnailUrl } from "@/lib/image-utils";
 import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
 import { AutoTranslatedChip } from "@/components/ui/AutoTranslatedChip";
+import { formatUnitTypes } from "@/lib/unit-types";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyCardProps {
@@ -46,7 +47,8 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
   // Build meta tokens (joined with diamond glyph)
   const metaTokens: string[] = [];
-  if (property.unit_types?.length) metaTokens.push(property.unit_types.join(", "));
+  const unitTypesLabel = formatUnitTypes(property.unit_types, language);
+  if (unitTypesLabel) metaTokens.push(unitTypesLabel);
   if (property.size_range) metaTokens.push(property.size_range);
   if (property.handover_date) {
     const d = new Date(property.handover_date);

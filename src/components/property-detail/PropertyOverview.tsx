@@ -3,6 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
 import { AutoTranslatedChip } from "@/components/ui/AutoTranslatedChip";
+import { formatUnitTypes } from "@/lib/unit-types";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyOverviewProps {
@@ -35,7 +36,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
 
   const specs = [
     { icon: MapPin, label: t("property.location"), value: location },
-    { icon: Building2, label: t("property.unitTypes"), value: property.unit_types?.join(", ") },
+    { icon: Building2, label: t("property.unitTypes"), value: formatUnitTypes(property.unit_types, language) || null },
     { icon: Maximize2, label: t("property.sizeRange"), value: property.size_range },
     { icon: Calendar, label: t("property.handover"), value: property.handover_date ? new Date(property.handover_date).toLocaleDateString() : null },
     { icon: Key, label: t("property.ownership"), value: property.ownership_type },
@@ -98,7 +99,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
           <div className="lg:col-span-1">
             <div className="bg-white border border-accent/30 p-6 sticky top-40 shadow-card">
               <h3 className={cn("text-accent text-xs font-medium tracking-widest uppercase mb-6", isRTL && "text-end")}>
-                Property Details
+                {t("property.detailsTitle")}
               </h3>
               
               {property.price_range && (
