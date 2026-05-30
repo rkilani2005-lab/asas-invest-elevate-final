@@ -48,7 +48,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "heading-section text-2xl md:text-3xl text-foreground text-start mb-8",
-          isRTL && "text-end"
+          "text-start"
         )}>
           {t("sections.location")}
         </h2>
@@ -71,7 +71,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
           </div>
 
           {/* Nearby Places */}
-          <div className={cn(isRTL && "text-end")}>
+          <div className={cn("text-start")}>
             <div className={cn(
               "flex items-center mb-6"
             )}>

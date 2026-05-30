@@ -51,13 +51,13 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "heading-section text-2xl md:text-3xl text-foreground text-start mb-4",
-          isRTL && "text-end"
+          "text-start"
         )}>
           {t("sections.paymentPlan")}
         </h2>
         <p className={cn(
           "text-muted-foreground mb-10 max-w-2xl text-start",
-          isRTL && "text-end me-0 ms-auto"
+          "text-start me-0 ms-auto"
         )}>
           {t("paymentPlan.description")}
         </p>
@@ -104,7 +104,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
               transition={{ delay: 0.3 + index * 0.1 }}
               className={cn(
                 "relative border border-border p-6 hover:border-accent/30 transition-all duration-300 text-start",
-                isRTL && "text-end"
+                "text-start"
               )}
             >
               <div className={cn(
@@ -136,7 +136,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
         {/* Summary */}
         <div className={cn(
           "mt-10 p-6 border border-accent/30 text-start",
-          isRTL && "text-end"
+          "text-start"
         )}>
           <div className="flex items-center gap-3">
             <Check className="h-5 w-5 text-accent flex-shrink-0" strokeWidth={1} />

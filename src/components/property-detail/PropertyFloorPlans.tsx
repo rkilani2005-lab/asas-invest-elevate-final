@@ -50,7 +50,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "font-serif text-2xl md:text-3xl font-medium text-foreground text-start mb-8",
-          isRTL && "text-end"
+          "text-start"
         )}>
           {t("sections.floorPlans")}
         </h2>
@@ -60,7 +60,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
           <div className="mb-8">
             <h3 className={cn(
               "text-lg font-medium text-foreground mb-4",
-              isRTL && "text-end"
+              "text-start"
             )}>
               {language === "ar" ? "مخططات PDF" : "PDF Floor Plans"}
             </h3>
@@ -78,7 +78,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                     transition={{ delay: index * 0.1 }}
                     className={cn(
                       "group bg-secondary/50 rounded-xl border border-border p-4 hover:border-accent/30 hover:shadow-md transition-all duration-300",
-                      isRTL && "text-end"
+                      "text-start"
                     )}
                   >
                     <div className={cn(
@@ -146,7 +146,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
             {pdfPlans.length > 0 && (
               <h3 className={cn(
                 "text-lg font-medium text-foreground mb-4",
-                isRTL && "text-end"
+                "text-start"
               )}>
                 {language === "ar" ? "مخططات صور" : "Image Floor Plans"}
               </h3>
@@ -186,7 +186,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                     {/* Info */}
                     <div className={cn(
                       "p-4 border-t border-border bg-background",
-                      isRTL && "text-end"
+                      "text-start"
                     )}>
                       <p className="font-medium text-foreground mb-1">
                         {caption || `Floor Plan ${index + 1}`}

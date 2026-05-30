@@ -51,11 +51,17 @@ const BuyerGuide = () => {
           </ScrollReveal>
           {bodyContent ? (
             <div
-              className={cn("max-w-none text-muted-foreground leading-relaxed [&_p]:mb-4 [&_h2]:text-accent [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-4 [&_ul]:list-disc [&_ul]:ps-6 [&_li]:mb-2", isRTL && "text-end")}
+              dir={isRTL ? "rtl" : "ltr"}
+              className={cn(
+                "max-w-none text-muted-foreground leading-relaxed text-start",
+                // Neutralize inline text-align baked into HTML by the RichTextEditor when authored in LTR.
+                "[&_*]:!text-start [&_p]:!text-start [&_li]:!text-start [&_h1]:!text-start [&_h2]:!text-start [&_h3]:!text-start",
+                "[&_p]:mb-4 [&_h2]:text-accent [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-4 [&_ul]:list-disc [&_ul]:ps-6 [&_li]:mb-2"
+              )}
               dangerouslySetInnerHTML={{ __html: bodyContent }}
             />
           ) : (
-            <div className={cn("text-muted-foreground leading-relaxed space-y-6", isRTL && "text-end")}>
+            <div className={cn("text-muted-foreground leading-relaxed space-y-6", "text-start")}>
               <p>{t("buyerGuide.intro")}</p>
               <h2 className="heading-section text-xl text-foreground">{t("buyerGuide.step1Title")}</h2>
               <p>{t("buyerGuide.step1Desc")}</p>

@@ -234,7 +234,8 @@ const ListProperty = () => {
             ) : (
             <form
               onSubmit={handleSubmit}
-              className="max-w-3xl mx-auto card-luxury p-6 md:p-10 space-y-10"
+              dir={isRTL ? "rtl" : "ltr"}
+              className="max-w-3xl mx-auto card-luxury p-6 md:p-10 space-y-10 text-start"
             >
               {/* Contact */}
               <section className="space-y-4">
@@ -545,7 +546,7 @@ const Field = ({
   label: string;
   children: React.ReactNode;
 }) => (
-  <div className="space-y-2">
+  <div className="space-y-2 text-start">
     <Label>{label}</Label>
     {children}
   </div>

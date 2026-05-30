@@ -164,7 +164,7 @@ const InsightDetail = () => {
           {content.excerpt && (
             <p className={cn(
               "text-primary-foreground/80 text-lg leading-relaxed mb-8",
-              isRTL && "text-end"
+              "text-start"
             )}>
               {content.excerpt}
             </p>
@@ -215,8 +215,11 @@ const InsightDetail = () => {
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4 lg:px-8 max-w-4xl">
           <article 
+            dir={isRTL ? "rtl" : "ltr"}
             className={cn(
-              "max-w-none space-y-6",
+              "max-w-none space-y-6 text-start",
+              // Neutralize inline text-align baked into HTML by the RichTextEditor when authored in LTR.
+              "[&_*]:!text-start [&_p]:!text-start [&_li]:!text-start [&_h1]:!text-start [&_h2]:!text-start [&_h3]:!text-start [&_blockquote]:!text-start",
               "[&_h1]:font-heading [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-foreground [&_h1]:mb-4",
               "[&_h2]:font-heading [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-foreground [&_h2]:mb-3 [&_h2]:mt-8",
               "[&_h3]:font-heading [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mb-2 [&_h3]:mt-6",
@@ -228,7 +231,7 @@ const InsightDetail = () => {
               "[&_li]:mb-2",
               "[&_blockquote]:border-s-4 [&_blockquote]:border-accent [&_blockquote]:ps-4 [&_blockquote]:italic [&_blockquote]:text-foreground/80",
               "[&_img]:rounded-lg [&_img]:my-6",
-              isRTL && "text-end font-arabicic"
+              isRTL && "font-arabic"
             )}
             dangerouslySetInnerHTML={{ __html: content.content || '' }}
           />

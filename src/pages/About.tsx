@@ -81,7 +81,7 @@ const About = () => {
           {foundersNote && (
             <div className="max-w-3xl mx-auto mb-20">
               <ScrollReveal>
-                <div className={cn("card-luxury p-10", isRTL ? "text-end" : "text-start")}>
+                <div className={cn("card-luxury p-10", "text-start")}>
                   <h2 className="heading-section text-xl text-foreground mb-6">{getText(foundersNote, "title")}</h2>
                   <p className="text-muted-foreground leading-relaxed italic text-lg">
                     {isRTL ? `«${getText(foundersNote, "content")}»` : `"${getText(foundersNote, "content")}"`}

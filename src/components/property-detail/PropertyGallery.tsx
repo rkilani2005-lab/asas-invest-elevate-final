@@ -186,7 +186,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
         )}>
           <h2 className={cn(
             "heading-section text-2xl md:text-3xl text-foreground text-start",
-            isRTL && "text-end"
+            "text-start"
           )}>
             {t("sections.gallery")}
           </h2>
@@ -355,7 +355,7 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
                     )}
                   </div>
                   {video.caption && (
-                    <div className={cn("p-3", isRTL && "text-end")}>
+                    <div className={cn("p-3", "text-start")}>
                       <p className="text-sm text-muted-foreground">{video.caption}</p>
                     </div>
                   )}

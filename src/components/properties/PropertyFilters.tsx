@@ -92,7 +92,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-end"
+            "text-start"
           )}>
             <SelectValue placeholder={t("filters.allLocations")} />
           </SelectTrigger>
@@ -113,7 +113,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-end"
+            "text-start"
           )}>
             <SelectValue placeholder={t("filters.allDevelopers")} />
           </SelectTrigger>
@@ -134,7 +134,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-end"
+            "text-start"
           )}>
             <SelectValue placeholder={t("filters.allCategories")} />
           </SelectTrigger>
@@ -152,7 +152,7 @@ const PropertyFilters = ({
         >
           <SelectTrigger className={cn(
             "h-11 bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-            isRTL && "text-end"
+            "text-start"
           )}>
             <SelectValue placeholder={t("filters.allBedrooms")} />
           </SelectTrigger>
