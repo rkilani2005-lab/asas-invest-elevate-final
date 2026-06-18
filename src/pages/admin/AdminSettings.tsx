@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Loader2, Instagram, Linkedin, Youtube, Twitter, Facebook } from "lucide-react";
+import { Save, Loader2, Instagram, Linkedin, Youtube, Twitter, Facebook, Send, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface SiteSettings {
@@ -25,6 +25,8 @@ interface SiteSettings {
     facebook: string;
     tiktok: string;
     snapchat: string;
+    telegram: string;
+    whatsapp_channel: string;
   };
   seo: {
     title_en: string;
@@ -51,6 +53,8 @@ const defaultSettings: SiteSettings = {
     facebook: "",
     tiktok: "",
     snapchat: "",
+    telegram: "",
+    whatsapp_channel: "",
   },
   seo: {
     title_en: "",
@@ -92,7 +96,18 @@ export default function AdminSettings() {
     fetchSettings();
   }, []);
 
+  const isValidUrl = (v: string) => {
+    if (!v) return true;
+    try { new URL(v); return true; } catch { return false; }
+  };
+
   const handleSave = async () => {
+    const urlFields: Array<[string, string]> = Object.entries(settings.social);
+    const invalid = urlFields.find(([, v]) => !isValidUrl(v));
+    if (invalid) {
+      toast.error(`Invalid URL for ${invalid[0]}`);
+      return;
+    }
     setIsSaving(true);
 
     try {
@@ -340,6 +355,35 @@ export default function AdminSettings() {
                     value={settings.social.snapchat}
                     onChange={(e) => updateSetting("social", "snapchat", e.target.value)}
                     placeholder="https://snapchat.com/add/yourusername"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="telegram" className="flex items-center gap-2">
+                    <Send className="h-4 w-4 text-sky-500" />
+                    Telegram Channel
+                  </Label>
+                  <Input
+                    id="telegram"
+                    type="url"
+                    value={settings.social.telegram}
+                    onChange={(e) => updateSetting("social", "telegram", e.target.value)}
+                    placeholder="https://t.me/yourchannel"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp_channel" className="flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4 text-green-600" />
+                    WhatsApp Channel
+                  </Label>
+                  <Input
+                    id="whatsapp_channel"
+                    type="url"
+                    value={settings.social.whatsapp_channel}
+                    onChange={(e) => updateSetting("social", "whatsapp_channel", e.target.value)}
+                    placeholder="https://whatsapp.com/channel/..."
                   />
                 </div>
               </div>
