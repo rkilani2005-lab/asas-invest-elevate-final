@@ -578,7 +578,9 @@
     "step2Title": "2. Understand Ownership Types",
     "step2Desc": "Freehold areas allow full ownership for foreign nationals. Leasehold areas offer long-term rights (typically 99 years). Your advisor will guide you to the right structure.",
     "step3Title": "3. Complete the Transaction",
-    "step3Desc": "Once you've selected a property, the process involves signing a Memorandum of Understanding (MOU), securing financing if needed, and completing the transfer at the Dubai Land Department."
+    "step3Bullet1": "Sign MOU or sales agreement.",
+    "step3Bullet2": "Apply for NOC to transfer the ownership.",
+    "step3Bullet3": "Transfer property ownership with Dubai Land Department (DLD)."
   },
   "careers": {
     "subtitle": "Join Us",
