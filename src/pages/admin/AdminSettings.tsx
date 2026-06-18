@@ -96,7 +96,18 @@ export default function AdminSettings() {
     fetchSettings();
   }, []);
 
+  const isValidUrl = (v: string) => {
+    if (!v) return true;
+    try { new URL(v); return true; } catch { return false; }
+  };
+
   const handleSave = async () => {
+    const urlFields: Array<[string, string]> = Object.entries(settings.social);
+    const invalid = urlFields.find(([, v]) => !isValidUrl(v));
+    if (invalid) {
+      toast.error(`Invalid URL for ${invalid[0]}`);
+      return;
+    }
     setIsSaving(true);
 
     try {
