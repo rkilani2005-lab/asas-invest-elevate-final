@@ -1,11 +1,13 @@
-import { Instagram, Linkedin, MessageCircle } from "lucide-react";
+import { Instagram, Linkedin, MessageCircle, Send } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { cn } from "@/lib/utils";
 
 const Footer = () => {
   const { t, isRTL } = useLanguage();
+  const { settings } = useSiteSettings();
 
   const footerColumns = [
     {
@@ -36,10 +38,11 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { icon: Instagram, href: "https://www.instagram.com/asas.invest.real.estate", label: "Instagram" },
+    { icon: Instagram, href: settings.social.instagram, label: "Instagram" },
+    { icon: Send, href: settings.social.telegram, label: "Telegram" },
     { icon: Linkedin, href: "#", label: "LinkedIn" },
-    { icon: MessageCircle, href: "https://wa.me/971500000000", label: "WhatsApp" }
-  ];
+    { icon: MessageCircle, href: settings.social.whatsapp_channel, label: "WhatsApp" },
+  ].filter((s) => s.href && s.href.trim() !== "");
 
   return (
     <footer
