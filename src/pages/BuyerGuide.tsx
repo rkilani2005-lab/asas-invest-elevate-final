@@ -62,7 +62,11 @@ const BuyerGuide = () => {
               <h2 className="heading-section text-xl text-foreground">{t("buyerGuide.step2Title")}</h2>
               <p>{t("buyerGuide.step2Desc")}</p>
               <h2 className="heading-section text-xl text-foreground">{t("buyerGuide.step3Title")}</h2>
-              <p>{t("buyerGuide.step3Desc")}</p>
+              <ul className="list-disc ps-5 space-y-2">
+                <li>{t("buyerGuide.step3Bullet1")}</li>
+                <li>{t("buyerGuide.step3Bullet2")}</li>
+                <li>{t("buyerGuide.step3Bullet3")}</li>
+              </ul>
             </div>
           )}
         </div>
