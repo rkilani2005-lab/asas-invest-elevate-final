@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Loader2, Instagram, Linkedin, Youtube, Twitter, Facebook } from "lucide-react";
+import { Save, Loader2, Instagram, Linkedin, Youtube, Twitter, Facebook, Send, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface SiteSettings {
@@ -25,6 +25,8 @@ interface SiteSettings {
     facebook: string;
     tiktok: string;
     snapchat: string;
+    telegram: string;
+    whatsapp_channel: string;
   };
   seo: {
     title_en: string;
@@ -51,6 +53,8 @@ const defaultSettings: SiteSettings = {
     facebook: "",
     tiktok: "",
     snapchat: "",
+    telegram: "",
+    whatsapp_channel: "",
   },
   seo: {
     title_en: "",
