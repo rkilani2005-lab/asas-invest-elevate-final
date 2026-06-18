@@ -1,18 +1,19 @@
 import { MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface WhatsAppButtonProps {
-  phoneNumber?: string;
   message?: string;
 }
 
-const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
-  phoneNumber = '+971501234567',
-  message,
-}) => {
+const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ message }) => {
   const { t } = useLanguage();
-  
+  const { settings, loading } = useSiteSettings();
+
+  const phoneNumber = settings.contact.whatsapp;
+  if (loading || !phoneNumber) return null;
+
   const defaultMessage = t('contact.whatsapp');
   const encodedMessage = encodeURIComponent(message || defaultMessage);
   const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
