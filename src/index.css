@@ -87,6 +87,12 @@
     line-height: 1.5;
   }
 
+  /* Justify all paragraphs to avoid ragged short lines */
+  p {
+    text-align: justify;
+    text-align-last: start;
+  }
+
   /* RTL Font Swap + Arabic-tuned typography
      Arabic letters render visually smaller than Latin at the same point size,
      so we scale up slightly and increase leading. Letter-spacing must be 0 —
