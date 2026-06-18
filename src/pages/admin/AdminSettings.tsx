@@ -357,6 +357,35 @@ export default function AdminSettings() {
                     placeholder="https://snapchat.com/add/yourusername"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="telegram" className="flex items-center gap-2">
+                    <Send className="h-4 w-4 text-sky-500" />
+                    Telegram Channel
+                  </Label>
+                  <Input
+                    id="telegram"
+                    type="url"
+                    value={settings.social.telegram}
+                    onChange={(e) => updateSetting("social", "telegram", e.target.value)}
+                    placeholder="https://t.me/yourchannel"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp_channel" className="flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4 text-green-600" />
+                    WhatsApp Channel
+                  </Label>
+                  <Input
+                    id="whatsapp_channel"
+                    type="url"
+                    value={settings.social.whatsapp_channel}
+                    onChange={(e) => updateSetting("social", "whatsapp_channel", e.target.value)}
+                    placeholder="https://whatsapp.com/channel/..."
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
