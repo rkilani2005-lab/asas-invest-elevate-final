@@ -44,25 +44,26 @@ const BuyerGuide = () => {
     <div className="min-h-screen bg-background grain-overlay">
       <Navigation />
       <main className="pt-24 pb-16 relative z-10">
-        <div className={cn("container mx-auto px-4 lg:px-8 max-w-3xl", isRTL && "font-arabic")}>
+        <div className={cn("container mx-auto px-4 lg:px-8 max-w-3xl", isRTL && "font-arabic")} dir={isRTL ? "rtl" : "ltr"}>
           <ScrollReveal className="text-center mb-12">
             <p className="text-eyebrow text-accent mb-4">{t("buyerGuide.subtitle")}</p>
             <h1 className="heading-hero text-3xl md:text-4xl text-accent mb-6">{t("buyerGuide.title")}</h1>
           </ScrollReveal>
           {bodyContent ? (
             <div
-              className={cn("max-w-none text-muted-foreground leading-relaxed [&_p]:mb-4 [&_h2]:text-accent [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-4 [&_ul]:list-disc [&_ul]:ps-6 [&_li]:mb-2", isRTL && "text-end")}
+              dir={isRTL ? "rtl" : "ltr"}
+              className={cn("max-w-none text-muted-foreground leading-relaxed [&_p]:mb-4 [&_h2]:text-accent [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-4 [&_ul]:list-disc [&_ul]:ps-6 [&_li]:mb-2", isRTL && "text-end [&_ul]:pe-6 [&_ul]:ps-0 [&_ol]:pe-6 [&_ol]:ps-0")}
               dangerouslySetInnerHTML={{ __html: bodyContent }}
             />
           ) : (
-            <div className={cn("text-muted-foreground leading-relaxed space-y-6", isRTL && "text-end")}>
+            <div dir={isRTL ? "rtl" : "ltr"} className={cn("text-muted-foreground leading-relaxed space-y-6", isRTL && "text-end")}>
               <p>{t("buyerGuide.intro")}</p>
               <h2 className="heading-section text-xl text-foreground">{t("buyerGuide.step1Title")}</h2>
               <p>{t("buyerGuide.step1Desc")}</p>
               <h2 className="heading-section text-xl text-foreground">{t("buyerGuide.step2Title")}</h2>
               <p>{t("buyerGuide.step2Desc")}</p>
               <h2 className="heading-section text-xl text-foreground">{t("buyerGuide.step3Title")}</h2>
-              <ul className="list-disc ps-5 space-y-2">
+              <ul className={cn("list-disc space-y-2", isRTL ? "pe-5" : "ps-5")}>
                 <li>{t("buyerGuide.step3Bullet1")}</li>
                 <li>{t("buyerGuide.step3Bullet2")}</li>
                 <li>{t("buyerGuide.step3Bullet3")}</li>
