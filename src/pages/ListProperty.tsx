@@ -167,6 +167,7 @@ const ListProperty = () => {
         <Navigation />
         <main className="pt-24 pb-16 relative z-10">
           <div
+            dir={isRTL ? "rtl" : "ltr"}
             className={cn(
               "container mx-auto px-4 lg:px-8",
               isRTL && "font-arabic text-end"
