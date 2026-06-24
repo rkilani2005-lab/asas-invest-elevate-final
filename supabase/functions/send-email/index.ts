@@ -51,6 +51,12 @@ async function refreshGmailToken(
   return data.access_token || null;
 }
 
+function encodeSubject(subject: string): string {
+  // RFC 2047 encoded-word so non-ASCII chars (em-dash, Arabic, etc.) render correctly
+  const b64 = btoa(unescape(encodeURIComponent(subject)));
+  return `=?UTF-8?B?${b64}?=`;
+}
+
 function buildMimeMessage(params: {
   from: string;
   fromName: string;
@@ -61,21 +67,24 @@ function buildMimeMessage(params: {
   replyTo?: string;
 }): string {
   const boundary = `boundary_${Date.now()}`;
+  const encodedFromName = encodeSubject(params.fromName);
   const lines = [
-    `From: "${params.fromName}" <${params.from}>`,
+    `From: ${encodedFromName} <${params.from}>`,
     `To: ${params.to}`,
-    `Subject: ${params.subject}`,
+    `Subject: ${encodeSubject(params.subject)}`,
     `MIME-Version: 1.0`,
     `Content-Type: multipart/alternative; boundary="${boundary}"`,
     params.replyTo ? `Reply-To: ${params.replyTo}` : "",
     "",
     `--${boundary}`,
     `Content-Type: text/plain; charset="UTF-8"`,
+    `Content-Transfer-Encoding: 8bit`,
     "",
     params.text,
     "",
     `--${boundary}`,
     `Content-Type: text/html; charset="UTF-8"`,
+    `Content-Transfer-Encoding: 8bit`,
     "",
     params.html,
     "",
