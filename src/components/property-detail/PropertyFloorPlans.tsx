@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
+import { trackPropertyDownload } from "@/lib/property-tracking";
 
 interface PropertyFloorPlansProps {
   property: Tables<"properties"> & {
@@ -127,6 +128,7 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                             target="_blank"
                             rel="noopener noreferrer"
                             title={language === "ar" ? "تحميل" : "Download"}
+                            onClick={() => trackPropertyDownload(property.id, plan.type === "floor_plate" ? "plate" : "floor_plan", plan.id)}
                           >
                             <Download className="h-4 w-4" />
                           </a>
@@ -228,7 +230,10 @@ const PropertyFloorPlans = ({ property }: PropertyFloorPlansProps) => {
                 download
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  trackPropertyDownload(property.id, selectedPlan.type === "floor_plate" ? "plate" : "floor_plan", selectedPlan.id);
+                }}
                 className="absolute top-4 end-20 z-50 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colorsrs"
               >
                 <Download className="h-5 w-5 text-white" />

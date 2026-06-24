@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
+import { trackPropertyDownload } from "@/lib/property-tracking";
 
 interface PropertyBrochuresProps {
   property: Tables<"properties"> & {
@@ -95,6 +96,7 @@ const PropertyBrochures = ({ property }: PropertyBrochuresProps) => {
                           download
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={() => trackPropertyDownload(property.id, "brochure", brochure.id)}
                         >
                           <Download className="h-4 w-4" />
                           {language === "ar" ? "تحميل" : "Download"}
