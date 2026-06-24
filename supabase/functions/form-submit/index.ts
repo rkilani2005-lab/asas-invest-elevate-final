@@ -173,6 +173,7 @@ Deno.serve(async (req) => {
       preferred_language,
       property_name,
       property_id,
+      property_slug,
       viewing_date,
       viewing_time,
       callback_time,
