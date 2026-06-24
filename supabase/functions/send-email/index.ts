@@ -390,12 +390,17 @@ Deno.serve(async (req) => {
       gmail_account,
     } = params;
 
+    const propertyUrl = property_slug
+      ? `https://asasinvest.com/property/${property_slug}`
+      : "https://asasinvest.com/buy";
+
     const vars: Record<string, string> = {
       visitor_name,
       visitor_email,
       visitor_phone,
       visitor_message,
       property_name,
+      property_url: propertyUrl,
       viewing_date,
       viewing_time,
       callback_time,
