@@ -209,6 +209,7 @@ function visitorConfirmationHtml(
     </div>
     <div style="margin:30px 0;text-align:center;">
       <a href="${vars.property_url || "https://asasinvest.com/buy"}" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Property →</a>
+      <p style="color:#999;font-size:12px;margin:12px 0 0;">Or open: <a href="${vars.property_url || "https://asasinvest.com/buy"}" style="color:#c9a84c;">${vars.property_url || "https://asasinvest.com/buy"}</a></p>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
     <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a> | <a href="https://asasinvest.com" style="color:#c9a84c;">asasinvest.com</a></p>
@@ -352,7 +353,7 @@ function teamAlertHtml(
       <tr style="background:#f9f9f9;"><td style="padding:10px 12px;font-size:13px;color:#888;width:140px;">Name</td><td style="padding:10px 12px;font-size:14px;color:#333;font-weight:bold;">${vars.visitor_name || "—"}</td></tr>
       <tr><td style="padding:10px 12px;font-size:13px;color:#888;">Email</td><td style="padding:10px 12px;font-size:14px;color:#333;"><a href="mailto:${vars.visitor_email}" style="color:#c9a84c;">${vars.visitor_email}</a></td></tr>
       <tr style="background:#f9f9f9;"><td style="padding:10px 12px;font-size:13px;color:#888;">Phone</td><td style="padding:10px 12px;font-size:14px;color:#333;">${vars.visitor_phone || "—"}</td></tr>
-      ${vars.property_name ? `<tr><td style="padding:10px 12px;font-size:13px;color:#888;">Property</td><td style="padding:10px 12px;font-size:14px;color:#333;font-weight:bold;">${vars.property_url ? `<a href="${vars.property_url}" style="color:#c9a84c;text-decoration:underline;">${vars.property_name}</a>` : vars.property_name}</td></tr>` : ""}
+      ${vars.property_name ? `<tr><td style="padding:10px 12px;font-size:13px;color:#888;">Property</td><td style="padding:10px 12px;font-size:14px;color:#333;font-weight:bold;">${vars.property_url ? `<a href="${vars.property_url}" style="color:#c9a84c;text-decoration:underline;">${vars.property_name}</a><br><span style="font-weight:normal;font-size:12px;color:#888;">${vars.property_url}</span>` : vars.property_name}</td></tr>` : ""}
       ${vars.viewing_date ? `<tr style="background:#f9f9f9;"><td style="padding:10px 12px;font-size:13px;color:#888;">Viewing Date</td><td style="padding:10px 12px;font-size:14px;color:#333;">${vars.viewing_date} ${vars.viewing_time || ""}</td></tr>` : ""}
       ${vars.callback_time ? `<tr><td style="padding:10px 12px;font-size:13px;color:#888;">Best Time</td><td style="padding:10px 12px;font-size:14px;color:#c9a84c;font-weight:bold;">${vars.callback_time}</td></tr>` : ""}
       ${vars.budget_range ? `<tr style="background:#f9f9f9;"><td style="padding:10px 12px;font-size:13px;color:#888;">Budget</td><td style="padding:10px 12px;font-size:14px;color:#333;">${vars.budget_range}</td></tr>` : ""}
