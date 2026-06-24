@@ -27,6 +27,7 @@ Deno.serve(async (req) => {
       preferred_language = "en",
       preferred_contact = "email",
       property_id,
+      property_slug,
       property_name,
       unit_type_interest,
       budget_range,
