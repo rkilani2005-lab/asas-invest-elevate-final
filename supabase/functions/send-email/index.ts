@@ -380,6 +380,7 @@ Deno.serve(async (req) => {
       visitor_message = "",
       preferred_language = "en",
       property_name = "",
+      property_slug = "",
       viewing_date = "",
       viewing_time = "",
       callback_time = "",
