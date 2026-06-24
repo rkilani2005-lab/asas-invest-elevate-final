@@ -51,6 +51,8 @@ const PropertyDetail = () => {
           payment_milestones(*)
         `)
         .eq("slug", slug)
+        .eq("publish_status", "active")
+        .or(`publish_start_date.is.null,publish_start_date.lte.${new Date().toISOString().slice(0,10)}`)
         .maybeSingle();
 
       if (error) throw error;
