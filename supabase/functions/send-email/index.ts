@@ -16,6 +16,7 @@ interface EmailParams {
   preferred_language?: string;
   property_name?: string;
   property_id?: string;
+  property_slug?: string;
   viewing_date?: string;
   viewing_time?: string;
   callback_time?: string;
@@ -159,7 +160,7 @@ function visitorConfirmationHtml(
     ${vars.visitor_message ? `<div style="background:#f9f9f9;border-left:4px solid #c9a84c;padding:15px;margin:20px 0;border-radius:4px;"><p style="margin:0;color:#666;font-style:italic;">"${vars.visitor_message}"</p></div>` : ""}
     <p style="color:#555;line-height:1.7;">If you need immediate assistance, please call us at <a href="tel:+97141234567" style="color:#c9a84c;">+971 4 123 4567</a>.</p>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asasinvest.com/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Browse Properties →</a>
+      <a href="https://asasinvest.com/buy" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Browse Properties →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
     <p style="color:#999;font-size:12px;text-align:center;line-height:1.8;">
@@ -198,7 +199,7 @@ function visitorConfirmationHtml(
       </ul>
     </div>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asasinvest.com/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View All Properties →</a>
+      <a href="${vars.property_url || "https://asasinvest.com/buy"}" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Property →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
     <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a> | <a href="https://asasinvest.com" style="color:#c9a84c;">asasinvest.com</a></p>
@@ -272,7 +273,7 @@ function visitorConfirmationHtml(
     <h2 style="color:#1a1a2e;margin-top:0;">Welcome to the ASAS Community</h2>
     <p style="color:#555;line-height:1.7;">Dear ${vars.visitor_name || "Valued Client"},<br>Thank you for subscribing. You'll receive curated updates on Dubai's most exclusive properties, market insights, and early access to new launches.</p>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asasinvest.com/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Browse All Properties →</a>
+      <a href="https://asasinvest.com/buy" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Browse All Properties →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
     <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="https://asasinvest.com" style="color:#c9a84c;">asasinvest.com</a></p>
@@ -295,7 +296,7 @@ function visitorConfirmationHtml(
     <h2 style="color:#1a1a2e;margin-top:0;">Thank You for Your Interest</h2>
     <p style="color:#555;line-height:1.7;">Dear ${vars.visitor_name || "Valued Client"},<br>Thank you for requesting the brochure for <strong>${vars.property_name || "our property"}</strong>. Our team will send you the full brochure shortly.</p>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asasinvest.com/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Property Online →</a>
+      <a href="${vars.property_url || "https://asasinvest.com/buy"}" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Property Online →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
     <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a></p>
@@ -342,7 +343,7 @@ function teamAlertHtml(
       <tr style="background:#f9f9f9;"><td style="padding:10px 12px;font-size:13px;color:#888;width:140px;">Name</td><td style="padding:10px 12px;font-size:14px;color:#333;font-weight:bold;">${vars.visitor_name || "—"}</td></tr>
       <tr><td style="padding:10px 12px;font-size:13px;color:#888;">Email</td><td style="padding:10px 12px;font-size:14px;color:#333;"><a href="mailto:${vars.visitor_email}" style="color:#c9a84c;">${vars.visitor_email}</a></td></tr>
       <tr style="background:#f9f9f9;"><td style="padding:10px 12px;font-size:13px;color:#888;">Phone</td><td style="padding:10px 12px;font-size:14px;color:#333;">${vars.visitor_phone || "—"}</td></tr>
-      ${vars.property_name ? `<tr><td style="padding:10px 12px;font-size:13px;color:#888;">Property</td><td style="padding:10px 12px;font-size:14px;color:#333;font-weight:bold;">${vars.property_name}</td></tr>` : ""}
+      ${vars.property_name ? `<tr><td style="padding:10px 12px;font-size:13px;color:#888;">Property</td><td style="padding:10px 12px;font-size:14px;color:#333;font-weight:bold;">${vars.property_url ? `<a href="${vars.property_url}" style="color:#c9a84c;text-decoration:underline;">${vars.property_name}</a>` : vars.property_name}</td></tr>` : ""}
       ${vars.viewing_date ? `<tr style="background:#f9f9f9;"><td style="padding:10px 12px;font-size:13px;color:#888;">Viewing Date</td><td style="padding:10px 12px;font-size:14px;color:#333;">${vars.viewing_date} ${vars.viewing_time || ""}</td></tr>` : ""}
       ${vars.callback_time ? `<tr><td style="padding:10px 12px;font-size:13px;color:#888;">Best Time</td><td style="padding:10px 12px;font-size:14px;color:#c9a84c;font-weight:bold;">${vars.callback_time}</td></tr>` : ""}
       ${vars.budget_range ? `<tr style="background:#f9f9f9;"><td style="padding:10px 12px;font-size:13px;color:#888;">Budget</td><td style="padding:10px 12px;font-size:14px;color:#333;">${vars.budget_range}</td></tr>` : ""}
@@ -379,6 +380,7 @@ Deno.serve(async (req) => {
       visitor_message = "",
       preferred_language = "en",
       property_name = "",
+      property_slug = "",
       viewing_date = "",
       viewing_time = "",
       callback_time = "",
@@ -388,12 +390,17 @@ Deno.serve(async (req) => {
       gmail_account,
     } = params;
 
+    const propertyUrl = property_slug
+      ? `https://asasinvest.com/property/${property_slug}`
+      : "https://asasinvest.com/buy";
+
     const vars: Record<string, string> = {
       visitor_name,
       visitor_email,
       visitor_phone,
       visitor_message,
       property_name,
+      property_url: propertyUrl,
       viewing_date,
       viewing_time,
       callback_time,

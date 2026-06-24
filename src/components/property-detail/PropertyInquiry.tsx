@@ -69,6 +69,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
           visitor_message: messageWithInterests || null,
           preferred_language: isRTL ? "ar" : "en",
           property_id: property.id,
+          property_slug: property.slug,
           property_name: propertyName,
           source_page: typeof window !== "undefined" ? window.location.pathname : undefined,
           consent_given: true,
