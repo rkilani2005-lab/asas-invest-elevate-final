@@ -16,6 +16,7 @@ interface EmailParams {
   preferred_language?: string;
   property_name?: string;
   property_id?: string;
+  property_slug?: string;
   viewing_date?: string;
   viewing_time?: string;
   callback_time?: string;
