@@ -982,6 +982,9 @@ export type Database = {
           power_load_kw: string | null
           price_range: string | null
           projected_roi: string | null
+          publish_expiry_date: string | null
+          publish_start_date: string | null
+          publish_status: Database["public"]["Enums"]["publish_status"]
           service_charges: string | null
           size_range: string | null
           slug: string
@@ -1031,6 +1034,9 @@ export type Database = {
           power_load_kw?: string | null
           price_range?: string | null
           projected_roi?: string | null
+          publish_expiry_date?: string | null
+          publish_start_date?: string | null
+          publish_status?: Database["public"]["Enums"]["publish_status"]
           service_charges?: string | null
           size_range?: string | null
           slug: string
@@ -1080,6 +1086,9 @@ export type Database = {
           power_load_kw?: string | null
           price_range?: string | null
           projected_roi?: string | null
+          publish_expiry_date?: string | null
+          publish_start_date?: string | null
+          publish_status?: Database["public"]["Enums"]["publish_status"]
           service_charges?: string | null
           size_range?: string | null
           slug?: string
@@ -1095,6 +1104,83 @@ export type Database = {
           washroom_type?: string | null
         }
         Relationships: []
+      }
+      property_downloads: {
+        Row: {
+          asset_kind: string
+          downloaded_at: string
+          id: string
+          media_id: string | null
+          property_id: string
+          session_id: string | null
+        }
+        Insert: {
+          asset_kind: string
+          downloaded_at?: string
+          id?: string
+          media_id?: string | null
+          property_id: string
+          session_id?: string | null
+        }
+        Update: {
+          asset_kind?: string
+          downloaded_at?: string
+          id?: string
+          media_id?: string | null
+          property_id?: string
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_downloads_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_downloads_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_views: {
+        Row: {
+          id: string
+          property_id: string
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          property_id: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          property_id?: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_views_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scheduled_emails: {
         Row: {
@@ -1382,6 +1468,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      expire_outdated_properties: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1405,6 +1492,7 @@ export type Database = {
       property_category: "residential" | "commercial"
       property_status: "available" | "reserved" | "sold"
       property_type: "off-plan" | "ready"
+      publish_status: "active" | "draft" | "expired"
       translation_category: "ui" | "content" | "property"
     }
     CompositeTypes: {
@@ -1548,6 +1636,7 @@ export const Constants = {
       property_category: ["residential", "commercial"],
       property_status: ["available", "reserved", "sold"],
       property_type: ["off-plan", "ready"],
+      publish_status: ["active", "draft", "expired"],
       translation_category: ["ui", "content", "property"],
     },
   },
