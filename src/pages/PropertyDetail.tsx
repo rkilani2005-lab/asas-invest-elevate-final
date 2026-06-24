@@ -63,6 +63,14 @@ const PropertyDetail = () => {
     enabled: !!slug,
   });
 
+  // Track view (deduped per session, per property)
+  useEffect(() => {
+    if (property?.id) {
+      trackPropertyView(property.id);
+    }
+  }, [property?.id]);
+
+
   // Check for content availability
   const hasFloorPlans = property?.media.some(m => m.type === "floorplan" || m.type === "floor_plate") ?? false;
   const hasBrochures = property?.media.some(m => m.type === "brochure") ?? false;
