@@ -19,6 +19,7 @@ import PropertyTabContent from "@/components/property-detail/PropertyTabContent"
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { trackPropertyView } from "@/lib/property-tracking";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
