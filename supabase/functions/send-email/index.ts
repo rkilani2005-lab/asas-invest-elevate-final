@@ -199,7 +199,7 @@ function visitorConfirmationHtml(
       </ul>
     </div>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asasinvest.com/properties" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View All Properties →</a>
+      <a href="${vars.property_url || "https://asasinvest.com/buy"}" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Property →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
     <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a> | <a href="https://asasinvest.com" style="color:#c9a84c;">asasinvest.com</a></p>
