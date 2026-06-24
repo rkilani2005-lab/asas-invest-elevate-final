@@ -51,7 +51,35 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from("inquiries").insert({
+      const messageWithInterests = [
+        formData.message,
+        formData.interests.length > 0
+          ? `Requested materials: ${formData.interests.join(", ")}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+
+      const { data, error } = await supabase.functions.invoke("form-submit", {
+        body: {
+          form_type: "property_inquiry",
+          visitor_name: formData.name,
+          visitor_email: formData.email,
+          visitor_phone: formData.phone || null,
+          visitor_message: messageWithInterests || null,
+          preferred_language: isRTL ? "ar" : "en",
+          property_id: property.id,
+          property_name: propertyName,
+          source_page: typeof window !== "undefined" ? window.location.pathname : undefined,
+          consent_given: true,
+        },
+      });
+
+      if (error) throw error;
+      if (data && data.success === false) throw new Error(data.error || "Submission failed");
+
+      // Also store in inquiries table for admin CRM view
+      await supabase.from("inquiries").insert({
         name: formData.name,
         email: formData.email,
         phone: formData.phone || null,
@@ -60,8 +88,6 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
         property_id: property.id,
         inquiry_type: "property",
       });
-
-      if (error) throw error;
 
       setIsSubmitted(true);
       toast({
