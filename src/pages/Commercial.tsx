@@ -27,6 +27,8 @@ const Commercial = () => {
         .from("properties")
         .select(`*, media(*)`)
         .eq("category", "commercial")
+        .eq("publish_status", "active")
+        .or(`publish_start_date.is.null,publish_start_date.lte.${new Date().toISOString().slice(0,10)}`)
         .order("sort_order", { ascending: true });
       if (error) throw error;
       return data as PropertyWithMedia[];

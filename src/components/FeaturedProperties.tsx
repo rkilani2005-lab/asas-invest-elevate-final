@@ -27,6 +27,8 @@ const FeaturedProperties = () => {
         .from("properties")
         .select(`*, media(*)`)
         .eq("status", "available")
+        .eq("publish_status", "active")
+        .or(`publish_start_date.is.null,publish_start_date.lte.${new Date().toISOString().slice(0,10)}`)
         .order("is_featured", { ascending: false })
         .order("sort_order", { ascending: true })
         .limit(9);

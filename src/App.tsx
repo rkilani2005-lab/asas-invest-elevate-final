@@ -52,6 +52,7 @@ const AdminCommunications = lazy(() => import("./pages/admin/AdminCommunications
 const AdminEmailSettings = lazy(() => import("./pages/admin/AdminEmailSettings"));
 const AdminEmailPage = lazy(() => import("./pages/admin/AdminEmailPage"));
 const AdminSellerSubmissions = lazy(() => import("./pages/admin/AdminSellerSubmissions"));
+const AdminPropertyReports = lazy(() => import("./pages/admin/AdminPropertyReports"));
 
 const queryClient = new QueryClient();
 
@@ -91,6 +92,7 @@ const App = () => (
                   <Route path="/admin/properties/new" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
                   <Route path="/admin/properties/:id/edit" element={<AdminLayout><PropertyWizardPage /></AdminLayout>} />
                   <Route path="/admin/properties/import" element={<AdminLayout><AdminBulkImport /></AdminLayout>} />
+                  <Route path="/admin/reports" element={<AdminLayout><AdminPropertyReports /></AdminLayout>} />
                   <Route path="/admin/gallery" element={<AdminLayout><AdminGallery /></AdminLayout>} />
                   <Route path="/admin/inquiries" element={<AdminLayout><AdminInquiries /></AdminLayout>} />
                   <Route path="/admin/seller-submissions" element={<AdminLayout><AdminSellerSubmissions /></AdminLayout>} />

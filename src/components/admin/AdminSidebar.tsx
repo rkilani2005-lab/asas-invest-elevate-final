@@ -20,6 +20,7 @@ import {
   Mail,
   ClipboardCheck,
   Tag,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -59,6 +60,7 @@ export default function AdminSidebar() {
   const navItems = [
     { href: "/admin", icon: LayoutDashboard, label: t("admin.nav.dashboard") },
     { href: "/admin/properties", icon: Building2, label: t("admin.nav.properties") },
+    { href: "/admin/reports", icon: BarChart3, label: "Property Reports" },
     { href: "/admin/importer", icon: CloudDownload, label: t("admin.nav.autoImport") },
     { href: "/admin/importer/approval", icon: ClipboardCheck, label: t("admin.nav.approvals") },
     { href: "/admin/seller-submissions", icon: Tag, label: "Seller Submissions" },

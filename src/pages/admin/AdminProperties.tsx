@@ -146,6 +146,7 @@ export default function AdminProperties() {
               <TableHead>Name</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Type</TableHead>
+              <TableHead>Publish</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[140px]">Actions</TableHead>
             </TableRow>
@@ -153,13 +154,13 @@ export default function AdminProperties() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                 </TableCell>
               </TableRow>
             ) : filteredProperties.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   No properties found
                 </TableCell>
               </TableRow>
@@ -201,6 +202,19 @@ export default function AdminProperties() {
                     <Badge variant={property.type === "off-plan" ? "default" : "secondary"}>
                       {property.type === "off-plan" ? "Off-Plan" : "Ready"}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {(() => {
+                      const ps = (property as any).publish_status as string | null;
+                      if (ps === "active") return <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20">Active</Badge>;
+                      if (ps === "expired") return <Badge className="bg-red-500/10 text-red-700 hover:bg-red-500/20">Expired</Badge>;
+                      return <Badge variant="secondary">Draft</Badge>;
+                    })()}
+                    {(property as any).publish_expiry_date && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Exp: {(property as any).publish_expiry_date}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(property.status)}>

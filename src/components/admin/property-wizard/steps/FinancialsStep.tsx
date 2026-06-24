@@ -30,7 +30,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { PropertyData, PropertyStatus, PaymentMilestone } from "../types";
+import type { PropertyData, PropertyStatus, PaymentMilestone, PublishStatus } from "../types";
 
 interface FinancialsStepProps {
   data: PropertyData;
@@ -277,6 +277,83 @@ export default function FinancialsStep({ data, onChange }: FinancialsStepProps) 
               checked={data.is_featured}
               onCheckedChange={(checked) => onChange({ is_featured: checked })}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Publishing controls */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Publishing</CardTitle>
+          <CardDescription>
+            Control when this listing is visible to the public. Only "Active" properties appear on the site; expired listings are hidden automatically after the expiry date.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+            <div>
+              <Label className="text-base">Publish Status</Label>
+              <p className="text-sm text-muted-foreground">
+                Draft hides the listing; Active publishes it; Expired is set automatically past the expiry date.
+              </p>
+            </div>
+            <Select
+              value={data.publish_status}
+              onValueChange={(value: PublishStatus) =>
+                onChange({ publish_status: value })
+              }
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    Active
+                  </span>
+                </SelectItem>
+                <SelectItem value="draft">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-gray-400" />
+                    Draft
+                  </span>
+                </SelectItem>
+                <SelectItem value="expired">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500" />
+                    Expired
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="publish_start_date">Publish Start Date</Label>
+              <Input
+                id="publish_start_date"
+                type="date"
+                value={data.publish_start_date || ""}
+                onChange={(e) => onChange({ publish_start_date: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave blank to publish immediately when Active.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="publish_expiry_date">Publish Expiry Date</Label>
+              <Input
+                id="publish_expiry_date"
+                type="date"
+                value={data.publish_expiry_date || ""}
+                onChange={(e) => onChange({ publish_expiry_date: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                After this date the listing is hidden and marked Expired.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

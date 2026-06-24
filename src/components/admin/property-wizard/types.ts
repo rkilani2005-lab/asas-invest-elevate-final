@@ -4,6 +4,7 @@ export type PropertyType = Database["public"]["Enums"]["property_type"];
 export type PropertyStatus = Database["public"]["Enums"]["property_status"];
 export type MediaType = Database["public"]["Enums"]["media_type"];
 export type PropertyCategory = Database["public"]["Enums"]["property_category"];
+export type PublishStatus = "active" | "draft" | "expired";
 
 export interface MediaItem {
   id?: string;
@@ -75,6 +76,9 @@ export interface PropertyData {
   // Financials
   payment_milestones: PaymentMilestone[];
   status: PropertyStatus;
+  publish_status: PublishStatus;
+  publish_start_date: string;
+  publish_expiry_date: string;
   is_featured: boolean;
   investment_en: string;
   investment_ar: string;

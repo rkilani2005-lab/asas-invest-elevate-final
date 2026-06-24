@@ -19,6 +19,7 @@ import PropertyTabContent from "@/components/property-detail/PropertyTabContent"
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { trackPropertyView } from "@/lib/property-tracking";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -51,6 +52,8 @@ const PropertyDetail = () => {
           payment_milestones(*)
         `)
         .eq("slug", slug)
+        .eq("publish_status", "active")
+        .or(`publish_start_date.is.null,publish_start_date.lte.${new Date().toISOString().slice(0,10)}`)
         .maybeSingle();
 
       if (error) throw error;
@@ -59,6 +62,14 @@ const PropertyDetail = () => {
     },
     enabled: !!slug,
   });
+
+  // Track view (deduped per session, per property)
+  useEffect(() => {
+    if (property?.id) {
+      trackPropertyView(property.id);
+    }
+  }, [property?.id]);
+
 
   // Check for content availability
   const hasFloorPlans = property?.media.some(m => m.type === "floorplan" || m.type === "floor_plate") ?? false;
