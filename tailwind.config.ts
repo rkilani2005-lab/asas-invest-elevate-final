@@ -75,10 +75,10 @@ export default {
         heading: ['"Satoshi"', 'system-ui', 'sans-serif'],
         display: ['"Satoshi"', 'system-ui', 'sans-serif'],
         // Arabic Fonts
-        'arabic-heading': ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
-        'arabic-body': ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
+        'arabic-heading': ['"Cairo"', 'system-ui', 'sans-serif'],
+        'arabic-body': ['"Cairo"', 'system-ui', 'sans-serif'],
         // Alias used across the app via `isRTL && "font-arabic"`
-        arabic: ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
+        arabic: ['"Cairo"', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
         'tighter': '-0.04em',

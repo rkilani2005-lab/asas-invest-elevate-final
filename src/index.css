@@ -1,4 +1,4 @@
-/* Fonts loaded via <link> in index.html (Satoshi + Inter + IBM Plex Sans Arabic) */
+/* Fonts loaded via <link> in index.html (Satoshi + Inter + Cairo) */
 
 @tailwind base;
 @tailwind components;
@@ -10,7 +10,7 @@
    - Primary Heading: Cormorant Garamond (genuine luxury serif)
    - Nav / Subheadings: DM Sans (geometric, clean confidence)
    - Body: Inter (Regular, 1.7 line-height, spacious feel)
-   - Arabic: IBM Plex Sans Arabic (all weights)
+   - Arabic: Cairo (all weights)
 
    Colors:
    - Textured Off-White (#FAFAFA) - Global background
@@ -98,7 +98,7 @@
      so we scale up slightly and increase leading. Letter-spacing must be 0 —
      wide tracking breaks Arabic ligatures. */
   [dir="rtl"] body {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
     font-size: 1.06rem; /* ~+6% body scale */
     line-height: 1.75;
     letter-spacing: 0;
@@ -147,7 +147,7 @@
   [dir="rtl"] h4,
   [dir="rtl"] h5,
   [dir="rtl"] h6 {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
     font-style: normal;
     letter-spacing: 0;
     line-height: 1.2;
@@ -166,7 +166,7 @@
 
   [dir="rtl"] .nav-link,
   [dir="rtl"] .label-luxury {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
     font-weight: 500;
     letter-spacing: 0;
   }
@@ -180,7 +180,7 @@
   }
 
   [dir="rtl"] .heading-hero {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: 0;
     line-height: 1.2;
@@ -195,7 +195,7 @@
   }
 
   [dir="rtl"] .heading-section {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: 0;
     line-height: 1.2;
@@ -211,7 +211,7 @@
   }
 
   [dir="rtl"] .text-eyebrow {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
     text-transform: none;
     letter-spacing: 0;
   }
@@ -232,7 +232,7 @@
   }
 
   [dir="rtl"] .btn-luxury {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
     font-weight: 600;
   }
 
@@ -352,15 +352,15 @@
   }
 
   [dir="rtl"] .font-heading {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
   }
 
   [dir="rtl"] .font-nav {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
   }
 
   [dir="rtl"] .font-body {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif;
   }
 
   /* Hide scrollbar utility */

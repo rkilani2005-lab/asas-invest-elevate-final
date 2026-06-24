@@ -47,7 +47,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
     // Update font family based on language
     if (language === 'ar') {
-      document.documentElement.style.setProperty('--font-body', '"IBM Plex Sans Arabic", sans-serif');
+      document.documentElement.style.setProperty('--font-body', '"Cairo", sans-serif');
     } else {
       document.documentElement.style.setProperty('--font-body', '"Inter", sans-serif');
     }
