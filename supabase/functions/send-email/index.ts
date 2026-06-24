@@ -296,7 +296,7 @@ function visitorConfirmationHtml(
     <h2 style="color:#1a1a2e;margin-top:0;">Thank You for Your Interest</h2>
     <p style="color:#555;line-height:1.7;">Dear ${vars.visitor_name || "Valued Client"},<br>Thank you for requesting the brochure for <strong>${vars.property_name || "our property"}</strong>. Our team will send you the full brochure shortly.</p>
     <div style="margin:30px 0;text-align:center;">
-      <a href="https://asasinvest.com/buy" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Property Online →</a>
+      <a href="${vars.property_url || "https://asasinvest.com/buy"}" style="background:#c9a84c;color:#fff;padding:14px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Property Online →</a>
     </div>
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
     <p style="color:#999;font-size:12px;text-align:center;">ASAS Real Estate | <a href="mailto:admin@asasinvest.com" style="color:#c9a84c;">admin@asasinvest.com</a></p>
