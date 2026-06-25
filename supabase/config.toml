@@ -12,6 +12,9 @@ verify_jwt = false
 [functions.extract-property]
 verify_jwt = false
 
+[functions.chat-extract]
+verify_jwt = false
+
 [functions.extract-chunk]
 verify_jwt = false
 

@@ -45,6 +45,7 @@ const AdminBulkImport = lazy(() => import("./pages/admin/AdminBulkImport"));
 const AdminAboutPage = lazy(() => import("./pages/admin/AdminAboutPage"));
 const ImporterDashboard = lazy(() => import("./pages/admin/importer/ImporterDashboard"));
 const ImporterScan = lazy(() => import("./pages/admin/importer/ImporterScan"));
+const ImporterChat = lazy(() => import("./pages/admin/importer/ImporterChat"));
 const ImporterQueue = lazy(() => import("./pages/admin/importer/ImporterQueue"));
 const ImporterSettings = lazy(() => import("./pages/admin/importer/ImporterSettings"));
 const ImporterApproval = lazy(() => import("./pages/admin/importer/ImporterApproval"));
@@ -110,6 +111,7 @@ const App = () => (
 
                   {/* Auto Importer Routes */}
                   <Route path="/admin/importer" element={<AdminLayout><ImporterDashboard /></AdminLayout>} />
+                  <Route path="/admin/importer/chat" element={<AdminLayout><ImporterChat /></AdminLayout>} />
                   <Route path="/admin/importer/scan" element={<AdminLayout><ImporterScan /></AdminLayout>} />
                   <Route path="/admin/importer/queue" element={<AdminLayout><ImporterQueue /></AdminLayout>} />
                   <Route path="/admin/importer/settings" element={<AdminLayout><ImporterSettings /></AdminLayout>} />
