@@ -111,24 +111,20 @@ export default function ImporterChat() {
       // 1. Extract PDF text in the browser (pdf.js) — keeps heavy parsing OFF the
       //    edge function (which was hitting the 546 resource limit). For image-only
       //    PDFs we render the first pages to images for the vision model.
-      // IMPORTANT: we deliberately do NOT upload the raw PDF as a file. The edge
-      // function would try to download+parse it server-side and hit the runtime
-      // resource limit (HTTP 546). Instead we read the PDF in the browser and send
-      // its text only. (Rendered page images of image-only PDFs are still sent.)
+      // The edge function reads PDFs natively via Claude (text + embedded images),
+      // so we upload the PDF itself. We ALSO run pdf.js in the browser as a
+      // supplement: pull a text layer (helps when present) and, for image-only
+      // PDFs, render page images for the gallery.
       const extractedTexts: string[] = [];
       const processList: PendingFile[] = [];
       for (const pf of filesToUpload) {
         if (pf.kind === "pdf") {
+          processList.push(pf); // upload the PDF — Claude reads it directly
           try {
-            const { text, pageImages } = await extractPdfClient(pf.file);
+            const { text, images } = await extractPdfClient(pf.file);
             if (text.trim().length > 20) extractedTexts.push(`--- ${pf.file.name} ---\n${text.slice(0, 16000)}`);
-            for (const img of pageImages) processList.push({ file: img, kind: "image" });
-            if (!text.trim() && pageImages.length === 0) {
-              setMessages((m) => [...m, { id: uid(), role: "assistant", text: `⚠️ I couldn't read text from **${pf.file.name}** (it may be scanned/secured). Please paste its key details or upload page screenshots.` }]);
-            }
-          } catch {
-            setMessages((m) => [...m, { id: uid(), role: "assistant", text: `⚠️ Couldn't open **${pf.file.name}** in the browser. Please paste the key details from it.` }]);
-          }
+            for (const img of images) processList.push({ file: img, kind: "image" });
+          } catch { /* Claude still reads the PDF server-side; pdf.js is only a supplement */ }
         } else {
           processList.push(pf);
         }
@@ -316,15 +312,105 @@ export default function ImporterChat() {
   );
 }
 
-// Browser-side PDF extraction with pdf.js. Returns text (all pages) and, only
-// when the PDF has little/no text layer, rendered page images for the vision model.
-async function extractPdfClient(file: File): Promise<{ text: string; pageImages: File[] }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function loadPdfjs(): Promise<any> {
   const pdfjs: any = await import("pdfjs-dist");
   // @ts-ignore — Vite ?url asset import
   const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
   pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+  return pdfjs;
+}
 
+function canvasToFile(canvas: HTMLCanvasElement, name: string): Promise<File | null> {
+  return new Promise((r) =>
+    canvas.toBlob((b) => r(b ? new File([b], name, { type: "image/jpeg" }) : null), "image/jpeg", 0.85),
+  );
+}
+
+// Pull the actual embedded raster images out of a PDF (clean property photos),
+// largest-first. Falls back to rendering whole pages if too few are found.
+async function extractPdfImages(pdfjs: any, doc: any, baseName: string, want = 5): Promise<File[]> {
+  const OPS = pdfjs.OPS;
+  const candidates: { area: number; canvas: HTMLCanvasElement }[] = [];
+  const pages = Math.min(doc.numPages, 25);
+
+  for (let p = 1; p <= pages && candidates.length < 40; p++) {
+    const page = await doc.getPage(p);
+    // Render first so image XObjects resolve into page.objs.
+    try {
+      const vp = page.getViewport({ scale: 1 });
+      const rc = document.createElement("canvas");
+      rc.width = Math.ceil(vp.width); rc.height = Math.ceil(vp.height);
+      const rctx = rc.getContext("2d");
+      if (rctx) await page.render({ canvasContext: rctx, viewport: vp, canvas: rc }).promise;
+    } catch { /* ignore render issues */ }
+
+    let ops: any;
+    try { ops = await page.getOperatorList(); } catch { continue; }
+    const names = new Set<string>();
+    for (let i = 0; i < ops.fnArray.length; i++) {
+      const fn = ops.fnArray[i];
+      if (fn === OPS.paintImageXObject || fn === OPS.paintImageXObjectRepeat || fn === OPS.paintJpegXObject) {
+        const a = ops.argsArray[i]?.[0];
+        if (typeof a === "string") names.add(a);
+      }
+    }
+    for (const name of names) {
+      try {
+        const img: any = await new Promise((res) => { try { page.objs.get(name, res); } catch { res(null); } });
+        const w = img?.width, h = img?.height;
+        if (!w || !h || w < 250 || h < 250) continue; // skip logos/icons
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d");
+        if (!ctx) continue;
+        if (img.bitmap) {
+          ctx.drawImage(img.bitmap, 0, 0);
+        } else if (img.data) {
+          const out = ctx.createImageData(w, h);
+          const src = img.data as Uint8ClampedArray;
+          const ch = src.length / (w * h);
+          if (ch === 4) out.data.set(src);
+          else if (ch === 3) for (let i = 0, j = 0; i < src.length; i += 3, j += 4) { out.data[j] = src[i]; out.data[j + 1] = src[i + 1]; out.data[j + 2] = src[i + 2]; out.data[j + 3] = 255; }
+          else if (ch === 1) for (let i = 0, j = 0; i < src.length; i++, j += 4) { out.data[j] = out.data[j + 1] = out.data[j + 2] = src[i]; out.data[j + 3] = 255; }
+          else continue;
+          ctx.putImageData(out, 0, 0);
+        } else continue;
+        candidates.push({ area: w * h, canvas: c });
+      } catch { /* object not resolved */ }
+    }
+  }
+
+  candidates.sort((a, b) => b.area - a.area);
+  const stem = baseName.replace(/\.pdf$/i, "");
+  const out: File[] = [];
+  for (let i = 0; i < candidates.length && out.length < want; i++) {
+    const f = await canvasToFile(candidates[i].canvas, `${stem}-img-${i + 1}.jpg`);
+    if (f) out.push(f);
+  }
+
+  // Fallback: not enough embedded images → render whole pages to top up.
+  if (out.length < want) {
+    for (let p = 1; p <= doc.numPages && out.length < want; p++) {
+      try {
+        const page = await doc.getPage(p);
+        const vp = page.getViewport({ scale: 1.6 });
+        const c = document.createElement("canvas");
+        c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+        const ctx = c.getContext("2d");
+        if (!ctx) continue;
+        await page.render({ canvasContext: ctx, viewport: vp, canvas: c }).promise;
+        const f = await canvasToFile(c, `${stem}-page-${p}.jpg`);
+        if (f) out.push(f);
+      } catch { /* ignore */ }
+    }
+  }
+  return out;
+}
+
+// Browser-side PDF processing with pdf.js: text layer (supplement) + 5 images.
+async function extractPdfClient(file: File): Promise<{ text: string; images: File[] }> {
+  const pdfjs = await loadPdfjs();
   const data = new Uint8Array(await file.arrayBuffer());
   const doc = await pdfjs.getDocument({ data }).promise;
 
@@ -333,28 +419,14 @@ async function extractPdfClient(file: File): Promise<{ text: string; pageImages:
   for (let p = 1; p <= textPages; p++) {
     const page = await doc.getPage(p);
     const content = await page.getTextContent();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     text += content.items.map((it: any) => (typeof it?.str === "string" ? it.str : "")).join(" ") + "\n";
   }
 
-  const pageImages: File[] = [];
-  if (text.trim().length < 300) {
-    const renderPages = Math.min(doc.numPages, 5);
-    for (let p = 1; p <= renderPages; p++) {
-      const page = await doc.getPage(p);
-      const viewport = page.getViewport({ scale: 1.6 });
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.ceil(viewport.width);
-      canvas.height = Math.ceil(viewport.height);
-      const ctx = canvas.getContext("2d");
-      if (!ctx) continue;
-      await page.render({ canvasContext: ctx, viewport, canvas }).promise;
-      const blob: Blob | null = await new Promise((r) => canvas.toBlob((b) => r(b), "image/jpeg", 0.82));
-      if (blob) pageImages.push(new File([blob], `${file.name.replace(/\.pdf$/i, "")}-page-${p}.jpg`, { type: "image/jpeg" }));
-    }
-  }
-  return { text, pageImages };
+  let images: File[] = [];
+  try { images = await extractPdfImages(pdfjs, doc, file.name, 5); } catch { images = []; }
+  return { text, images };
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Minimal **bold** rendering for assistant text
 function renderInline(text: string): React.ReactNode {

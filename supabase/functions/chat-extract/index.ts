@@ -24,7 +24,7 @@ import { unzipSync, strFromU8 } from "npm:fflate@0.8.2";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
-const VERSION = "v4-claude-2026-06-25";
+const VERSION = "v5-claude-2026-06-25";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -175,11 +175,12 @@ Deno.serve(async (req) => {
 
     const warnings: string[] = [];
     const textBlocks: string[] = [];
-    const contentBlocks: unknown[] = [];   // Claude content blocks (documents + images)
+    const contentBlocks: unknown[] = [];   // Claude content blocks (PDF documents)
+    const imageBlocks: unknown[] = [];     // image vision blocks (used only if no PDF)
     const pendingMedia: Record<string, unknown>[] = [];
     let videoUrl = "";
     let imgIndex = 0;
-    let visionImages = 0;
+    let hasPdf = false;
 
     if (pastedText) textBlocks.push(`--- Admin notes ---\n${pastedText}`);
     for (const t of extractedTexts) { const s = String(t || "").trim(); if (s) textBlocks.push(s.slice(0, 16000)); }
@@ -216,6 +217,7 @@ Deno.serve(async (req) => {
           pendingMedia.push({ media_type: "brochure", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 300, compression_status: "done" });
           if (bytes.length <= MAX_PDF_BYTES) {
             contentBlocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: toBase64(bytes) }, title: f.name });
+            hasPdf = true;
           } else {
             warnings.push(`PDF "${f.name}" is ${(bytes.length / 1024 / 1024).toFixed(0)}MB — too large to read directly. Please split it or paste key details.`);
           }
@@ -227,9 +229,10 @@ Deno.serve(async (req) => {
             original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path,
             is_hero: imgIndex === 0 && !isFloorplan, sort_order: imgIndex, compression_status: "done", original_size_bytes: bytes.length,
           });
-          if (visionImages < MAX_VISION_IMAGES) {
-            contentBlocks.push({ type: "image", source: { type: "base64", media_type: imageMime(f.name, f.mime), data: toBase64(bytes) } });
-            visionImages++;
+          // Collect for vision; only sent to Claude if NO PDF is present (a PDF
+          // already contains these images — re-sending them just doubles cost).
+          if (imageBlocks.length < MAX_VISION_IMAGES) {
+            imageBlocks.push({ type: "image", source: { type: "base64", media_type: imageMime(f.name, f.mime), data: toBase64(bytes) } });
           }
           imgIndex++;
         } else if (f.kind === "docx") {
@@ -243,6 +246,8 @@ Deno.serve(async (req) => {
     }
 
     // ── Claude extraction (raw Messages API) ──────────────────────────────────
+    // Add image vision blocks only when there's no PDF (PDFs already carry them).
+    if (!hasPdf) for (const b of imageBlocks) contentBlocks.push(b);
     const sourceText = textBlocks.join("\n\n").slice(0, 60000);
     contentBlocks.push({ type: "text", text: PROMPT(propertyHint) + (sourceText ? `\n\nADDITIONAL TEXT FROM ADMIN / WEB:\n${sourceText}` : "") });
 
