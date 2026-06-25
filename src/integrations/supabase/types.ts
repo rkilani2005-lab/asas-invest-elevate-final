@@ -402,6 +402,8 @@ export type Database = {
       import_jobs: {
         Row: {
           ai_extraction_raw: Json | null
+          chat_messages: Json | null
+          chat_sources: Json | null
           cms_property_id: string | null
           cms_url: string | null
           created_at: string | null
@@ -423,6 +425,7 @@ export type Database = {
           is_featured: boolean | null
           location_ar: string | null
           location_en: string | null
+          manual_todo: Json | null
           name_ar: string | null
           name_en: string | null
           overview_ar: string | null
@@ -432,6 +435,7 @@ export type Database = {
           price_range: string | null
           size_range: string | null
           slug: string | null
+          source_type: string
           status: string | null
           tagline_ar: string | null
           tagline_en: string | null
@@ -444,6 +448,8 @@ export type Database = {
         }
         Insert: {
           ai_extraction_raw?: Json | null
+          chat_messages?: Json | null
+          chat_sources?: Json | null
           cms_property_id?: string | null
           cms_url?: string | null
           created_at?: string | null
@@ -465,6 +471,7 @@ export type Database = {
           is_featured?: boolean | null
           location_ar?: string | null
           location_en?: string | null
+          manual_todo?: Json | null
           name_ar?: string | null
           name_en?: string | null
           overview_ar?: string | null
@@ -474,6 +481,7 @@ export type Database = {
           price_range?: string | null
           size_range?: string | null
           slug?: string | null
+          source_type?: string
           status?: string | null
           tagline_ar?: string | null
           tagline_en?: string | null
@@ -486,6 +494,8 @@ export type Database = {
         }
         Update: {
           ai_extraction_raw?: Json | null
+          chat_messages?: Json | null
+          chat_sources?: Json | null
           cms_property_id?: string | null
           cms_url?: string | null
           created_at?: string | null
@@ -507,6 +517,7 @@ export type Database = {
           is_featured?: boolean | null
           location_ar?: string | null
           location_en?: string | null
+          manual_todo?: Json | null
           name_ar?: string | null
           name_en?: string | null
           overview_ar?: string | null
@@ -516,6 +527,7 @@ export type Database = {
           price_range?: string | null
           size_range?: string | null
           slug?: string | null
+          source_type?: string
           status?: string | null
           tagline_ar?: string | null
           tagline_en?: string | null
