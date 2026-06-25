@@ -108,12 +108,35 @@ export default function ImporterChat() {
     setPending([]);
 
     try {
-      // 1. Upload each file to the property-media bucket under imports/<folder>/
+      // 1. Extract PDF text in the browser (pdf.js) — keeps heavy parsing OFF the
+      //    edge function (which was hitting the 546 resource limit). For image-only
+      //    PDFs we render the first pages to images for the vision model.
+      const extractedTexts: string[] = [];
+      const processList: PendingFile[] = [];
+      for (const pf of filesToUpload) {
+        if (pf.kind === "pdf") {
+          processList.push(pf); // keep the original PDF as a downloadable brochure
+          try {
+            const { text, pageImages } = await extractPdfClient(pf.file);
+            if (text.trim().length > 20) extractedTexts.push(`--- ${pf.file.name} ---\n${text.slice(0, 16000)}`);
+            for (const img of pageImages) processList.push({ file: img, kind: "image" });
+            if (!text.trim() && pageImages.length === 0) {
+              setMessages((m) => [...m, { id: uid(), role: "assistant", text: `⚠️ I couldn't read text from **${pf.file.name}** (it may be scanned/secured). Please paste its key details or upload page screenshots.` }]);
+            }
+          } catch {
+            setMessages((m) => [...m, { id: uid(), role: "assistant", text: `⚠️ Couldn't open **${pf.file.name}** in the browser. I'll still attach it as a brochure — paste the key details if extraction comes back empty.` }]);
+          }
+        } else {
+          processList.push(pf);
+        }
+      }
+
+      // 2. Upload everything to the property-media bucket under imports/<folder>/
       const folder = `imports/${uid()}`;
       const uploaded: { storage_path: string; name: string; mime: string; kind: FileKind }[] = [];
-      for (const pf of filesToUpload) {
+      for (const pf of processList) {
         const safeName = pf.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const path = `${folder}/${Date.now()}-${safeName}`;
+        const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${safeName}`;
         const { error } = await supabase.storage.from(BUCKET).upload(path, pf.file, {
           contentType: pf.file.type || "application/octet-stream", upsert: true,
         });
@@ -121,7 +144,7 @@ export default function ImporterChat() {
         uploaded.push({ storage_path: path, name: pf.file.name, mime: pf.file.type, kind: pf.kind });
       }
 
-      // 2. Call the extraction orchestrator (raw fetch — no invoke timeout)
+      // 3. Call the extraction orchestrator (raw fetch — no invoke timeout)
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-extract`, {
         method: "POST",
@@ -132,6 +155,7 @@ export default function ImporterChat() {
         body: JSON.stringify({
           property_hint: cleanText.split("\n")[0]?.slice(0, 120) || "",
           text: cleanText,
+          extracted_texts: extractedTexts,
           urls,
           files: uploaded,
         }),
@@ -285,6 +309,46 @@ export default function ImporterChat() {
       </div>
     </div>
   );
+}
+
+// Browser-side PDF extraction with pdf.js. Returns text (all pages) and, only
+// when the PDF has little/no text layer, rendered page images for the vision model.
+async function extractPdfClient(file: File): Promise<{ text: string; pageImages: File[] }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pdfjs: any = await import("pdfjs-dist");
+  // @ts-ignore — Vite ?url asset import
+  const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+  pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+
+  const data = new Uint8Array(await file.arrayBuffer());
+  const doc = await pdfjs.getDocument({ data }).promise;
+
+  let text = "";
+  const textPages = Math.min(doc.numPages, 20);
+  for (let p = 1; p <= textPages; p++) {
+    const page = await doc.getPage(p);
+    const content = await page.getTextContent();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    text += content.items.map((it: any) => (typeof it?.str === "string" ? it.str : "")).join(" ") + "\n";
+  }
+
+  const pageImages: File[] = [];
+  if (text.trim().length < 300) {
+    const renderPages = Math.min(doc.numPages, 5);
+    for (let p = 1; p <= renderPages; p++) {
+      const page = await doc.getPage(p);
+      const viewport = page.getViewport({ scale: 1.6 });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) continue;
+      await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+      const blob: Blob | null = await new Promise((r) => canvas.toBlob((b) => r(b), "image/jpeg", 0.82));
+      if (blob) pageImages.push(new File([blob], `${file.name.replace(/\.pdf$/i, "")}-page-${p}.jpg`, { type: "image/jpeg" }));
+    }
+  }
+  return { text, pageImages };
 }
 
 // Minimal **bold** rendering for assistant text

@@ -227,6 +227,9 @@ Deno.serve(async (req) => {
 
     if (pastedText) textBlocks.push(`--- Admin notes ---\n${pastedText}`);
 
+    // Text extracted in the browser (pdf.js) — heavy PDF parsing stays off the edge function
+    for (const t of (body.extracted_texts || [])) { const s = String(t || "").trim(); if (s) textBlocks.push(s.slice(0, 16000)); }
+
     // URLs → text + scraped images (+ video links)
     for (const url of urls) {
       if (/youtube\.com|youtu\.be|vimeo\.com/i.test(url)) { if (!videoUrl) videoUrl = url; continue; }
@@ -250,6 +253,13 @@ Deno.serve(async (req) => {
           pendingMedia.push({ media_type: "video", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 200, compression_status: "done" });
           continue;
         }
+        if (f.kind === "pdf") {
+          // Text comes from the browser via extracted_texts. NEVER download/parse the PDF
+          // here — that hit the edge runtime resource limit (HTTP 546).
+          const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(f.storage_path);
+          pendingMedia.push({ media_type: "brochure", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 300, compression_status: "done" });
+          continue;
+        }
         const { data: blob, error: dlErr } = await supabaseAdmin.storage.from(BUCKET).download(f.storage_path);
         if (dlErr || !blob) { warnings.push(`Couldn't read uploaded file: ${f.name}`); continue; }
         const bytes = new Uint8Array(await blob.arrayBuffer());
@@ -266,12 +276,6 @@ Deno.serve(async (req) => {
           if (imageParts.length < MAX_VISION_IMAGES)
             imageParts.push({ url: `data:${mimeForImage(f.name, f.mime)};base64,${toBase64(bytes)}` });
           imgIndex++;
-        } else if (f.kind === "pdf") {
-          const text = extractTextFromPdfBuffer(bytes);
-          if (text.length > 50) textBlocks.push(`--- PDF: ${f.name} ---\n${text.slice(0, 16000)}`);
-          else warnings.push(`PDF "${f.name}" looks image-only — little text found. Upload its key pages as images for best results.`);
-          const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(f.storage_path);
-          pendingMedia.push({ media_type: "brochure", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 300, compression_status: "done" });
         } else if (f.kind === "docx") {
           const text = extractTextFromDocx(bytes);
           if (text.length > 30) textBlocks.push(`--- Word: ${f.name} ---\n${text.slice(0, 16000)}`);
