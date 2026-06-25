@@ -196,8 +196,12 @@ function generateSlug(text: string): string {
 const VALID_COLUMNS = ["name_en","name_ar","slug","tagline_en","tagline_ar","developer_en","developer_ar","location_en","location_ar","price_range","size_range","unit_types","ownership_type","type","handover_date","overview_en","overview_ar","highlights_en","highlights_ar","video_url","status","is_featured","investment_en","investment_ar","enduser_text_en","enduser_text_ar"];
 
 // ── handler ───────────────────────────────────────────────────────────────────
+const VERSION = "v3-clientpdf-2026-06-25";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  // Unauthenticated health/version probe — lets us verify which build is live.
+  if (req.method === "GET") return json({ ok: true, version: VERSION });
 
   try {
     const authHeader = req.headers.get("Authorization");
