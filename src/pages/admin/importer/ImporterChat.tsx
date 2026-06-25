@@ -111,11 +111,14 @@ export default function ImporterChat() {
       // 1. Extract PDF text in the browser (pdf.js) — keeps heavy parsing OFF the
       //    edge function (which was hitting the 546 resource limit). For image-only
       //    PDFs we render the first pages to images for the vision model.
+      // IMPORTANT: we deliberately do NOT upload the raw PDF as a file. The edge
+      // function would try to download+parse it server-side and hit the runtime
+      // resource limit (HTTP 546). Instead we read the PDF in the browser and send
+      // its text only. (Rendered page images of image-only PDFs are still sent.)
       const extractedTexts: string[] = [];
       const processList: PendingFile[] = [];
       for (const pf of filesToUpload) {
         if (pf.kind === "pdf") {
-          processList.push(pf); // keep the original PDF as a downloadable brochure
           try {
             const { text, pageImages } = await extractPdfClient(pf.file);
             if (text.trim().length > 20) extractedTexts.push(`--- ${pf.file.name} ---\n${text.slice(0, 16000)}`);
@@ -124,7 +127,7 @@ export default function ImporterChat() {
               setMessages((m) => [...m, { id: uid(), role: "assistant", text: `⚠️ I couldn't read text from **${pf.file.name}** (it may be scanned/secured). Please paste its key details or upload page screenshots.` }]);
             }
           } catch {
-            setMessages((m) => [...m, { id: uid(), role: "assistant", text: `⚠️ Couldn't open **${pf.file.name}** in the browser. I'll still attach it as a brochure — paste the key details if extraction comes back empty.` }]);
+            setMessages((m) => [...m, { id: uid(), role: "assistant", text: `⚠️ Couldn't open **${pf.file.name}** in the browser. Please paste the key details from it.` }]);
           }
         } else {
           processList.push(pf);
@@ -154,7 +157,9 @@ export default function ImporterChat() {
         },
         body: JSON.stringify({
           property_hint: cleanText.split("\n")[0]?.slice(0, 120) || "",
-          text: cleanText,
+          // Fold PDF text into `text` so ANY server version reads it (older builds
+          // ignore extracted_texts). extracted_texts kept for the newer build.
+          text: [cleanText, ...extractedTexts].filter(Boolean).join("\n\n"),
           extracted_texts: extractedTexts,
           urls,
           files: uploaded,
