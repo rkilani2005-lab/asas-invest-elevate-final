@@ -121,18 +121,23 @@ export default function ImporterChat() {
         uploaded.push({ storage_path: path, name: pf.file.name, mime: pf.file.type, kind: pf.kind });
       }
 
-      // 2. Call the extraction orchestrator
-      const { data, error } = await supabase.functions.invoke("chat-extract", {
-        body: {
+      // 2. Call the extraction orchestrator (raw fetch — no invoke timeout)
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-extract`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
           property_hint: cleanText.split("\n")[0]?.slice(0, 120) || "",
           text: cleanText,
           urls,
           files: uploaded,
-        },
+        }),
       });
-
-      if (error) throw new Error(error.message || "Extraction failed");
-      if (data?.error) throw new Error(data.error);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data?.error) throw new Error(data?.error || `Request failed (${res.status})`);
 
       setMessages((m) => [...m, {
         id: uid(), role: "assistant",
