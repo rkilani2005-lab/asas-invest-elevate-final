@@ -265,8 +265,9 @@ Deno.serve(async (req) => {
           });
           // Vision only if no PDF (PDFs already carry their images), under the cap,
           // and small enough — keeps the Claude request bounded → avoids 504.
-          if (imageBlocks.length < MAX_VISION_IMAGES && bytes.length <= MAX_IMAGE_BYTES) {
+          if (imageBlocks.length < MAX_VISION_IMAGES && bytes.length <= MAX_IMAGE_BYTES && totalRawBytes + bytes.length <= MAX_TOTAL_RAW_BYTES) {
             imageBlocks.push({ type: "image", source: { type: "base64", media_type: imageMime(f.name, f.mime), data: toBase64(bytes) } });
+            totalRawBytes += bytes.length;
           }
           imgIndex++;
         } else if (f.kind === "docx") {
