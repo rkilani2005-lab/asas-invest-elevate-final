@@ -343,7 +343,7 @@ export default function ImporterChat() {
         </Button>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Up to <strong>200&nbsp;MB</strong> per file. PDFs are read in full up to <strong>~100 pages / 30&nbsp;MB</strong> — larger PDFs are summarised from their text and first pages.
+        Up to <strong>200&nbsp;MB</strong> per file. PDFs are read in full up to <strong>~100 pages / 18&nbsp;MB</strong> — larger PDFs are summarised from their text and first pages.
       </p>
     </div>
   );
