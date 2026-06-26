@@ -78,7 +78,7 @@ export default function ImporterChat() {
     if (!list) return;
     const next: PendingFile[] = [];
     for (const file of Array.from(list)) {
-      if (file.size > 200 * 1024 * 1024) { toast.error(`${file.name} is over 200 MB — skipped.`); continue; }
+      if (file.size > 50 * 1024 * 1024) { toast.error(`${file.name} is over the 50 MB limit — skipped.`); continue; }
       next.push({ file, kind: classifyKind(file) });
     }
     setPending((p) => [...p, ...next]);
