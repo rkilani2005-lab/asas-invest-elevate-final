@@ -190,10 +190,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className={cn(
-                      "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                      isRTL && "text-right"
-                    )}
+                    className={"bg-white border-accent/30 rounded-none focus:border-accent text-foreground text-start"}
                     placeholder={t("contact.name")}
                   />
                 </div>
@@ -206,10 +203,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className={cn(
-                      "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                      isRTL && "text-right"
-                    )}
+                    className={"bg-white border-accent/30 rounded-none focus:border-accent text-foreground text-start"}
                     placeholder="your@email.com"
                   />
                 </div>
@@ -223,10 +217,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  className={cn(
-                    "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                    isRTL && "text-right"
-                  )}
+                  className={"bg-white border-accent/30 rounded-none focus:border-accent text-foreground text-start"}
                   placeholder="+971 XX XXX XXXX"
                 />
               </div>
@@ -263,10 +254,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 <Textarea
                   value={formData.message}
                   onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                  className={cn(
-                    "bg-white border-accent/30 rounded-none focus:border-accent resize-none text-foreground",
-                    isRTL && "text-right"
-                  )}
+                  className={"bg-white border-accent/30 rounded-none focus:border-accent resize-none text-foreground text-start"}
                   rows={4}
                   placeholder={t("inquire.messagePlaceholder")}
                 />
