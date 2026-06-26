@@ -41,21 +41,24 @@ export async function trackPropertyView(propertyId: string) {
 export type DownloadKind = "brochure" | "floor_plan" | "plate" | "other";
 
 /**
- * Records a brochure/floor-plan/plate download. Non-blocking.
+ * Records a brochure/floor-plan/plate download. Non-blocking from the caller's
+ * point of view, but MUST await the insert internally — Supabase query builders
+ * are lazy, so a non-awaited `void insert(...)` never sends the request.
  */
-export function trackPropertyDownload(
+export async function trackPropertyDownload(
   propertyId: string,
   assetKind: DownloadKind,
   mediaId?: string | null,
 ) {
   if (!propertyId) return;
   try {
-    void (supabase as any).from("property_downloads").insert({
+    const { error } = await (supabase as any).from("property_downloads").insert({
       property_id: propertyId,
       media_id: mediaId ?? null,
       asset_kind: assetKind,
       session_id: getSessionId(),
     });
+    if (error) console.warn("trackPropertyDownload failed", error);
   } catch (e) {
     console.warn("trackPropertyDownload failed", e);
   }
