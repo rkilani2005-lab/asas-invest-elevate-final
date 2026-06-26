@@ -183,10 +183,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
             <form onSubmit={handleSubmit} className="bg-white border border-accent/30 p-8 space-y-5 shadow-card">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className={cn(
-                    "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-right"
-                  )}>
+                  <label className={"block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider text-start"}>
                     {t("contact.name")} *
                   </label>
                   <Input
@@ -201,10 +198,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   />
                 </div>
                 <div>
-                  <label className={cn(
-                    "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-right"
-                  )}>
+                  <label className={"block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider text-start"}>
                     {t("contact.email")} *
                   </label>
                   <Input
@@ -222,10 +216,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               </div>
 
               <div>
-                <label className={cn(
-                  "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                  isRTL && "text-right"
-                )}>
+                <label className={"block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider text-start"}>
                   {t("contact.phone")}
                 </label>
                 <Input
@@ -241,10 +232,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               </div>
 
               <div>
-                <label className={cn(
-                  "block text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider",
-                  isRTL && "text-right"
-                )}>
+                <label className={"block text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider text-start"}>
                   {t("contact.interests")}
                 </label>
                 <div className={cn(
@@ -269,10 +257,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               </div>
 
               <div>
-                <label className={cn(
-                  "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                  isRTL && "text-right"
-                )}>
+                <label className={"block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider text-start"}>
                   {t("contact.message")}
                 </label>
                 <Textarea
