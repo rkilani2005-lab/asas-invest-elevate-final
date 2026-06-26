@@ -24,7 +24,7 @@ import { unzipSync, strFromU8 } from "npm:fflate@0.8.2";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
-const VERSION = "v6-claude-2026-06-26";
+const VERSION = "v7-claude-2026-06-26";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
