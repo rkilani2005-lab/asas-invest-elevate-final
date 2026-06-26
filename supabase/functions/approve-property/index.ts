@@ -93,6 +93,9 @@ Deno.serve(async (req): Promise<Response> => {
     const { data: claimsData } = await supabase.auth.getClaims(authHeader.replace("Bearer ", ""));
     if (!claimsData?.claims) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
 
+    const { data: roleRow } = await (supabaseAdmin as any).from("user_roles").select("role").eq("user_id", claimsData.claims.sub).eq("role", "admin").maybeSingle();
+    if (!roleRow) return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
     const { job_id, action, review_notes, reviewed_by } = await req.json();
     if (!job_id || !action) return new Response(JSON.stringify({ error: "Missing job_id or action" }), { status: 400, headers: corsHeaders });
     if (!["approve", "reject"].includes(action)) return new Response(JSON.stringify({ error: "action must be approve or reject" }), { status: 400, headers: corsHeaders });
