@@ -645,9 +645,8 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     await supabase.from("import_media").delete().eq("job_id", job.id);
     await supabase.from("import_jobs").delete().eq("id", job.id);
 
-    toast.success("Job deleted — you can re-scan and re-select this folder");
+    toast.success("Job deleted");
     onRefresh();
-    navigate("/admin/importer/scan");
   };
 
   // ── Edit helpers ──────────────────────────────────────────────────────────
@@ -1731,9 +1730,9 @@ export default function ImporterQueue() {
         <div className="text-center py-16 text-muted-foreground">
           <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-20" />
           <p className="text-lg font-medium">Queue is empty</p>
-          <p className="text-sm mt-1">Scan Google Drive and select properties to import</p>
+          <p className="text-sm mt-1">Use the AI Property Chat to import a property</p>
           <Button className="mt-4" asChild>
-            <Link to="/admin/importer/scan">Scan Google Drive</Link>
+            <Link to="/admin/importer/chat">AI Property Chat</Link>
           </Button>
         </div>
       )}

@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { I18nextProvider } from "react-i18next";
 import i18n from "@/i18n/config";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -43,11 +43,8 @@ const PropertyWizardPage = lazy(() => import("./pages/admin/PropertyWizardPage")
 const AdminAmenityLibrary = lazy(() => import("./pages/admin/AdminAmenityLibrary"));
 const AdminBulkImport = lazy(() => import("./pages/admin/AdminBulkImport"));
 const AdminAboutPage = lazy(() => import("./pages/admin/AdminAboutPage"));
-const ImporterDashboard = lazy(() => import("./pages/admin/importer/ImporterDashboard"));
-const ImporterScan = lazy(() => import("./pages/admin/importer/ImporterScan"));
 const ImporterChat = lazy(() => import("./pages/admin/importer/ImporterChat"));
 const ImporterQueue = lazy(() => import("./pages/admin/importer/ImporterQueue"));
-const ImporterSettings = lazy(() => import("./pages/admin/importer/ImporterSettings"));
 const ImporterApproval = lazy(() => import("./pages/admin/importer/ImporterApproval"));
 const AdminCommunications = lazy(() => import("./pages/admin/AdminCommunications"));
 const AdminEmailSettings = lazy(() => import("./pages/admin/AdminEmailSettings"));
@@ -109,13 +106,14 @@ const App = () => (
                   <Route path="/admin/translations" element={<AdminLayout><AdminTranslations /></AdminLayout>} />
                   <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
 
-                  {/* Auto Importer Routes */}
-                  <Route path="/admin/importer" element={<AdminLayout><ImporterDashboard /></AdminLayout>} />
+                  {/* AI Property Import + Review */}
+                  <Route path="/admin/importer" element={<Navigate to="/admin/importer/chat" replace />} />
                   <Route path="/admin/importer/chat" element={<AdminLayout><ImporterChat /></AdminLayout>} />
-                  <Route path="/admin/importer/scan" element={<AdminLayout><ImporterScan /></AdminLayout>} />
                   <Route path="/admin/importer/queue" element={<AdminLayout><ImporterQueue /></AdminLayout>} />
-                  <Route path="/admin/importer/settings" element={<AdminLayout><ImporterSettings /></AdminLayout>} />
                   <Route path="/admin/importer/approval" element={<AdminLayout><ImporterApproval /></AdminLayout>} />
+                  {/* Legacy Google Drive importer routes → AI chat */}
+                  <Route path="/admin/importer/scan" element={<Navigate to="/admin/importer/chat" replace />} />
+                  <Route path="/admin/importer/settings" element={<Navigate to="/admin/importer/chat" replace />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>

@@ -16,12 +16,12 @@ import {
   Sparkles,
   Images,
   FileText,
-  CloudDownload,
   Mail,
   ClipboardCheck,
   Tag,
   BarChart3,
   Bot,
+  ListChecks,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -63,7 +63,7 @@ export default function AdminSidebar() {
     { href: "/admin/properties", icon: Building2, label: t("admin.nav.properties") },
     { href: "/admin/reports", icon: BarChart3, label: "Property Reports" },
     { href: "/admin/importer/chat", icon: Bot, label: "AI Property Chat" },
-    { href: "/admin/importer", icon: CloudDownload, label: t("admin.nav.autoImport") },
+    { href: "/admin/importer/queue", icon: ListChecks, label: "Review Queue" },
     { href: "/admin/importer/approval", icon: ClipboardCheck, label: t("admin.nav.approvals") },
     { href: "/admin/seller-submissions", icon: Tag, label: "Seller Submissions" },
     { href: "/admin/gallery", icon: Images, label: t("admin.nav.gallery") },
@@ -109,7 +109,7 @@ export default function AdminSidebar() {
           >
             <item.icon className="w-5 h-5 shrink-0" />
             <span className="flex-1">{item.label}</span>
-            {item.href === "/admin/importer" && queueCount > 0 && (
+            {item.href === "/admin/importer/queue" && queueCount > 0 && (
               <NavBadge count={queueCount} active={isActive(item.href)} />
             )}
             {item.href === "/admin/importer/approval" && pendingApprovalCount > 0 && (
