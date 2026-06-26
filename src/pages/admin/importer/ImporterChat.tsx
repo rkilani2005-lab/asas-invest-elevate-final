@@ -121,7 +121,9 @@ export default function ImporterChat() {
         if (pf.kind === "pdf") {
           processList.push(pf); // upload the PDF — Claude reads it directly
           try {
-            const { text, images } = await extractPdfClient(pf.file);
+            // Hard overall cap: pdf.js must never block the send. If it stalls,
+            // we proceed — Claude still reads the PDF server-side.
+            const { text, images } = await withTimeout(extractPdfClient(pf.file), 60000, "pdf");
             if (text.trim().length > 20) extractedTexts.push(`--- ${pf.file.name} ---\n${text.slice(0, 16000)}`);
             for (const img of images) processList.push({ file: img, kind: "image" });
           } catch { /* Claude still reads the PDF server-side; pdf.js is only a supplement */ }
@@ -327,103 +329,56 @@ function canvasToFile(canvas: HTMLCanvasElement, name: string): Promise<File | n
   );
 }
 
-// Pull the actual embedded raster images out of a PDF (clean property photos),
-// largest-first. Falls back to rendering whole pages if too few are found.
-async function extractPdfImages(pdfjs: any, doc: any, baseName: string, want = 5): Promise<File[]> {
-  const OPS = pdfjs.OPS;
-  const candidates: { area: number; canvas: HTMLCanvasElement }[] = [];
-  const pages = Math.min(doc.numPages, 25);
+// Reject if a promise takes longer than ms — so a misbehaving pdf.js call can
+// never hang the whole send. The underlying work is simply abandoned.
+function withTimeout<T>(p: Promise<T>, ms: number, label = "op"): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<T>((_, rej) => setTimeout(() => rej(new Error(`${label} timed out`)), ms)),
+  ]);
+}
 
-  for (let p = 1; p <= pages && candidates.length < 40; p++) {
-    const page = await doc.getPage(p);
-    // Render first so image XObjects resolve into page.objs.
-    try {
-      const vp = page.getViewport({ scale: 1 });
-      const rc = document.createElement("canvas");
-      rc.width = Math.ceil(vp.width); rc.height = Math.ceil(vp.height);
-      const rctx = rc.getContext("2d");
-      if (rctx) await page.render({ canvasContext: rctx, viewport: vp, canvas: rc }).promise;
-    } catch { /* ignore render issues */ }
-
-    let ops: any;
-    try { ops = await page.getOperatorList(); } catch { continue; }
-    const names = new Set<string>();
-    for (let i = 0; i < ops.fnArray.length; i++) {
-      const fn = ops.fnArray[i];
-      if (fn === OPS.paintImageXObject || fn === OPS.paintImageXObjectRepeat || fn === OPS.paintJpegXObject) {
-        const a = ops.argsArray[i]?.[0];
-        if (typeof a === "string") names.add(a);
-      }
-    }
-    for (const name of names) {
-      try {
-        const img: any = await new Promise((res) => { try { page.objs.get(name, res); } catch { res(null); } });
-        const w = img?.width, h = img?.height;
-        if (!w || !h || w < 250 || h < 250) continue; // skip logos/icons
-        const c = document.createElement("canvas");
-        c.width = w; c.height = h;
-        const ctx = c.getContext("2d");
-        if (!ctx) continue;
-        if (img.bitmap) {
-          ctx.drawImage(img.bitmap, 0, 0);
-        } else if (img.data) {
-          const out = ctx.createImageData(w, h);
-          const src = img.data as Uint8ClampedArray;
-          const ch = src.length / (w * h);
-          if (ch === 4) out.data.set(src);
-          else if (ch === 3) for (let i = 0, j = 0; i < src.length; i += 3, j += 4) { out.data[j] = src[i]; out.data[j + 1] = src[i + 1]; out.data[j + 2] = src[i + 2]; out.data[j + 3] = 255; }
-          else if (ch === 1) for (let i = 0, j = 0; i < src.length; i++, j += 4) { out.data[j] = out.data[j + 1] = out.data[j + 2] = src[i]; out.data[j + 3] = 255; }
-          else continue;
-          ctx.putImageData(out, 0, 0);
-        } else continue;
-        candidates.push({ area: w * h, canvas: c });
-      } catch { /* object not resolved */ }
-    }
-  }
-
-  candidates.sort((a, b) => b.area - a.area);
+// Render the PDF pages to images (pdf.js's most reliable path). Reliable beats
+// clever: this never hangs, and brochure pages are mostly the property renders.
+async function extractPdfImages(doc: any, baseName: string, want = 5): Promise<File[]> {
   const stem = baseName.replace(/\.pdf$/i, "");
   const out: File[] = [];
-  for (let i = 0; i < candidates.length && out.length < want; i++) {
-    const f = await canvasToFile(candidates[i].canvas, `${stem}-img-${i + 1}.jpg`);
-    if (f) out.push(f);
-  }
-
-  // Fallback: not enough embedded images → render whole pages to top up.
-  if (out.length < want) {
-    for (let p = 1; p <= doc.numPages && out.length < want; p++) {
-      try {
-        const page = await doc.getPage(p);
-        const vp = page.getViewport({ scale: 1.6 });
-        const c = document.createElement("canvas");
-        c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
-        const ctx = c.getContext("2d");
-        if (!ctx) continue;
-        await page.render({ canvasContext: ctx, viewport: vp, canvas: c }).promise;
-        const f = await canvasToFile(c, `${stem}-page-${p}.jpg`);
-        if (f) out.push(f);
-      } catch { /* ignore */ }
-    }
+  const pages = Math.min(doc.numPages, want);
+  for (let p = 1; p <= pages; p++) {
+    try {
+      const page: any = await withTimeout(doc.getPage(p), 8000, "getPage");
+      const vp = page.getViewport({ scale: 2 });
+      const c = document.createElement("canvas");
+      c.width = Math.ceil(vp.width);
+      c.height = Math.ceil(vp.height);
+      const ctx = c.getContext("2d");
+      if (!ctx) continue;
+      await withTimeout(page.render({ canvasContext: ctx, viewport: vp, canvas: c }).promise, 12000, "render");
+      const f = await canvasToFile(c, `${stem}-page-${p}.jpg`);
+      if (f) out.push(f);
+    } catch { /* skip this page */ }
   }
   return out;
 }
 
-// Browser-side PDF processing with pdf.js: text layer (supplement) + 5 images.
+// Browser-side PDF processing with pdf.js: text layer (supplement) + page images.
 async function extractPdfClient(file: File): Promise<{ text: string; images: File[] }> {
   const pdfjs = await loadPdfjs();
   const data = new Uint8Array(await file.arrayBuffer());
-  const doc = await pdfjs.getDocument({ data }).promise;
+  const doc: any = await withTimeout(pdfjs.getDocument({ data }).promise, 15000, "getDocument");
 
   let text = "";
   const textPages = Math.min(doc.numPages, 20);
   for (let p = 1; p <= textPages; p++) {
-    const page = await doc.getPage(p);
-    const content = await page.getTextContent();
-    text += content.items.map((it: any) => (typeof it?.str === "string" ? it.str : "")).join(" ") + "\n";
+    try {
+      const page: any = await withTimeout(doc.getPage(p), 8000, "getPage");
+      const content: any = await withTimeout(page.getTextContent(), 8000, "getTextContent");
+      text += content.items.map((it: any) => (typeof it?.str === "string" ? it.str : "")).join(" ") + "\n";
+    } catch { /* skip page text */ }
   }
 
   let images: File[] = [];
-  try { images = await extractPdfImages(pdfjs, doc, file.name, 5); } catch { images = []; }
+  try { images = await extractPdfImages(doc, file.name, 5); } catch { images = []; }
   return { text, images };
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
