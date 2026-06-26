@@ -24,7 +24,7 @@ import { unzipSync, strFromU8 } from "npm:fflate@0.8.2";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
-const VERSION = "v6-claude-2026-06-26";
+const VERSION = "v7-claude-2026-06-26";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,9 +39,13 @@ const json = (b: unknown, status = 200) =>
 const BUCKET = "property-media";
 const MODEL = "claude-opus-4-8";
 const MIN_IMAGES = 5;
-const MAX_VISION_IMAGES = 4;             // keep the Claude request bounded (avoid 504)
-const MAX_IMAGE_BYTES = 3.5 * 1024 * 1024;
-const MAX_PDF_BYTES = 30 * 1024 * 1024;  // Claude PDF hard limit ~32MB / 100 pages
+// Anthropic enforces a 32 MB TOTAL request cap (raw bytes after base64). Base64
+// inflates payloads ~33%, so the sum of (pdf + images) raw bytes must stay well
+// under 24 MB to avoid 413 "request_too_large".
+const MAX_VISION_IMAGES = 3;             // keep the Claude request bounded (avoid 504/413)
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const MAX_PDF_BYTES = 18 * 1024 * 1024;  // ~24 MB after base64 — safely under Claude's 32 MB cap
+const MAX_TOTAL_RAW_BYTES = 22 * 1024 * 1024; // hard ceiling for pdf+images combined (raw)
 const CLAUDE_TIMEOUT_MS = 110000;        // abort before the gateway 504s
 
 interface UploadFile { storage_path: string; name: string; mime: string; kind?: string; size?: number }
@@ -197,6 +201,7 @@ Deno.serve(async (req) => {
     let videoUrl = "";
     let imgIndex = 0;
     let hasPdf = false;
+    let totalRawBytes = 0;                  // running total of bytes sent to Claude
 
     if (pastedText) textBlocks.push(`--- Admin notes ---\n${pastedText}`);
     for (const t of extractedTexts) { const s = String(t || "").trim(); if (s) textBlocks.push(s.slice(0, 16000)); }
@@ -232,14 +237,16 @@ Deno.serve(async (req) => {
           const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(f.storage_path);
           pendingMedia.push({ media_type: "brochure", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 300, compression_status: "done" });
           const sz = Number(f.size) || 0;
-          if (sz > 0 && sz <= MAX_PDF_BYTES) {
+          if (sz > 0 && sz <= MAX_PDF_BYTES && totalRawBytes + sz <= MAX_TOTAL_RAW_BYTES) {
             const { data: pblob } = await supabaseAdmin.storage.from(BUCKET).download(f.storage_path);
             if (pblob) {
-              contentBlocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: toBase64(new Uint8Array(await pblob.arrayBuffer())) }, title: f.name });
+              const pbytes = new Uint8Array(await pblob.arrayBuffer());
+              contentBlocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: toBase64(pbytes) }, title: f.name });
+              totalRawBytes += pbytes.length;
               hasPdf = true;
             }
           } else {
-            warnings.push(`"${f.name}" is too large/long for direct AI reading — extracting from its text and page images instead.`);
+            warnings.push(`"${f.name}" is too large for direct AI reading — extracting from its text and page images instead.`);
           }
           continue;
         }
@@ -258,8 +265,9 @@ Deno.serve(async (req) => {
           });
           // Vision only if no PDF (PDFs already carry their images), under the cap,
           // and small enough — keeps the Claude request bounded → avoids 504.
-          if (imageBlocks.length < MAX_VISION_IMAGES && bytes.length <= MAX_IMAGE_BYTES) {
+          if (imageBlocks.length < MAX_VISION_IMAGES && bytes.length <= MAX_IMAGE_BYTES && totalRawBytes + bytes.length <= MAX_TOTAL_RAW_BYTES) {
             imageBlocks.push({ type: "image", source: { type: "base64", media_type: imageMime(f.name, f.mime), data: toBase64(bytes) } });
+            totalRawBytes += bytes.length;
           }
           imgIndex++;
         } else if (f.kind === "docx") {
@@ -299,7 +307,7 @@ Deno.serve(async (req) => {
     let r = await callClaude(contentBlocks);
     // If the document/image request failed (too large/long → 400, or slow → timeout),
     // retry with extracted text only so we still return a usable draft.
-    if (!r.ok && (r.status === 400 || r.err === "timeout") && (hasPdf || imageBlocks.length > 0)) {
+    if (!r.ok && (r.status === 400 || r.status === 413 || r.err === "timeout") && (hasPdf || imageBlocks.length > 0)) {
       warnings.push(r.err === "timeout" ? "Direct read timed out — retried with extracted text." : "Direct read failed — retried with extracted text.");
       r = await callClaude([{ type: "text", text: promptText }]);
     }
