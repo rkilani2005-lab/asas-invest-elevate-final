@@ -342,6 +342,9 @@ export default function ImporterChat() {
           {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <SendHorizontal className="w-5 h-5" />}
         </Button>
       </div>
+      <p className="text-xs text-muted-foreground mt-2 text-center">
+        Up to <strong>200&nbsp;MB</strong> per file. PDFs are read in full up to <strong>~100 pages / 30&nbsp;MB</strong> — larger PDFs are summarised from their text and first pages.
+      </p>
     </div>
   );
 }
@@ -370,30 +373,95 @@ function withTimeout<T>(p: Promise<T>, ms: number, label = "op"): Promise<T> {
   ]);
 }
 
-// Render the PDF pages to images (pdf.js's most reliable path). Reliable beats
-// clever: this never hangs, and brochure pages are mostly the property renders.
-async function extractPdfImages(doc: any, baseName: string, want = 5): Promise<File[]> {
+// Pull the actual EMBEDDED photos out of a PDF — clean images with no text
+// overlay — instead of screenshotting whole pages. We render each page at low
+// scale first (that resolves the image XObjects into page.objs), then read each
+// image with the SYNCHRONOUS page.objs.get (the callback form could hang). Falls
+// back to page renders only if the PDF has no usable embedded images.
+async function extractPdfImages(pdfjs: any, doc: any, baseName: string, want = 5): Promise<File[]> {
+  const OPS = pdfjs.OPS;
   const stem = baseName.replace(/\.pdf$/i, "");
-  const out: File[] = [];
-  const pages = Math.min(doc.numPages, want);
-  for (let p = 1; p <= pages; p++) {
+  const candidates: { area: number; canvas: HTMLCanvasElement }[] = [];
+  const scanPages = Math.min(doc.numPages, 15);
+
+  for (let p = 1; p <= scanPages && candidates.length < 10; p++) {
+    let page: any;
+    try { page = await withTimeout(doc.getPage(p), 8000, "getPage"); } catch { continue; }
+    // Render at low scale to resolve image objects into page.objs.
     try {
-      const page: any = await withTimeout(doc.getPage(p), 8000, "getPage");
-      const vp = page.getViewport({ scale: 1.5 });
-      const c = document.createElement("canvas");
-      c.width = Math.ceil(vp.width);
-      c.height = Math.ceil(vp.height);
-      const ctx = c.getContext("2d");
-      if (!ctx) continue;
-      await withTimeout(page.render({ canvasContext: ctx, viewport: vp, canvas: c }).promise, 12000, "render");
-      const f = await canvasToFile(c, `${stem}-page-${p}.jpg`);
-      if (f) out.push(f);
-    } catch { /* skip this page */ }
+      const vp = page.getViewport({ scale: 1 });
+      const rc = document.createElement("canvas");
+      rc.width = Math.ceil(vp.width); rc.height = Math.ceil(vp.height);
+      const rctx = rc.getContext("2d");
+      if (rctx) await withTimeout(page.render({ canvasContext: rctx, viewport: vp, canvas: rc }).promise, 12000, "render");
+    } catch { /* objs may still be available */ }
+
+    let ops: any;
+    try { ops = await withTimeout(page.getOperatorList(), 8000, "ops"); } catch { continue; }
+    const names = new Set<string>();
+    for (let i = 0; i < ops.fnArray.length; i++) {
+      const fn = ops.fnArray[i];
+      if (fn === OPS.paintImageXObject || fn === OPS.paintImageXObjectRepeat) {
+        const a = ops.argsArray[i]?.[0];
+        if (typeof a === "string") names.add(a);
+      }
+    }
+    for (const name of names) {
+      if (candidates.length >= 10) break;
+      let img: any;
+      try { img = page.objs.get(name); } catch { continue; } // sync — throws if unresolved
+      const w = img?.width, h = img?.height;
+      if (!w || !h || w < 300 || h < 300) continue; // skip logos / icons / thumbnails
+      try {
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d");
+        if (!ctx) continue;
+        if (img.bitmap) {
+          ctx.drawImage(img.bitmap, 0, 0);
+        } else if (img.data) {
+          const od = ctx.createImageData(w, h);
+          const src = img.data as Uint8ClampedArray;
+          const ch = src.length / (w * h);
+          if (ch === 4) od.data.set(src);
+          else if (ch === 3) for (let i = 0, j = 0; i < src.length; i += 3, j += 4) { od.data[j] = src[i]; od.data[j + 1] = src[i + 1]; od.data[j + 2] = src[i + 2]; od.data[j + 3] = 255; }
+          else if (ch === 1) for (let i = 0, j = 0; i < src.length; i++, j += 4) { od.data[j] = od.data[j + 1] = od.data[j + 2] = src[i]; od.data[j + 3] = 255; }
+          else continue;
+          ctx.putImageData(od, 0, 0);
+        } else continue;
+        candidates.push({ area: w * h, canvas: c });
+      } catch { /* skip this image */ }
+    }
+  }
+
+  candidates.sort((a, b) => b.area - a.area); // biggest (hero) photos first
+  const out: File[] = [];
+  for (let i = 0; i < candidates.length && out.length < want; i++) {
+    const f = await canvasToFile(candidates[i].canvas, `${stem}-photo-${i + 1}.jpg`);
+    if (f) out.push(f);
+  }
+
+  // Last resort: no clean embedded images found → render the first pages.
+  if (out.length === 0) {
+    const n = Math.min(doc.numPages, want);
+    for (let p = 1; p <= n; p++) {
+      try {
+        const page: any = await withTimeout(doc.getPage(p), 8000, "getPage");
+        const vp = page.getViewport({ scale: 1.5 });
+        const c = document.createElement("canvas");
+        c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+        const ctx = c.getContext("2d");
+        if (!ctx) continue;
+        await withTimeout(page.render({ canvasContext: ctx, viewport: vp, canvas: c }).promise, 12000, "render");
+        const f = await canvasToFile(c, `${stem}-page-${p}.jpg`);
+        if (f) out.push(f);
+      } catch { /* skip */ }
+    }
   }
   return out;
 }
 
-// Browser-side PDF processing with pdf.js: text layer (supplement) + page images.
+// Browser-side PDF processing with pdf.js: text layer (supplement) + clean images.
 async function extractPdfClient(file: File): Promise<{ text: string; images: File[] }> {
   const pdfjs = await loadPdfjs();
   const data = new Uint8Array(await file.arrayBuffer());
@@ -410,7 +478,7 @@ async function extractPdfClient(file: File): Promise<{ text: string; images: Fil
   }
 
   let images: File[] = [];
-  try { images = await extractPdfImages(doc, file.name, 5); } catch { images = []; }
+  try { images = await extractPdfImages(pdfjs, doc, file.name, 5); } catch { images = []; }
   return { text, images };
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
