@@ -78,7 +78,7 @@ const PropertyPaymentPlan = ({ property }: PropertyPaymentPlanProps) => {
               <div
                 key={milestone.id}
                 className="absolute transform -translate-x-1/2"
-                style={{ left: `${milestone.cumulative}%` }}
+                style={{ insetInlineStart: `${milestone.cumulative}%` }}
               >
                 <motion.div
                   initial={{ scale: 0 }}

@@ -24,7 +24,7 @@ import { unzipSync, strFromU8 } from "npm:fflate@0.8.2";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
-const VERSION = "v7-claude-2026-06-26";
+const VERSION = "v8-claude-2026-06-26";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -235,7 +235,15 @@ Deno.serve(async (req) => {
           // the PDF is small enough for Claude to read directly (its hard limit is
           // ~32MB / 100 pages) — otherwise we'd burn time/memory and risk a 504.
           const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(f.storage_path);
-          pendingMedia.push({ media_type: "brochure", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 300, compression_status: "done" });
+          // Route the PDF to the right section by filename: floor plate, floor plan,
+          // else brochure → so it's downloadable in Floor Plans / Brochures.
+          const pdfLower = f.name.toLowerCase();
+          const pdfType = /floor[\s_-]*plate|floor[\s_-]*palette|\bplate\b|\bpalette\b/.test(pdfLower)
+            ? "floor_plate"
+            : /floor[\s_-]*plan|unit[\s_-]*plan|\blayout\b|floorplan/.test(pdfLower)
+            ? "floorplan"
+            : "brochure";
+          pendingMedia.push({ media_type: pdfType, original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: pdfType === "brochure" ? 300 : pdfType === "floorplan" ? 120 : 130, compression_status: "done" });
           const sz = Number(f.size) || 0;
           if (sz > 0 && sz <= MAX_PDF_BYTES && totalRawBytes + sz <= MAX_TOTAL_RAW_BYTES) {
             const { data: pblob } = await supabaseAdmin.storage.from(BUCKET).download(f.storage_path);

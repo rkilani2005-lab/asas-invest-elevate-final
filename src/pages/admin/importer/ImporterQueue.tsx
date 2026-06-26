@@ -811,7 +811,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
 
       // ── 2. Prepare media list ────────────────────────────────────────────
       // Include images (all detected categories) and videos for upload
-      const UPLOADABLE_TYPES = ["image","hero","exterior","interior","floorplan","amenity","render","view","video"];
+      const UPLOADABLE_TYPES = ["image","hero","exterior","interior","floorplan","floor_plate","amenity","render","view","video","brochure"];
       const mediaToUpload = (media || []).filter(
         (m: any) => UPLOADABLE_TYPES.includes(m.media_type)
       );

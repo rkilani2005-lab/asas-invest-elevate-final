@@ -81,7 +81,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
 
             {nearbyData.length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-accent text-xs font-medium tracking-widest uppercase mb-4">Nearby Attractions</h3>
+                <h3 className="text-accent text-xs font-medium tracking-widest uppercase mb-4">{language === "ar" ? "أماكن قريبة" : "Nearby Attractions"}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {nearbyData.map((place, index) => {
                     const Icon = getIcon(place.type);
@@ -116,8 +116,10 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
 
             {nearbyData.length === 0 && (
               <div className="border border-border p-6">
-                <p className="text-muted-foreground">
-                  Located in {location}, this property offers excellent connectivity to Dubai's key landmarks and amenities.
+                <p className={cn("text-muted-foreground", isRTL && "text-end")}>
+                  {language === "ar"
+                    ? `يقع هذا العقار في ${location}، ويوفّر اتصالاً ممتازاً بأبرز معالم دبي ومرافقها وخدماتها.`
+                    : `Located in ${location}, this property offers excellent connectivity to Dubai's key landmarks and amenities.`}
                 </p>
               </div>
             )}
