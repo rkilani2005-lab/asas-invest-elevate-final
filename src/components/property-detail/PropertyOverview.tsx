@@ -3,7 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
 import { AutoTranslatedChip } from "@/components/ui/AutoTranslatedChip";
-import { localizeUnitTypes } from "@/lib/unit-types";
+import { localizeUnitTypes, localizeOwnership } from "@/lib/unit-types";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyOverviewProps {
@@ -39,7 +39,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
     { icon: Building2, label: t("property.unitTypes"), value: localizeUnitTypes(property.unit_types as string[] | null, language) },
     { icon: Maximize2, label: t("property.sizeRange"), value: property.size_range },
     { icon: Calendar, label: t("property.handover"), value: property.handover_date ? new Date(property.handover_date).toLocaleDateString() : null },
-    { icon: Key, label: t("property.ownership"), value: property.ownership_type },
+    { icon: Key, label: t("property.ownership"), value: localizeOwnership(property.ownership_type, language) },
     { icon: Car, label: t("property.parking"), value: property.parking },
   ].filter(spec => spec.value);
 
@@ -101,13 +101,17 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
           <div className="lg:col-span-1">
             <div className="bg-white border border-accent/30 p-6 sticky top-40 shadow-card">
               <h3 className={cn("text-accent text-xs font-medium tracking-widest uppercase mb-6", isRTL && "text-end")}>
-                Property Details
+                {language === "ar" ? "تفاصيل العقار" : "Property Details"}
               </h3>
               
               {property.price_range && (
                 <div className={cn("pb-4 mb-4 border-b border-border", isRTL && "text-end")}>
                   <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">{t("property.price")}</p>
-                  <p className="heading-section text-2xl text-foreground">{property.price_range}</p>
+                  <p className="heading-section text-2xl text-foreground">
+                    {language === "ar"
+                      ? property.price_range.replace(/^\s*from\s+/i, "ابتداءً من ").replace(/\bto\b/i, "إلى")
+                      : property.price_range}
+                  </p>
                 </div>
               )}
 

@@ -4,6 +4,10 @@
 
 const WORD_MAP_AR: Record<string, string> = {
   "signature collection": "مجموعة سيجنتشر",
+  "town home": "تاون هوم",
+  "town house": "تاون هاوس",
+  townhomes: "تاون هوم",
+  townhome: "تاون هوم",
   townhouses: "تاون هاوس",
   townhouse: "تاون هاوس",
   apartments: "شقق",
@@ -34,4 +38,14 @@ export function localizeUnitTypes(types: string[] | null | undefined, lang: stri
   const list = (types || []).map((t) => String(t).trim()).filter(Boolean);
   if (lang !== "ar") return list.join(", ");
   return list.map(localizeToken).join("، "); // Arabic comma separator
+}
+
+// Ownership type (Freehold / Leasehold) → Arabic.
+export function localizeOwnership(value: string | null | undefined, lang: string): string {
+  const v = (value || "").trim();
+  if (!v || lang !== "ar") return v;
+  const low = v.toLowerCase();
+  if (low.includes("freehold")) return "تملك حر";
+  if (low.includes("leasehold")) return "حق انتفاع";
+  return v;
 }
