@@ -6,6 +6,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function escapeHtml(s: unknown): string {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 interface EmailParams {
   submission_id: string;
   form_type: string;
@@ -375,6 +385,43 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Allowed callers:
+    //   1. Internal edge functions presenting the service-role key.
+    //   2. Authenticated admin users (admin role via user_roles).
+    // Anyone else is rejected to prevent Gmail abuse / spoofing.
+    const authHeader = req.headers.get("Authorization") || "";
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+    const isService = !!serviceKey && authHeader === `Bearer ${serviceKey}`;
+
+    if (!isService) {
+      if (!authHeader.startsWith("Bearer ")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const anonClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: claimsData } = await anonClient.auth.getClaims(authHeader.replace("Bearer ", ""));
+      if (!claimsData?.claims) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const adminCheck = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+      const { data: roleRow } = await (adminCheck as any).from("user_roles").select("role").eq("user_id", claimsData.claims.sub).eq("role", "admin").maybeSingle();
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -401,21 +448,23 @@ Deno.serve(async (req) => {
     } = params;
 
     const propertyUrl = property_slug
-      ? `https://asasinvest.com/property/${property_slug}`
+      ? `https://asasinvest.com/property/${encodeURIComponent(property_slug)}`
       : "https://asasinvest.com/buy";
 
+    // HTML-escape every value before it gets interpolated into email templates
+    // to prevent HTML injection from user-submitted form fields.
     const vars: Record<string, string> = {
-      visitor_name,
-      visitor_email,
-      visitor_phone,
-      visitor_message,
-      property_name,
+      visitor_name: escapeHtml(visitor_name),
+      visitor_email: escapeHtml(visitor_email),
+      visitor_phone: escapeHtml(visitor_phone),
+      visitor_message: escapeHtml(visitor_message),
+      property_name: escapeHtml(property_name),
       property_url: propertyUrl,
-      viewing_date,
-      viewing_time,
-      callback_time,
-      budget_range,
-      unit_type_interest,
+      viewing_date: escapeHtml(viewing_date),
+      viewing_time: escapeHtml(viewing_time),
+      callback_time: escapeHtml(callback_time),
+      budget_range: escapeHtml(budget_range),
+      unit_type_interest: escapeHtml(unit_type_interest),
     };
 
     const GOOGLE_CLIENT_ID = Deno.env.get("GMAIL_CLIENT_ID") || Deno.env.get("GOOGLE_CLIENT_ID");

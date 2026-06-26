@@ -41,6 +41,14 @@ Deno.serve(async (req) => {
     });
   }
 
+  const { data: roleRow } = await (supabase as any).from("user_roles").select("role").eq("user_id", claimsData.claims.sub).eq("role", "admin").maybeSingle();
+  if (!roleRow) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
   const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
   const REDIRECT_URI = `${Deno.env.get("SUPABASE_URL")}/functions/v1/gdrive-oauth-callback`;

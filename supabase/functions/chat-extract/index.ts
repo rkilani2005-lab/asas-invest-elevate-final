@@ -169,6 +169,9 @@ Deno.serve(async (req) => {
     const { data: claimsData } = await supabase.auth.getClaims(authHeader.replace("Bearer ", ""));
     if (!claimsData?.claims) return json({ error: "Unauthorized" }, 401);
 
+    const { data: roleRow } = await (supabaseAdmin as any).from("user_roles").select("role").eq("user_id", claimsData.claims.sub).eq("role", "admin").maybeSingle();
+    if (!roleRow) return json({ error: "Forbidden" }, 403);
+
     const body = await req.json();
     const propertyHint = String(body.property_hint || "").trim();
     const pastedText = String(body.text || "").trim();
