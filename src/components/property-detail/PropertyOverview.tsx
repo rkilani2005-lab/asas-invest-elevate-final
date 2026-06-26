@@ -81,12 +81,14 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
 
             {highlights.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-accent text-xs font-medium tracking-widest uppercase mb-4">Key Highlights</h3>
-                <ul className={cn("grid grid-cols-1 md:grid-cols-2 gap-3", isRTL && "text-end")}>
+                <h3 className={cn("text-accent text-xs font-medium tracking-widest uppercase mb-4", isRTL && "text-end")}>
+                  {language === "ar" ? "أبرز المميزات" : "Key Highlights"}
+                </h3>
+                <ul dir={isRTL ? "rtl" : "ltr"} className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {highlights.map((highlight, index) => (
-                    <li key={index} className={cn("flex items-center text-muted-foreground")}>
-                      <div className={cn("w-1.5 h-1.5 bg-accent flex-shrink-0", isRTL ? "ms-3" : "me-3")} />
-                      {highlight}
+                    <li key={index} className="flex items-start text-muted-foreground">
+                      <div className="w-1.5 h-1.5 bg-accent flex-shrink-0 mt-2 me-3" />
+                      <span>{highlight}</span>
                     </li>
                   ))}
                 </ul>
