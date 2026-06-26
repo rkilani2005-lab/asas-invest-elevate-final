@@ -199,19 +199,31 @@ Deno.serve(async (req) => {
       if (amenities.length > 0) {
         // Delete existing amenities for this property
         await supabaseService.from("amenities").delete().eq("property_id", propertyId);
-        const amenitiesToInsert = amenities.map((a: any) => ({
-          property_id: propertyId,
-          name_en: a.name_en || a.name || "Amenity",
-          name_ar: a.name_ar || null,
-          icon: a.icon || "Star",
-          category: a.category || "General",
-        }));
-        await supabaseService.from("amenities").insert(amenitiesToInsert);
-        await supabase.from("import_logs").insert({
-          job_id, action: "amenities_saved",
-          details: `Saved ${amenitiesToInsert.length} amenities`,
-          level: "success",
-        });
+        // _amenities is usually an array of plain strings (e.g. "Swimming Pool"),
+        // but can be objects {name_en,...}. Handle both; drop blanks. (Previously
+        // every entry fell back to the literal "Amenity" because strings have no
+        // .name_en / .name property.)
+        const amenitiesToInsert = amenities
+          .map((a: any) => {
+            const name = (typeof a === "string" ? a : (a?.name_en || a?.name || "")).toString().trim();
+            if (!name) return null;
+            return {
+              property_id: propertyId,
+              name_en: name,
+              name_ar: (a && typeof a === "object" && a.name_ar) ? a.name_ar : null,
+              icon: (a && typeof a === "object" && a.icon) ? a.icon : "Star",
+              category: (a && typeof a === "object" && a.category) ? a.category : "General",
+            };
+          })
+          .filter(Boolean);
+        if (amenitiesToInsert.length > 0) {
+          await supabaseService.from("amenities").insert(amenitiesToInsert);
+          await supabase.from("import_logs").insert({
+            job_id, action: "amenities_saved",
+            details: `Saved ${amenitiesToInsert.length} amenities`,
+            level: "success",
+          });
+        }
       }
 
       // Update job with CMS property ID
