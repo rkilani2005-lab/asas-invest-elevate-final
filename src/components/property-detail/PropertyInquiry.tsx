@@ -146,14 +146,14 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
           "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
         )}>
           {/* Left - Info */}
-          <div className={cn(isRTL && "text-right lg:order-2")}>
-            <p className="text-accent text-xs font-medium tracking-widest uppercase mb-4">
+          <div className="text-start">
+            <p className="text-accent text-xs font-medium tracking-widest uppercase mb-4 text-start">
               {t("sections.inquire")}
             </p>
-            <h2 className="font-serif text-3xl md:text-4xl font-medium text-accent mb-6">
+            <h2 className="font-serif text-3xl md:text-4xl font-medium text-accent mb-6 text-start">
               {t("inquire.interestedIn", { property: propertyName })}
             </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8 text-start">
               {t("inquire.intro")}
             </p>
 
