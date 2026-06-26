@@ -28,6 +28,7 @@ import {
   RotateCcw,
   ScanSearch,
   Trash2,
+  Plus,
   Zap,
   Bell,
   X,
@@ -659,6 +660,53 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     onRefresh();
   };
 
+  // ── Media review: remove / add before publishing ───────────────────────────
+  const addMediaRef = useRef<HTMLInputElement>(null);
+  const [addingMedia, setAddingMedia] = useState(false);
+
+  const handleRemoveMedia = async (mediaId: string) => {
+    await supabase.from("import_media").delete().eq("id", mediaId);
+    toast.success("Removed");
+    refetchMedia();
+    onRefresh();
+  };
+
+  const handleAddMedia = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setAddingMedia(true);
+    try {
+      let order = ((media as any[])?.length || 0) + 10;
+      for (const file of Array.from(files)) {
+        if (file.size > 200 * 1024 * 1024) { toast.error(`${file.name} is over 200 MB — skipped`); continue; }
+        const isVid = file.type.startsWith("video/");
+        const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `imports/${job.id}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${safe}`;
+        const { error } = await supabase.storage.from("property-media").upload(path, file, {
+          contentType: file.type || "application/octet-stream", upsert: true,
+        });
+        if (error) { toast.error(`Upload failed: ${file.name}`); continue; }
+        const { data: pub } = supabase.storage.from("property-media").getPublicUrl(path);
+        await supabase.from("import_media").insert({
+          job_id: job.id,
+          media_type: isVid ? "video" : "render",
+          original_filename: file.name,
+          storage_url: pub.publicUrl,
+          dropbox_path: path,
+          is_hero: false,
+          sort_order: order++,
+          compression_status: "done",
+          original_size_bytes: file.size,
+        });
+      }
+      toast.success("Media added");
+      refetchMedia();
+      onRefresh();
+    } finally {
+      setAddingMedia(false);
+      if (addMediaRef.current) addMediaRef.current.value = "";
+    }
+  };
+
   // ── Edit helpers ──────────────────────────────────────────────────────────
   const startEditing = () => {
     setForm({
@@ -1029,7 +1077,12 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     );
   };
 
-  const imageMedia = (media || []).filter((m: any) => m.media_type === "image");
+  const isPdfItem = (m: any) =>
+    ((m.original_filename || "").toLowerCase().endsWith(".pdf")) ||
+    ((m.storage_url || "").toLowerCase().includes(".pdf"));
+  const IMG_MEDIA_TYPES = ["image", "hero", "render", "floorplan", "interior", "exterior", "amenity", "view", "location", "material", "other"];
+  const imageMedia = (media || []).filter((m: any) => IMG_MEDIA_TYPES.includes(m.media_type) && !isPdfItem(m));
+  const docMedia = (media || []).filter((m: any) => isPdfItem(m) || m.media_type === "brochure" || m.media_type === "floor_plate");
   const videos = (media || []).filter((m: any) => m.media_type === "video");
 
   // ── Extraction step stepper ─────────────────────────────────────────────
@@ -1419,92 +1472,115 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
               {/* ── Media tab ──────────────────────────────────────────── */}
               <TabsContent value="media" className="p-4">
                 <div className="space-y-4">
+                  {/* Add media (review-time) */}
+                  {job.import_status === "reviewing" && (
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <p className="text-xs text-muted-foreground">
+                        Review the extracted media — remove any you don't want, or add your own before publishing.
+                      </p>
+                      <input
+                        ref={addMediaRef} type="file" multiple hidden
+                        accept="image/*,video/*"
+                        onChange={(e) => handleAddMedia(e.target.files)}
+                      />
+                      <Button size="sm" variant="outline" disabled={addingMedia} onClick={() => addMediaRef.current?.click()}>
+                        {addingMedia ? <Loader2 className="w-3 h-3 me-1 animate-spin" /> : <Plus className="w-3 h-3 me-1" />}
+                        Add media
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Images — thumbnails with remove */}
                   {imageMedia.length > 0 && (
                     <div>
                       <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                         <Image className="w-3 h-3" /> Images ({imageMedia.length})
-                        <span className="ms-2 text-[10px] bg-purple-500/10 text-purple-600 px-1.5 py-0.5 rounded">
-                          client-compressed → ≤600 KB
-                        </span>
                       </h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {imageMedia.map((img: any) => {
-                          const fp = fileProgress.find(
-                            (f) => f.filename === img.original_filename
-                          );
-                          return (
-                            <div
-                              key={img.id}
-                              className={`rounded-lg border p-2 text-xs ${
-                                img.is_hero ? "border-primary" : ""
-                              } ${fp?.phase === "done" ? "border-green-500/50 bg-green-500/5" : ""}`}
-                            >
-                              <div className="truncate font-medium">
-                                {img.original_filename}
+                      <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+                        {imageMedia.map((img: any) => (
+                          <div
+                            key={img.id}
+                            className={`group relative aspect-square rounded-lg overflow-hidden border ${img.is_hero ? "border-primary" : "border-border"}`}
+                          >
+                            {img.storage_url ? (
+                              <img src={img.storage_url} alt={img.original_filename} loading="lazy" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-muted">
+                                <Image className="w-5 h-5 text-muted-foreground" />
                               </div>
-                              <div className="text-muted-foreground mt-0.5 flex items-center gap-1 flex-wrap">
-                                <span>
-                                  {img.original_size_bytes
-                                    ? formatFileSize(img.original_size_bytes)
-                                    : "—"}
-                                </span>
-                                {fp?.phase === "done" && fp.compressedSize !== undefined && (
-                                  <>
-                                    <span className="text-muted-foreground">→</span>
-                                    <span className="text-green-600 font-medium">
-                                      {formatFileSize(fp.compressedSize)}
-                                    </span>
-                                    {fp.savedPct !== undefined && fp.savedPct > 0 && (
-                                      <span className="text-muted-foreground">−{fp.savedPct}%</span>
-                                    )}
-                                  </>
-                                )}
-                                {img.is_hero && (
-                                  <Badge className="text-[10px] px-1 py-0">Hero</Badge>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
+                            )}
+                            {img.is_hero && <Badge className="absolute top-1 start-1 text-[9px] px-1 py-0">Hero</Badge>}
+                            {job.import_status === "reviewing" && (
+                              <button
+                                onClick={() => handleRemoveMedia(img.id)}
+                                title="Remove image"
+                                className="absolute top-1 end-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
 
+                  {/* Documents — brochure / floor plan / plate PDFs */}
+                  {docMedia.length > 0 && (
+                    <div>
+                      <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                        <FileText className="w-3 h-3" /> Documents ({docMedia.length})
+                      </h4>
+                      <div className="space-y-1">
+                        {docMedia.map((d: any) => (
+                          <div key={d.id} className="flex items-center gap-2 text-xs border rounded-lg p-2">
+                            <FileText className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                            <a href={d.storage_url} target="_blank" rel="noopener noreferrer" className="flex-1 truncate hover:underline">{d.original_filename}</a>
+                            <Badge variant="secondary" className="text-[10px]">
+                              {d.media_type === "floor_plate" ? "Floor Plate" : d.media_type === "floorplan" ? "Floor Plan" : "Brochure"}
+                            </Badge>
+                            {job.import_status === "reviewing" && (
+                              <button onClick={() => handleRemoveMedia(d.id)} title="Remove" className="text-muted-foreground hover:text-destructive">
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Videos */}
                   {videos.length > 0 && (
                     <div>
                       <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                         <Video className="w-3 h-3" /> Videos ({videos.length})
                       </h4>
-                      {videos.map((vid: any) => (
-                        <div
-                          key={vid.id}
-                          className="flex items-center gap-2 text-xs border rounded-lg p-2"
-                        >
-                          <Video className="w-3 h-3 text-muted-foreground" />
-                          <span className="flex-1 truncate">{vid.original_filename}</span>
-                          <span className="text-muted-foreground">
-                            {vid.original_size_bytes
-                              ? `${(vid.original_size_bytes / 1024 / 1024).toFixed(1)} MB`
-                              : "—"}
-                          </span>
-                          {(vid.original_size_bytes || 0) > MAX_VIDEO_BYTES ? (
-                            <Badge variant="secondary" className="text-[10px] bg-yellow-500/10 text-yellow-600">
-                              Will skip — over 40 MB
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary" className="text-[10px] bg-green-500/10 text-green-600">
-                              Will upload
-                            </Badge>
-                          )}
-                        </div>
-                      ))}
+                      <div className="space-y-1">
+                        {videos.map((vid: any) => (
+                          <div key={vid.id} className="flex items-center gap-2 text-xs border rounded-lg p-2">
+                            <Video className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                            <span className="flex-1 truncate">{vid.original_filename}</span>
+                            <span className="text-muted-foreground">
+                              {vid.original_size_bytes ? `${(vid.original_size_bytes / 1024 / 1024).toFixed(1)} MB` : "—"}
+                            </span>
+                            {(vid.original_size_bytes || 0) > MAX_VIDEO_BYTES && (
+                              <Badge variant="secondary" className="text-[10px] bg-yellow-500/10 text-yellow-600">over 40 MB</Badge>
+                            )}
+                            {job.import_status === "reviewing" && (
+                              <button onClick={() => handleRemoveMedia(vid.id)} title="Remove" className="text-muted-foreground hover:text-destructive">
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
-
                   {!(media || []).length && (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                      No media files detected
+                      No media yet — use "Add media" to attach images or videos.
                     </p>
                   )}
                 </div>
