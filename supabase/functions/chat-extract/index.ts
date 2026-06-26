@@ -201,6 +201,7 @@ Deno.serve(async (req) => {
     let videoUrl = "";
     let imgIndex = 0;
     let hasPdf = false;
+    let totalRawBytes = 0;                  // running total of bytes sent to Claude
 
     if (pastedText) textBlocks.push(`--- Admin notes ---\n${pastedText}`);
     for (const t of extractedTexts) { const s = String(t || "").trim(); if (s) textBlocks.push(s.slice(0, 16000)); }
