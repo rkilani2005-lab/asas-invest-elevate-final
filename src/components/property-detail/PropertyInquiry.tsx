@@ -146,7 +146,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
           "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
         )}>
           {/* Left - Info */}
-          <div className={cn(isRTL && "text-end lg:order-2")}>
+          <div className={cn(isRTL && "text-right lg:order-2")}>
             <p className="text-accent text-xs font-medium tracking-widest uppercase mb-4">
               {t("sections.inquire")}
             </p>
@@ -185,7 +185,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 <div>
                   <label className={cn(
                     "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-end"
+                    isRTL && "text-right"
                   )}>
                     {t("contact.name")} *
                   </label>
@@ -195,7 +195,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     className={cn(
                       "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                      isRTL && "text-end"
+                      isRTL && "text-right"
                     )}
                     placeholder={t("contact.name")}
                   />
@@ -203,7 +203,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                 <div>
                   <label className={cn(
                     "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                    isRTL && "text-end"
+                    isRTL && "text-right"
                   )}>
                     {t("contact.email")} *
                   </label>
@@ -214,7 +214,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     className={cn(
                       "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                      isRTL && "text-end"
+                      isRTL && "text-right"
                     )}
                     placeholder="your@email.com"
                   />
@@ -224,7 +224,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <div>
                 <label className={cn(
                   "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                  isRTL && "text-end"
+                  isRTL && "text-right"
                 )}>
                   {t("contact.phone")}
                 </label>
@@ -234,7 +234,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   className={cn(
                     "bg-white border-accent/30 rounded-none focus:border-accent text-foreground",
-                    isRTL && "text-end"
+                    isRTL && "text-right"
                   )}
                   placeholder="+971 XX XXX XXXX"
                 />
@@ -243,7 +243,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <div>
                 <label className={cn(
                   "block text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider",
-                  isRTL && "text-end"
+                  isRTL && "text-right"
                 )}>
                   {t("contact.interests")}
                 </label>
@@ -271,7 +271,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
               <div>
                 <label className={cn(
                   "block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider",
-                  isRTL && "text-end"
+                  isRTL && "text-right"
                 )}>
                   {t("contact.message")}
                 </label>
@@ -280,7 +280,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   className={cn(
                     "bg-white border-accent/30 rounded-none focus:border-accent resize-none text-foreground",
-                    isRTL && "text-end"
+                    isRTL && "text-right"
                   )}
                   rows={4}
                   placeholder={t("inquire.messagePlaceholder")}

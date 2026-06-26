@@ -88,9 +88,12 @@ const PropertyGallery = ({ property }: PropertyGalleryProps) => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  // Filter gallery media (exclude hero and floorplans)
-  const allMedia = property.media.filter(m => 
-    m.type === "render" || m.type === "interior"
+  // Gallery shows every uploaded image EXCEPT the ones that have their own
+  // section: hero (banner), floor plans/plates, brochures and videos. This way
+  // any image the admin uploads (render, interior, material, etc.) shows here.
+  const NON_GALLERY_TYPES = ["hero", "floorplan", "floor_plate", "brochure", "video"];
+  const allMedia = property.media.filter(
+    m => m.type && !NON_GALLERY_TYPES.includes(m.type)
   );
 
   // Collect videos from media table + property video_url

@@ -1,11 +1,24 @@
 import { MapPin, Clock, Building, ShoppingBag, GraduationCap, Plane } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
+import { AutoTranslatedChip } from "@/components/ui/AutoTranslatedChip";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyLocationProps {
   property: Tables<"properties">;
 }
+
+// Auto-translates a nearby-place name to Arabic when no Arabic value is stored.
+const NearbyPlaceName = ({ enName, arName, cacheKey }: { enName: string; arName?: string | null; cacheKey: string }) => {
+  const field = useAutoTranslatedField(enName, arName ?? null, cacheKey);
+  return (
+    <>
+      {field.value}
+      {field.autoTranslated && <AutoTranslatedChip />}
+    </>
+  );
+};
 
 const PropertyLocation = ({ property }: PropertyLocationProps) => {
   const { t, isRTL, language } = useLanguage();
@@ -99,7 +112,13 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
                           )}>
                             <Icon className="h-4 w-4 text-accent" strokeWidth={1} />
                           </div>
-                          <p className="text-sm font-medium text-foreground">{getPlaceName(place)}</p>
+                          <p className="text-sm font-medium text-foreground">
+                            <NearbyPlaceName
+                              enName={place.name_en || place.name || ""}
+                              arName={place.name_ar}
+                              cacheKey={`nearby:${property.id}:${index}:name`}
+                            />
+                          </p>
                         </div>
                         <p className={cn(
                           "text-xs text-muted-foreground",
