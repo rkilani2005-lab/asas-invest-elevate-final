@@ -1206,44 +1206,12 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
           {!isProcessing && !publishing && (
               <div className="flex gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
 
-                {/* ── Pending: run extraction ─────────────────────────── */}
-                {job.import_status === "pending" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleExtract}
-                    disabled={extracting}
-                  >
-                    {extracting ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-3 h-3" />
-                    )}
-                    <span className="ms-1">Extract</span>
-                  </Button>
-                )}
-
-                {/* ── Reviewing: edit · redo extraction · publish ────── */}
+                {/* ── Reviewing: edit · publish ──────────────────────── */}
                 {job.import_status === "reviewing" && (
                   <>
                     <Button size="sm" variant="outline" onClick={startEditing}>
                       <Edit3 className="w-3 h-3" />
                       <span className="ms-1">Edit</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleRedoExtraction}
-                      disabled={extracting}
-                      className="text-amber-600 border-amber-300 hover:bg-amber-50"
-                      title="Clear extracted data and re-run AI extraction"
-                    >
-                      {extracting ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <RotateCcw className="w-3 h-3" />
-                      )}
-                      <span className="ms-1">Redo</span>
                     </Button>
                     <Button
                       size="sm"
@@ -1256,35 +1224,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                         <Send className="w-3 h-3" />
                       )}
                       <span className="ms-1">Publish</span>
-                    </Button>
-                  </>
-                )}
-
-                {/* ── Error: redo extraction · redo scan ─────────────── */}
-                {job.import_status === "error" && (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleRedoExtraction}
-                      disabled={extracting}
-                      className="text-amber-600 border-amber-300 hover:bg-amber-50"
-                    >
-                      {extracting ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <RotateCcw className="w-3 h-3" />
-                      )}
-                      <span className="ms-1">Redo Extraction</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleRedoScan}
-                      className="text-blue-600 border-blue-300 hover:bg-blue-50"
-                    >
-                      <ScanSearch className="w-3 h-3" />
-                      <span className="ms-1">Redo Scan</span>
                     </Button>
                   </>
                 )}

@@ -74,6 +74,38 @@ export default function ImporterChat() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, busy]);
 
+  // Load persisted chat history (past extraction attempts) once on mount.
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await (supabase as any)
+          .from("ai_chat_log")
+          .select("id, status, prompt, file_names, job_id, assistant_message, error")
+          .order("created_at", { ascending: false })
+          .limit(15);
+        if (!data?.length) return;
+        const hist: ChatMessage[] = [];
+        for (const row of [...data].reverse()) {
+          const fileNames: string[] = Array.isArray(row.file_names) ? row.file_names : [];
+          hist.push({
+            id: `h-u-${row.id}`,
+            role: "user",
+            text: row.prompt || (fileNames.length ? `(${fileNames.length} attachment${fileNames.length === 1 ? "" : "s"})` : "—"),
+            attachments: fileNames.map((n) => ({ name: n, kind: "other" as FileKind })),
+          });
+          hist.push({
+            id: `h-a-${row.id}`,
+            role: "assistant",
+            text: row.status === "success" ? (row.assistant_message || "Draft created.") : `⚠️ ${row.error || "Extraction failed."}`,
+            jobId: row.status === "success" ? (row.job_id || undefined) : undefined,
+          });
+        }
+        setMessages((m) => [m[0], ...hist, ...m.slice(1)]);
+      } catch { /* history is best-effort */ }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const addFiles = useCallback((list: FileList | null) => {
     if (!list) return;
     const next: PendingFile[] = [];
@@ -134,7 +166,7 @@ export default function ImporterChat() {
 
       // 2. Upload everything to the property-media bucket under imports/<folder>/
       const folder = `imports/${uid()}`;
-      const uploaded: { storage_path: string; name: string; mime: string; kind: FileKind }[] = [];
+      const uploaded: { storage_path: string; name: string; mime: string; kind: FileKind; size: number }[] = [];
       for (const pf of processList) {
         const safeName = pf.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${safeName}`;
@@ -142,7 +174,7 @@ export default function ImporterChat() {
           contentType: pf.file.type || "application/octet-stream", upsert: true,
         });
         if (error) { toast.error(`Upload failed for ${pf.file.name}: ${error.message}`); continue; }
-        uploaded.push({ storage_path: path, name: pf.file.name, mime: pf.file.type, kind: pf.kind });
+        uploaded.push({ storage_path: path, name: pf.file.name, mime: pf.file.type, kind: pf.kind, size: pf.file.size });
       }
 
       // 3. Call the extraction orchestrator (raw fetch — no invoke timeout)
@@ -347,7 +379,7 @@ async function extractPdfImages(doc: any, baseName: string, want = 5): Promise<F
   for (let p = 1; p <= pages; p++) {
     try {
       const page: any = await withTimeout(doc.getPage(p), 8000, "getPage");
-      const vp = page.getViewport({ scale: 2 });
+      const vp = page.getViewport({ scale: 1.5 });
       const c = document.createElement("canvas");
       c.width = Math.ceil(vp.width);
       c.height = Math.ceil(vp.height);

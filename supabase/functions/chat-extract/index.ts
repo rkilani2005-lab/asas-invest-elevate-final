@@ -24,7 +24,7 @@ import { unzipSync, strFromU8 } from "npm:fflate@0.8.2";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
-const VERSION = "v5-claude-2026-06-25";
+const VERSION = "v6-claude-2026-06-26";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,10 +39,12 @@ const json = (b: unknown, status = 200) =>
 const BUCKET = "property-media";
 const MODEL = "claude-opus-4-8";
 const MIN_IMAGES = 5;
-const MAX_VISION_IMAGES = 6;
-const MAX_PDF_BYTES = 28 * 1024 * 1024; // Claude PDF limit ~32MB/request
+const MAX_VISION_IMAGES = 4;             // keep the Claude request bounded (avoid 504)
+const MAX_IMAGE_BYTES = 3.5 * 1024 * 1024;
+const MAX_PDF_BYTES = 30 * 1024 * 1024;  // Claude PDF hard limit ~32MB / 100 pages
+const CLAUDE_TIMEOUT_MS = 110000;        // abort before the gateway 504s
 
-interface UploadFile { storage_path: string; name: string; mime: string; kind?: string }
+interface UploadFile { storage_path: string; name: string; mime: string; kind?: string; size?: number }
 
 const SYSTEM = `You are a senior real-estate data extraction specialist and bilingual (English + Arabic) marketing copywriter for ASAS Properties, Dubai/UAE.
 You receive property brochures/factsheets (as PDFs), images, and text. Read EVERYTHING, including tables, floor-plan unit mixes, payment plans, amenities and the marketing narrative.
@@ -173,6 +175,20 @@ Deno.serve(async (req) => {
     if (!pastedText && extractedTexts.length === 0 && urls.length === 0 && files.length === 0)
       return json({ error: "Provide some text, a URL, or an uploaded file." }, 400);
 
+    // Persist every chat extraction attempt (success or failure) as history.
+    const logChat = async (status: "success" | "failed", extra: Record<string, unknown>) => {
+      try {
+        await supabaseAdmin.from("ai_chat_log").insert({
+          status,
+          prompt: pastedText.slice(0, 4000) || propertyHint || null,
+          file_names: files.map((f) => f.name),
+          urls,
+          model: MODEL,
+          ...extra,
+        });
+      } catch { /* logging must never break extraction */ }
+    };
+
     const warnings: string[] = [];
     const textBlocks: string[] = [];
     const contentBlocks: unknown[] = [];   // Claude content blocks (PDF documents)
@@ -208,20 +224,31 @@ Deno.serve(async (req) => {
           pendingMedia.push({ media_type: "video", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 200, compression_status: "done" });
           continue;
         }
+
+        if (f.kind === "pdf") {
+          // Register the brochure WITHOUT downloading. Only download + base64 when
+          // the PDF is small enough for Claude to read directly (its hard limit is
+          // ~32MB / 100 pages) — otherwise we'd burn time/memory and risk a 504.
+          const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(f.storage_path);
+          pendingMedia.push({ media_type: "brochure", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 300, compression_status: "done" });
+          const sz = Number(f.size) || 0;
+          if (sz > 0 && sz <= MAX_PDF_BYTES) {
+            const { data: pblob } = await supabaseAdmin.storage.from(BUCKET).download(f.storage_path);
+            if (pblob) {
+              contentBlocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: toBase64(new Uint8Array(await pblob.arrayBuffer())) }, title: f.name });
+              hasPdf = true;
+            }
+          } else {
+            warnings.push(`"${f.name}" is too large/long for direct AI reading — extracting from its text and page images instead.`);
+          }
+          continue;
+        }
+
         const { data: blob, error: dlErr } = await supabaseAdmin.storage.from(BUCKET).download(f.storage_path);
         if (dlErr || !blob) { warnings.push(`Couldn't read uploaded file: ${f.name}`); continue; }
         const bytes = new Uint8Array(await blob.arrayBuffer());
 
-        if (f.kind === "pdf") {
-          const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(f.storage_path);
-          pendingMedia.push({ media_type: "brochure", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 300, compression_status: "done" });
-          if (bytes.length <= MAX_PDF_BYTES) {
-            contentBlocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: toBase64(bytes) }, title: f.name });
-            hasPdf = true;
-          } else {
-            warnings.push(`PDF "${f.name}" is ${(bytes.length / 1024 / 1024).toFixed(0)}MB — too large to read directly. Please split it or paste key details.`);
-          }
-        } else if (f.kind === "image") {
+        if (f.kind === "image") {
           const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(f.storage_path);
           const isFloorplan = /floor|plan|layout/i.test(f.name);
           pendingMedia.push({
@@ -229,9 +256,9 @@ Deno.serve(async (req) => {
             original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path,
             is_hero: imgIndex === 0 && !isFloorplan, sort_order: imgIndex, compression_status: "done", original_size_bytes: bytes.length,
           });
-          // Collect for vision; only sent to Claude if NO PDF is present (a PDF
-          // already contains these images — re-sending them just doubles cost).
-          if (imageBlocks.length < MAX_VISION_IMAGES) {
+          // Vision only if no PDF (PDFs already carry their images), under the cap,
+          // and small enough — keeps the Claude request bounded → avoids 504.
+          if (imageBlocks.length < MAX_VISION_IMAGES && bytes.length <= MAX_IMAGE_BYTES) {
             imageBlocks.push({ type: "image", source: { type: "base64", media_type: imageMime(f.name, f.mime), data: toBase64(bytes) } });
           }
           imgIndex++;
@@ -245,33 +272,50 @@ Deno.serve(async (req) => {
       } catch (e) { warnings.push(`Error processing ${f.name}: ${String(e).slice(0, 100)}`); }
     }
 
-    // ── Claude extraction (raw Messages API) ──────────────────────────────────
-    // Add image vision blocks only when there's no PDF (PDFs already carry them).
+    // ── Claude extraction (raw Messages API, with timeout + text-only retry) ──
     if (!hasPdf) for (const b of imageBlocks) contentBlocks.push(b);
     const sourceText = textBlocks.join("\n\n").slice(0, 60000);
-    contentBlocks.push({ type: "text", text: PROMPT(propertyHint) + (sourceText ? `\n\nADDITIONAL TEXT FROM ADMIN / WEB:\n${sourceText}` : "") });
+    const promptText = PROMPT(propertyHint) + (sourceText ? `\n\nADDITIONAL TEXT FROM ADMIN / WEB:\n${sourceText}` : "");
+    contentBlocks.push({ type: "text", text: promptText });
+
+    const callClaude = async (blocks: unknown[]) => {
+      const controller = new AbortController();
+      const to = setTimeout(() => controller.abort(), CLAUDE_TIMEOUT_MS);
+      try {
+        const res = await fetch(ANTHROPIC_URL, {
+          method: "POST",
+          headers: { "x-api-key": apiKey, "anthropic-version": ANTHROPIC_VERSION, "content-type": "application/json" },
+          body: JSON.stringify({ model: MODEL, max_tokens: 8000, system: SYSTEM, messages: [{ role: "user", content: blocks }] }),
+          signal: controller.signal,
+        });
+        if (!res.ok) return { ok: false as const, status: res.status, err: (await res.text().catch(() => "")).slice(0, 200) };
+        return { ok: true as const, status: 200, data: await res.json() };
+      } catch (e) {
+        return { ok: false as const, status: 0, err: (e as Error)?.name === "AbortError" ? "timeout" : String((e as Error)?.message || e).slice(0, 200) };
+      } finally { clearTimeout(to); }
+    };
 
     let record: Record<string, unknown> = {};
-    {
-      const res = await fetch(ANTHROPIC_URL, {
-        method: "POST",
-        headers: { "x-api-key": apiKey, "anthropic-version": ANTHROPIC_VERSION, "content-type": "application/json" },
-        body: JSON.stringify({ model: MODEL, max_tokens: 8000, system: SYSTEM, messages: [{ role: "user", content: contentBlocks }] }),
-      });
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        if (res.status === 401) return json({ error: "ANTHROPIC_API_KEY is invalid (401). Check the key in Supabase secrets." }, 500);
-        if (res.status === 429) return json({ error: "Claude rate limit reached — please retry shortly." }, 429);
-        if (res.status === 400) { warnings.push(`Claude rejected the request: ${errText.slice(0, 200)}`); }
-        else return json({ error: `Claude API error ${res.status}: ${errText.slice(0, 200)}` }, 502);
-      } else {
-        const data = await res.json();
-        if (data.stop_reason === "refusal") warnings.push("Claude declined to process this content.");
-        else {
-          const textOut = (data.content || []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("\n");
-          record = parseJSON(textOut);
-        }
-      }
+    let r = await callClaude(contentBlocks);
+    // If the document/image request failed (too large/long → 400, or slow → timeout),
+    // retry with extracted text only so we still return a usable draft.
+    if (!r.ok && (r.status === 400 || r.err === "timeout") && (hasPdf || imageBlocks.length > 0)) {
+      warnings.push(r.err === "timeout" ? "Direct read timed out — retried with extracted text." : "Direct read failed — retried with extracted text.");
+      r = await callClaude([{ type: "text", text: promptText }]);
+    }
+    if (!r.ok) {
+      if (r.status === 401) { await logChat("failed", { error: "ANTHROPIC_API_KEY invalid" }); return json({ error: "ANTHROPIC_API_KEY is invalid (401). Check the key in Supabase secrets." }, 500); }
+      if (r.status === 429) { await logChat("failed", { error: "rate limit" }); return json({ error: "Claude rate limit reached — please retry shortly." }, 429); }
+      const msg = r.err === "timeout"
+        ? "Extraction took too long. For very large PDFs, paste the key details or upload a shorter brochure."
+        : `Claude API error${r.status ? " " + r.status : ""}: ${r.err}`;
+      await logChat("failed", { error: msg });
+      return json({ error: msg }, 502);
+    }
+    if (r.data.stop_reason === "refusal") warnings.push("Claude declined to process this content.");
+    else {
+      const textOut = (r.data.content || []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("\n");
+      record = parseJSON(textOut);
     }
 
     // Defaults / normalisation
@@ -337,6 +381,8 @@ Deno.serve(async (req) => {
     if (row.unit_types) lines.push(`🏠 Units: ${String(row.unit_types).replace(/\|/g, ", ")}`);
     lines.push(`🖼️ ${imageCount} image(s) attached${imagesNeeded ? ` — upload ${imagesNeeded} more to reach ${MIN_IMAGES}.` : "."}`);
     lines.push(missingFields.length ? `⚠️ Couldn't extract: **${missingFields.join(", ")}** — add these in review.` : `✅ All key fields extracted. Open it in the Review Queue to approve & publish.`);
+
+    await logChat("success", { job_id: jobId, assistant_message: lines.join("\n") });
 
     return json({
       success: true, job_id: jobId, assistant_message: lines.join("\n"),
