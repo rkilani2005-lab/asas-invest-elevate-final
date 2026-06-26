@@ -649,6 +649,16 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     onRefresh();
   };
 
+  // ── Delete this draft extraction (job + its media + logs) ──────────────────
+  const handleDelete = async () => {
+    if (!window.confirm(`Delete the draft "${job.name_en || job.folder_name}"? This removes the extraction and its attached media. This cannot be undone.`)) return;
+    await supabase.from("import_logs").delete().eq("job_id", job.id);
+    await supabase.from("import_media").delete().eq("job_id", job.id);
+    await supabase.from("import_jobs").delete().eq("id", job.id);
+    toast.success("Draft deleted");
+    onRefresh();
+  };
+
   // ── Edit helpers ──────────────────────────────────────────────────────────
   const startEditing = () => {
     setForm({
@@ -1238,6 +1248,20 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                     <Link to={job.cms_url} target="_blank">
                       <Eye className="w-3 h-3 me-1" />View
                     </Link>
+                  </Button>
+                )}
+
+                {/* ── Delete draft (any non-published state) ───────────── */}
+                {job.import_status !== "completed" && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={handleDelete}
+                    title="Delete this draft"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span className="ms-1">Delete</span>
                   </Button>
                 )}
               </div>
