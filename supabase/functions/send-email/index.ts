@@ -385,16 +385,41 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Internal-only: only callers presenting the service-role key can send emails.
-    // This function is invoked server-to-server from form-submit and other trusted
-    // edge functions. Public callers are rejected to prevent Gmail abuse / spoofing.
+    // Allowed callers:
+    //   1. Internal edge functions presenting the service-role key.
+    //   2. Authenticated admin users (admin role via user_roles).
+    // Anyone else is rejected to prevent Gmail abuse / spoofing.
     const authHeader = req.headers.get("Authorization") || "";
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-    if (!serviceKey || authHeader !== `Bearer ${serviceKey}`) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const isService = !!serviceKey && authHeader === `Bearer ${serviceKey}`;
+
+    if (!isService) {
+      if (!authHeader.startsWith("Bearer ")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const anonClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: claimsData } = await anonClient.auth.getClaims(authHeader.replace("Bearer ", ""));
+      if (!claimsData?.claims) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const adminCheck = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+      const { data: roleRow } = await (adminCheck as any).from("user_roles").select("role").eq("user_id", claimsData.claims.sub).eq("role", "admin").maybeSingle();
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const supabase = createClient(
