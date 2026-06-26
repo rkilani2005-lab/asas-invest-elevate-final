@@ -179,7 +179,7 @@ const PropertyInquiry = ({ property }: PropertyInquiryProps) => {
           </div>
 
           {/* Right - Form */}
-          <div className={cn("lg:order-1", isRTL && "lg:order-1")}>
+          <div>
             <form onSubmit={handleSubmit} className="bg-white border border-accent/30 p-8 space-y-5 shadow-card">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
