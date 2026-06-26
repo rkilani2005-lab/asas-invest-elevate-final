@@ -50,6 +50,53 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_chat_log: {
+        Row: {
+          assistant_message: string | null
+          created_at: string
+          error: string | null
+          file_names: string[] | null
+          id: string
+          job_id: string | null
+          model: string | null
+          prompt: string | null
+          status: string
+          urls: string[] | null
+        }
+        Insert: {
+          assistant_message?: string | null
+          created_at?: string
+          error?: string | null
+          file_names?: string[] | null
+          id?: string
+          job_id?: string | null
+          model?: string | null
+          prompt?: string | null
+          status: string
+          urls?: string[] | null
+        }
+        Update: {
+          assistant_message?: string | null
+          created_at?: string
+          error?: string | null
+          file_names?: string[] | null
+          id?: string
+          job_id?: string | null
+          model?: string | null
+          prompt?: string | null
+          status?: string
+          urls?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_chat_log_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       amenities: {
         Row: {
           category: string | null
