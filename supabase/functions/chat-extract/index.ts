@@ -39,9 +39,13 @@ const json = (b: unknown, status = 200) =>
 const BUCKET = "property-media";
 const MODEL = "claude-opus-4-8";
 const MIN_IMAGES = 5;
-const MAX_VISION_IMAGES = 4;             // keep the Claude request bounded (avoid 504)
-const MAX_IMAGE_BYTES = 3.5 * 1024 * 1024;
-const MAX_PDF_BYTES = 30 * 1024 * 1024;  // Claude PDF hard limit ~32MB / 100 pages
+// Anthropic enforces a 32 MB TOTAL request cap (raw bytes after base64). Base64
+// inflates payloads ~33%, so the sum of (pdf + images) raw bytes must stay well
+// under 24 MB to avoid 413 "request_too_large".
+const MAX_VISION_IMAGES = 3;             // keep the Claude request bounded (avoid 504/413)
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const MAX_PDF_BYTES = 18 * 1024 * 1024;  // ~24 MB after base64 — safely under Claude's 32 MB cap
+const MAX_TOTAL_RAW_BYTES = 22 * 1024 * 1024; // hard ceiling for pdf+images combined (raw)
 const CLAUDE_TIMEOUT_MS = 110000;        // abort before the gateway 504s
 
 interface UploadFile { storage_path: string; name: string; mime: string; kind?: string; size?: number }
