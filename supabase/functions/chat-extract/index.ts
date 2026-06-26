@@ -307,7 +307,7 @@ Deno.serve(async (req) => {
     let r = await callClaude(contentBlocks);
     // If the document/image request failed (too large/long → 400, or slow → timeout),
     // retry with extracted text only so we still return a usable draft.
-    if (!r.ok && (r.status === 400 || r.err === "timeout") && (hasPdf || imageBlocks.length > 0)) {
+    if (!r.ok && (r.status === 400 || r.status === 413 || r.err === "timeout") && (hasPdf || imageBlocks.length > 0)) {
       warnings.push(r.err === "timeout" ? "Direct read timed out — retried with extracted text." : "Direct read failed — retried with extracted text.");
       r = await callClaude([{ type: "text", text: promptText }]);
     }
