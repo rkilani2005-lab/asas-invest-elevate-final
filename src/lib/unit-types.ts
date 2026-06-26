@@ -45,7 +45,19 @@ export function localizeOwnership(value: string | null | undefined, lang: string
   const v = (value || "").trim();
   if (!v || lang !== "ar") return v;
   const low = v.toLowerCase();
-  if (low.includes("freehold")) return "تملك حر";
+  if (low.includes("freehold")) return "التملك الحر";
   if (low.includes("leasehold")) return "حق انتفاع";
   return v;
+}
+
+// Size range like "450 - 3,200 sqft" → Arabic unit (قدم² / م²). Render inside a
+// dir="ltr" wrapper so the number range doesn't bidi-reverse in the RTL page.
+export function localizeSizeRange(value: string | null | undefined, lang: string): string {
+  const v = (value || "").trim();
+  if (!v || lang !== "ar") return v;
+  return v
+    .replace(/\bsq\.?\s?ft\b/gi, "قدم²")
+    .replace(/\bsqft\b/gi, "قدم²")
+    .replace(/\bsq\.?\s?m\b/gi, "م²")
+    .replace(/\bsqm\b/gi, "م²");
 }

@@ -3,7 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useAutoTranslatedField } from "@/hooks/useAutoTranslatedField";
 import { AutoTranslatedChip } from "@/components/ui/AutoTranslatedChip";
-import { localizeUnitTypes, localizeOwnership } from "@/lib/unit-types";
+import { localizeUnitTypes, localizeOwnership, localizeSizeRange } from "@/lib/unit-types";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PropertyOverviewProps {
@@ -37,7 +37,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
   const specs = [
     { icon: MapPin, label: t("property.location"), value: location },
     { icon: Building2, label: t("property.unitTypes"), value: localizeUnitTypes(property.unit_types as string[] | null, language) },
-    { icon: Maximize2, label: t("property.sizeRange"), value: property.size_range },
+    { icon: Maximize2, label: t("property.sizeRange"), value: property.size_range ? <span dir="ltr" className="inline-block">{localizeSizeRange(property.size_range, language)}</span> : null },
     { icon: Calendar, label: t("property.handover"), value: property.handover_date ? new Date(property.handover_date).toLocaleDateString() : null },
     { icon: Key, label: t("property.ownership"), value: localizeOwnership(property.ownership_type, language) },
     { icon: Car, label: t("property.parking"), value: property.parking },
