@@ -250,7 +250,7 @@ const PropertyDetail = () => {
 
         {/* Title Section */}
         <div className="container mx-auto px-4 lg:px-8 pb-8">
-          <div className={cn("max-w-4xl", isRTL && "text-end ms-auto me-0")}>
+          <div className={cn("max-w-4xl", isRTL && "text-end ms-0 me-auto")}>
             <p className="text-accent text-xs font-medium tracking-widest uppercase mb-2">
               {language === "ar" && property.developer_ar ? property.developer_ar : property.developer_en}
             </p>
