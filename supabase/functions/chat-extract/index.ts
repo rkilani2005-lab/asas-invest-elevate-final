@@ -237,14 +237,16 @@ Deno.serve(async (req) => {
           const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(f.storage_path);
           pendingMedia.push({ media_type: "brochure", original_filename: f.name, storage_url: pub.publicUrl, dropbox_path: f.storage_path, is_hero: false, sort_order: 300, compression_status: "done" });
           const sz = Number(f.size) || 0;
-          if (sz > 0 && sz <= MAX_PDF_BYTES) {
+          if (sz > 0 && sz <= MAX_PDF_BYTES && totalRawBytes + sz <= MAX_TOTAL_RAW_BYTES) {
             const { data: pblob } = await supabaseAdmin.storage.from(BUCKET).download(f.storage_path);
             if (pblob) {
-              contentBlocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: toBase64(new Uint8Array(await pblob.arrayBuffer())) }, title: f.name });
+              const pbytes = new Uint8Array(await pblob.arrayBuffer());
+              contentBlocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: toBase64(pbytes) }, title: f.name });
+              totalRawBytes += pbytes.length;
               hasPdf = true;
             }
           } else {
-            warnings.push(`"${f.name}" is too large/long for direct AI reading — extracting from its text and page images instead.`);
+            warnings.push(`"${f.name}" is too large for direct AI reading — extracting from its text and page images instead.`);
           }
           continue;
         }
