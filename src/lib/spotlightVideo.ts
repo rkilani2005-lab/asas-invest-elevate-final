@@ -61,3 +61,19 @@ export function isMp4(s: Pick<Spotlight, "video_provider">): boolean {
 export function isInstagram(s: Pick<Spotlight, "video_provider">): boolean {
   return s.video_provider === "instagram";
 }
+
+/**
+ * Returns the URL only if it is a plain http(s) link, else null. Guards against
+ * `javascript:`/`data:` and other script-bearing schemes before we ever pass a
+ * stored value to window.open() or an href (defense-in-depth — admin-only data,
+ * but never trust a URL field with a navigation primitive).
+ */
+export function safeExternalUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url, window.location.origin);
+    return u.protocol === "http:" || u.protocol === "https:" ? u.href : null;
+  } catch {
+    return null;
+  }
+}

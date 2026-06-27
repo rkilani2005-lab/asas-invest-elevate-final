@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Play, Film, ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
-import { type Spotlight, getEmbedUrl, getPosterUrl, isMp4, isInstagram } from "@/lib/spotlightVideo";
+import { type Spotlight, getEmbedUrl, getPosterUrl, isMp4, isInstagram, safeExternalUrl } from "@/lib/spotlightVideo";
 import { trackSpotlight, type SpotlightSurface, type SpotlightEventType } from "@/lib/spotlightAnalytics";
 
 interface SpotlightCardProps {
@@ -51,7 +51,8 @@ export default function SpotlightCard({ spotlight, surface, propertySlug, classN
   const handlePlay = () => {
     trackSpotlight({ spotlightId: spotlight.id, eventType: "play", surface, locale });
     if (isInstagram(spotlight)) {
-      window.open(spotlight.video_url, "_blank", "noopener,noreferrer");
+      const href = safeExternalUrl(spotlight.video_url);
+      if (href) window.open(href, "_blank", "noopener,noreferrer");
       return;
     }
     setPlaying(true);

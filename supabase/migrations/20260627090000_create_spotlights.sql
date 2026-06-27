@@ -38,7 +38,8 @@ create policy "spotlights_public_read"
 create policy "spotlights_admin_all"
   on public.spotlights for all
   to authenticated
-  using (true) with check (true);
+  using (public.has_role(auth.uid(), 'admin'::app_role))
+  with check (public.has_role(auth.uid(), 'admin'::app_role));
 
 -- ── Analytics events ────────────────────────────────────────────────────────
 create table if not exists public.spotlight_events (
@@ -67,7 +68,7 @@ create policy "spotlight_events_anon_insert"
 create policy "spotlight_events_admin_read"
   on public.spotlight_events for select
   to authenticated
-  using (true);
+  using (public.has_role(auth.uid(), 'admin'::app_role));
 
 -- Aggregation view powering the admin report.
 create or replace view public.spotlight_stats as
