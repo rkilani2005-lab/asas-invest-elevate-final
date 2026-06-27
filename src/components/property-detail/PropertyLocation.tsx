@@ -61,7 +61,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "heading-section text-2xl md:text-3xl text-foreground text-start mb-8",
-          isRTL && "text-end"
+          
         )}>
           {t("sections.location")}
         </h2>
@@ -84,7 +84,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
           </div>
 
           {/* Nearby Places */}
-          <div className={cn(isRTL && "text-end")}>
+          <div>
             <div className={cn(
               "flex items-center mb-6"
             )}>
@@ -135,7 +135,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
 
             {nearbyData.length === 0 && (
               <div className="border border-border p-6">
-                <p className={cn("text-muted-foreground", isRTL && "text-end")}>
+                <p className={cn("text-muted-foreground")}>
                   {language === "ar"
                     ? `يقع هذا العقار في ${location}، ويوفّر اتصالاً ممتازاً بأبرز معالم دبي ومرافقها وخدماتها.`
                     : `Located in ${location}, this property offers excellent connectivity to Dubai's key landmarks and amenities.`}

@@ -43,7 +43,7 @@ const AmenityCategoryHeading = ({ category, propertyId }: { category: string; pr
   return (
     <h3 className={cn(
       "text-accent text-xs font-medium tracking-widest uppercase mb-4 text-start",
-      isRTL && "text-end"
+      
     )}>
       {field.value}
       {field.autoTranslated && <AutoTranslatedChip />}
@@ -88,7 +88,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
         <div className="container mx-auto px-4 lg:px-8">
           <h2 className={cn(
             "heading-section text-2xl md:text-3xl text-foreground text-start mb-8",
-            isRTL && "text-end"
+            
           )}>
             {t("sections.amenities")}
           </h2>
@@ -105,7 +105,7 @@ const PropertyAmenities = ({ property }: PropertyAmenitiesProps) => {
       <div className="container mx-auto px-4 lg:px-8">
         <h2 className={cn(
           "heading-section text-2xl md:text-3xl text-foreground text-start mb-8",
-          isRTL && "text-end"
+          
         )}>
           {t("sections.amenities")}
         </h2>
