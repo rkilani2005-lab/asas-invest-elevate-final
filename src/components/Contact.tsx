@@ -309,7 +309,8 @@ const Contact = () => {
                           value={contactForm.message}
                           onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                           required
-                          className={cn(inputCls, "resize-none")}
+                          dir={isRTL ? "rtl" : "ltr"}
+                          className={cn(inputCls, "resize-none", isRTL && "text-right")}
                         />
                       </div>
                       <div className={cn("flex items-start gap-3", isRTL && "flex-row-reverse text-right")}>
