@@ -166,10 +166,45 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
 
   try {
+    // ── Admin-only gate ───────────────────────────────────────────────────────
+    // This function uses the SERVICE ROLE key and the admin's stored Google Drive
+    // OAuth token to fetch an arbitrary, caller-supplied file_id. With verify_jwt
+    // = false at the gateway, it MUST verify the caller is an admin in-code, or
+    // anyone could exfiltrate any Drive file the connected account can read.
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    );
+    const { data: claimsData } = await authClient.auth.getClaims(authHeader.replace("Bearer ", ""));
+    if (!claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const { data: roleRow } = await (supabase as any)
+      .from("user_roles").select("role")
+      .eq("user_id", claimsData.claims.sub).eq("role", "admin").maybeSingle();
+    if (!roleRow) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const { file_id, filename } = await req.json();
     if (!file_id) {
