@@ -107,18 +107,23 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
               {property.price_range && (
                 <div className={cn("pb-4 mb-4 border-b border-border")}>
                   <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">{t("property.price")}</p>
-                  <p className="heading-section text-2xl text-foreground">
-                    {language === "ar"
-                      ? property.price_range.replace(/^\s*from\s+/i, "ابتداءً من ").replace(/\bto\b/i, "إلى")
-                      : property.price_range}
-                  </p>
+                  {language === "ar" ? (
+                    <p className="heading-section text-2xl text-foreground">
+                      <span>ابتداءً من </span>
+                      <span dir="ltr" className="inline-block">
+                        {property.price_range.replace(/^\s*from\s+/i, "").replace(/\bto\b/i, "–")}
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="heading-section text-2xl text-foreground">{property.price_range}</p>
+                  )}
                 </div>
               )}
 
               <div className="space-y-4">
                 {allSpecs.map((spec, index) => (
                   <div key={index} className={cn("flex items-start")}>
-                    <div className={cn("w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0", isRTL ? "ms-3" : "me-3")}>
+                    <div className={cn("w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0", isRTL ? "ms-5" : "me-5")}>
                       <spec.icon className="h-5 w-5 text-accent" strokeWidth={1} />
                     </div>
                     <div>
@@ -128,6 +133,7 @@ const PropertyOverview = ({ property }: PropertyOverviewProps) => {
                   </div>
                 ))}
               </div>
+
             </div>
           </div>
         </div>
