@@ -189,16 +189,17 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             {secondaryLineParts.length > 0 ? secondaryLineParts.join(' · ') : "—"}
           </p>
 
-          {/* Meta tokens with gold diamond separators (always rendered) */}
+          {/* Meta tokens with gold diamond separators — clamped to one line */}
           <div
-            className="mt-auto pt-4 border-t border-border/50 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground min-h-[2rem] justify-start"
+            className="mt-auto pt-4 border-t border-border/50 flex flex-nowrap items-center gap-x-2 text-xs text-muted-foreground h-[2rem] justify-start overflow-hidden whitespace-nowrap"
             style={{ fontFamily: "'Inter', sans-serif" }}
+            title={metaTokens.join(' · ') || undefined}
           >
             {metaTokens.length > 0 ? (
               metaTokens.map((tk, i) => (
-                <span key={i} className="inline-flex items-center gap-2">
+                <span key={i} className="inline-flex items-center gap-2 shrink-0">
                   {i > 0 && <span className="text-accent" aria-hidden>◇</span>}
-                  <span>{tk}</span>
+                  <span className="truncate">{tk}</span>
                 </span>
               ))
             ) : (
@@ -206,17 +207,19 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             )}
           </div>
 
-          {/* Location footer (always reserves a line) */}
+          {/* Location footer — clamped to one line */}
           <p
             className={cn(
-              "text-xs mt-2 min-h-[1rem] text-start",
+              "text-xs mt-2 h-[1rem] text-start truncate",
               location ? "text-muted-foreground/80" : "text-transparent select-none"
             )}
             style={{ fontFamily: "'Inter', sans-serif" }}
             aria-hidden={!location}
+            title={location || undefined}
           >
             {location || "—"}
           </p>
+
         </div>
       </article>
 
