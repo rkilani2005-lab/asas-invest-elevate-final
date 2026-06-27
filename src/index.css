@@ -104,6 +104,22 @@
     letter-spacing: 0;
   }
 
+  /* Global RTL font enforcement: any element with inline or utility font-family
+     (Inter, Satoshi, serif, etc.) is forced to Cairo when the document is RTL.
+     Monospace (code/pre/kbd/samp and font-mono utility) is preserved. */
+  [dir="rtl"] body,
+  [dir="rtl"] body * {
+    font-family: 'Cairo', system-ui, sans-serif !important;
+  }
+  [dir="rtl"] code,
+  [dir="rtl"] pre,
+  [dir="rtl"] kbd,
+  [dir="rtl"] samp,
+  [dir="rtl"] .font-mono,
+  [dir="rtl"] [class*="font-mono"] {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  }
+
   /* Reset any wide/narrow tracking utilities under RTL */
   [dir="rtl"] .tracking-tight,
   [dir="rtl"] .tracking-tighter,
