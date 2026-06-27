@@ -54,9 +54,46 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   };
   const displayPrice = formatPrice(property.price_range);
 
+  // Translate unit type tokens like "1BR", "2 BED", "3BR Duplex", "Studio" to Arabic
+  const translateUnitType = (raw: string): string => {
+    if (!isRTL) return raw;
+    let s = raw.trim();
+    // Studio / Penthouse / Townhouse / Villa / Office / Retail
+    const wordMap: Record<string, string> = {
+      studio: "استوديو",
+      penthouse: "بنتهاوس",
+      townhouse: "تاون هاوس",
+      villa: "فيلا",
+      office: "مكتب",
+      retail: "محل تجاري",
+      shop: "محل",
+      duplex: "دوبلكس",
+      simplex: "سيمبلكس",
+      loft: "لوفت",
+    };
+    const lower = s.toLowerCase();
+    for (const [en, ar] of Object.entries(wordMap)) {
+      if (lower === en) return ar;
+    }
+    // Patterns like "1BR", "2 BR", "3 BED", "4 BEDROOM", optionally followed by Duplex/Simplex
+    const m = s.match(/^(\d+)\s*(BR|BED|BEDROOM|BEDROOMS|B\/R)\b\s*(.*)$/i);
+    if (m) {
+      const num = m[1];
+      const suffix = m[3]?.trim().toLowerCase();
+      const suffixAr = suffix && wordMap[suffix] ? ` ${wordMap[suffix]}` : suffix ? ` ${suffix}` : "";
+      return `${num} غرف${suffixAr}`;
+    }
+    // "bedroom-6" style
+    const m2 = s.match(/^bedroom[-\s]*(\d+)$/i);
+    if (m2) return `${m2[1]} غرف`;
+    return s;
+  };
+
   // Build meta tokens (joined with diamond glyph)
   const metaTokens: string[] = [];
-  if (property.unit_types?.length) metaTokens.push(property.unit_types.join(", "));
+  if (property.unit_types?.length) {
+    metaTokens.push(property.unit_types.map(translateUnitType).join("، "));
+  }
   if (property.size_range) metaTokens.push(property.size_range);
   if (property.handover_date) {
     const d = new Date(property.handover_date);
