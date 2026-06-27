@@ -312,10 +312,11 @@ const Navigation = () => {
                   left: isRTL ? "auto" : 0,
                   right: isRTL ? 0 : "auto",
                 }}
-                className="w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y"
+                className="w-[300px] h-screen z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y overflow-hidden"
               >
                 {/* Inner wrapper restores the document direction for text & layout flow */}
-                <div dir={isRTL ? "rtl" : "ltr"} className="flex flex-col h-full">
+                <div dir={isRTL ? "rtl" : "ltr"} className="flex flex-col flex-1 min-h-0 w-full">
+
                   <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
                     <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
                       <img 
