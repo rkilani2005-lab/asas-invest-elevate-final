@@ -27,6 +27,7 @@ const Invest = lazy(() => import("./pages/Invest"));
 const About = lazy(() => import("./pages/About"));
 const BuyerGuide = lazy(() => import("./pages/BuyerGuide"));
 const Careers = lazy(() => import("./pages/Careers"));
+const SpotlightPage = lazy(() => import("./pages/Spotlight"));
 
 // Admin — lazy loaded (huge bundle, never needed on the public site)
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -52,6 +53,7 @@ const AdminEmailSettings = lazy(() => import("./pages/admin/AdminEmailSettings")
 const AdminEmailPage = lazy(() => import("./pages/admin/AdminEmailPage"));
 const AdminSellerSubmissions = lazy(() => import("./pages/admin/AdminSellerSubmissions"));
 const AdminPropertyReports = lazy(() => import("./pages/admin/AdminPropertyReports"));
+const AdminSpotlights = lazy(() => import("./pages/admin/AdminSpotlights"));
 
 const queryClient = new QueryClient();
 
@@ -84,6 +86,7 @@ const App = () => (
                   <Route path="/property/:slug" element={<PropertyDetail />} />
                   <Route path="/insights" element={<InsightsPage />} />
                   <Route path="/insights/:slug" element={<InsightDetail />} />
+                  <Route path="/spotlight" element={<SpotlightPage />} />
 
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLogin />} />
@@ -99,6 +102,7 @@ const App = () => (
                   <Route path="/admin/communications" element={<AdminLayout><AdminCommunications /></AdminLayout>} />
                   <Route path="/admin/communications/settings" element={<AdminLayout><AdminEmailSettings /></AdminLayout>} />
                   <Route path="/admin/email" element={<AdminLayout><AdminEmailPage /></AdminLayout>} />
+                  <Route path="/admin/spotlights" element={<AdminLayout><AdminSpotlights /></AdminLayout>} />
                   <Route path="/admin/insights" element={<AdminLayout><AdminInsights /></AdminLayout>} />
                   <Route path="/admin/insights/new" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />
                   <Route path="/admin/insights/:id/edit" element={<AdminLayout><InsightEditorPage /></AdminLayout>} />

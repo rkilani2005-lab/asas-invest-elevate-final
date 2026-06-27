@@ -46,8 +46,11 @@ export function useMegaMenuItems() {
       ],
     },
     {
-      label: t("nav.insights"),
-      href: "/insights",
+      label: t("nav.spotlight"),
+      items: [
+        { label: t("nav.insights"), href: "/insights", description: t("nav.insightsDesc") },
+        { label: t("nav.spotlightProjectVideos"), href: "/spotlight", description: t("nav.spotlightProjectVideosDesc") },
+      ],
     },
     {
       label: t("nav.aboutAsas"),

@@ -12,6 +12,10 @@
     "about": "About",
     "contact": "Contact",
     "insights": "Insights",
+    "insightsDesc": "Market news & analysis",
+    "spotlight": "Spotlight",
+    "spotlightProjectVideos": "Project Videos",
+    "spotlightProjectVideosDesc": "Project tours & reels",
     "buy": "Buy",
     "sell": "Sell",
     "invest": "Invest",
@@ -229,6 +233,21 @@
     "shareArticle": "Share this article",
     "notFoundTitle": "Article Not Found",
     "notFoundDesc": "Sorry, the article you're looking for doesn't exist."
+  },
+  "home": {
+    "spotlight": {
+      "eyebrow": "Spotlight",
+      "title": "Project Videos",
+      "viewAll": "View all",
+      "viewProject": "View project"
+    }
+  },
+  "spotlight": {
+    "page": {
+      "title": "Project Spotlight",
+      "subtitle": "Walkthroughs, reels and project tours from ASAS Invest."
+    },
+    "empty": "No videos published yet — check back soon."
   },
   "featuredProperties": {
     "subtitle": "Our Portfolio",

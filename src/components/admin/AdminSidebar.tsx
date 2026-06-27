@@ -22,6 +22,7 @@ import {
   BarChart3,
   Bot,
   ListChecks,
+  Film,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -71,6 +72,7 @@ export default function AdminSidebar() {
     { href: "/admin/communications", icon: Users, label: t("admin.nav.communications") },
     { href: "/admin/email", icon: Mail, label: t("admin.nav.email") },
     { href: "/admin/insights", icon: Newspaper, label: t("admin.nav.insights") },
+    { href: "/admin/spotlights", icon: Film, label: "Spotlight" },
     { href: "/admin/home-content", icon: Home, label: t("admin.nav.homePage") },
     { href: "/admin/about", icon: FileText, label: t("admin.nav.aboutPage") },
     { href: "/admin/translations", icon: Languages, label: t("admin.nav.translations") },

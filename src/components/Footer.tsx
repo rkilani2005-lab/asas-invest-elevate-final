@@ -32,6 +32,7 @@ const Footer = () => {
       links: [
         { name: t("nav.aboutVision"), href: "/about" },
         { name: t("nav.insights"), href: "/insights" },
+        { name: t("nav.spotlightProjectVideos"), href: "/spotlight" },
         { name: t("nav.sellValuation"), href: "/sell" },
       ],
     },

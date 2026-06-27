@@ -1,6 +1,7 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import FeaturedProperties from "@/components/FeaturedProperties";
+import SpotlightSection from "@/components/home/SpotlightSection";
 import EditorialBand from "@/components/EditorialBand";
 import Stats from "@/components/Stats";
 import TrustCredentials from "@/components/TrustCredentials";
@@ -37,6 +38,7 @@ const Index = () => {
       <main>
         <Hero />
         <FeaturedProperties />
+        <SpotlightSection />
         <EditorialBand />
         <Stats />
         <TrustCredentials />

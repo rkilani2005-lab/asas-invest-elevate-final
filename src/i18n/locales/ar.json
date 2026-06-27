@@ -12,6 +12,10 @@
     "about": "نبذة عن الشركة",
     "contact": "تواصل معنا",
     "insights": "رؤى وتحليلات",
+    "insightsDesc": "أخبار وتحليلات السوق",
+    "spotlight": "الأضواء",
+    "spotlightProjectVideos": "فيديوهات المشاريع",
+    "spotlightProjectVideosDesc": "جولات ومقاطع المشاريع",
     "buy": "شراء",
     "sell": "بيع",
     "invest": "فرص استثمارية",
@@ -229,6 +233,21 @@
     "shareArticle": "شارك هذا المقال",
     "notFoundTitle": "المقال غير موجود",
     "notFoundDesc": "عذراً، المقال الذي تبحث عنه غير موجود."
+  },
+  "home": {
+    "spotlight": {
+      "eyebrow": "الأضواء",
+      "title": "فيديوهات المشاريع",
+      "viewAll": "عرض الكل",
+      "viewProject": "عرض المشروع"
+    }
+  },
+  "spotlight": {
+    "page": {
+      "title": "أضواء المشاريع",
+      "subtitle": "جولات ومقاطع فيديو لمشاريع أساس إنفست."
+    },
+    "empty": "لا توجد فيديوهات منشورة بعد — تابعونا قريباً."
   },
   "featuredProperties": {
     "subtitle": "محفظتنا",
