@@ -341,7 +341,7 @@ const Contact = () => {
 
                 {/* CALLBACK */}
                 <TabsContent value="callback" className="p-8 mt-0">
-                  <p className="text-sm text-muted-foreground mb-6">{t("contact.callbackIntro")}</p>
+                  <p className={cn("text-sm text-muted-foreground mb-6", isRTL && "text-right")} dir={isRTL ? "rtl" : "ltr"}>{t("contact.callbackIntro")}</p>
                   <form onSubmit={handleCallbackSubmit} className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
