@@ -93,31 +93,6 @@ const TrustCredentials = () => {
           </div>
         </ScrollReveal>
 
-        {/* Press */}
-        <ScrollReveal delay={0.1}>
-          <p
-            className="text-eyebrow text-charcoal/60 mb-6 text-center"
-            style={{ letterSpacing: "0.15em" }}
-          >
-            {t("trust.featuredIn")}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-            {press.map((name) => (
-              <span
-                key={name}
-                className="text-charcoal/50 hover:text-charcoal transition-colors duration-300"
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 500,
-                  letterSpacing: "0.16em",
-                  fontSize: "0.8rem",
-                }}
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-        </ScrollReveal>
       </div>
     </section>
   );
