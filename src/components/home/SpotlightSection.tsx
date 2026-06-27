@@ -23,7 +23,7 @@ const SpotlightSection = () => {
           .eq("is_published", true)
           .order("sort_order", { ascending: false })
           .order("published_at", { ascending: false })
-          .limit(4);
+          .limit(6);
         if (error) return [] as SpotlightRow[];
         return (data || []) as SpotlightRow[];
       } catch {
@@ -34,9 +34,6 @@ const SpotlightSection = () => {
 
   // Self-hide when there's nothing to show.
   if (!spotlights || spotlights.length === 0) return null;
-
-  const featured = spotlights.find((s) => s.is_featured) || spotlights[0];
-  const recent = spotlights.filter((s) => s.id !== featured.id).slice(0, 3);
 
   return (
     <section className="py-24 bg-background grain-overlay">
@@ -52,20 +49,10 @@ const SpotlightSection = () => {
         </ScrollReveal>
 
         <ScrollReveal>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            {/* Featured (≈60%) */}
-            <div className="lg:col-span-3">
-              <SpotlightCard spotlight={featured} surface="home" propertySlug={featured.properties?.slug} variant="featured" />
-            </div>
-
-            {/* Recent list (≈40%) */}
-            {recent.length > 0 && (
-              <div className="lg:col-span-2 flex flex-col gap-6">
-                {recent.map((s) => (
-                  <SpotlightCard key={s.id} spotlight={s} surface="home" propertySlug={s.properties?.slug} variant="compact" />
-                ))}
-              </div>
-            )}
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+            {spotlights.slice(0, 6).map((s) => (
+              <SpotlightCard key={s.id} spotlight={s} surface="home" propertySlug={s.properties?.slug} />
+            ))}
           </div>
         </ScrollReveal>
       </div>

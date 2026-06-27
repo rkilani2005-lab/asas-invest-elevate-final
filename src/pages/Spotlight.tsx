@@ -48,9 +48,9 @@ const SpotlightPage = () => {
           </header>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-secondary border border-border animate-pulse" style={{ aspectRatio: "16 / 9" }} />
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-secondary border border-border rounded-xl animate-pulse" style={{ aspectRatio: "4 / 5" }} />
               ))}
             </div>
           ) : !spotlights || spotlights.length === 0 ? (
@@ -58,9 +58,9 @@ const SpotlightPage = () => {
               <p className="text-muted-foreground text-lg">{t("spotlight.empty")}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
               {spotlights.map((s) => (
-                <SpotlightCard key={s.id} spotlight={s} surface="archive" propertySlug={s.properties?.slug} variant="featured" />
+                <SpotlightCard key={s.id} spotlight={s} surface="archive" propertySlug={s.properties?.slug} />
               ))}
             </div>
           )}
