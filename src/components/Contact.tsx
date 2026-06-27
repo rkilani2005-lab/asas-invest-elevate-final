@@ -215,11 +215,14 @@ const Contact = () => {
             <div className="bg-white border border-accent/30 shadow-card">
               <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSubmitted(false); }}>
                 <TabsList className="w-full rounded-none border-b border-accent/20 bg-transparent h-auto p-0">
-                  {[
-                    { id: "contact", label: t("contact.tabContact") },
-                    { id: "callback", label: t("contact.tabCallback") },
-                    { id: "newsletter", label: t("contact.tabNewsletter") },
-                  ].map((tab) => (
+                  {(() => {
+                    const tabs = [
+                      { id: "contact", label: t("contact.tabContact") },
+                      { id: "callback", label: t("contact.tabCallback") },
+                      { id: "newsletter", label: t("contact.tabNewsletter") },
+                    ];
+                    return (isRTL ? [...tabs].reverse() : tabs);
+                  })().map((tab) => (
                     <TabsTrigger
                       key={tab.id}
                       value={tab.id}
