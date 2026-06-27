@@ -14,6 +14,9 @@ const Invest = () => {
   const { t, isRTL } = useLanguage();
   const [purchasePrice, setPurchasePrice] = useState("");
   const [expectedRent, setExpectedRent] = useState("");
+  const whyDubaiTextAlign = isRTL
+    ? ({ textAlign: "right", textAlignLast: "right" } as const)
+    : undefined;
 
   const price = parseFloat(purchasePrice) || 0;
   const rent = parseFloat(expectedRent) || 0;
@@ -136,13 +139,26 @@ const Invest = () => {
                 { icon: Shield, title: t("invest.whyStability"), desc: t("invest.whyStabilityDesc") },
                 { icon: Award, title: t("invest.whyLifestyle"), desc: t("invest.whyLifestyleDesc") },
               ].map((item) => (
-                <div key={item.title} dir={isRTL ? "rtl" : "ltr"} className="flex gap-4">
+                <div
+                  key={item.title}
+                  dir={isRTL ? "rtl" : "ltr"}
+                  className={cn(
+                    "flex gap-4",
+                    isRTL ? "flex-row text-right [unicode-bidi:isolate]" : "flex-row text-left"
+                  )}
+                >
                   <div className="w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0">
                     <item.icon className="h-5 w-5 text-accent" strokeWidth={1} />
                   </div>
-                  <div dir={isRTL ? "rtl" : "ltr"} className={cn("flex-1 min-w-0", isRTL ? "text-right" : "text-left")}>
-                    <h4 className={cn("font-medium text-foreground mb-1", isRTL ? "text-right" : "text-left")}>{item.title}</h4>
-                    <p className={cn("text-sm text-muted-foreground leading-relaxed", isRTL ? "text-right" : "text-left")}>{item.desc}</p>
+                  <div
+                    dir={isRTL ? "rtl" : "ltr"}
+                    className={cn(
+                      "flex-1 min-w-0",
+                      isRTL ? "text-right [unicode-bidi:isolate]" : "text-left"
+                    )}
+                  >
+                    <h4 className="font-medium text-foreground mb-1" style={whyDubaiTextAlign}>{item.title}</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed" style={whyDubaiTextAlign}>{item.desc}</p>
                   </div>
                 </div>
 
