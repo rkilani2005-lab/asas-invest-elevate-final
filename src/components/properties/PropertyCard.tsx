@@ -44,6 +44,16 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   // Optional yield value (rental yield % stored on property if available)
   const yieldValue = (property as any).rental_yield ?? (property as any).yield_percentage;
 
+  // Localize price string: strip leading "from " (label already shown above)
+  // and swap "AED" → "د.إ" in Arabic.
+  const formatPrice = (raw?: string | null) => {
+    if (!raw) return "";
+    let p = raw.replace(/^\s*from\s+/i, "").trim();
+    if (isRTL) p = p.replace(/\bAED\b/gi, "د.إ");
+    return p;
+  };
+  const displayPrice = formatPrice(property.price_range);
+
   // Build meta tokens (joined with diamond glyph)
   const metaTokens: string[] = [];
   if (property.unit_types?.length) metaTokens.push(property.unit_types.join(", "));
