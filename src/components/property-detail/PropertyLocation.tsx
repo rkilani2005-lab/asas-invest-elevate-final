@@ -84,7 +84,7 @@ const PropertyLocation = ({ property }: PropertyLocationProps) => {
           </div>
 
           {/* Nearby Places */}
-          <div className={cn()}>
+          <div>
             <div className={cn(
               "flex items-center mb-6"
             )}>
