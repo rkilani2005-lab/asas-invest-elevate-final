@@ -14,7 +14,7 @@ const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ message }) => {
   const phoneNumber = settings.contact.whatsapp;
   if (loading || !phoneNumber) return null;
 
-  const defaultMessage = t('contact.whatsapp');
+  const defaultMessage = 'Hello ASAS';
   const encodedMessage = encodeURIComponent(message || defaultMessage);
   const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
 
