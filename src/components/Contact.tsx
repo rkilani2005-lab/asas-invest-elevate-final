@@ -415,7 +415,7 @@ const Contact = () => {
                     </div>
                   ) : (
                     <>
-                      <p className="text-sm text-muted-foreground mb-6">{t("contact.newsletterIntro")}</p>
+                      <p className={cn("text-sm text-muted-foreground mb-6", isRTL && "text-right")} dir={isRTL ? "rtl" : "ltr"}>{t("contact.newsletterIntro")}</p>
                       <form onSubmit={handleNewsletterSubmit} className="space-y-5">
                         <div>
                           <label className={labelCls}>{t("contact.newsletterName")}</label>
