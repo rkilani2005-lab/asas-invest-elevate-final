@@ -333,7 +333,7 @@ const Navigation = () => {
                       <MobileMegaMenu onLinkClick={handleMobileLinkClick} />
                     </div>
 
-                    <div className="px-6 py-6 border-t border-border space-y-4">
+                    <div className="px-6 py-6 border-t border-border space-y-4 shrink-0" style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}>
                       <div className="flex justify-start">
                         <LanguageSwitcher />
                       </div>
