@@ -50,16 +50,31 @@ const TrustCredentials = () => {
                 className="bg-white p-7 h-full transition-all duration-300 hover:-translate-y-1"
                 style={{ border: "1px solid rgba(197,160,89,0.25)" }}
               >
-                <div className="inline-flex items-center justify-center w-11 h-11 mb-5" style={{ background: "rgba(197,160,89,0.1)" }}>
+                <div
+                  className={cn(
+                    "inline-flex items-center justify-center w-11 h-11 mb-5",
+                    isRTL && "flex mx-auto"
+                  )}
+                  style={{ background: "rgba(197,160,89,0.1)" }}
+                >
                   <pillar.icon className="h-5 w-5 text-accent" strokeWidth={1.5} />
                 </div>
-                <h3 className="heading-section mb-2" style={{ fontSize: "1.05rem", color: "#1A1A1A", fontWeight: 600 }}>
+                <h3
+                  className={cn("heading-section mb-2", isRTL && "text-center")}
+                  style={{ fontSize: "1.05rem", color: "#1A1A1A", fontWeight: 600 }}
+                >
                   {t(pillar.titleKey)}
                 </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
+                <p
+                  className={cn(
+                    "text-muted-foreground text-sm leading-relaxed",
+                    isRTL && "text-justify"
+                  )}
+                >
                   {t(pillar.descKey)}
                 </p>
               </div>
+
             </StaggerItem>
           ))}
         </StaggerContainer>
