@@ -10,6 +10,7 @@ import i18n from "@/i18n/config";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index"; // keep eager: it's the LCP page
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
+import ScrollToHash from "@/components/ScrollToHash";
 
 // Public pages — lazy loaded
 const InsightsPage = lazy(() => import("./pages/Insights"));
@@ -66,6 +67,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToHash />
               <Suspense fallback={<PageFallback />}>
                 <Routes>
                   <Route path="/" element={<Index />} />
