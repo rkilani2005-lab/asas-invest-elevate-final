@@ -305,6 +305,8 @@ const Navigation = () => {
                     bottom: 0,
                     left: isRTL ? "auto" : 0,
                     right: isRTL ? 0 : "auto",
+                    height: "100dvh",
+                    maxHeight: "100dvh",
                   }}
                   className="w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y overflow-hidden"
                 >
