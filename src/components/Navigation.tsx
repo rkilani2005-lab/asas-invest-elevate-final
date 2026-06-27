@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -253,108 +255,101 @@ const Navigation = () => {
           </button>
         </div>
 
-        {/* Mobile Slide-in Panel */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-[60] lg:hidden"
-                onClick={() => setIsMobileMenuOpen(false)}
-                aria-hidden="true"
-              />
-              <motion.div
-                ref={drawerRef}
-                role="dialog"
-                aria-modal="true"
-                aria-label={t("navigation.mobileMenuLabel", "Site navigation")}
-                id="mobile-navigation-drawer"
-                // Force LTR on the OUTER animated element so Framer Motion's `x`
-                // values are never visually inverted by an RTL ancestor. The inner
-                // content sets its own `dir` for text/layout flow.
-                dir="ltr"
-                // Anchor to the visual RIGHT in RTL, visual LEFT in LTR.
-                // Slide in from the same edge (always 100% offset toward that edge):
-                //   RTL → starts at +100% (off-screen right) → animates to 0 (rests at right).
-                //   LTR → starts at -100% (off-screen left)  → animates to 0 (rests at left).
-                initial={{ x: isRTL ? "100%" : "-100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: isRTL ? "100%" : "-100%" }}
-                transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.35 }}
-                drag="x"
-                dragDirectionLock
-                // Allow dragging only toward the anchored edge to close.
-                dragConstraints={isRTL ? { left: 0, right: 300 } : { left: -300, right: 0 }}
-                dragElastic={0.15}
-                dragMomentum={false}
-                onDragEnd={(_, info) => {
-                  const closeThresholdPx = 80;
-                  const closeVelocity = 400;
-                  const closedByDistance = isRTL
-                    ? info.offset.x > closeThresholdPx
-                    : info.offset.x < -closeThresholdPx;
-                  const closedByVelocity = isRTL
-                    ? info.velocity.x > closeVelocity
-                    : info.velocity.x < -closeVelocity;
-                  if (closedByDistance || closedByVelocity) {
-                    setIsMobileMenuOpen(false);
-                  }
-                }}
-                style={{
-                  position: "fixed",
-                  top: 0,
-                  bottom: 0,
-                  // Hard-pin to a physical edge with explicit left/right (no logical
-                  // properties) so RTL inheritance can never flip the anchor.
-                  left: isRTL ? "auto" : 0,
-                  right: isRTL ? 0 : "auto",
-                }}
-                className="w-[300px] h-screen z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y overflow-hidden"
-              >
-                {/* Inner wrapper restores the document direction for text & layout flow */}
-                <div dir={isRTL ? "rtl" : "ltr"} className="flex flex-col flex-1 min-h-0 w-full">
-
-                  <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
-                    <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
-                      <img 
-                        src={logoWhiteBg} 
-                        alt="Asas Invest" 
-                        className="h-10 w-auto object-contain"
-                      />
-                    </Link>
-                    <button
-                      ref={closeButtonRef}
-                      className="p-2 text-foreground hover:text-accent transition-colors rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      aria-label={t("buttons.closeMenu", "Close menu")}
-                    >
-                      <X className="h-5 w-5" strokeWidth={1.5} />
-                    </button>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto py-6 px-6">
-                    <MobileMegaMenu onLinkClick={handleMobileLinkClick} />
-                  </div>
-
-                  <div className="px-6 py-6 border-t border-border space-y-4">
-                    <div className="flex justify-start">
-                      <LanguageSwitcher />
+        {/* Mobile Slide-in Panel — portaled to body so the scrolled nav's
+            backdrop-filter doesn't create a containing block that traps it. */}
+        {createPortal(
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-[60] lg:hidden"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  aria-hidden="true"
+                />
+                <motion.div
+                  ref={drawerRef}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={t("navigation.mobileMenuLabel", "Site navigation")}
+                  id="mobile-navigation-drawer"
+                  dir="ltr"
+                  initial={{ x: isRTL ? "100%" : "-100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: isRTL ? "100%" : "-100%" }}
+                  transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.35 }}
+                  drag="x"
+                  dragDirectionLock
+                  dragConstraints={isRTL ? { left: 0, right: 300 } : { left: -300, right: 0 }}
+                  dragElastic={0.15}
+                  dragMomentum={false}
+                  onDragEnd={(_, info) => {
+                    const closeThresholdPx = 80;
+                    const closeVelocity = 400;
+                    const closedByDistance = isRTL
+                      ? info.offset.x > closeThresholdPx
+                      : info.offset.x < -closeThresholdPx;
+                    const closedByVelocity = isRTL
+                      ? info.velocity.x > closeVelocity
+                      : info.velocity.x < -closeVelocity;
+                    if (closedByDistance || closedByVelocity) {
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    bottom: 0,
+                    left: isRTL ? "auto" : 0,
+                    right: isRTL ? 0 : "auto",
+                  }}
+                  className="w-[300px] h-screen z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y overflow-hidden"
+                >
+                  <div dir={isRTL ? "rtl" : "ltr"} className="flex flex-col flex-1 min-h-0 w-full">
+                    <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
+                      <Link to="/" onClick={(e) => handleMobileLinkClick(e, '/')} className="flex items-center">
+                        <img
+                          src={logoWhiteBg}
+                          alt="Asas Invest"
+                          className="h-10 w-auto object-contain"
+                        />
+                      </Link>
+                      <button
+                        ref={closeButtonRef}
+                        className="p-2 text-foreground hover:text-accent transition-colors rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        aria-label={t("buttons.closeMenu", "Close menu")}
+                      >
+                        <X className="h-5 w-5" strokeWidth={1.5} />
+                      </button>
                     </div>
-                    <Button variant="luxury" className="w-full" onClick={(e) => handleMobileLinkClick(e as any, '/#contact')}>
-                      {t("buttons.contactUs")}
-                    </Button>
+
+                    <div className="flex-1 overflow-y-auto py-6 px-6">
+                      <MobileMegaMenu onLinkClick={handleMobileLinkClick} />
+                    </div>
+
+                    <div className="px-6 py-6 border-t border-border space-y-4">
+                      <div className="flex justify-start">
+                        <LanguageSwitcher />
+                      </div>
+                      <Button variant="luxury" className="w-full" onClick={(e) => handleMobileLinkClick(e as any, '/#contact')}>
+                        {t("buttons.contactUs")}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
       </div>
     </nav>
   );
 };
+
 
 export default Navigation;
