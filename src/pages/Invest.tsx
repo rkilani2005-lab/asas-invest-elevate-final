@@ -139,11 +139,12 @@ const Invest = () => {
                   <div className="w-10 h-10 border border-accent/30 flex items-center justify-center flex-shrink-0">
                     <item.icon className="h-5 w-5 text-accent" strokeWidth={1} />
                   </div>
-                  <div className={cn(isRTL && "text-end")}>
-                    <h4 className="font-medium text-foreground mb-1">{item.title}</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <div dir={isRTL ? "rtl" : "ltr"} className={cn("flex-1 min-w-0", isRTL ? "text-right" : "text-left")}>
+                    <h4 className={cn("font-medium text-foreground mb-1", isRTL ? "text-right" : "text-left")}>{item.title}</h4>
+                    <p className={cn("text-sm text-muted-foreground leading-relaxed", isRTL ? "text-right" : "text-left")}>{item.desc}</p>
                   </div>
                 </div>
+
               ))}
             </div>
           </div>
