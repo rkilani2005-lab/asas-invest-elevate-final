@@ -14,6 +14,9 @@ const Invest = () => {
   const { t, isRTL } = useLanguage();
   const [purchasePrice, setPurchasePrice] = useState("");
   const [expectedRent, setExpectedRent] = useState("");
+  const whyDubaiTextAlign = isRTL
+    ? ({ textAlign: "right", textAlignLast: "right" } as const)
+    : undefined;
 
   const price = parseFloat(purchasePrice) || 0;
   const rent = parseFloat(expectedRent) || 0;
@@ -154,8 +157,8 @@ const Invest = () => {
                       isRTL ? "text-right [unicode-bidi:isolate]" : "text-left"
                     )}
                   >
-                    <h4 className={cn("font-medium text-foreground mb-1", isRTL && "text-right [text-align-last:right]")}>{item.title}</h4>
-                    <p className={cn("text-sm text-muted-foreground leading-relaxed", isRTL && "text-right [text-align-last:right]")}>{item.desc}</p>
+                    <h4 className="font-medium text-foreground mb-1" style={whyDubaiTextAlign}>{item.title}</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed" style={whyDubaiTextAlign}>{item.desc}</p>
                   </div>
                 </div>
 
