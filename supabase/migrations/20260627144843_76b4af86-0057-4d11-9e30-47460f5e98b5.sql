@@ -1,0 +1,1 @@
+UPDATE public.site_settings SET value = jsonb_set(value, '{whatsapp}', '"+971507089543"') WHERE key='contact';
