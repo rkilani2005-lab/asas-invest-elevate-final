@@ -305,8 +305,10 @@ const Navigation = () => {
                     bottom: 0,
                     left: isRTL ? "auto" : 0,
                     right: isRTL ? 0 : "auto",
+                    height: "100dvh",
+                    maxHeight: "100dvh",
                   }}
-                  className="w-[300px] h-screen z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y overflow-hidden"
+                  className="w-[300px] z-[70] lg:hidden bg-background shadow-2xl flex flex-col touch-pan-y overflow-hidden"
                 >
                   <div dir={isRTL ? "rtl" : "ltr"} className="flex flex-col flex-1 min-h-0 w-full">
                     <div className="flex items-center justify-between h-20 px-6 border-b border-border [direction:ltr]">
@@ -331,7 +333,7 @@ const Navigation = () => {
                       <MobileMegaMenu onLinkClick={handleMobileLinkClick} />
                     </div>
 
-                    <div className="px-6 py-6 border-t border-border space-y-4">
+                    <div className="px-6 py-6 border-t border-border space-y-4 shrink-0" style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}>
                       <div className="flex justify-start">
                         <LanguageSwitcher />
                       </div>
