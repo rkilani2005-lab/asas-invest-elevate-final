@@ -112,11 +112,12 @@ const Invest = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="p-6 border border-accent/30 text-center">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t("invest.grossROI")}</p>
-                  <p dir="ltr" className="heading-hero text-3xl text-accent tabular-nums">{formatPct(grossROIValue)}</p>
+                  <p dir="ltr" className="heading-hero text-3xl text-accent tabular-nums text-center">{formatPct(grossROIValue)}</p>
                 </div>
                 <div className="p-6 border border-accent/30 text-center">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t("invest.netROI")}</p>
-                  <p dir="ltr" className="heading-hero text-3xl text-accent tabular-nums">{formatPct(netROIValue)}</p>
+                  <p dir="ltr" className="heading-hero text-3xl text-accent tabular-nums text-center">{formatPct(netROIValue)}</p>
+
                 </div>
               </div>
               <p className="text-xs text-muted-foreground mt-4 text-center">{t("invest.calcNote")}</p>
