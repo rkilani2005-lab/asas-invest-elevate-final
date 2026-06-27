@@ -159,7 +159,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             </p>
             <p
               className={cn(
-                "text-start",
+                "text-start truncate",
                 property.price_range ? "text-foreground" : "text-muted-foreground/50 italic"
               )}
               style={{
@@ -167,11 +167,14 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
                 fontWeight: 700,
                 fontSize: '1.5rem',
                 letterSpacing: '-0.03em',
-                lineHeight: 1.05,
+                lineHeight: 1.15,
+                minHeight: '1.75rem',
               }}
+              title={displayPrice || undefined}
             >
-              {property.price_range || t("property.placeholder.price")}
+              {displayPrice || t("property.placeholder.price")}
             </p>
+
           </div>
 
           {/* Secondary line (always reserves a line) */}
