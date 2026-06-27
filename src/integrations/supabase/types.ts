@@ -1474,6 +1474,119 @@ export type Database = {
         }
         Relationships: []
       }
+      spotlight_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: number
+          locale: string
+          session_id: string | null
+          spotlight_id: string
+          surface: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: never
+          locale?: string
+          session_id?: string | null
+          spotlight_id: string
+          surface?: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: never
+          locale?: string
+          session_id?: string | null
+          spotlight_id?: string
+          surface?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotlight_events_spotlight_id_fkey"
+            columns: ["spotlight_id"]
+            isOneToOne: false
+            referencedRelation: "spotlight_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spotlight_events_spotlight_id_fkey"
+            columns: ["spotlight_id"]
+            isOneToOne: false
+            referencedRelation: "spotlights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spotlights: {
+        Row: {
+          community_ar: string | null
+          community_en: string | null
+          created_at: string
+          hook_ar: string | null
+          hook_en: string | null
+          id: string
+          is_featured: boolean
+          is_published: boolean
+          property_id: string | null
+          published_at: string | null
+          sort_order: number
+          thumbnail_url: string | null
+          title_ar: string
+          title_en: string
+          updated_at: string
+          video_provider: string
+          video_url: string
+        }
+        Insert: {
+          community_ar?: string | null
+          community_en?: string | null
+          created_at?: string
+          hook_ar?: string | null
+          hook_en?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          property_id?: string | null
+          published_at?: string | null
+          sort_order?: number
+          thumbnail_url?: string | null
+          title_ar: string
+          title_en: string
+          updated_at?: string
+          video_provider?: string
+          video_url: string
+        }
+        Update: {
+          community_ar?: string | null
+          community_en?: string | null
+          created_at?: string
+          hook_ar?: string | null
+          hook_en?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          property_id?: string | null
+          published_at?: string | null
+          sort_order?: number
+          thumbnail_url?: string | null
+          title_ar?: string
+          title_en?: string
+          updated_at?: string
+          video_provider?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotlights_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       translations: {
         Row: {
           ar_text: string | null
@@ -1524,7 +1637,21 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      spotlight_stats: {
+        Row: {
+          click_throughs: number | null
+          completed: number | null
+          id: string | null
+          impressions: number | null
+          play_rate_pct: number | null
+          plays: number | null
+          plays_ar: number | null
+          plays_en: number | null
+          title_ar: string | null
+          title_en: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       expire_outdated_properties: { Args: never; Returns: undefined }
