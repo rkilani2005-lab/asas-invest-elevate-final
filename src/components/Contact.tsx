@@ -287,9 +287,9 @@ const Contact = () => {
                         <div>
                           <label className={labelCls}>{t("contact.subject")}</label>
                           <Select value={contactForm.subject} onValueChange={(v) => setContactForm({ ...contactForm, subject: v })}>
-                            <SelectTrigger className={inputCls}>
-                              <SelectValue placeholder={t("contact.subjectPlaceholder")} />
-                            </SelectTrigger>
+                          <SelectTrigger className={cn(inputCls, isRTL && "flex-row-reverse text-right [&>span]:text-right")}>
+                            <SelectValue placeholder={t("contact.subjectPlaceholder")} />
+                          </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="general">{t("contact.subjectGeneral")}</SelectItem>
                               <SelectItem value="property">{t("contact.subjectProperty")}</SelectItem>
@@ -312,15 +312,15 @@ const Contact = () => {
                           className={cn(inputCls, "resize-none")}
                         />
                       </div>
-                      <div className="flex items-start gap-3">
+                      <div className={cn("flex items-start gap-3", isRTL && "flex-row-reverse text-right")}>
                         <input
                           type="checkbox"
                           id="consent"
                           checked={contactForm.consent}
                           onChange={(e) => setContactForm({ ...contactForm, consent: e.target.checked })}
-                          className="mt-0.5 w-4 h-4 accent-[hsl(var(--accent))] cursor-pointer"
+                          className="mt-0.5 w-4 h-4 accent-[hsl(var(--accent))] cursor-pointer shrink-0"
                         />
-                        <label htmlFor="consent" className="text-xs text-muted-foreground cursor-pointer leading-relaxed">
+                        <label htmlFor="consent" className={cn("text-xs text-muted-foreground cursor-pointer leading-relaxed", isRTL && "text-right")}>
                           {t("contact.consentLabel")}{" "}
                           <a href="#" className="text-accent hover:underline">{t("contact.privacyPolicy")}</a>.
                         </label>
