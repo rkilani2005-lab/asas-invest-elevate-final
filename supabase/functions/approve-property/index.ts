@@ -80,6 +80,18 @@ async function sendGmailNotification(
   });
 }
 
+/**
+ * Run a promise after the HTTP response is sent. Supabase's Edge runtime keeps
+ * the isolate alive for work registered with EdgeRuntime.waitUntil, so the slow
+ * Gmail send no longer blocks the approver's request. Falls back to a detached
+ * promise locally where EdgeRuntime is unavailable.
+ */
+function scheduleBackground(p: Promise<unknown>): void {
+  const er = (globalThis as any).EdgeRuntime;
+  if (er && typeof er.waitUntil === "function") er.waitUntil(p.catch(() => {}));
+  else void p.catch(() => {});
+}
+
 Deno.serve(async (req): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -124,10 +136,12 @@ Deno.serve(async (req): Promise<Response> => {
         level: "success",
       });
 
-      // Notify content team
-      const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle() as any;
-      const teamEmail = emailRow?.value || ((await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()) as any).data?.value;
-      if (teamEmail) {
+      // Notify content team in the background so the approver's request returns
+      // immediately instead of waiting on the Gmail token refresh + send (1–3s).
+      scheduleBackground((async () => {
+        const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle() as any;
+        const teamEmail = emailRow?.value || ((await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()) as any).data?.value;
+        if (!teamEmail) return;
         const html = buildEmailHtml(
           `Property Approved: ${propertyName}`,
           `<p>The following property has been <strong style="color:#2e7d32">approved</strong> and is now being published to the ASAS website.</p>
@@ -138,8 +152,8 @@ Deno.serve(async (req): Promise<Response> => {
           <hr class="divider"/>
           <p style="font-size:13px;color:#7a7a7a">The property will appear live on the website after media processing completes.</p>`
         );
-        await sendGmailNotification(supabase as any, teamEmail, `[ASAS] Property Approved & Publishing: ${propertyName}`, html, `Property "${propertyName}" has been approved by ${reviewed_by || "admin"} and is being published.`).catch(() => {});
-      }
+        await sendGmailNotification(supabase as any, teamEmail, `[ASAS] Property Approved & Publishing: ${propertyName}`, html, `Property "${propertyName}" has been approved by ${reviewed_by || "admin"} and is being published.`);
+      })());
 
       return new Response(JSON.stringify({ success: true, action: "approved", job_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -163,11 +177,11 @@ Deno.serve(async (req): Promise<Response> => {
         level: "warning",
       });
 
-      // Notify content team with specific fix instructions
-      const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle() as any;
-      const teamEmail = emailRow?.value || ((await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()) as any).data?.value;
-
-      if (teamEmail) {
+      // Notify content team in the background (don't block the reviewer's request).
+      scheduleBackground((async () => {
+        const { data: emailRow } = await supabase.from("importer_settings").select("value").eq("key", "content_team_email").maybeSingle() as any;
+        const teamEmail = emailRow?.value || ((await supabase.from("importer_settings").select("value").eq("key", "admin_email").maybeSingle()) as any).data?.value;
+        if (!teamEmail) return;
         const errorsHtml = errors.length > 0
           ? `<div class="err-box"><strong>Errors to fix:</strong><ul style="margin:8px 0 0;padding-left:20px">${errors.map((e) => `<li style="color:#e53e3e;margin-bottom:4px">${e}</li>`).join("")}</ul></div>`
           : "";
@@ -184,11 +198,11 @@ Deno.serve(async (req): Promise<Response> => {
           ${review_notes ? `<p class="label">Admin Notes</p><div class="warn-box">${review_notes}</div>` : ""}
           ${errorsHtml}${warningsHtml}
           <hr class="divider"/>
-          <p><strong>To fix:</strong> Update the <code>metadata.json</code> file in the Google Drive folder for this property, then re-import from the ASAS admin dashboard.</p>
+          <p><strong>To fix:</strong> Re-import this property from the AI Property Chat in the ASAS admin dashboard with the corrected details.</p>
           <p style="font-size:13px;color:#7a7a7a">Navigate to: Admin → Auto Import → Queue → find this property → Re-extract</p>`
         );
-        await sendGmailNotification(supabase as any, teamEmail, `[ASAS] Property Needs Changes: ${propertyName}`, html, `Property "${propertyName}" was rejected by ${reviewed_by || "admin"}. Reason: ${review_notes || "See dashboard for details."}`).catch(() => {});
-      }
+        await sendGmailNotification(supabase as any, teamEmail, `[ASAS] Property Needs Changes: ${propertyName}`, html, `Property "${propertyName}" was rejected by ${reviewed_by || "admin"}. Reason: ${review_notes || "See dashboard for details."}`);
+      })());
 
       return new Response(JSON.stringify({ success: true, action: "rejected", job_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }

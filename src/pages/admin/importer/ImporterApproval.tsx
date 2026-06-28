@@ -67,7 +67,7 @@ function ApprovalCard({ job, onAction }: { job: Record<string, unknown>; onActio
         job_id: job.id,
         action,
         review_notes: notes.trim() || null,
-        reviewed_by: (await supabase.auth.getUser()).data.user?.email || "admin",
+        reviewed_by: (await supabase.auth.getSession()).data.session?.user?.email || "admin",
       });
       toast.success(action === "approve" ? "Property approved — publishing started" : "Property rejected — content team notified");
       onAction();
