@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePdfChunker } from "@/hooks/usePdfChunker";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -94,7 +93,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
   const [editing, setEditing]           = useState(false);
   const [form, setForm]                 = useState<Record<string, any>>({});
   const [publishing, setPublishing]     = useState(false);
-  const [extracting, setExtracting]     = useState(false);
   const [fileProgress, setFileProgress] = useState<FileProgress[]>([]);
   const [overallStep, setOverallStep]   = useState("");
 
@@ -135,460 +133,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     job.import_status || ""
   );
 
-  // ── AI Extraction v2 — text + image pipeline ──────
-  const { extractPdfText } = usePdfChunker();
-
-  // ── Helper: convert an image Blob to base64 for AI Vision ───────────────
-  // Uses window.FileReader (accessed via window. so Vite cannot rename it).
-  // No canvas/Image APIs needed — AI accepts raw JPEG/PNG/WEBP up to 20 MB.
-  const resizeImageForAI = useCallback((blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      // window.FileReader: property access on window prevents minifier renaming
-      const reader = new (window as any).FileReader();
-      reader.onloadend = () => {
-        const result: string = reader.result;
-        // result is "data:image/jpeg;base64,<b64data>" — strip the prefix
-        const comma = result.indexOf(",");
-        resolve(comma >= 0 ? result.slice(comma + 1) : result);
-      };
-      reader.onerror = () => reject(new Error("FileReader failed to read image blob"));
-      reader.readAsDataURL(blob);
-    });
-  }, []);
-
-  const handleExtract = useCallback(async () => {
-    setExtracting(true);
-    await supabase.from("import_jobs").update({ import_status: "extracting" }).eq("id", job.id);
-
-    const addLog = async (action: string, details: string, level = "info") => {
-      await supabase.from("import_logs").insert({ job_id: job.id, action, details, level });
-    };
-
-    // Download files from Google Drive via server-side proxy (no CORS issues)
-    const downloadFromDrive = async (fileId: string, filename: string): Promise<Blob> => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gdrive-oauth`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({ action: "download_file", file_id: fileId }),
-        },
-      );
-      if (!res.ok) {
-        let detail = `HTTP ${res.status}`;
-        try { const j = await res.json(); detail = j.error || j.details || detail; } catch {}
-        throw new Error(`Failed to download "${filename}": ${detail}`);
-      }
-      return res.blob();
-    };
-
-    try {
-      // ── Step 1: Load all media items from DB ──────────────────────────────
-      const { data: mediaItems } = await supabase
-        .from("import_media").select("*").eq("job_id", job.id).order("sort_order");
-      const allItems    = mediaItems || [];
-      const pdfItems    = allItems.filter((m: any) =>
-        m.media_type === "brochure" ||
-        (m.media_type === "other" && m.original_filename?.toLowerCase().endsWith(".pdf"))
-      );
-      const imageItems  = allItems.filter((m: any) => m.media_type === "image" || m.media_type === "hero" || m.media_type === "render" || m.media_type === "floorplan" || m.media_type === "interior" || m.media_type === "exterior" || m.media_type === "amenity" || m.media_type === "location");
-      const videoItems  = allItems.filter((m: any) => m.media_type === "video");
-
-      await addLog("step", `1/9 — Found ${pdfItems.length} PDF(s), ${imageItems.length} image(s), ${videoItems.length} video(s)`);
-
-      const CONCURRENCY = 3;
-      const allBatches: Array<{
-        pages: string[]; sourceFile: string; batchIndex: number;
-        totalBatches: number; folderCategory: string;
-      }> = [];
-
-      // ── Step 2: Extract text from PDFs SERVER-SIDE (no browser download) ──
-      // The edge function downloads the PDF from Drive and returns only the text
-      // (~20 KB instead of downloading 22+ MB PDFs to the browser)
-      if (pdfItems.length > 0) {
-        // ── Smart filtering: skip foreign-language duplicates ────────────────
-        // Properties often have English + Chinese + Russian copies of the same docs.
-        // We only need English for extraction (Arabic is AI-generated from English).
-        const FOREIGN_LANG_PATTERNS = [
-          /_zh_cn/i, /_zh/i, /_cn/i, /_ru/i, /_ar/i, /_fr/i, /_de/i, /_es/i, /_pt/i,
-          /_ja/i, /_ko/i, /_hi/i, /[\u4e00-\u9fff]/, /[\u0400-\u04ff]/,
-          /chinese/i, /russian/i, /arabic/i, /mandarin/i,
-        ];
-
-        const isNonEnglish = (filename: string): boolean =>
-          FOREIGN_LANG_PATTERNS.some((p) => p.test(filename));
-
-        const englishPdfs = pdfItems.filter((m: any) => !isNonEnglish(m.original_filename));
-        const skippedPdfs = pdfItems.filter((m: any) => isNonEnglish(m.original_filename));
-
-        if (skippedPdfs.length > 0) {
-          await addLog("info",
-            `Skipping ${skippedPdfs.length} non-English PDF(s): ${skippedPdfs.map((m: any) => m.original_filename).join(", ")}`,
-            "info");
-        }
-
-        const pdfsToProcess = englishPdfs.length > 0 ? englishPdfs : pdfItems.slice(0, 3); // fallback to first 3 if no English detected
-        await addLog("step",
-          `2/9 — Extracting text from ${pdfsToProcess.length} English PDF(s) server-side (${pdfItems.length - pdfsToProcess.length} foreign-language skipped)`);
-
-        let combinedText = "";
-
-        // Sort: payment plans & fact sheets first (small, data-rich), then floor plans, then brochures
-        const pdfPriority = (name: string): number => {
-          const n = name.toLowerCase();
-          if (n.includes("payment") || n.includes("installment")) return 0;
-          if (n.includes("fact") || n.includes("sheet")) return 1;
-          if (n.includes("floor") || n.includes("plan")) return 2;
-          return 3; // brochure and other
-        };
-        const sortedPdfs = [...pdfsToProcess].sort(
-          (a, b) => pdfPriority(a.original_filename) - pdfPriority(b.original_filename)
-              || (a.original_size_bytes || 0) - (b.original_size_bytes || 0)
-        );
-
-        for (const item of sortedPdfs) {
-          try {
-            const sizeMB = item.original_size_bytes
-              ? (item.original_size_bytes / 1024 / 1024).toFixed(1) : "?";
-            await addLog("info", `Extracting text from "${item.original_filename}" (${sizeMB} MB) — server-side`);
-
-            let extractedText = "";
-
-            // Try server-side extraction first (fast, no browser download)
-            try {
-              const result = await callEdgeFunction("extract-pdf-text", {
-                file_id: item.dropbox_path,
-                filename: item.original_filename,
-              });
-              if (result?.ok && result.text?.trim() && result.quality !== "minimal") {
-                extractedText = result.text;
-                await addLog("info",
-                  `✓ "${item.original_filename}": ${result.chars} chars server-side (${result.download_ms + result.extract_ms}ms)`,
-                  "success");
-              }
-            } catch (serverErr: any) {
-              // Server extraction failed — will try browser fallback below
-              await addLog("warning",
-                `Server extraction failed for "${item.original_filename}": ${serverErr.message}`,
-                "warning");
-            }
-
-            // Browser fallback if server got nothing useful
-            if (!extractedText) {
-              try {
-                await addLog("info", `Trying browser PDF.js fallback for "${item.original_filename}"…`);
-                const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
-                const fallbackText = await extractPdfText(blob, item.original_filename);
-                if (fallbackText.trim()) {
-                  extractedText = fallbackText;
-                  await addLog("info",
-                    `✓ Browser fallback: ${fallbackText.length} chars from "${item.original_filename}"`,
-                    "success");
-                }
-              } catch (fbErr: any) {
-                await addLog("warning", `Browser fallback also failed for "${item.original_filename}": ${fbErr.message}`, "warning");
-              }
-            }
-
-            if (extractedText) {
-              combinedText += `\n=== ${item.original_filename} ===\n${extractedText}\n`;
-            }
-          } catch (pdfErr: any) {
-            await addLog("warning", `PDF error "${item.original_filename}": ${pdfErr.message}`, "warning");
-          }
-        }
-        if (combinedText.trim()) {
-          // Split text into chunks if very long (>30K chars) to avoid token limits
-          const MAX_CHUNK = 30000;
-          const textChunks: string[] = [];
-          if (combinedText.length <= MAX_CHUNK) {
-            textChunks.push(combinedText);
-          } else {
-            for (let i = 0; i < combinedText.length; i += MAX_CHUNK) {
-              textChunks.push(combinedText.slice(i, i + MAX_CHUNK));
-            }
-          }
-          const totalBatches = textChunks.length;
-          for (let i = 0; i < textChunks.length; i++) {
-            allBatches.push({
-              pages:        [textChunks[i]],
-              sourceFile:   "pdf-text-extraction",
-              batchIndex:   i,
-              totalBatches,
-              folderCategory: "TextData",
-            });
-          }
-          await addLog("info", `PDF text ready: ${combinedText.length} chars in ${totalBatches} batch(es)`, "success");
-        }
-      } else {
-        await addLog("warning", "No PDF brochures found — continuing with images only", "warning");
-      }
-
-      // ── Step 3: Download images + prepare vision batches ──────────────────
-      // Prioritise: floor plans → exterior → interior → others (max 12 images total)
-      const priorityOrder = (name: string, isHero: boolean): number => {
-        const n = name.toLowerCase();
-        if (n.includes("floor") || n.includes("plan") || n.includes("layout")) return 0;
-        if (n.includes("exterior") || n.includes("facade") || isHero)           return 1;
-        if (n.includes("amenity") || n.includes("pool") || n.includes("gym"))   return 2;
-        if (n.includes("interior") || n.includes("living") || n.includes("bedroom")) return 3;
-        return 4;
-      };
-
-      const sortedImages = [...imageItems].sort((a, b) =>
-        priorityOrder(a.original_filename, a.is_hero) -
-        priorityOrder(b.original_filename, b.is_hero)
-      ).slice(0, 12); // cap at 12 images for extraction
-
-      if (sortedImages.length > 0) {
-        await addLog("step", `3/9 — Downloading ${sortedImages.length} image(s) for visual analysis`);
-
-        const imageB64List: string[] = [];
-        for (const item of sortedImages) {
-          try {
-            const blob = await downloadFromDrive(item.dropbox_path, item.original_filename);
-            // Ensure blob has an image MIME type so FileReader works correctly
-            const typedBlob = blob.type.startsWith("image/")
-              ? blob
-              : new Blob([await blob.arrayBuffer()], { type: "image/jpeg" });
-            const b64 = await resizeImageForAI(typedBlob);
-            imageB64List.push(b64);
-            await addLog("info", `Image ready: ${item.original_filename}`);
-          } catch (imgErr: any) {
-            await addLog("warning", `Skipped image "${item.original_filename}": ${imgErr.message}`, "warning");
-          }
-        }
-
-        // Group images into batches of 4 for AI
-        const IMG_BATCH = 4;
-        const imgTotalBatches = Math.ceil(imageB64List.length / IMG_BATCH);
-        for (let i = 0; i < imageB64List.length; i += IMG_BATCH) {
-          allBatches.push({
-            pages:        imageB64List.slice(i, i + IMG_BATCH),
-            sourceFile:   "property-images",
-            batchIndex:   Math.floor(i / IMG_BATCH),
-            totalBatches: imgTotalBatches,
-            folderCategory: "Images",
-          });
-        }
-        await addLog("info", `${imageB64List.length} image(s) ready in ${imgTotalBatches} batch(es)`, "success");
-      }
-
-      // ── Step 4: Collect video metadata ────────────────────────────────────
-      const videoMeta = videoItems.map((v: any) => ({
-        filename: v.original_filename,
-        size_mb: v.original_size_bytes ? (v.original_size_bytes / 1048576).toFixed(1) : "unknown",
-        file_id: v.dropbox_path,
-      }));
-      if (videoMeta.length > 0) {
-        await addLog("step", `4/9 — Found ${videoMeta.length} video(s): ${videoItems.map((v: any) => v.original_filename).join(", ")}`);
-      }
-
-      if (!allBatches.length) {
-        throw new Error("No PDFs or images could be processed. Check the Google Drive folder has files.");
-      }
-
-      // ── Step 5: Send all batches to extract-chunk (AI Vision) ─────────
-      await addLog("step", `5/9 — Sending ${allBatches.length} batch(es) to AI extraction`);
-      const partials: unknown[] = [];
-      const batchErrors: string[] = [];
-
-      for (let i = 0; i < allBatches.length; i += CONCURRENCY) {
-        const group = allBatches.slice(i, i + CONCURRENCY);
-        const results = await Promise.all(group.map(async (batch) => {
-          let res: any;
-          try {
-            res = await callEdgeFunction("extract-chunk", {
-              pages: batch.pages, sourceFile: batch.sourceFile,
-              batchIndex: batch.batchIndex, totalBatches: batch.totalBatches,
-              folderCategory: batch.folderCategory, hints: job.folder_name,
-            });
-          } catch (fetchErr: any) {
-            const msg = fetchErr.message || String(fetchErr);
-            console.error(`extract-chunk error (batch ${batch.batchIndex + 1}):`, msg);
-            batchErrors.push(msg);
-            await addLog("warning",
-              `extract-chunk network error (is it deployed?): ${msg}`, "warning");
-            return null;
-          }
-          if (!res?.ok) {
-            const errMsg = res?.error ?? "unknown";
-            console.error(`extract-chunk failed (batch ${batch.batchIndex + 1}):`, errMsg);
-            batchErrors.push(errMsg);
-            await addLog("warning", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" failed: ${errMsg}`, "warning");
-            return null;
-          }
-          await addLog("info", `Batch ${batch.batchIndex + 1}/${batch.totalBatches} of "${batch.sourceFile}" ✓`, "success");
-          return res.data;
-        }));
-        partials.push(...results.filter(Boolean));
-      }
-
-      if (!partials.length) {
-        const firstErr = batchErrors[0] || "unknown error";
-        throw new Error(`AI could not extract data from any batch. First error: ${firstErr}`);
-      }
-
-      // ── Step 6: Merge all partials ────────────────────────────────────────
-      await addLog("step", `6/9 — Merging ${partials.length} partial(s) with AI`);
-      const merged = await callEdgeFunction("merge-extract", {
-        partials,
-        folder_name: job.folder_name,
-        hints: job.folder_name,
-        video_files: videoMeta,
-        image_count: imageItems.length,
-        video_count: videoItems.length,
-      });
-      if (!merged?.ok) throw new Error(merged?.error ?? "Merge failed");
-      const d = merged.data as Record<string, unknown>;
-
-      // ── Step 7: Save text fields to import_jobs ───────────────────────────
-      await addLog("step", "7/9 — Saving extracted text data");
-      await supabase.from("import_jobs").update({
-        import_status:   "reviewing",
-        name_en:         (d.name_en as string)         || null,
-        name_ar:         (d.name_ar as string)         || null,
-        slug:            (d.slug as string)             || null,
-        tagline_en:      (d.tagline_en as string)      || null,
-        tagline_ar:      (d.tagline_ar as string)      || null,
-        developer_en:    (d.developer_en as string)    || null,
-        developer_ar:    (d.developer_ar as string)    || null,
-        location_en:     (d.location_en as string)     || null,
-        location_ar:     (d.location_ar as string)     || null,
-        price_range:     (d.price_range as string)     || null,
-        size_range:      (d.size_range as string)      || null,
-        unit_types:      (d.unit_types as string)      || null,
-        ownership_type:  (d.ownership_type as string)  || null,
-        type:            (d.type as string)             || "off-plan",
-        status:          "available",
-        is_featured:     true,
-        handover_date:   (d.handover_date as string)   || null,
-        overview_en:     (d.overview_en as string)     || null,
-        overview_ar:     (d.overview_ar as string)     || null,
-        highlights_en:   (d.highlights_en as string)   || null,
-        highlights_ar:   (d.highlights_ar as string)   || null,
-        investment_en:   (d.investment_en as string)   || null,
-        investment_ar:   (d.investment_ar as string)   || null,
-        enduser_text_en: (d.enduser_text_en as string) || null,
-        enduser_text_ar: (d.enduser_text_ar as string) || null,
-        video_url:       (d.video_url as string)       || null,
-      }).eq("id", job.id);
-
-      // ── Step 8: Save amenities + payment plan to ai_extraction_raw ──────
-      // publish-property reads from ai_extraction_raw._payment_milestones and _amenities
-      await addLog("step", "8/9 — Saving amenities and payment plan");
-      const aiExtractionRaw: Record<string, unknown> = {};
-      if (Array.isArray(d.amenities) && d.amenities.length) {
-        // Store as both string names and structured objects for publish-property
-        aiExtractionRaw._amenities = d.amenities.map((a: unknown) =>
-          typeof a === "string" ? { name_en: a, category: "General", icon: "Star" } : a
-        );
-        await addLog("amenities_extracted", `${d.amenities.length} amenities`, "info");
-      }
-      if (Array.isArray(d.payment_plan) && d.payment_plan.length) {
-        aiExtractionRaw._payment_milestones = d.payment_plan;
-        await addLog("payment_plan_extracted", `${d.payment_plan.length} milestones`, "info");
-      }
-      if (Object.keys(aiExtractionRaw).length > 0) {
-        await supabase.from("import_jobs").update({
-          ai_extraction_raw: aiExtractionRaw as any,
-        }).eq("id", job.id);
-      }
-
-      // ── Step 9: Update media sort order based on category priority ─────────
-      await addLog("step", "9/9 — Updating media category order");
-      // Mark floor plan images for the publish step
-      for (const item of imageItems) {
-        const fn = item.original_filename.toLowerCase();
-        let detectedCategory = "image";
-        if (fn.includes("floor") || fn.includes("plan") || fn.includes("layout")) detectedCategory = "floorplan";
-        else if (item.is_hero || item.sort_order === 0) detectedCategory = "hero";
-        else if (fn.includes("exterior") || fn.includes("facade")) detectedCategory = "exterior";
-        else if (fn.includes("interior") || fn.includes("living") || fn.includes("bedroom")) detectedCategory = "interior";
-        else if (fn.includes("pool") || fn.includes("gym") || fn.includes("amenity")) detectedCategory = "amenity";
-        // Store detected category in media_type field for publish step to use
-        await supabase.from("import_media").update({ media_type: detectedCategory }).eq("id", item.id);
-      }
-
-      // ── Step 9b: Transfer media from Drive to Supabase Storage SERVER-SIDE ─
-      // Uses transfer-media edge function: Drive → Storage directly.
-      // Browser never downloads or uploads the media files.
-      const uploadableMedia = [...imageItems, ...videoItems].filter(
-        (m: any) => !m.storage_url || m.compression_status !== "done"
-      );
-      if (uploadableMedia.length > 0) {
-        await addLog("step", `9/9 — Transferring ${uploadableMedia.length} media file(s) to storage (server-side)`);
-        let uploadedCount = 0, skippedCount = 0;
-        const UPLOAD_CONCURRENCY = 3;
-
-        for (let i = 0; i < uploadableMedia.length; i += UPLOAD_CONCURRENCY) {
-          const batch = uploadableMedia.slice(i, i + UPLOAD_CONCURRENCY);
-          const results = await Promise.allSettled(batch.map(async (item, batchIdx) => {
-            const idx = i + batchIdx;
-            const safeName = item.original_filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-            const storagePath = `jobs/${job.id}/${String(idx).padStart(3, "0")}-${safeName}`;
-
-            try {
-              const result = await callEdgeFunction("transfer-media", {
-                file_id: item.dropbox_path,
-                filename: item.original_filename,
-                storage_path: storagePath,
-                job_id: job.id,
-                import_media_id: item.id,
-              });
-
-              if (result?.ok) {
-                return { filename: item.original_filename, url: result.url, size: result.file_size };
-              } else if (result?.skipped) {
-                return { filename: item.original_filename, skipped: true, error: result.error };
-              } else {
-                throw new Error(result?.error || "Transfer failed");
-              }
-            } catch (err: any) {
-              throw new Error(`"${item.original_filename}": ${err.message}`);
-            }
-          }));
-
-          for (const result of results) {
-            if (result.status === "fulfilled") {
-              const val = result.value as any;
-              if (val.skipped) {
-                skippedCount++;
-                await addLog("warning", `Skipped "${val.filename}": ${val.error}`, "warning");
-              } else {
-                uploadedCount++;
-                await addLog("info",
-                  `✓ ${val.filename} → Storage (${(val.size / 1024).toFixed(0)} KB)`, "success");
-              }
-            } else {
-              await addLog("warning", `Transfer failed: ${result.reason?.message || result.reason}`, "warning");
-            }
-          }
-        }
-        await addLog("info",
-          `Media transfer complete: ${uploadedCount} transferred, ${skippedCount} skipped (all server-side)`, "success");
-      }
-
-      await addLog("extract_complete",
-        `✓ "${d.name_en || job.folder_name}" — ${imageItems.length} image(s), ${videoItems.length} video(s) imported`,
-        "success"
-      );
-      toast.success(`Extraction complete — ${imageItems.length} images & ${videoItems.length} videos imported to storage`);
-      onRefresh();
-
-    } catch (e: any) {
-      await addLog("extract_error", e.message, "error");
-      await supabase.from("import_jobs")
-        .update({ import_status: "error", error_log: e.message }).eq("id", job.id);
-      toast.error(e.message);
-    } finally {
-      setExtracting(false);
-    }
-  }, [job, resizeImageForAI, onRefresh]);
 
   const handleResetStuck = async () => {
     await supabase
@@ -599,56 +143,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     onRefresh();
   };
 
-  // ── Redo Extraction: clear extracted data + logs, reset to pending, re-run ──
-  const handleRedoExtraction = async () => {
-    if (!window.confirm(`Re-run AI extraction for "${job.folder_name}"? This will clear all previously extracted data.`)) return;
-    setExtracting(true);
-
-    // 1. Wipe extracted text fields + reset status
-    await supabase.from("import_jobs").update({
-      import_status:   "pending",
-      name_en: null,         name_ar: null,
-      tagline_en: null,      tagline_ar: null,
-      developer_en: null,    developer_ar: null,
-      location_en: null,     location_ar: null,
-      price_range: null,     size_range: null,
-      unit_types: null,      ownership_type: null,
-      handover_date: null,
-      overview_en: null,     overview_ar: null,
-      highlights_en: null,   highlights_ar: null,
-      investment_en: null,   investment_ar: null,
-      enduser_text_en: null, enduser_text_ar: null,
-      error_log: null,
-    }).eq("id", job.id);
-
-    // 2. Clear old logs so the stepper starts fresh
-    await supabase.from("import_logs").delete().eq("job_id", job.id);
-
-    // 3. Reset media upload state so files are re-processed
-    await supabase.from("import_media").update({
-      storage_url: null,
-      compressed_size_bytes: null,
-      compression_status: "pending",
-    }).eq("job_id", job.id);
-
-    toast.info("Cleared — restarting extraction…");
-    onRefresh();
-
-    // 4. Wait a tick so the DB update propagates, then re-run extraction
-    setTimeout(() => handleExtract(), 300);
-  };
-
-  // ── Redo Scan: delete this job + its media, go back to scan to re-select ────
-  const handleRedoScan = async () => {
-    if (!window.confirm(`Delete this job and re-scan the Drive folder for "${job.folder_name}"? All extracted data will be lost.`)) return;
-
-    await supabase.from("import_logs").delete().eq("job_id", job.id);
-    await supabase.from("import_media").delete().eq("job_id", job.id);
-    await supabase.from("import_jobs").delete().eq("id", job.id);
-
-    toast.success("Job deleted");
-    onRefresh();
-  };
 
   // ── Delete this draft extraction (job + its media + logs) ──────────────────
   const handleDelete = async () => {
@@ -735,111 +229,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
     onRefresh();
   };
 
-  // ── Client-side media upload with compression ─────────────────────────────
-  /**
-   * Downloads a file from Google Drive (via access token), compresses images
-   * client-side using the Canvas API, then uploads the result directly to
-   * Supabase Storage. Returns the public URL.
-   */
-  const compressAndUpload = async (
-    mediaItem: any,
-    propertyId: string,
-    idx: number
-  ): Promise<{ url: string; compressedSize: number; skipped: boolean }> => {
-    // Check against all image-like media types, not just "image"
-    const IMAGE_TYPES = ["image","hero","exterior","interior","floorplan","amenity","render","view","location","other"];
-    const isImage = IMAGE_TYPES.includes(mediaItem.media_type) || mediaItem.media_type?.startsWith("image");
-    const isVideo = mediaItem.media_type === "video";
-
-    // ── Videos: skip if over 40 MB ────────────────────────────────────────
-    if (isVideo) {
-      const origBytes = mediaItem.original_size_bytes || 0;
-      if (origBytes > MAX_VIDEO_BYTES) {
-        return { url: "", compressedSize: origBytes, skipped: true };
-      }
-    }
-
-    // ── Step 1+2: Download from Google Drive via server-side proxy ──────────
-    const fileId = mediaItem.dropbox_path;
-    const { data: { session } } = await supabase.auth.getSession();
-    const fetchRes = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gdrive-oauth`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({ action: "download_file", file_id: fileId }),
-      },
-    );
-    if (!fetchRes.ok) {
-      let detail = `HTTP ${fetchRes.status}`;
-      try { const j = await fetchRes.json(); detail = j.error || j.details || detail; } catch {}
-      throw new Error(`Failed to download ${mediaItem.original_filename}: ${detail}`);
-    }
-    const rawBlob = await fetchRes.blob();
-
-    let finalBlob: Blob;
-    let compressedSize: number;
-    let skipped = false;
-
-    if (isImage) {
-      // ── Step 3: compress to ≤ 600 KB with iterative Canvas encoding ────
-      setFileProgress((prev) =>
-        prev.map((f) =>
-          f.filename === mediaItem.original_filename
-            ? { ...f, phase: "compressing" }
-            : f
-        )
-      );
-
-      // Ensure MIME type for compressImageToLimit (Drive may return application/octet-stream)
-      const typedForCompress = rawBlob.type.startsWith("image/")
-        ? rawBlob
-        : new Blob([await rawBlob.arrayBuffer()], { type: "image/jpeg" });
-      finalBlob = await compressImageToLimit(typedForCompress, MAX_IMAGE_BYTES, ({ quality, size, pass }) => {
-        setFileProgress((prev) =>
-          prev.map((f) =>
-            f.filename === mediaItem.original_filename
-              ? { ...f, phase: "compressing", compressedSize: size }
-              : f
-          )
-        );
-      });
-      compressedSize = finalBlob.size;
-    } else {
-      // Video — upload as-is
-      finalBlob = rawBlob;
-      compressedSize = rawBlob.size;
-    }
-
-    // ── Step 4: upload compressed blob to Supabase Storage ────────────────
-    setFileProgress((prev) =>
-      prev.map((f) =>
-        f.filename === mediaItem.original_filename ? { ...f, phase: "uploading" } : f
-      )
-    );
-
-    const ext    = isImage ? getExtensionFromBlob(finalBlob) : mediaItem.original_filename.split(".").pop() || "mp4";
-    const safeFilename = mediaItem.original_filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const storagePath  = `${propertyId}/${String(idx).padStart(3, "0")}-${safeFilename.replace(/\.[^.]+$/, "")}.${ext}`;
-
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("property-media")
-      .upload(storagePath, finalBlob, {
-        contentType: isImage ? (ext === "webp" ? "image/webp" : "image/jpeg") : "video/mp4",
-        upsert: true,
-      });
-
-    if (uploadError) throw new Error(`Upload failed for ${mediaItem.original_filename}: ${uploadError.message}`);
-
-    const { data: { publicUrl } } = supabase.storage
-      .from("property-media")
-      .getPublicUrl(storagePath);
-
-    return { url: publicUrl, compressedSize, skipped };
-  };
 
   // ── Main publish handler ──────────────────────────────────────────────────
   const handlePublish = async () => {
@@ -940,59 +329,26 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             continue;   // ← skip the full download/compress/upload below
           }
 
-          // ── Normal path: not yet in storage — download, compress, upload ──
-          const { url, compressedSize, skipped } = await compressAndUpload(item, property_id, i);
-
-          if (skipped) {
-            skippedCount++;
-            setFileProgress((prev) =>
-              prev.map((f) =>
-                f.filename === item.original_filename
-                  ? { ...f, phase: "skipped", error: "Over 40 MB — skipped" }
-                  : f
-              )
-            );
-            await supabase.from("import_logs").insert({
-              job_id: job.id,
-              action: "media_skipped",
-              details: `"${item.original_filename}" skipped — exceeds 40 MB video limit`,
-              level: "warning",
-            });
-            continue;
-          }
-
-          // Save original size before compression info
-          const savedPct = item.original_size_bytes
-            ? Math.round((1 - compressedSize / item.original_size_bytes) * 100)
-            : 0;
-
+          // ── No stored file ───────────────────────────────────────────────
+          // Chat-imported media is uploaded to Supabase Storage up front and is
+          // handled by the fast-path above. Anything without a storage URL has no
+          // source to pull from (the legacy Drive/Dropbox transfer was removed),
+          // so skip it rather than failing the publish.
+          skippedCount++;
           setFileProgress((prev) =>
             prev.map((f) =>
               f.filename === item.original_filename
-                ? { ...f, phase: "done", compressedSize, savedPct }
+                ? { ...f, phase: "skipped", error: "No stored file" }
                 : f
             )
           );
-
-          // Update import_media record
-          await supabase.from("import_media").update({
-            storage_url: url,
-            compressed_size_bytes: compressedSize,
-            compression_status: "done",
-          }).eq("id", item.id);
-
-          // Create CMS media record with valid enum type
-          const enumType = mapToEnumType(item.media_type, item.original_filename, item.is_hero || item.sort_order === 0);
-
-          await (supabase.from("media") as any).insert({
-            property_id,
-            type: enumType,
-            url,
-            order_index: item.sort_order,
-            file_size: compressedSize,
+          await supabase.from("import_logs").insert({
+            job_id: job.id,
+            action: "media_skipped",
+            details: `"${item.original_filename}" skipped — no stored file to publish`,
+            level: "warning",
           });
-
-          successCount++;
+          continue;
         } catch (fileErr: any) {
           setFileProgress((prev) =>
             prev.map((f) =>
@@ -1085,63 +441,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
   const docMedia = (media || []).filter((m: any) => isPdfItem(m) || m.media_type === "brochure" || m.media_type === "floor_plate");
   const videos = (media || []).filter((m: any) => m.media_type === "video");
 
-  // ── Extraction step stepper ─────────────────────────────────────────────
-  const EXTRACTION_STEPS = [
-    { key: "1/9", label: "Scanning files" },
-    { key: "2/9", label: "Downloading text files" },
-    { key: "3/9", label: "Loading images" },
-    { key: "4/9", label: "Videos found" },
-    { key: "5/9", label: "AI extraction" },
-    { key: "6/9", label: "Merging data" },
-    { key: "7/9", label: "Saving fields" },
-    { key: "8/9", label: "Amenities" },
-    { key: "9/9", label: "Uploading media" },
-  ];
-
-  // Find the LAST step log (most recent progress)
-  const stepLogs = (logs || []).filter((l: any) => l.action === "step");
-  const currentStepLog = stepLogs[0] ?? null; // logs ordered desc so [0] is newest
-  const currentStepKey = currentStepLog ? (currentStepLog as any).details?.split(" —")[0].trim() : null;
-  const currentStepIdx = currentStepKey
-    ? EXTRACTION_STEPS.findIndex((s) => s.key === currentStepKey)
-    : -1;
-
-  const extractionStepper = (extracting || job.import_status === "extracting") && (
-    <div className="border-t px-4 py-3 bg-blue-500/5 space-y-2">
-      <div className="flex items-center gap-2 text-xs font-medium text-blue-600">
-        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        <span>
-          {currentStepLog
-            ? (currentStepLog as any).details
-            : "Starting extraction…"}
-        </span>
-      </div>
-      <div className="flex gap-1">
-        {EXTRACTION_STEPS.map((step, i) => (
-          <div key={step.key} className="flex-1 flex flex-col items-center gap-1">
-            <div
-              className={`h-1.5 w-full rounded-full transition-all ${
-                i < currentStepIdx
-                  ? "bg-green-500"
-                  : i === currentStepIdx
-                  ? "bg-blue-500 animate-pulse"
-                  : "bg-muted"
-              }`}
-            />
-            <span
-              className={`text-[10px] leading-tight text-center ${
-                i <= currentStepIdx
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {step.label}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 
   // ── Compression progress overlay (shown while publishing) ────────────────
   const publishingProgressPanel = publishing && fileProgress.length > 0 && (
@@ -1342,8 +641,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
           )}
         </div>
 
-        {/* ── Extraction step stepper (while extracting) ──────────────── */}
-        {extractionStepper}
 
         {/* ── Compression progress (while publishing) ────────────────────── */}
         {publishingProgressPanel}
@@ -1365,7 +662,7 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                 {!job.name_en && job.import_status === "pending" ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Sparkles className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">Click "Extract" to run AI data extraction</p>
+                    <p className="text-sm">No data yet — import a property from the AI Property Chat</p>
                   </div>
                 ) : editing ? (
                   <div className="space-y-4">
@@ -1436,20 +733,6 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
                       <div className="flex gap-2 pt-2 flex-wrap">
                         <Button size="sm" variant="outline" onClick={startEditing}>
                           <Edit3 className="w-3 h-3 me-1" />Edit Data
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleRedoExtraction}
-                          disabled={extracting}
-                          className="text-amber-600 border-amber-300 hover:bg-amber-50"
-                        >
-                          {extracting ? (
-                            <Loader2 className="w-3 h-3 animate-spin me-1" />
-                          ) : (
-                            <RotateCcw className="w-3 h-3 me-1" />
-                          )}
-                          Redo Extraction
                         </Button>
                         <Button
                           size="sm"
@@ -1680,7 +963,7 @@ export default function ImporterQueue() {
 
           toast(`New folder queued: ${row.folder_name}`, {
             icon: <FolderPlus className="w-4 h-4 text-primary" />,
-            description: "Auto-detected via Google Drive auto-scan",
+            description: "Imported via AI Property Chat",
             duration: 6000,
           });
         }
