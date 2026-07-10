@@ -25,3 +25,18 @@ dist-ssr
 
 # Claude Code local config
 .claude/
+
+# ── Capacitor native build artifacts ──────────────────────────────────────────
+/ios/App/Pods
+/ios/App/App/public
+/ios/App/App/capacitor.config.json
+/ios/App/build
+/ios/DerivedData
+/android/.gradle
+/android/build
+/android/app/build
+/android/capacitor-cordova-android-plugins
+/android/app/src/main/assets/public
+/android/app/src/main/assets/capacitor.config.json
+/android/app/src/main/assets/capacitor.plugins.json
+/android/local.properties
