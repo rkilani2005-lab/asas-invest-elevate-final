@@ -565,6 +565,17 @@ function JobCard({ job, onRefresh }: { job: any; onRefresh: () => void }) {
             {cfg.label}
           </Badge>
 
+          {/* Draft is linked to a live listing — publishing updates it, not duplicates it */}
+          {job.cms_property_id && (
+            <Badge
+              variant="secondary"
+              className="text-xs bg-blue-500/10 text-blue-600"
+              title="Publishing will update the existing property instead of creating a new one"
+            >
+              Updates existing
+            </Badge>
+          )}
+
           {!isProcessing && !publishing && (
               <div className="flex gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
 

@@ -132,9 +132,17 @@ Deno.serve(async (req) => {
       let propertySlug: string;
 
       if (existingPropertyId) {
-        // UPDATE existing property
+        // UPDATE existing property. Only write fields the job actually carries —
+        // a partial re-extraction (e.g. one extra floor-plan PDF) must never blank
+        // details that are already live on the listing.
+        const updateData = Object.fromEntries(
+          Object.entries(propertyData).filter(([, v]) =>
+            v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && v.length === 0)
+          )
+        );
+
         const { data: updated, error: updateErr } = await supabaseService
-          .from("properties").update(propertyData)
+          .from("properties").update(updateData)
           .eq("id", existingPropertyId).select("id, slug").single();
 
         if (updateErr) {

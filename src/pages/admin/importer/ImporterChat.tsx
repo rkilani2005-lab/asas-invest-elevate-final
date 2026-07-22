@@ -67,6 +67,9 @@ export default function ImporterChat() {
   const [input, setInput] = useState("");
   const [pending, setPending] = useState<PendingFile[]>([]);
   const [busy, setBusy] = useState(false);
+  // Off by default: the agent updates a matching existing property instead of
+  // duplicating it. Turn on to force a brand-new listing.
+  const [forceNew, setForceNew] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -193,6 +196,9 @@ export default function ImporterChat() {
           extracted_texts: extractedTexts,
           urls,
           files: uploaded,
+          // When off (default) the agent links this extraction to a matching
+          // existing property and updates it instead of creating a duplicate.
+          force_new: forceNew,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -342,6 +348,19 @@ export default function ImporterChat() {
           {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <SendHorizontal className="w-5 h-5" />}
         </Button>
       </div>
+      <label className="flex items-center justify-center gap-2 mt-2 text-xs text-muted-foreground cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={forceNew}
+          onChange={(e) => setForceNew(e.target.checked)}
+          disabled={busy}
+          className="h-3.5 w-3.5 accent-primary"
+        />
+        Create as a <strong>new</strong> property (skip matching an existing one)
+      </label>
+      <p className="text-xs text-muted-foreground mt-1 text-center">
+        By default, files for a project you already have will <strong>update</strong> that listing instead of creating a duplicate.
+      </p>
       <p className="text-xs text-muted-foreground mt-2 text-center">
         Up to <strong>200&nbsp;MB</strong> per file. PDFs are read in full up to <strong>~100 pages / 18&nbsp;MB</strong> — larger PDFs are summarised from their text and first pages.
       </p>

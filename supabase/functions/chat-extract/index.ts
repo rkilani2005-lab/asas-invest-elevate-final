@@ -24,7 +24,7 @@ import { unzipSync, strFromU8 } from "npm:fflate@0.8.2";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
-const VERSION = "v8-claude-2026-06-26";
+const VERSION = "v9-claude-update-mode-2026-06-28";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -178,6 +178,10 @@ Deno.serve(async (req) => {
     const extractedTexts: string[] = (body.extracted_texts || []).map(String);
     const urls: string[] = (body.urls || []).map((u: string) => String(u).trim()).filter(Boolean);
     const files: UploadFile[] = (body.files || []).map((f: UploadFile) => ({ ...f, kind: classifyKind(f) }));
+    // Update-vs-create controls: target an existing listing explicitly, or force a
+    // brand-new one even when this looks like a project we already have.
+    const targetPropertyId = String(body.target_property_id || "").trim() || null;
+    const forceNew = body.force_new === true;
 
     if (!pastedText && extractedTexts.length === 0 && urls.length === 0 && files.length === 0)
       return json({ error: "Provide some text, a URL, or an uploaded file." }, 400);
@@ -358,6 +362,52 @@ Deno.serve(async (req) => {
       else row[col] = v;
     }
 
+    // ── Update vs create ──────────────────────────────────────────────────────
+    // If this project already exists, link the draft to it (publish-property then
+    // UPDATEs that listing instead of inserting a duplicate). Everything the new
+    // files didn't mention is back-filled from the live record, so enriching a
+    // property with one extra brochure can never blank its existing fields.
+    const PIPE_COLS = new Set(["unit_types", "highlights_en", "highlights_ar"]);
+    const toPipe = (v: unknown) => (Array.isArray(v) ? v.filter(Boolean).join("|") : v);
+    const isEmpty = (v: unknown) =>
+      v === undefined || v === null || v === "" || (Array.isArray(v) && v.length === 0);
+
+    let targetProperty: Record<string, unknown> | null = null;
+    if (!forceNew) {
+      if (targetPropertyId) {
+        const { data } = await supabaseAdmin.from("properties").select("*").eq("id", targetPropertyId).maybeSingle();
+        targetProperty = (data as Record<string, unknown>) || null;
+      } else {
+        // Same slug, else same name (case-insensitive) — conservative on purpose,
+        // so unrelated projects are never merged together.
+        const { data: bySlug } = await supabaseAdmin.from("properties").select("*").eq("slug", String(row.slug || "")).maybeSingle();
+        targetProperty = (bySlug as Record<string, unknown>) || null;
+        const nameEn = String(row.name_en || "").trim();
+        if (!targetProperty && nameEn && nameEn !== "Untitled Property") {
+          const { data: byName } = await supabaseAdmin.from("properties").select("*").ilike("name_en", nameEn).limit(1);
+          targetProperty = ((byName || [])[0] as Record<string, unknown>) || null;
+        }
+      }
+    }
+
+    const AUTO_COLS = new Set(["slug", "status", "is_featured", "type"]); // always set — not worth reporting
+    const addedFields: string[] = [];
+    if (targetProperty) {
+      for (const col of VALID_COLUMNS) {
+        if (!isEmpty(row[col])) {
+          if (!AUTO_COLS.has(col)) addedFields.push(col); // contributed by the new files
+          continue;
+        }
+        const existing = targetProperty[col];
+        if (isEmpty(existing)) continue;
+        row[col] = PIPE_COLS.has(col) ? toPipe(existing) : existing; // keep what's already live
+      }
+      // Never change the live URL, publish state, or featured flag on an update.
+      row.slug = targetProperty.slug ?? row.slug;
+      row.status = targetProperty.status ?? row.status;
+      row.is_featured = targetProperty.is_featured ?? row.is_featured;
+    }
+
     const REQUIRED = [
       ["name_en", "Project name"], ["developer_en", "Developer"], ["overview_en", "Description"],
       ["unit_types", "Unit types"], ["size_range", "Size (SQF)"], ["type", "Status (off-plan/ready)"], ["price_range", "Price range"],
@@ -377,6 +427,8 @@ Deno.serve(async (req) => {
       dropbox_folder_path: `chat:${crypto.randomUUID()}`,
       folder_name: (row.name_en as string) || propertyHint || "AI Chat Import",
       import_status: "reviewing",
+      // Set → publish-property UPDATEs this listing instead of creating a duplicate.
+      cms_property_id: targetProperty ? (targetProperty.id as string) : null,
       image_count: imageCount,
       video_count: videoCount,
       manual_todo: manualTodo,
@@ -394,17 +446,30 @@ Deno.serve(async (req) => {
     try { await supabaseAdmin.from("import_logs").insert({ job_id: jobId, action: "chat_extract", details: `Claude (${MODEL}). Missing: ${missingFields.length}. Images: ${imageCount}/${MIN_IMAGES}.`, level: missingFields.length || imagesNeeded ? "warning" : "success" }); } catch { /* noop */ }
 
     const name = (row.name_en as string) || propertyHint || "this property";
-    const lines = [`I've drafted **${name}**${row.developer_en ? ` by ${row.developer_en}` : ""}.`];
+    const lines = targetProperty
+      ? [`I matched this to the existing property **${name}** — this draft will **update** it (no duplicate will be created).`]
+      : [`I've drafted **${name}**${row.developer_en ? ` by ${row.developer_en}` : ""}.`];
+    if (targetProperty) {
+      lines.push(addedFields.length
+        ? `🔄 New info from these files: **${addedFields.join(", ")}** — everything else is kept from the current listing.`
+        : `🔄 No new field values found — existing details kept as-is.`);
+    }
     if (row.location_en) lines.push(`📍 ${row.location_en}`);
     if (row.price_range) lines.push(`💰 ${row.price_range}`);
     if (row.unit_types) lines.push(`🏠 Units: ${String(row.unit_types).replace(/\|/g, ", ")}`);
     lines.push(`🖼️ ${imageCount} image(s) attached${imagesNeeded ? ` — upload ${imagesNeeded} more to reach ${MIN_IMAGES}.` : "."}`);
     lines.push(missingFields.length ? `⚠️ Couldn't extract: **${missingFields.join(", ")}** — add these in review.` : `✅ All key fields extracted. Open it in the Review Queue to approve & publish.`);
+    if (targetProperty) lines.push(`_Wrong match? Re-send with "Create as new property" enabled._`);
 
     await logChat("success", { job_id: jobId, assistant_message: lines.join("\n") });
 
     return json({
       success: true, job_id: jobId, assistant_message: lines.join("\n"),
+      mode: targetProperty ? "update" : "create",
+      matched_property: targetProperty
+        ? { id: targetProperty.id, name_en: targetProperty.name_en, slug: targetProperty.slug }
+        : null,
+      updated_fields: targetProperty ? addedFields : [],
       property: row, manual_todo: manualTodo, image_count: imageCount,
       payment_milestones: paymentMilestones, amenities: amenitiesList, warnings,
     });
