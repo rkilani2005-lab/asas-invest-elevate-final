@@ -1314,6 +1314,7 @@ export type Database = {
           status: string
           unit_type: string | null
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           admin_notes?: string | null
@@ -1343,6 +1344,7 @@ export type Database = {
           status?: string
           unit_type?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           admin_notes?: string | null
@@ -1372,6 +1374,7 @@ export type Database = {
           status?: string
           unit_type?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -1611,6 +1614,42 @@ export type Database = {
           en_text?: string
           key?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      translations_cache: {
+        Row: {
+          auto: boolean
+          cache_key: string
+          created_at: string
+          model: string | null
+          source_locale: string
+          source_text: string
+          target_locale: string
+          translated_text: string
+          updated_at: string
+        }
+        Insert: {
+          auto?: boolean
+          cache_key: string
+          created_at?: string
+          model?: string | null
+          source_locale?: string
+          source_text: string
+          target_locale: string
+          translated_text: string
+          updated_at?: string
+        }
+        Update: {
+          auto?: boolean
+          cache_key?: string
+          created_at?: string
+          model?: string | null
+          source_locale?: string
+          source_text?: string
+          target_locale?: string
+          translated_text?: string
+          updated_at?: string
         }
         Relationships: []
       }
