@@ -40,9 +40,9 @@ export function useMegaMenuItems() {
       label: t("nav.invest"),
       items: [
         { label: t("nav.investAdvisory"), href: "/invest", description: t("nav.investAdvisoryDesc") },
-        { label: t("nav.investVisa"), href: "/invest#golden-visa", description: t("nav.investVisaDesc") },
         { label: t("nav.investCalculator"), href: "/invest#calculator", description: t("nav.investCalculatorDesc") },
         { label: t("nav.investWhy"), href: "/invest#why-dubai", description: t("nav.investWhyDesc") },
+        { label: t("nav.investVisa"), href: "/invest#golden-visa", description: t("nav.investVisaDesc") },
       ],
     },
     {
