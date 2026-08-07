@@ -156,7 +156,7 @@ const InsightDetail = () => {
           
           <h1 className={cn(
             "font-serif text-3xl md:text-4xl lg:text-5xl font-medium mb-6 leading-tight",
-            isRTL && "font-arabic text-end"
+            isRTL && "font-arabic text-start"
           )}>
             {content.title}
           </h1>
@@ -164,7 +164,7 @@ const InsightDetail = () => {
           {content.excerpt && (
             <p className={cn(
               "text-primary-foreground/80 text-lg leading-relaxed mb-8",
-              isRTL && "text-end"
+              isRTL && "text-start"
             )}>
               {content.excerpt}
             </p>
