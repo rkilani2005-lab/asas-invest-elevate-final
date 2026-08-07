@@ -20,6 +20,7 @@ export default function SpotlightCard({ spotlight, surface, propertySlug, classN
   const navigate = useNavigate();
   const locale = language === "ar" ? "ar" : "en";
   const [playing, setPlaying] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const impressed = useRef(false);
@@ -29,8 +30,9 @@ export default function SpotlightCard({ spotlight, surface, propertySlug, classN
   const community = locale === "ar" ? spotlight.community_ar || spotlight.community_en : spotlight.community_en;
   const poster = getPosterUrl(spotlight);
   const embedUrl = getEmbedUrl(spotlight);
-  // When no custom/derived poster exists for an MP4, show a frame from the file.
-  const mp4FramePoster = !poster && isMp4(spotlight) ? `${spotlight.video_url}#t=0.5` : null;
+  // Auto-thumbnail: a still frame from the MP4 itself — used when there's no
+  // poster set, or when the poster image fails to load. #t=0.5 seeks to ~0.5s.
+  const framePoster = isMp4(spotlight) ? `${spotlight.video_url}#t=0.5` : null;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -102,13 +104,19 @@ export default function SpotlightCard({ spotlight, surface, propertySlug, classN
       ) : (
         <button type="button" onClick={handlePlay} className="absolute inset-0 w-full h-full text-start" aria-label={`Play ${title}`}>
           {/* Poster */}
-          {poster ? (
-            <img src={poster} alt={title} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-          ) : mp4FramePoster ? (
-            <video src={mp4FramePoster} preload="metadata" muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+          {poster && !posterFailed ? (
+            <img
+              src={poster}
+              alt={title}
+              loading="lazy"
+              onError={() => setPosterFailed(true)}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          ) : framePoster ? (
+            <video src={framePoster} preload="metadata" muted playsInline className="absolute inset-0 w-full h-full object-cover bg-black" />
           ) : (
-            <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-secondary to-muted">
-              <Film className="w-10 h-10 text-muted-foreground" strokeWidth={1} />
+            <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1A1A1A] to-[#2b2b2b]">
+              <Film className="w-10 h-10 text-accent/70" strokeWidth={1} />
             </div>
           )}
 

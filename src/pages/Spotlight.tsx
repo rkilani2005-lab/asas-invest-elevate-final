@@ -41,7 +41,7 @@ const SpotlightPage = () => {
       <Navigation />
       <main className={cn("pt-32 pb-24", isRTL && "font-arabic")}>
         <div className="container mx-auto px-4 lg:px-8">
-          <header className={cn("max-w-2xl mb-12", isRTL && "text-end ms-auto")}>
+          <header className={cn("max-w-2xl mb-12", isRTL ? "text-right" : "text-left")}>
             <p className="text-eyebrow text-accent mb-3">{t("home.spotlight.eyebrow")}</p>
             <h1 className="heading-section text-4xl md:text-5xl text-foreground mb-4">{t("spotlight.page.title")}</h1>
             <p className="text-muted-foreground text-lg leading-relaxed">{t("spotlight.page.subtitle")}</p>
