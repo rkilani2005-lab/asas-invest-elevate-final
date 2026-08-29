@@ -38,15 +38,16 @@ async function sendGmailNotification(
   htmlBody: string,
   textBody: string
 ): Promise<void> {
-  // Get a connected Gmail account (prefer noreply)
-  const { data: gmailRows } = await supabase
-    .from("gmail_accounts")
-    .select("email, access_token, refresh_token, token_expiry")
-    .eq("is_connected", true)
-    .order("purpose")
-    .limit(1);
-
-  const gmailAccount = gmailRows?.[0] as any;
+  // Send from the No-Reply account (no-reply@asasinvest.com); fall back to any
+  // connected account only if No-Reply isn't configured.
+  const pickAccount = async (purpose?: string) => {
+    let q = supabase.from("gmail_accounts")
+      .select("email, access_token, refresh_token, token_expiry").eq("is_connected", true);
+    if (purpose) q = q.eq("purpose", purpose);
+    const { data } = await q.limit(1);
+    return data?.[0] as any;
+  };
+  const gmailAccount = (await pickAccount("noreply")) || (await pickAccount());
   if (!gmailAccount?.access_token) return;
 
   const GCI = Deno.env.get("GMAIL_CLIENT_ID") || Deno.env.get("GOOGLE_CLIENT_ID");

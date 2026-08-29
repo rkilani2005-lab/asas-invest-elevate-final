@@ -141,8 +141,9 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const teamEmail: string = (settingRow?.value as string) || "admin@asasinvest.com";
 
-    // Get Gmail account for sender — try purpose-specific first, then any connected account
-    const senderPurpose = ["contact", "newsletter"].includes(form_type) ? "info" : "sales";
+    // All website emails go out from the No-Reply account (no-reply@asasinvest.com);
+    // fall back to any connected account only if No-Reply isn't configured.
+    const senderPurpose = "noreply";
     let { data: gmailAccount } = await supabase
       .from("gmail_accounts")
       .select("*")
