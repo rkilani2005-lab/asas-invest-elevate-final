@@ -58,6 +58,7 @@ export default function PropertyAssistant() {
   const [busy, setBusy] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
+  const [leadSent, setLeadSent] = useState(false); // true once the team has been emailed this visitor's details
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const greeting = ar
@@ -90,9 +91,10 @@ export default function PropertyAssistant() {
     try {
       const payload = next.filter((m) => m.content !== greeting); // don't send the local greeting
       const { data, error } = await supabase.functions.invoke("property-assistant", {
-        body: { messages: payload, locale: language },
+        body: { messages: payload, locale: language, lead_captured: leadSent },
       });
       if (error) throw error;
+      if ((data as any)?.lead_captured) setLeadSent(true);
       const reply = (data as any)?.reply || (data as any)?.error;
       setMessages((prev) => [...prev, { role: "assistant", content: reply || (ar ? "عذراً، حدث خطأ. حاول مرة أخرى." : "Sorry, something went wrong. Please try again.") }]);
     } catch {

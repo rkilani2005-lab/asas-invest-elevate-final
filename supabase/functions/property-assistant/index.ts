@@ -7,16 +7,19 @@
  * ever exposes public data) and passed to Claude as the sole source of truth.
  * The model is instructed never to invent prices, availability, or projects.
  *
- * Public endpoint (verify_jwt = false). No DB writes, no tools — it only reads
- * published properties and returns text, so there is no privileged surface.
- * Requires secret: ANTHROPIC_API_KEY.
+ * Public endpoint (verify_jwt = false). It reads published properties (anon) and,
+ * when a visitor shares contact details, emails a lead brief to admin@asasinvest.com
+ * via the connected Gmail account (service role, background send). No visitor data
+ * is written to the database. Requires secret: ANTHROPIC_API_KEY.
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 const MODEL = "claude-haiku-4-5-20251001"; // fast + cheap for a public widget; swap to claude-sonnet-5 for richer prose
-const VERSION = "v1-assistant-2026-06-28";
+const VERSION = "v2-assistant-leadcapture-2026-06-28";
+
+const LEAD_RECIPIENT = "admin@asasinvest.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -83,9 +86,98 @@ STRICT GROUNDING — this is the most important rule:
 
 FORMAT: Keep replies short and scannable (a sentence or two plus a few bullet points max). End with a gentle, helpful next step (e.g., view a listing, or contact the team). Currency is AED unless a listing states otherwise.
 
+LEAD CAPTURE — connect them with a human:
+- Once you've answered their question, or as soon as they show real interest (a specific property, a budget, a viewing, or investment intent), warmly invite them to share their name, email, and phone number so an ASAS advisor can follow up with tailored options or arrange a viewing.
+- Ask naturally and gently, and only ONCE. If they decline or ignore it, respect that completely and keep helping — never nag or repeat the request.
+- The moment they share their email or phone, thank them warmly (by name if you have it) and reassure them that the ASAS team will reach out shortly. Do not ask for it again after that.
+- Never claim you have booked anything or sent anything yourself; simply say the team will be in touch.
+
 === ASAS PUBLISHED PROPERTIES (the ONLY inventory you may reference) ===
 ${catalog || "(No properties are currently published.)"}
 === END OF PROPERTIES ===`;
+}
+
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** Pull a contact email + phone out of the visitor's own messages (regex only). */
+function extractContact(messages: ChatMsg[]): { email: string | null; phone: string | null } {
+  const text = messages.filter((m) => m.role === "user").map((m) => m.content).join("\n");
+  const email = (text.match(/[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/) || [])[0] || null;
+  let phone: string | null = null;
+  // Digit runs with phone-like punctuation (commas excluded → prices like 1,800,000 don't match).
+  for (const c of text.match(/\+?\d[\d\s()\-]{6,}\d/g) || []) {
+    const digits = c.replace(/\D/g, "");
+    if (digits.length >= 8 && digits.length <= 15) { phone = c.trim(); break; }
+  }
+  return { email, phone };
+}
+
+/** HTML lead brief for the ASAS team. */
+function leadEmailHtml(email: string | null, phone: string | null, locale: string, messages: ChatMsg[]): string {
+  const transcript = messages.slice(-14).map((m) => {
+    const who = m.role === "user" ? "Visitor" : "Assistant";
+    const col = m.role === "user" ? "#1a1a1a" : "#8a7a52";
+    return `<p style="margin:0 0 10px;line-height:1.5"><strong style="color:${col}">${who}:</strong> <span style="color:#333">${escapeHtml(m.content)}</span></p>`;
+  }).join("");
+  const row = (k: string, v: string) =>
+    `<tr><td style="padding:8px 0;color:#7a7a7a;width:120px">${k}</td><td style="padding:8px 0;color:#1a1a1a;font-weight:600">${v}</td></tr>`;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
+  <body style="font-family:Arial,sans-serif;background:#f5f0e8;margin:0;padding:0">
+    <div style="max-width:620px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08)">
+      <div style="background:#1a1a1a;padding:24px 30px"><h1 style="color:#c9a96e;font-size:19px;margin:0">ASAS · New Website Lead</h1></div>
+      <div style="padding:26px 30px;color:#2c2c2c">
+        <p style="margin:0 0 18px">A visitor shared their contact details with the website assistant. Please follow up.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:15px">
+          ${row("Email", email ? `<a href="mailto:${escapeHtml(email)}" style="color:#1a1a1a">${escapeHtml(email)}</a>` : "&mdash;")}
+          ${row("Phone", phone ? `<a href="tel:${escapeHtml(phone.replace(/\s/g, ""))}" style="color:#1a1a1a">${escapeHtml(phone)}</a>` : "&mdash;")}
+          ${row("Language", locale === "ar" ? "Arabic" : "English")}
+        </table>
+        <hr style="border:none;border-top:1px solid #e8e0d0;margin:22px 0"/>
+        <p style="font-size:11px;font-weight:700;color:#7a7a7a;text-transform:uppercase;letter-spacing:.5px;margin:0 0 12px">Conversation</p>
+        ${transcript}
+      </div>
+      <div style="background:#f5f0e8;padding:14px 30px;font-size:11px;color:#7a7a7a">Automated by the ASAS website assistant &middot; asasinvest.com</div>
+    </div></body></html>`;
+}
+
+/** Send an email through the connected Gmail account (same infra as approval emails). */
+async function sendGmailNotification(supabase: any, to: string, subject: string, htmlBody: string, textBody: string): Promise<void> {
+  const { data: rows } = await supabase.from("gmail_accounts")
+    .select("email, access_token, refresh_token, token_expiry").eq("is_connected", true).order("purpose").limit(1);
+  const acct = rows?.[0];
+  if (!acct?.access_token) { console.warn("property-assistant: no connected Gmail account — lead email skipped"); return; }
+  const GCI = Deno.env.get("GMAIL_CLIENT_ID") || Deno.env.get("GOOGLE_CLIENT_ID");
+  const GCS = Deno.env.get("GMAIL_CLIENT_SECRET") || Deno.env.get("GOOGLE_CLIENT_SECRET");
+  let token = acct.access_token;
+  const expiry = acct.token_expiry ? new Date(acct.token_expiry).getTime() : 0;
+  if (Date.now() > expiry - 5 * 60 * 1000 && acct.refresh_token && GCI && GCS) {
+    const r = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ client_id: GCI, client_secret: GCS, refresh_token: acct.refresh_token, grant_type: "refresh_token" }),
+    });
+    if (r.ok) token = (await r.json()).access_token;
+  }
+  const boundary = `b_${Date.now()}`;
+  const raw = [
+    `From: "ASAS Website" <${acct.email}>`, `To: ${to}`, `Subject: ${subject}`, `MIME-Version: 1.0`,
+    `Content-Type: multipart/alternative; boundary="${boundary}"`, "",
+    `--${boundary}`, `Content-Type: text/plain; charset="UTF-8"`, "", textBody, "",
+    `--${boundary}`, `Content-Type: text/html; charset="UTF-8"`, "", htmlBody, "",
+    `--${boundary}--`,
+  ].join("\r\n");
+  const encoded = btoa(unescape(encodeURIComponent(raw))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
+    method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ raw: encoded }),
+  });
+}
+
+/** Run after the response is sent so the visitor's reply is never delayed by the email. */
+function scheduleBackground(p: Promise<unknown>): void {
+  const er = (globalThis as any).EdgeRuntime;
+  if (er && typeof er.waitUntil === "function") er.waitUntil(p.catch((e: unknown) => console.error("lead email failed:", e)));
+  else void p.catch(() => {});
 }
 
 Deno.serve(async (req) => {
@@ -142,7 +234,24 @@ Deno.serve(async (req) => {
 
     const data = await resp.json();
     const reply = (data.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n").trim();
-    return json({ reply: reply || (ar ? "كيف يمكنني مساعدتك في عقارات أساس؟" : "How can I help you with ASAS properties?") });
+    const finalReply = reply || (ar ? "كيف يمكنني مساعدتك في عقارات أساس؟" : "How can I help you with ASAS properties?");
+
+    // Lead capture: once the visitor has shared an email or phone, email a brief to
+    // the ASAS team — once per conversation (the client passes lead_captured back).
+    let leadCaptured = body.lead_captured === true;
+    if (!leadCaptured) {
+      const { email: leadEmail, phone: leadPhone } = extractContact(messages);
+      if (leadEmail || leadPhone) {
+        leadCaptured = true;
+        const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+        const tag = leadEmail || leadPhone;
+        const subject = `New website lead${tag ? ` — ${tag}` : ""}`;
+        const text = `New website lead.\nEmail: ${leadEmail || "-"}\nPhone: ${leadPhone || "-"}\nLanguage: ${ar ? "Arabic" : "English"}`;
+        scheduleBackground(sendGmailNotification(admin, LEAD_RECIPIENT, subject, leadEmailHtml(leadEmail, leadPhone, locale, messages), text));
+      }
+    }
+
+    return json({ reply: finalReply, lead_captured: leadCaptured });
   } catch (e) {
     console.error("property-assistant error:", e);
     return json({ error: "Assistant error." }, 500);
