@@ -9,6 +9,9 @@ verify_jwt = false
 [functions.property-assistant]
 verify_jwt = false
 
+[functions.spotlight-thumbnail]
+verify_jwt = false
+
 [functions.approve-property]
 verify_jwt = false
 

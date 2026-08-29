@@ -13,7 +13,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Star, Loader2, Film } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, Loader2, Film, ImageDown } from "lucide-react";
 import { toast } from "sonner";
 import type { Spotlight, SpotlightProvider } from "@/lib/spotlightVideo";
 import { getPosterUrl } from "@/lib/spotlightVideo";
@@ -39,6 +39,7 @@ export default function AdminSpotlights() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<Partial<Spotlight>>(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [fetchingId, setFetchingId] = useState<string | null>(null);
 
   const [stats, setStats] = useState<StatRow[]>([]);
   const [range, setRange] = useState<"7" | "30" | "all">("all");
@@ -110,15 +111,40 @@ export default function AdminSpotlights() {
       is_featured: !!form.is_featured,
       updated_at: new Date().toISOString(),
     };
-    const q = form.id
-      ? (supabase as any).from("spotlights").update(payload).eq("id", form.id)
-      : (supabase as any).from("spotlights").insert(payload);
-    const { error } = await q;
+    let savedId = form.id || null;
+    if (form.id) {
+      const { error } = await (supabase as any).from("spotlights").update(payload).eq("id", form.id);
+      if (error) { setSaving(false); toast.error(`Save failed: ${error.message}`); return; }
+    } else {
+      const { data, error } = await (supabase as any).from("spotlights").insert(payload).select("id").single();
+      if (error) { setSaving(false); toast.error(`Save failed: ${error.message}`); return; }
+      savedId = data?.id || null;
+    }
     setSaving(false);
-    if (error) { toast.error(`Save failed: ${error.message}`); return; }
     toast.success(form.id ? "Spotlight updated" : "Spotlight created");
     setDialogOpen(false);
-    load();
+    // Auto-fetch a cover for Instagram/MP4 when no manual thumbnail was provided.
+    if (savedId && !payload.thumbnail_url && (payload.video_provider === "instagram" || payload.video_provider === "mp4")) {
+      fetchCover(savedId);
+    } else {
+      load();
+    }
+  }
+
+  /** Ask the server to grab the video's cover image and store it permanently. */
+  async function fetchCover(id: string) {
+    setFetchingId(id);
+    try {
+      const { data, error } = await supabase.functions.invoke("spotlight-thumbnail", { body: { spotlight_id: id } });
+      if (error) throw error;
+      if ((data as any)?.error) { toast.error((data as any).error); return; }
+      toast.success("Cover image saved");
+    } catch (e: any) {
+      toast.error(e?.message || "Couldn't fetch a cover image");
+    } finally {
+      setFetchingId(null);
+      load();
+    }
   }
 
   async function remove(id: string) {
@@ -172,7 +198,7 @@ export default function AdminSpotlights() {
                   <TableHead className="text-center">Order</TableHead>
                   <TableHead className="text-center">Featured</TableHead>
                   <TableHead className="text-center">Published</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead className="w-[140px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -208,6 +234,12 @@ export default function AdminSpotlights() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
+                          {(s.video_provider === "instagram" || s.video_provider === "mp4") && (
+                            <Button variant="ghost" size="icon" title="Fetch cover image from the video"
+                              disabled={fetchingId === s.id} onClick={() => fetchCover(s.id)}>
+                              {fetchingId === s.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageDown className="h-4 w-4" />}
+                            </Button>
+                          )}
                           <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild><Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button></AlertDialogTrigger>
@@ -316,7 +348,7 @@ export default function AdminSpotlights() {
               </Field>
               <Field label="Video URL *"><Input value={form.video_url || ""} onChange={(e) => set({ video_url: e.target.value })} placeholder="https://…" /></Field>
             </div>
-            <Field label="Thumbnail URL (recommended for Instagram / MP4)"><Input value={form.thumbnail_url || ""} onChange={(e) => set({ thumbnail_url: e.target.value })} placeholder="https://… (optional)" /></Field>
+            <Field label="Thumbnail URL (optional — auto-fetched for Instagram/MP4 if left blank)"><Input value={form.thumbnail_url || ""} onChange={(e) => set({ thumbnail_url: e.target.value })} placeholder="https://… (leave blank to auto-fetch the cover)" /></Field>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Community (EN)"><Input value={form.community_en || ""} onChange={(e) => set({ community_en: e.target.value })} /></Field>
               <Field label="Community (AR)"><Input dir="rtl" value={form.community_ar || ""} onChange={(e) => set({ community_ar: e.target.value })} /></Field>
