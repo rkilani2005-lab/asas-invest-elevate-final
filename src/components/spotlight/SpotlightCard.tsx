@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Play, Film, ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
-import { type Spotlight, getEmbedUrl, getPosterUrl, isMp4, isInstagram, safeExternalUrl } from "@/lib/spotlightVideo";
+import { type Spotlight, getEmbedUrl, getDerivedPoster, isMp4, isInstagram, safeExternalUrl } from "@/lib/spotlightVideo";
 import { trackSpotlight, type SpotlightSurface, type SpotlightEventType } from "@/lib/spotlightAnalytics";
 
 interface SpotlightCardProps {
@@ -20,7 +20,8 @@ export default function SpotlightCard({ spotlight, surface, propertySlug, classN
   const navigate = useNavigate();
   const locale = language === "ar" ? "ar" : "en";
   const [playing, setPlaying] = useState(false);
-  const [posterFailed, setPosterFailed] = useState(false);
+  const [customFailed, setCustomFailed] = useState(false);   // admin thumbnail_url failed to load
+  const [derivedFailed, setDerivedFailed] = useState(false); // provider cover (IG/YouTube) failed to load
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const impressed = useRef(false);
@@ -28,10 +29,11 @@ export default function SpotlightCard({ spotlight, surface, propertySlug, classN
 
   const title = locale === "ar" ? spotlight.title_ar || spotlight.title_en : spotlight.title_en;
   const community = locale === "ar" ? spotlight.community_ar || spotlight.community_en : spotlight.community_en;
-  const poster = getPosterUrl(spotlight);
+  // Poster resolution order: admin thumbnail → provider cover (YouTube frame /
+  // Instagram post image) → MP4 still frame → branded placeholder.
+  const customPoster = spotlight.thumbnail_url || null;
+  const derivedPoster = getDerivedPoster(spotlight);
   const embedUrl = getEmbedUrl(spotlight);
-  // Auto-thumbnail: a still frame from the MP4 itself — used when there's no
-  // poster set, or when the poster image fails to load. #t=0.5 seeks to ~0.5s.
   const framePoster = isMp4(spotlight) ? `${spotlight.video_url}#t=0.5` : null;
 
   useEffect(() => {
@@ -103,13 +105,22 @@ export default function SpotlightCard({ spotlight, surface, propertySlug, classN
         ) : null
       ) : (
         <button type="button" onClick={handlePlay} className="absolute inset-0 w-full h-full text-start" aria-label={`Play ${title}`}>
-          {/* Poster */}
-          {poster && !posterFailed ? (
+          {/* Poster — admin thumbnail → provider cover → MP4 frame → placeholder */}
+          {customPoster && !customFailed ? (
             <img
-              src={poster}
+              src={customPoster}
               alt={title}
               loading="lazy"
-              onError={() => setPosterFailed(true)}
+              onError={() => setCustomFailed(true)}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          ) : derivedPoster && !derivedFailed ? (
+            <img
+              src={derivedPoster}
+              alt={title}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onError={() => setDerivedFailed(true)}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           ) : framePoster ? (

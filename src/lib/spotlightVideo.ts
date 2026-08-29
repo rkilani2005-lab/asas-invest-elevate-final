@@ -44,14 +44,34 @@ export function getEmbedUrl(s: Pick<Spotlight, "video_url" | "video_provider">):
   return null; // mp4 → native <video>, handled by the card
 }
 
-/** Poster image: custom thumbnail if set, else derive for YouTube. */
-export function getPosterUrl(s: Pick<Spotlight, "thumbnail_url" | "video_url" | "video_provider">): string | null {
-  if (s.thumbnail_url) return s.thumbnail_url;
+/** Instagram post/reel shortcode from any common URL form. */
+export function getInstagramShortcode(url: string): string | null {
+  const m = url.match(/instagram\.com\/(?:[^/?#]+\/)?(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/i);
+  return m ? m[1] : null;
+}
+
+/**
+ * Provider-derived poster when no custom thumbnail is set.
+ * - YouTube → the video's still frame (always works).
+ * - Instagram → the post's public cover image via the /media/ endpoint
+ *   (best-effort: works for public posts; if Instagram blocks it or the reel is
+ *   private, the card's onError falls back to the branded placeholder).
+ */
+export function getDerivedPoster(s: Pick<Spotlight, "video_url" | "video_provider">): string | null {
   if (s.video_provider === "youtube") {
     const id = getYouTubeId(s.video_url);
-    if (id) return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+    return id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : null;
+  }
+  if (s.video_provider === "instagram") {
+    const code = getInstagramShortcode(s.video_url);
+    return code ? `https://www.instagram.com/p/${code}/media/?size=l` : null;
   }
   return null;
+}
+
+/** Poster image: custom thumbnail if set, else the provider-derived cover. */
+export function getPosterUrl(s: Pick<Spotlight, "thumbnail_url" | "video_url" | "video_provider">): string | null {
+  return s.thumbnail_url || getDerivedPoster(s);
 }
 
 export function isMp4(s: Pick<Spotlight, "video_provider">): boolean {
