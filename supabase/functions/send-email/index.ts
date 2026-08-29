@@ -118,7 +118,7 @@ async function sendViaGmail(
 ): Promise<{ messageId: string; threadId: string } | null> {
   const raw = buildMimeMessage({
     from,
-    fromName: "ASAS Real Estate",
+    fromName: "Website Inquiry",
     to,
     subject,
     html,

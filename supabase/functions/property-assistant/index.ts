@@ -143,16 +143,9 @@ function leadEmailHtml(email: string | null, phone: string | null, locale: strin
 
 /** Send an email through the connected Gmail account (same infra as approval emails). */
 async function sendGmailNotification(supabase: any, to: string, subject: string, htmlBody: string, textBody: string): Promise<void> {
-  // Send from the No-Reply account (no-reply@asasinvest.com); fall back to any
-  // connected account only if No-Reply isn't configured.
-  const pickAccount = async (purpose?: string) => {
-    let q = supabase.from("gmail_accounts")
-      .select("email, access_token, refresh_token, token_expiry").eq("is_connected", true);
-    if (purpose) q = q.eq("purpose", purpose);
-    const { data } = await q.limit(1);
-    return data?.[0];
-  };
-  const acct = (await pickAccount("noreply")) || (await pickAccount());
+  const { data: rows } = await supabase.from("gmail_accounts")
+    .select("email, access_token, refresh_token, token_expiry").eq("is_connected", true).order("purpose").limit(1);
+  const acct = rows?.[0];
   if (!acct?.access_token) { console.warn("property-assistant: no connected Gmail account — lead email skipped"); return; }
   const GCI = Deno.env.get("GMAIL_CLIENT_ID") || Deno.env.get("GOOGLE_CLIENT_ID");
   const GCS = Deno.env.get("GMAIL_CLIENT_SECRET") || Deno.env.get("GOOGLE_CLIENT_SECRET");
@@ -167,7 +160,7 @@ async function sendGmailNotification(supabase: any, to: string, subject: string,
   }
   const boundary = `b_${Date.now()}`;
   const raw = [
-    `From: "ASAS Website" <${acct.email}>`, `To: ${to}`, `Subject: ${subject}`, `MIME-Version: 1.0`,
+    `From: "Website Inquiry" <${acct.email}>`, `To: ${to}`, `Subject: ${subject}`, `MIME-Version: 1.0`,
     `Content-Type: multipart/alternative; boundary="${boundary}"`, "",
     `--${boundary}`, `Content-Type: text/plain; charset="UTF-8"`, "", textBody, "",
     `--${boundary}`, `Content-Type: text/html; charset="UTF-8"`, "", htmlBody, "",
