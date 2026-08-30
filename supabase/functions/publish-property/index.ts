@@ -41,7 +41,7 @@ async function getGDriveToken(supabase: ReturnType<typeof createClient>): Promis
         await supabase.from("importer_settings").upsert([
           { key: "gdrive_access_token", value: t.access_token },
           { key: "gdrive_token_expiry", value: new Date(Date.now() + (t.expires_in || 3600) * 1000).toISOString() },
-        ], { onConflict: "key" } as any);
+        ] as any, { onConflict: "key" } as any);
       }
     }
   }
@@ -226,9 +226,9 @@ Deno.serve(async (req) => {
               category: (a && typeof a === "object" && a.category) ? a.category : "General",
             };
           })
-          .filter(Boolean);
+          .filter((x): x is NonNullable<typeof x> => x !== null);
         if (amenitiesToInsert.length > 0) {
-          await supabaseService.from("amenities").insert(amenitiesToInsert);
+          await supabaseService.from("amenities").insert(amenitiesToInsert as any);
           await supabase.from("import_logs").insert({
             job_id, action: "amenities_saved",
             details: `Saved ${amenitiesToInsert.length} amenities`,
