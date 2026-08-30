@@ -40,6 +40,7 @@ export default function AdminSpotlights() {
   const [form, setForm] = useState<Partial<Spotlight>>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [fetchingId, setFetchingId] = useState<string | null>(null);
+  const [bulkFetching, setBulkFetching] = useState(false);
 
   const [stats, setStats] = useState<StatRow[]>([]);
   const [range, setRange] = useState<"7" | "30" | "all">("all");
@@ -147,6 +148,27 @@ export default function AdminSpotlights() {
     }
   }
 
+  /** Backfill covers for every Instagram/MP4 video that has no thumbnail yet. */
+  async function fetchAllMissing() {
+    const missing = rows.filter(
+      (r) => !r.thumbnail_url && (r.video_provider === "instagram" || r.video_provider === "mp4"),
+    );
+    if (missing.length === 0) { toast.info("No missing covers — every video already has one."); return; }
+    setBulkFetching(true);
+    let ok = 0, fail = 0;
+    for (const r of missing) {
+      setFetchingId(r.id);
+      try {
+        const { data, error } = await supabase.functions.invoke("spotlight-thumbnail", { body: { spotlight_id: r.id } });
+        if (error || (data as any)?.error) fail++; else ok++;
+      } catch { fail++; }
+    }
+    setFetchingId(null);
+    setBulkFetching(false);
+    toast[fail ? "error" : "success"](`Covers: ${ok} saved${fail ? `, ${fail} couldn't be fetched (private/blocked — add a Thumbnail URL).` : "."}`);
+    load();
+  }
+
   async function remove(id: string) {
     const { error } = await (supabase as any).from("spotlights").delete().eq("id", id);
     if (error) toast.error("Delete failed");
@@ -177,7 +199,13 @@ export default function AdminSpotlights() {
           <h1 className="text-3xl font-semibold flex items-center gap-2"><Film className="w-7 h-7 text-primary" /> Spotlight — Project Videos</h1>
           <p className="text-muted-foreground mt-1">Manage the project-video showcase and view engagement.</p>
         </div>
-        <Button onClick={openCreate}><Plus className="me-2 h-4 w-4" /> New Video</Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={fetchAllMissing} disabled={bulkFetching}>
+            {bulkFetching ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <ImageDown className="me-2 h-4 w-4" />}
+            Fetch all missing covers
+          </Button>
+          <Button onClick={openCreate}><Plus className="me-2 h-4 w-4" /> New Video</Button>
+        </div>
       </div>
 
       <Tabs defaultValue="manage">
